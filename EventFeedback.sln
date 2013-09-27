@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{35B7497D-EF2C-4329-8FE8-440CF8833FD3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{10F692CF-164F-48F6-A6A0-147DE9E917B6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{5A88D19A-2B86-4884-B881-D7639A5EA6A6}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Membership", "Domain.Membership\Domain.Membership.csproj", "{E2532E42-3971-4BE7-8B09-B786CDE166F7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Azure|Any CPU = Azure|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{35B7497D-EF2C-4329-8FE8-440CF8833FD3}.Azure|Any CPU.ActiveCfg = Azure|Any CPU
+		{35B7497D-EF2C-4329-8FE8-440CF8833FD3}.Azure|Any CPU.Build.0 = Azure|Any CPU
+		{35B7497D-EF2C-4329-8FE8-440CF8833FD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35B7497D-EF2C-4329-8FE8-440CF8833FD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35B7497D-EF2C-4329-8FE8-440CF8833FD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35B7497D-EF2C-4329-8FE8-440CF8833FD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Azure|Any CPU.ActiveCfg = Azure|Any CPU
+		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Azure|Any CPU.Build.0 = Azure|Any CPU
+		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Azure|Any CPU.ActiveCfg = Azure|Any CPU
+		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Azure|Any CPU.Build.0 = Azure|Any CPU
+		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2532E42-3971-4BE7-8B09-B786CDE166F7}.Azure|Any CPU.ActiveCfg = Azure|Any CPU
+		{E2532E42-3971-4BE7-8B09-B786CDE166F7}.Azure|Any CPU.Build.0 = Azure|Any CPU
+		{E2532E42-3971-4BE7-8B09-B786CDE166F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2532E42-3971-4BE7-8B09-B786CDE166F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2532E42-3971-4BE7-8B09-B786CDE166F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2532E42-3971-4BE7-8B09-B786CDE166F7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
