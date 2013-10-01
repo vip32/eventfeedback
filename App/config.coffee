@@ -7,21 +7,21 @@ exports.config =
   files:
     javascripts:
       joinTo:
-        'javascripts/app.js': /^app/
-        'javascripts/vendor.js': /^(bower_components|vendor)/
-        'test/test.js': /^test/
+        'app/javascripts/app.js': /^app/
+        'app/javascripts/vendor.js': /^(bower_components|vendor)/
+        'app/test/test.js': /^test/
       order:
         after: [
-          'test/vendor/scripts/test-helper.js'
+          'app/test/vendor/scripts/test-helper.js'
         ]
 
     stylesheets:
       joinTo:
-        'stylesheets/app.css': /^(?!test)/
-        'test/test.css': /^test/
+        'app/stylesheets/app.css': /^(?!test)/
+        'app/test/test.css': /^test/
       order:
-        after: ['vendor/styles/helpers.css']
+        after: ['app/vendor/styles/helpers.css']
 
     templates:
       defaultExtension: 'hbs'
-      joinTo: 'javascripts/app.js'
+      joinTo: 'app/javascripts/app.js'

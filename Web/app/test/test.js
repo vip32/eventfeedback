@@ -13763,6 +13763,12 @@ return sinon;}.call(typeof window != 'undefined' && window || {}));
     exceptionalSinonMethod("thrown", "threw", "thrown %1");
 }));
 
+;// Create `window.describe` etc. for our BDD-like tests.
+mocha.setup({ui: 'bdd'});
+
+// Create another global variable for simpler syntax.
+window.expect = chai.expect;
+
 ;require.register("test/initialize", function(exports, require, module) {
 var test, tests, _i, _len;
 
@@ -13846,12 +13852,6 @@ describe('SiteView', function() {
 });
 
 });
-
-;// Create `window.describe` etc. for our BDD-like tests.
-mocha.setup({ui: 'bdd'});
-
-// Create another global variable for simpler syntax.
-window.expect = chai.expect;
 
 ;
 //@ sourceMappingURL=test.js.map
