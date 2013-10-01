@@ -50,6 +50,7 @@ namespace EventFeedback.Web
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Default; // Default=use the ASP.NET customErrors setting (On/Off/RemoteOnly)
             //config.Services.Replace(typeof(ITraceWriter), new TraceSourceWriter());
             //TraceSource.TraceData(TraceEventType.Information, 0, config.Routes.Dump());
+            config.MessageHandlers.Add(new RequireHttpsHandler());
             config.Filters.Add(new ActivityTraceFilterAttribute());
             config.Filters.Add(new ExceptionHandlingAttribute());
             config.Filters.Add(new NullFilter());
