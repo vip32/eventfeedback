@@ -72,6 +72,7 @@
     <Content Include="public\favicon.ico" />
     <Content Include="public\fonts\glyphicons-halflings-regular.svg" />
     <Content Include="public\index.html" />
+    <Content Include="public\index.local.html" />
     <Content Include="public\javascripts\app.js" />
     <Content Include="public\javascripts\vendor.js" />
     <Content Include="public\stylesheets\app.css" />
