@@ -7,6 +7,7 @@ using System.Web.Http.Controllers;
 
 namespace EventFeedback.Common
 {
+    // TODO: move to delegation handler to set correlation as early as possible
     public class ActivityTraceFilterAttribute : System.Web.Http.Filters.ActionFilterAttribute
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

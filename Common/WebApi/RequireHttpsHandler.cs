@@ -19,11 +19,11 @@ namespace EventFeedback.Common
                     {
                         Scheme = Uri.UriSchemeHttps,
                         Port = 443
+
                     };
                 response = request.CreateErrorResponse(HttpStatusCode.Forbidden, "https required");
                 response.Headers.Location = uriBuilder.Uri;
             }
-
             return response;
         }
     }

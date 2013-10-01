@@ -31,8 +31,6 @@ namespace EventFeedback.Web
         {
             try
             {
-                //_traceSource.TraceInformation("checking auth");
-
                 // perform request processing 
                 var headers = request.Headers;
                 if (headers.Authorization != null && Scheme.Equals(headers.Authorization.Scheme))
