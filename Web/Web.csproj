@@ -67,14 +67,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="app\javascripts\app.js" />
-    <Content Include="app\javascripts\vendor.js" />
-    <Content Include="app\stylesheets\app.css" />
-    <Content Include="app\test\test.css" />
-    <Content Include="app\test\test.js" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
-    <Content Include="index.html" />
+    <Content Include="public\favicon.ico" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="public\index.html" />
+    <Content Include="public\javascripts\app.js" />
+    <Content Include="public\javascripts\vendor.js" />
+    <Content Include="public\stylesheets\app.css" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -176,12 +176,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="app\javascripts\app.js.map" />
-    <Content Include="app\javascripts\vendor.js.map" />
-    <Content Include="app\stylesheets\app.css.map" />
-    <Content Include="app\test\test.css.map" />
-    <Content Include="app\test\test.js.map" />
     <None Include="Properties\PublishProfiles\etfeedback.pubxml" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="public\javascripts\app.js.map" />
+    <Content Include="public\javascripts\vendor.js.map" />
+    <Content Include="public\stylesheets\app.css.map" />
     <None Include="Web.Azure.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
