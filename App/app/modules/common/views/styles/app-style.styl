@@ -1,0 +1,134 @@
+// nib is a powerful lib for stylus that provides cross-browser css3 mixins.
+// No more vendor prefixes. http://visionmedia.github.com/nib/
+@import 'nib'
+
+// Apply a natural box layout model to all elements.
+// http://paulirish.com/2012/box-sizing-border-box-ftw/
+
+*
+  box-sizing: border-box
+
+body
+  padding-top 60px
+  padding-bottom 40px
+  // background-color #eee
+
+.form-contact
+  padding 15px
+  margin 0 auto
+  label
+    font-size 16px
+    font-weight normal
+  .form-control
+    position relative
+    font-size 16px
+    height auto
+    padding 10px
+    -webkit-box-sizing border-box
+    -moz-box-sizing border-box
+    box-sizing border-box
+    &:focus
+      z-index 2
+  input[type="text"]
+    margin-bottom -1px
+
+.form-signin
+  max-width 330px
+  padding 15px
+  margin 0 auto
+  .checkbox
+    font-weight normal
+  label
+    font-size 16px
+    font-weight normal
+  .form-control
+    position relative
+    font-size 16px
+    height auto
+    padding 10px
+    -webkit-box-sizing border-box
+    -moz-box-sizing border-box
+    box-sizing border-box
+    &:focus
+      z-index 2
+  input[type="text"]
+    margin-bottom -1px
+  input[type="password"]
+    margin-bottom 10px
+
+.form-signin .form-signin-heading,
+.form-signin .checkbox
+  margin-bottom 10px
+
+// Remove border-radius and make it look squared
+
+.navbar-toggle
+  border-radius 0px
+
+.btn
+  border none
+  border-radius 0px
+
+.make-switch
+  border-radius 0px
+
+input.form-control
+  border-radius 0px
+
+.list-group-item:first-child
+  border-radius 0px
+  border-top-right-radius 0px
+  border-top-left-radius 0px
+
+.list-group-item:last-child
+  border-radius 0px
+  border-bottom-right-radius 0px
+  border-bottom-left-radius 0px
+
+.container .jumbotron
+  border-radius 0px
+
+// make the drawer quick
+
+.no-transition
+  -webkit-transition height 0.01s
+  -moz-transition height 0.01s
+  -ms-transition height 0.01s
+  -o-transition height 0.01s
+  transition height 0.01s
+
+// set some button colors, from http://bootswatch.com/cosmo/
+.btn-primary
+  background-color #2986b9
+.btn-primary:hover
+  background-color #3276b1
+
+.btn-success
+  background-color #64b92a
+.btn-success:hover
+  background-color #47a447
+
+.btn-warning
+  background-color #d7af0d
+.btn-warning:hover
+  background-color #ed9c28
+
+.btn-info
+  background-color #4fbeba
+.btn-info:hover
+  background-color #269abc
+
+.btn-danger
+  background-color #c0392b
+.btn-danger:hover
+  background-color #d2322d
+
+.btn-default
+  background-color #fff
+  border: 1px solid #ddd !important
+.btn-default:hover
+  background-color #ebebeb
+  border-color: #adadad
+
+.success
+  background-color #64b92a

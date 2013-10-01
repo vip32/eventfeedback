@@ -22,6 +22,7 @@ namespace EventFeedback.Domain.Membership
             if (!WebSecurity.Initialized)
                 WebSecurity.InitializeDatabaseConnection("DataContext", "UserProfiles", "UserId", "UserName",
                                                          autoCreateTables: false);
+                                                            // TODO: rename UserProfiles > Users [Id]
             return WebSecurity.Initialized;
         }
 
