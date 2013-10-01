@@ -183,7 +183,7 @@ Config = (function() {
 
   Config.prototype.approot = '/';
 
-  Config.prototype.apiroot = 'https://localhost:44300/api/v1';
+  Config.prototype.apiroot = '/api/v1';
 
   Config.prototype.startuptrigger = 'home:index';
 

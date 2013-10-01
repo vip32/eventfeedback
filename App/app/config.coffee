@@ -2,7 +2,7 @@
 class Config
   appcontainer: 'content'
   approot: '/'
-  apiroot: 'https://localhost:44300/api/v1' # TODO: change for other envs (Azure)
+  apiroot: '/api/v1'
   startuptrigger: 'home:index'
   brandtrigger: 'home:index'
   layout: 'layouts/app-layout'
