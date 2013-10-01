@@ -82,6 +82,14 @@
     <Compile Include="Migrations\201309222146148_Domain_Session_Attrs.Designer.cs">
       <DependentUpon>201309222146148_Domain_Session_Attrs.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201310012052283_Domain_Tags.cs" />
+    <Compile Include="Migrations\201310012052283_Domain_Tags.Designer.cs">
+      <DependentUpon>201310012052283_Domain_Tags.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201310012059292_Domain_Speakers_Track.cs" />
+    <Compile Include="Migrations\201310012059292_Domain_Speakers_Track.Designer.cs">
+      <DependentUpon>201310012059292_Domain_Speakers_Track.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Entities\Session.cs" />
@@ -100,8 +108,18 @@
     <EmbeddedResource Include="Migrations\201309222146148_Domain_Session_Attrs.resx">
       <DependentUpon>201309222146148_Domain_Session_Attrs.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201310012052283_Domain_Tags.resx">
+      <DependentUpon>201310012052283_Domain_Tags.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201310012059292_Domain_Speakers_Track.resx">
+      <DependentUpon>201310012059292_Domain_Speakers_Track.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{35B7497D-EF2C-4329-8FE8-440CF8833FD3}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Domain.Membership\Domain.Membership.csproj">
       <Project>{E2532E42-3971-4BE7-8B09-B786CDE166F7}</Project>
       <Name>Domain.Membership</Name>

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using EventFeedback.Common;
 
 namespace EventFeedback.Domain
 {
@@ -23,13 +25,43 @@ namespace EventFeedback.Domain
         public DateTime? EndDate { get; set; }
         [StringLength(128)]
         public string Location { get; set; }
+        [StringLength(10)]
         public string Level { get; set; } // 100/200/300
+        [StringLength(128)]
         public string Type { get; set; } // Session/Workshop/Codemash
-        public string Tracks { get; set; } // C#/java/sap
+        [StringLength(128)]
+        public string Track { get; set; } // C#/java/sap
 
         public int EventId { get; set; }
         //public Event Event { get; set; }
 
+        public ICollection<string> Speakers { get; set; }
+        [StringLength(512)]
+        public string SpeakerList
+        {
+            get
+            {
+                return String.Join(";", Speakers);
+            }
+            set
+            {
+                Speakers = value.NullToEmpty().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            }
+        }
+
+        public ICollection<string> Tags { get; set; }
+        [StringLength(512)]
+        public string TagList
+        {
+            get
+            {
+                return String.Join(";", Tags);
+            }
+            set
+            {
+                Tags = value.NullToEmpty().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            }
+        }
         public ICollection<SessionFeedback> Feedback { get; set; }
 
         /// <summary>
@@ -39,6 +71,7 @@ namespace EventFeedback.Domain
         {
             CreateDate = DateTime.Now;
             Active = true;
+            Tags = new Collection<string>();
         }
 
         public bool IsActive()
@@ -53,6 +86,7 @@ namespace EventFeedback.Domain
         public void SetDeleted(string accountName)
         {
             Deleted = true;
+            Active = false;
             ModifyDate = DateTime.Now;
             DeleteDate = DateTime.Now;
             DeletedBy = accountName;

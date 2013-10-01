@@ -20,18 +20,25 @@ namespace EventFeedback.Domain
         public int SessionId { get; set; }
         //public Session Session { get; set; }
 
+        public int AverageRate { get; set; }
         public int RateOverall { get; set; }
+        [StringLength(1024)]
         public string DescriptionOverall { get; set; }
 
         public int Rate1 { get; set; }
+        [StringLength(1024)]
         public string Description1 { get; set; }
         public int Rate2 { get; set; }
+        [StringLength(1024)]
         public string Description2 { get; set; }
         public int Rate3 { get; set; }
+        [StringLength(1024)]
         public string Description3 { get; set; }
         public int Rate4 { get; set; }
+        [StringLength(1024)]
         public string Description4 { get; set; }
         public int Rate5 { get; set; }
+        [StringLength(1024)]
         public string Description5 { get; set; }
 
         /// <summary>
@@ -50,6 +57,7 @@ namespace EventFeedback.Domain
         public void SetDeleted(string accountName)
         {
             Deleted = true;
+            Active = false;
             ModifyDate = DateTime.Now;
             DeleteDate = DateTime.Now;
             DeletedBy = accountName;

@@ -83,6 +83,8 @@ namespace EventFeedback.Domain.Migrations
                                             Title = "Keynote ET1",
                                             StartDate = new DateTime(2013, 2, 18, 9, 0, 0),
                                             EndDate = new DateTime(2013, 2, 18, 11, 30, 0),
+                                            TagList = "C#;Java",
+                                            SpeakerList = "Speaker1;Speaker2",
                                             Feedback = new Collection<SessionFeedback>
                                                 {
                                                     new SessionFeedback {UserId = 1},
@@ -93,13 +95,17 @@ namespace EventFeedback.Domain.Migrations
                                         {
                                             Title = "Session1 ET1",
                                             StartDate = new DateTime(2013, 2, 18, 11, 30, 0),
-                                            EndDate = new DateTime(2013, 2, 18, 12, 30, 0)
+                                            EndDate = new DateTime(2013, 2, 18, 12, 30, 0),
+                                            TagList = "C#",
+                                            SpeakerList = "Speaker1",
                                         },
                                     new Session
                                         {
                                             Title = "Session2 ET1",
                                             StartDate = new DateTime(2013, 2, 18, 13, 0, 0),
-                                            EndDate = new DateTime(2013, 2, 18, 14, 30, 0)
+                                            EndDate = new DateTime(2013, 2, 18, 14, 30, 0),
+                                            TagList = "Java",
+                                            SpeakerList = "Speaker1",
                                         }
                                 }
                     },
@@ -116,19 +122,25 @@ namespace EventFeedback.Domain.Migrations
                                         {
                                             Title = "Keynote",
                                             StartDate = new DateTime(2013, 5, 10, 9, 0, 0),
-                                            EndDate = new DateTime(2013, 5, 10, 11, 30, 0)
+                                            EndDate = new DateTime(2013, 5, 10, 11, 30, 0),
+                                            TagList = "C#;Java",
+                                            SpeakerList = "Speaker1;Speaker2",
                                         },
                                     new Session
                                         {
                                             Title = "Session1 ET2",
                                             StartDate = new DateTime(2013, 5, 10, 11, 30, 0),
-                                            EndDate = new DateTime(2013, 5, 10, 12, 30, 0)
+                                            EndDate = new DateTime(2013, 5, 10, 12, 30, 0),
+                                            TagList = "C#",
+                                            SpeakerList = "Speaker1",
                                         },
                                     new Session
                                         {
                                             Title = "Session2 ET2",
                                             StartDate = new DateTime(2013, 5, 10, 13, 0, 0),
-                                            EndDate = new DateTime(2013, 5, 10, 14, 30, 0)
+                                            EndDate = new DateTime(2013, 5, 10, 14, 30, 0),
+                                            TagList = "Java",
+                                            SpeakerList = "Speaker1",
                                         }
                                 }
                     },
@@ -145,19 +157,25 @@ namespace EventFeedback.Domain.Migrations
                                         {
                                             Title = "Keynote ET3",
                                             StartDate = new DateTime(2013, 7, 1, 9, 0, 0),
-                                            EndDate = new DateTime(2013, 7, 1, 11, 30, 0)
+                                            EndDate = new DateTime(2013, 7, 1, 11, 30, 0),
+                                            TagList = "C#;Java",
+                                            SpeakerList = "Speaker1;Speaker2",
                                         },
                                     new Session
                                         {
                                             Title = "Session1 ET3",
                                             StartDate = new DateTime(2013, 7, 1, 11, 30, 0),
-                                            EndDate = new DateTime(2013, 7, 1, 12, 30, 0)
+                                            EndDate = new DateTime(2013, 7, 1, 12, 30, 0),
+                                            TagList = "C#",
+                                            SpeakerList = "Speaker1",
                                         },
                                     new Session
                                         {
                                             Title = "Session2 ET3",
                                             StartDate = new DateTime(2013, 7, 1, 13, 0, 0),
-                                            EndDate = new DateTime(2013, 7, 1, 14, 30, 0)
+                                            EndDate = new DateTime(2013, 7, 1, 14, 30, 0),
+                                            TagList = "Java",
+                                            SpeakerList = "Speaker1",
                                         }
                                 }
                     },
@@ -174,19 +192,25 @@ namespace EventFeedback.Domain.Migrations
                                         {
                                             Title = "Keynote ET4",
                                             StartDate = new DateTime(2013, 10, 24, 9, 0, 0),
-                                            EndDate = new DateTime(2013, 10, 24, 11, 30, 0)
+                                            EndDate = new DateTime(2013, 10, 24, 11, 30, 0),
+                                            TagList = "C#;Java",
+                                            SpeakerList = "Speaker1;Speaker2",
                                         },
                                     new Session
                                         {
                                             Title = "Session1 ET4",
                                             StartDate = new DateTime(2013, 10, 23, 11, 30, 0),
-                                            EndDate = new DateTime(2013, 10, 23, 12, 30, 0)
+                                            EndDate = new DateTime(2013, 10, 23, 12, 30, 0),
+                                            TagList = "C#",
+                                            SpeakerList = "Speaker1",
                                         },
                                     new Session
                                         {
                                             Title = "Session2 ET4",
                                             StartDate = new DateTime(2013, 10, 23, 13, 0, 0),
-                                            EndDate = new DateTime(2013, 10, 23, 14, 30, 0)
+                                            EndDate = new DateTime(2013, 10, 23, 14, 30, 0),
+                                            TagList = "Java",
+                                            SpeakerList = "Speaker1",
                                         }
                                 }
                     }
