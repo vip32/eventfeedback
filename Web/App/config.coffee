@@ -1,8 +1,7 @@
 exports.config =
   # See http://brunch.io/#documentation for docs.
   paths:
-    public: '../Web/public'
-    # watched: ['src', 'test', 'vendor']
+    public: '../public'
 
   files:
     javascripts:
