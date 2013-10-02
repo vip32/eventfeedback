@@ -2,7 +2,7 @@
 class Config
   appcontainer: 'content'
   approot: '/'
-  apiroot: '/api/v1'
+  apiroot: '/api'
   startuptrigger: 'home:index'
   brandtrigger: 'home:index'
   layout: 'layouts/app-layout'
@@ -10,5 +10,6 @@ class Config
     'common': 'modules/common/router'
     'header': 'modules/header/router'
     'contact': 'modules/contact/router'
+    'event': 'modules/event/router'
 
 module.exports = new Config()

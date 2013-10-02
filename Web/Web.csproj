@@ -76,7 +76,9 @@
     <Content Include="public\javascripts\app.js" />
     <Content Include="public\javascripts\vendor.js" />
     <Content Include="public\stylesheets\app.css" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>

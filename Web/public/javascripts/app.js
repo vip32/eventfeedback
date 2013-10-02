@@ -183,7 +183,7 @@ Config = (function() {
 
   Config.prototype.approot = '/';
 
-  Config.prototype.apiroot = '/api/v1';
+  Config.prototype.apiroot = '/api';
 
   Config.prototype.startuptrigger = 'home:index';
 
@@ -194,7 +194,8 @@ Config = (function() {
   Config.prototype.modules = {
     'common': 'modules/common/router',
     'header': 'modules/header/router',
-    'contact': 'modules/contact/router'
+    'contact': 'modules/contact/router',
+    'event': 'modules/event/router'
   };
 
   return Config;
@@ -465,6 +466,54 @@ module.exports.TestData = TestData = (function() {
 
 });
 
+;require.register("models/event", function(exports, require, module) {
+var Collection, Contact, EventsCollection, Model, config, _ref, _ref1,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+config = require('../config');
+
+Model = require('../lib/base/model');
+
+Collection = require('../lib/base/collection');
+
+module.exports.Model = Contact = (function(_super) {
+  __extends(Contact, _super);
+
+  function Contact() {
+    _ref = Contact.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  return Contact;
+
+})(Model);
+
+module.exports.Collection = EventsCollection = (function(_super) {
+  __extends(EventsCollection, _super);
+
+  function EventsCollection() {
+    _ref1 = EventsCollection.__super__.constructor.apply(this, arguments);
+    return _ref1;
+  }
+
+  EventsCollection.prototype.url = "" + config.apiroot + "/events";
+
+  EventsCollection.prototype.credentials = {
+    username: 'admin',
+    password: 'admin'
+  };
+
+  EventsCollection.prototype.model = module.exports.Model;
+
+  EventsCollection.prototype.comparator = 'title';
+
+  return EventsCollection;
+
+})(Collection);
+
+});
+
 ;require.register("models/header", function(exports, require, module) {
 var Collection, Header, HeadersCollection, Model, TestData, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
@@ -481,8 +530,6 @@ module.exports.Model = Header = (function(_super) {
     _ref = Header.__super__.constructor.apply(this, arguments);
     return _ref;
   }
-
-  Header.prototype.urlRoot = "headers";
 
   Header.prototype.defaults = {
     title: '',
@@ -502,7 +549,7 @@ module.exports.Collection = HeadersCollection = (function(_super) {
     return _ref1;
   }
 
-  HeadersCollection.prototype.localStorage = new Backbone.LocalStorage("headers");
+  HeadersCollection.prototype.url = 'headers';
 
   HeadersCollection.prototype.model = module.exports.Model;
 
@@ -517,10 +564,7 @@ module.exports.TestData = TestData = (function() {
 
   TestData.prototype.addTo = function(collection) {
     if (collection.size() === 0) {
-      collection.reset(this.data);
-      return collection.forEach(function(model) {
-        return model.save();
-      });
+      return collection.reset(this.data);
     }
   };
 
@@ -536,7 +580,7 @@ module.exports.TestData = TestData = (function() {
       title: "About",
       trigger: "about:index",
       intern: true,
-      order: 2
+      order: 3
     }, {
       id: "9cf247f4-4c76-d453-bbec-1c40080e32e5",
       title: "Contacts",
@@ -544,17 +588,23 @@ module.exports.TestData = TestData = (function() {
       intern: true,
       order: 1
     }, {
+      id: "1cf247f4-4c76-d453-bbec-1c40080e32e4",
+      title: "Events",
+      trigger: "events:index",
+      intern: true,
+      order: 2
+    }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f5",
       title: "Sign in",
       trigger: "signin:index",
       intern: true,
-      order: 3
+      order: 4
     }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f4",
       title: "Debug",
       trigger: "debug:index",
       intern: true,
-      order: 4
+      order: 5
     }
   ];
 
@@ -1193,6 +1243,259 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   });
 });
 
+;require.register("modules/event/controller", function(exports, require, module) {
+var Controller, Event, application,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+Event = require('../../models/event');
+
+module.exports = Controller = (function(_super) {
+  __extends(Controller, _super);
+
+  function Controller(options) {
+    var _this = this;
+    console.log('event controller init');
+    application.addInitializer(function(options) {
+      application.on('events:index', function() {
+        return application.navigate('events');
+      });
+      application.on('event:details', function(id) {
+        return application.navigate('events/' + id);
+      });
+      return _this.events = new Event.Collection();
+    });
+  }
+
+  Controller.prototype.showEventsIndex = function() {
+    return this.events.fetch().done(function(models) {
+      var View, view;
+      View = require('./views/events-index-view');
+      view = new View({
+        collection: models
+      });
+      return application.layout.content.show(view);
+    });
+  };
+
+  Controller.prototype.showEventDetails = function(id) {
+    return this.events.fetch().done(function(models) {
+      var View, view;
+      View = require('./views/event-details-view');
+      view = new View({
+        model: models.get(id)
+      });
+      return application.layout.content.show(view);
+    });
+  };
+
+  Controller.prototype.onClose = function() {
+    return console.log('event controller close');
+  };
+
+  return Controller;
+
+})(Backbone.Marionette.Controller);
+
+});
+
+;require.register("modules/event/router", function(exports, require, module) {
+var Controller, Router, application, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+Controller = require('./controller');
+
+module.exports = Router = (function(_super) {
+  __extends(Router, _super);
+
+  function Router() {
+    _ref = Router.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  Router.prototype.appRoutes = {
+    'events': 'showEventsIndex',
+    'events/:id': 'showEventDetails'
+  };
+
+  Router.prototype.initialize = function(options) {
+    var _this = this;
+    console.log('event router init');
+    return application.addInitializer(function(options) {
+      application.on('events:index', function() {
+        application.navigate('events');
+        return _this.controller.showEventsIndex();
+      });
+      return application.on('event:details', function(id) {
+        application.navigate('event', id);
+        return _this.controller.showEventDetails(id);
+      });
+    });
+  };
+
+  Router.prototype.controller = new Controller();
+
+  return Router;
+
+})(Backbone.Marionette.AppRouter);
+
+});
+
+;require.register("modules/event/views/event-details-view", function(exports, require, module) {
+var EventDetailsView, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = EventDetailsView = (function(_super) {
+  __extends(EventDetailsView, _super);
+
+  function EventDetailsView() {
+    _ref = EventDetailsView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  EventDetailsView.prototype.id = 'event-details-view';
+
+  EventDetailsView.prototype.template = require('./templates/event-details');
+
+  EventDetailsView.prototype.initialize = function(options) {
+    return console.log('event id', options);
+  };
+
+  return EventDetailsView;
+
+})(Backbone.Marionette.ItemView);
+
+});
+
+;require.register("modules/event/views/event-item-view", function(exports, require, module) {
+var EventItemView, ItemView, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+ItemView = require('../../../../lib/base/item-view');
+
+module.exports = EventItemView = (function(_super) {
+  __extends(EventItemView, _super);
+
+  function EventItemView() {
+    _ref = EventItemView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  EventItemView.prototype.id = 'event-item-view';
+
+  EventItemView.prototype.template = require('./templates/event-item');
+
+  EventItemView.prototype.tagName = 'a';
+
+  EventItemView.prototype.className = 'list-group-item';
+
+  EventItemView.prototype.tagAttrs = {
+    'href': function(model) {
+      return '#events/' + model.get('id');
+    }
+  };
+
+  return EventItemView;
+
+})(ItemView);
+
+});
+
+;require.register("modules/event/views/events-index-view", function(exports, require, module) {
+var Event, EventIndexView, application, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+Event = require('../../../models/event');
+
+module.exports = EventIndexView = (function(_super) {
+  __extends(EventIndexView, _super);
+
+  function EventIndexView() {
+    _ref = EventIndexView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  EventIndexView.prototype.id = 'event-index-view';
+
+  EventIndexView.prototype.template = require('./templates/events-index');
+
+  EventIndexView.prototype.itemView = require('./event-item-view');
+
+  EventIndexView.prototype.itemViewContainer = '.js-events';
+
+  EventIndexView.prototype.onClose = function() {
+    return console.log('events-index view close');
+  };
+
+  return EventIndexView;
+
+})(Backbone.Marionette.CompositeView);
+
+});
+
+;require.register("modules/event/views/templates/event-details", function(exports, require, module) {
+module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>";
+  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + " ";
+  if (stack1 = helpers.description) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.description; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h3>\r\n    <h3>";
+  if (stack1 = helpers.speaker) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.speaker; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>\r\n      <a class=\"btn btn-lg btn-primary\" href=\"#events\">&laquo; Back</a>\r\n    </p>\r\n  </div>\r\n</div>";
+  return buffer;
+  });
+});
+
+;require.register("modules/event/views/templates/event-item", function(exports, require, module) {
+module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + " ";
+  if (stack1 = helpers.description) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.description; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1);
+  return buffer;
+  });
+});
+
+;require.register("modules/event/views/templates/events-index", function(exports, require, module) {
+module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  
+
+
+  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>Events</h3>\r\n    <div class=\"list-group js-events\">\r\n      <!-- events -->\r\n    </div>\r\n  </div>\r\n</div>";
+  });
+});
+
 ;require.register("modules/header/controller", function(exports, require, module) {
 var Controller, Header, application,
   __hasProp = {}.hasOwnProperty,
@@ -1210,21 +1513,17 @@ module.exports = Controller = (function(_super) {
     console.log('about controller init');
     application.addInitializer(function(options) {
       _this.headers = new Header.Collection();
-      return _this.headers.fetch().done(function() {
-        return new Header.TestData().addTo(_this.headers);
-      });
+      return new Header.TestData().addTo(_this.headers);
     });
   }
 
   Controller.prototype.showHeader = function() {
-    return this.headers.fetch().done(function(models) {
-      var View, view;
-      View = require('./views/header-view');
-      view = new View.Header({
-        collection: models
-      });
-      return application.layout.header.show(view);
+    var View, view;
+    View = require('./views/header-view');
+    view = new View.Header({
+      collection: this.headers
     });
+    return application.layout.header.show(view);
   };
 
   Controller.prototype.onClose = function() {

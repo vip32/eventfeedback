@@ -9,14 +9,12 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     application.addInitializer (options) =>
 
       @headers = new Header.Collection()
-      @headers.fetch().done =>
-        new Header.TestData().addTo(@headers)
+      new Header.TestData().addTo(@headers)
 
   showHeader: ->
-    @headers.fetch().done (models) ->
-      View = require './views/header-view'
-      view = new View.Header(collection: models)
-      application.layout.header.show(view)
+    View = require './views/header-view'
+    view = new View.Header(collection: @headers)
+    application.layout.header.show(view)
 
   onClose: ->
     console.log 'header controller close'

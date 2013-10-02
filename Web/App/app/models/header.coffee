@@ -3,7 +3,6 @@ Collection = require '../lib/base/collection'
 
 module.exports.Model = class Header extends Model
 
-  urlRoot: "headers"
   defaults:
     title: ''
     href: ''
@@ -12,7 +11,7 @@ module.exports.Model = class Header extends Model
 
 module.exports.Collection = class HeadersCollection extends Collection
 
-  localStorage: new Backbone.LocalStorage("headers")
+  url: 'headers'
   model: module.exports.Model
   comparator: 'order'
 
@@ -23,9 +22,6 @@ module.exports.TestData = class TestData
     # add the data items to the provided collection if its empty
     if collection.size() is 0
       collection.reset(@data)
-      # save all new models to the collection
-      collection.forEach (model) ->
-        model.save()
 
   data: [
     id: "511b8984-8958-663d-4707-9378aa71776b"
@@ -38,7 +34,7 @@ module.exports.TestData = class TestData
     title: "About"
     trigger: "about:index"
     intern: true
-    order: 2
+    order: 3
   ,
     id: "9cf247f4-4c76-d453-bbec-1c40080e32e5"
     title: "Contacts"
@@ -46,15 +42,21 @@ module.exports.TestData = class TestData
     intern: true
     order: 1
   ,
+    id: "1cf247f4-4c76-d453-bbec-1c40080e32e4"
+    title: "Events"
+    trigger: "events:index"
+    intern: true
+    order: 2
+  ,
     id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f5"
     title: "Sign in"
     trigger: "signin:index"
     intern: true
-    order: 3
+    order: 4
   ,
     id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f4"
     title: "Debug"
     trigger: "debug:index"
     intern: true
-    order: 4
+    order: 5
   ]
