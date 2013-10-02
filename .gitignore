@@ -31,6 +31,7 @@ tmp/
 # Bower stuff.
 bower_components/
 
+certs/
 bin/
 obj/
 *.vspscc

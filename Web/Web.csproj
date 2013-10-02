@@ -184,9 +184,6 @@
     <Content Include="public\javascripts\app.js.map" />
     <Content Include="public\javascripts\vendor.js.map" />
     <Content Include="public\stylesheets\app.css.map" />
-    <None Include="Web.Azure.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">
