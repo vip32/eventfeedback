@@ -13,7 +13,6 @@
     "backbone.marionette": "~1.1.0",
     "Backbone.localStorage": "~1.1.6",
     "backbone.basicauth": "~0.4.0",
-    "hammerjs": "~1.0.5",
     "underscore": "~1.5.2",
     "bootstrap": "~3.0.0",
     "console-polyfill": "~0.1.0",
@@ -21,7 +20,7 @@
     "moment": "~2.2.1",
     "bootstrap-switch": "*",
     "fastclick": "~0.6.10",
-    "backbone.hammer": "~0.1.0"
+    "jquery-touchswipe": "~1.6.4"
   },
   "overrides": {
     "backbone": {
@@ -58,11 +57,6 @@
         "pace.js",
         "themes/pace-theme-flat-top.css"
       ]
-    },
-    "backbone.hammer":{
-      "dependencies":{
-        "hammerjs": "*"
-      }
     }
   }
 }

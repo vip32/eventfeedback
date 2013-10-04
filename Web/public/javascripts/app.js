@@ -249,12 +249,9 @@ module.exports = AppLayout = (function(_super) {
   };
 
   AppLayout.prototype.events = {
-    'click .page-content': 'onSidebarHide'
-  };
-
-  AppLayout.prototype.hammerEvents = {
-    'swipeleft .page-content': 'onSidebarHide',
-    'swiperight .page-content': 'onSidebarToggle'
+    'click .page-content': 'onSidebarHide',
+    'swipeleft': 'onSidebarHide',
+    'swiperight': 'onSidebarToggle'
   };
 
   AppLayout.prototype.onSidebarToggle = function() {
