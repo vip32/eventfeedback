@@ -11769,6 +11769,1536 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
 }).call(this);
 
+;/*! Hammer.JS - v1.0.5 - 2013-04-07
+ * http://eightmedia.github.com/hammer.js
+ *
+ * Copyright (c) 2013 Jorik Tangelder <j.tangelder@gmail.com>;
+ * Licensed under the MIT license */
+
+(function(window, undefined) {
+    'use strict';
+
+/**
+ * Hammer
+ * use this to create instances
+ * @param   {HTMLElement}   element
+ * @param   {Object}        options
+ * @returns {Hammer.Instance}
+ * @constructor
+ */
+var Hammer = function(element, options) {
+    return new Hammer.Instance(element, options || {});
+};
+
+// default settings
+Hammer.defaults = {
+    // add styles and attributes to the element to prevent the browser from doing
+    // its native behavior. this doesnt prevent the scrolling, but cancels
+    // the contextmenu, tap highlighting etc
+    // set to false to disable this
+    stop_browser_behavior: {
+		// this also triggers onselectstart=false for IE
+        userSelect: 'none',
+		// this makes the element blocking in IE10 >, you could experiment with the value
+		// see for more options this issue; https://github.com/EightMedia/hammer.js/issues/241
+        touchAction: 'none',
+		touchCallout: 'none',
+        contentZooming: 'none',
+        userDrag: 'none',
+        tapHighlightColor: 'rgba(0,0,0,0)'
+    }
+
+    // more settings are defined per gesture at gestures.js
+};
+
+// detect touchevents
+Hammer.HAS_POINTEREVENTS = navigator.pointerEnabled || navigator.msPointerEnabled;
+Hammer.HAS_TOUCHEVENTS = ('ontouchstart' in window);
+
+// dont use mouseevents on mobile devices
+Hammer.MOBILE_REGEX = /mobile|tablet|ip(ad|hone|od)|android/i;
+Hammer.NO_MOUSEEVENTS = Hammer.HAS_TOUCHEVENTS && navigator.userAgent.match(Hammer.MOBILE_REGEX);
+
+// eventtypes per touchevent (start, move, end)
+// are filled by Hammer.event.determineEventTypes on setup
+Hammer.EVENT_TYPES = {};
+
+// direction defines
+Hammer.DIRECTION_DOWN = 'down';
+Hammer.DIRECTION_LEFT = 'left';
+Hammer.DIRECTION_UP = 'up';
+Hammer.DIRECTION_RIGHT = 'right';
+
+// pointer type
+Hammer.POINTER_MOUSE = 'mouse';
+Hammer.POINTER_TOUCH = 'touch';
+Hammer.POINTER_PEN = 'pen';
+
+// touch event defines
+Hammer.EVENT_START = 'start';
+Hammer.EVENT_MOVE = 'move';
+Hammer.EVENT_END = 'end';
+
+// hammer document where the base events are added at
+Hammer.DOCUMENT = document;
+
+// plugins namespace
+Hammer.plugins = {};
+
+// if the window events are set...
+Hammer.READY = false;
+
+/**
+ * setup events to detect gestures on the document
+ */
+function setup() {
+    if(Hammer.READY) {
+        return;
+    }
+
+    // find what eventtypes we add listeners to
+    Hammer.event.determineEventTypes();
+
+    // Register all gestures inside Hammer.gestures
+    for(var name in Hammer.gestures) {
+        if(Hammer.gestures.hasOwnProperty(name)) {
+            Hammer.detection.register(Hammer.gestures[name]);
+        }
+    }
+
+    // Add touch events on the document
+    Hammer.event.onTouch(Hammer.DOCUMENT, Hammer.EVENT_MOVE, Hammer.detection.detect);
+    Hammer.event.onTouch(Hammer.DOCUMENT, Hammer.EVENT_END, Hammer.detection.detect);
+
+    // Hammer is ready...!
+    Hammer.READY = true;
+}
+
+/**
+ * create new hammer instance
+ * all methods should return the instance itself, so it is chainable.
+ * @param   {HTMLElement}       element
+ * @param   {Object}            [options={}]
+ * @returns {Hammer.Instance}
+ * @constructor
+ */
+Hammer.Instance = function(element, options) {
+    var self = this;
+
+    // setup HammerJS window events and register all gestures
+    // this also sets up the default options
+    setup();
+
+    this.element = element;
+
+    // start/stop detection option
+    this.enabled = true;
+
+    // merge options
+    this.options = Hammer.utils.extend(
+        Hammer.utils.extend({}, Hammer.defaults),
+        options || {});
+
+    // add some css to the element to prevent the browser from doing its native behavoir
+    if(this.options.stop_browser_behavior) {
+        Hammer.utils.stopDefaultBrowserBehavior(this.element, this.options.stop_browser_behavior);
+    }
+
+    // start detection on touchstart
+    Hammer.event.onTouch(element, Hammer.EVENT_START, function(ev) {
+        if(self.enabled) {
+            Hammer.detection.startDetect(self, ev);
+        }
+    });
+
+    // return instance
+    return this;
+};
+
+
+Hammer.Instance.prototype = {
+    /**
+     * bind events to the instance
+     * @param   {String}      gesture
+     * @param   {Function}    handler
+     * @returns {Hammer.Instance}
+     */
+    on: function onEvent(gesture, handler){
+        var gestures = gesture.split(' ');
+        for(var t=0; t<gestures.length; t++) {
+            this.element.addEventListener(gestures[t], handler, false);
+        }
+        return this;
+    },
+
+
+    /**
+     * unbind events to the instance
+     * @param   {String}      gesture
+     * @param   {Function}    handler
+     * @returns {Hammer.Instance}
+     */
+    off: function offEvent(gesture, handler){
+        var gestures = gesture.split(' ');
+        for(var t=0; t<gestures.length; t++) {
+            this.element.removeEventListener(gestures[t], handler, false);
+        }
+        return this;
+    },
+
+
+    /**
+     * trigger gesture event
+     * @param   {String}      gesture
+     * @param   {Object}      eventData
+     * @returns {Hammer.Instance}
+     */
+    trigger: function triggerEvent(gesture, eventData){
+        // create DOM event
+        var event = Hammer.DOCUMENT.createEvent('Event');
+		event.initEvent(gesture, true, true);
+		event.gesture = eventData;
+
+        // trigger on the target if it is in the instance element,
+        // this is for event delegation tricks
+        var element = this.element;
+        if(Hammer.utils.hasParent(eventData.target, element)) {
+            element = eventData.target;
+        }
+
+        element.dispatchEvent(event);
+        return this;
+    },
+
+
+    /**
+     * enable of disable hammer.js detection
+     * @param   {Boolean}   state
+     * @returns {Hammer.Instance}
+     */
+    enable: function enable(state) {
+        this.enabled = state;
+        return this;
+    }
+};
+
+/**
+ * this holds the last move event,
+ * used to fix empty touchend issue
+ * see the onTouch event for an explanation
+ * @type {Object}
+ */
+var last_move_event = null;
+
+
+/**
+ * when the mouse is hold down, this is true
+ * @type {Boolean}
+ */
+var enable_detect = false;
+
+
+/**
+ * when touch events have been fired, this is true
+ * @type {Boolean}
+ */
+var touch_triggered = false;
+
+
+Hammer.event = {
+    /**
+     * simple addEventListener
+     * @param   {HTMLElement}   element
+     * @param   {String}        type
+     * @param   {Function}      handler
+     */
+    bindDom: function(element, type, handler) {
+        var types = type.split(' ');
+        for(var t=0; t<types.length; t++) {
+            element.addEventListener(types[t], handler, false);
+        }
+    },
+
+
+    /**
+     * touch events with mouse fallback
+     * @param   {HTMLElement}   element
+     * @param   {String}        eventType        like Hammer.EVENT_MOVE
+     * @param   {Function}      handler
+     */
+    onTouch: function onTouch(element, eventType, handler) {
+		var self = this;
+
+        this.bindDom(element, Hammer.EVENT_TYPES[eventType], function bindDomOnTouch(ev) {
+            var sourceEventType = ev.type.toLowerCase();
+
+            // onmouseup, but when touchend has been fired we do nothing.
+            // this is for touchdevices which also fire a mouseup on touchend
+            if(sourceEventType.match(/mouse/) && touch_triggered) {
+                return;
+            }
+
+            // mousebutton must be down or a touch event
+            else if( sourceEventType.match(/touch/) ||   // touch events are always on screen
+                sourceEventType.match(/pointerdown/) || // pointerevents touch
+                (sourceEventType.match(/mouse/) && ev.which === 1)   // mouse is pressed
+            ){
+                enable_detect = true;
+            }
+
+            // we are in a touch event, set the touch triggered bool to true,
+            // this for the conflicts that may occur on ios and android
+            if(sourceEventType.match(/touch|pointer/)) {
+                touch_triggered = true;
+            }
+
+            // count the total touches on the screen
+            var count_touches = 0;
+
+            // when touch has been triggered in this detection session
+            // and we are now handling a mouse event, we stop that to prevent conflicts
+            if(enable_detect) {
+                // update pointerevent
+                if(Hammer.HAS_POINTEREVENTS && eventType != Hammer.EVENT_END) {
+                    count_touches = Hammer.PointerEvent.updatePointer(eventType, ev);
+                }
+                // touch
+                else if(sourceEventType.match(/touch/)) {
+                    count_touches = ev.touches.length;
+                }
+                // mouse
+                else if(!touch_triggered) {
+                    count_touches = sourceEventType.match(/up/) ? 0 : 1;
+                }
+
+                // if we are in a end event, but when we remove one touch and
+                // we still have enough, set eventType to move
+                if(count_touches > 0 && eventType == Hammer.EVENT_END) {
+                    eventType = Hammer.EVENT_MOVE;
+                }
+                // no touches, force the end event
+                else if(!count_touches) {
+                    eventType = Hammer.EVENT_END;
+                }
+
+                // because touchend has no touches, and we often want to use these in our gestures,
+                // we send the last move event as our eventData in touchend
+                if(!count_touches && last_move_event !== null) {
+                    ev = last_move_event;
+                }
+                // store the last move event
+                else {
+                    last_move_event = ev;
+                }
+
+                // trigger the handler
+                handler.call(Hammer.detection, self.collectEventData(element, eventType, ev));
+
+                // remove pointerevent from list
+                if(Hammer.HAS_POINTEREVENTS && eventType == Hammer.EVENT_END) {
+                    count_touches = Hammer.PointerEvent.updatePointer(eventType, ev);
+                }
+            }
+
+            //debug(sourceEventType +" "+ eventType);
+
+            // on the end we reset everything
+            if(!count_touches) {
+                last_move_event = null;
+                enable_detect = false;
+                touch_triggered = false;
+                Hammer.PointerEvent.reset();
+            }
+        });
+    },
+
+
+    /**
+     * we have different events for each device/browser
+     * determine what we need and set them in the Hammer.EVENT_TYPES constant
+     */
+    determineEventTypes: function determineEventTypes() {
+        // determine the eventtype we want to set
+        var types;
+
+        // pointerEvents magic
+        if(Hammer.HAS_POINTEREVENTS) {
+            types = Hammer.PointerEvent.getEvents();
+        }
+        // on Android, iOS, blackberry, windows mobile we dont want any mouseevents
+        else if(Hammer.NO_MOUSEEVENTS) {
+            types = [
+                'touchstart',
+                'touchmove',
+                'touchend touchcancel'];
+        }
+        // for non pointer events browsers and mixed browsers,
+        // like chrome on windows8 touch laptop
+        else {
+            types = [
+                'touchstart mousedown',
+                'touchmove mousemove',
+                'touchend touchcancel mouseup'];
+        }
+
+        Hammer.EVENT_TYPES[Hammer.EVENT_START]  = types[0];
+        Hammer.EVENT_TYPES[Hammer.EVENT_MOVE]   = types[1];
+        Hammer.EVENT_TYPES[Hammer.EVENT_END]    = types[2];
+    },
+
+
+    /**
+     * create touchlist depending on the event
+     * @param   {Object}    ev
+     * @param   {String}    eventType   used by the fakemultitouch plugin
+     */
+    getTouchList: function getTouchList(ev/*, eventType*/) {
+        // get the fake pointerEvent touchlist
+        if(Hammer.HAS_POINTEREVENTS) {
+            return Hammer.PointerEvent.getTouchList();
+        }
+        // get the touchlist
+        else if(ev.touches) {
+            return ev.touches;
+        }
+        // make fake touchlist from mouse position
+        else {
+            return [{
+                identifier: 1,
+                pageX: ev.pageX,
+                pageY: ev.pageY,
+                target: ev.target
+            }];
+        }
+    },
+
+
+    /**
+     * collect event data for Hammer js
+     * @param   {HTMLElement}   element
+     * @param   {String}        eventType        like Hammer.EVENT_MOVE
+     * @param   {Object}        eventData
+     */
+    collectEventData: function collectEventData(element, eventType, ev) {
+        var touches = this.getTouchList(ev, eventType);
+
+        // find out pointerType
+        var pointerType = Hammer.POINTER_TOUCH;
+        if(ev.type.match(/mouse/) || Hammer.PointerEvent.matchType(Hammer.POINTER_MOUSE, ev)) {
+            pointerType = Hammer.POINTER_MOUSE;
+        }
+
+        return {
+            center      : Hammer.utils.getCenter(touches),
+            timeStamp   : new Date().getTime(),
+            target      : ev.target,
+            touches     : touches,
+            eventType   : eventType,
+            pointerType : pointerType,
+            srcEvent    : ev,
+
+            /**
+             * prevent the browser default actions
+             * mostly used to disable scrolling of the browser
+             */
+            preventDefault: function() {
+                if(this.srcEvent.preventManipulation) {
+                    this.srcEvent.preventManipulation();
+                }
+
+                if(this.srcEvent.preventDefault) {
+                    this.srcEvent.preventDefault();
+                }
+            },
+
+            /**
+             * stop bubbling the event up to its parents
+             */
+            stopPropagation: function() {
+                this.srcEvent.stopPropagation();
+            },
+
+            /**
+             * immediately stop gesture detection
+             * might be useful after a swipe was detected
+             * @return {*}
+             */
+            stopDetect: function() {
+                return Hammer.detection.stopDetect();
+            }
+        };
+    }
+};
+
+Hammer.PointerEvent = {
+    /**
+     * holds all pointers
+     * @type {Object}
+     */
+    pointers: {},
+
+    /**
+     * get a list of pointers
+     * @returns {Array}     touchlist
+     */
+    getTouchList: function() {
+        var self = this;
+        var touchlist = [];
+
+        // we can use forEach since pointerEvents only is in IE10
+        Object.keys(self.pointers).sort().forEach(function(id) {
+            touchlist.push(self.pointers[id]);
+        });
+        return touchlist;
+    },
+
+    /**
+     * update the position of a pointer
+     * @param   {String}   type             Hammer.EVENT_END
+     * @param   {Object}   pointerEvent
+     */
+    updatePointer: function(type, pointerEvent) {
+        if(type == Hammer.EVENT_END) {
+            this.pointers = {};
+        }
+        else {
+            pointerEvent.identifier = pointerEvent.pointerId;
+            this.pointers[pointerEvent.pointerId] = pointerEvent;
+        }
+
+        return Object.keys(this.pointers).length;
+    },
+
+    /**
+     * check if ev matches pointertype
+     * @param   {String}        pointerType     Hammer.POINTER_MOUSE
+     * @param   {PointerEvent}  ev
+     */
+    matchType: function(pointerType, ev) {
+        if(!ev.pointerType) {
+            return false;
+        }
+
+        var types = {};
+        types[Hammer.POINTER_MOUSE] = (ev.pointerType == ev.MSPOINTER_TYPE_MOUSE || ev.pointerType == Hammer.POINTER_MOUSE);
+        types[Hammer.POINTER_TOUCH] = (ev.pointerType == ev.MSPOINTER_TYPE_TOUCH || ev.pointerType == Hammer.POINTER_TOUCH);
+        types[Hammer.POINTER_PEN] = (ev.pointerType == ev.MSPOINTER_TYPE_PEN || ev.pointerType == Hammer.POINTER_PEN);
+        return types[pointerType];
+    },
+
+
+    /**
+     * get events
+     */
+    getEvents: function() {
+        return [
+            'pointerdown MSPointerDown',
+            'pointermove MSPointerMove',
+            'pointerup pointercancel MSPointerUp MSPointerCancel'
+        ];
+    },
+
+    /**
+     * reset the list
+     */
+    reset: function() {
+        this.pointers = {};
+    }
+};
+
+
+Hammer.utils = {
+    /**
+     * extend method,
+     * also used for cloning when dest is an empty object
+     * @param   {Object}    dest
+     * @param   {Object}    src
+	 * @parm	{Boolean}	merge		do a merge
+     * @returns {Object}    dest
+     */
+    extend: function extend(dest, src, merge) {
+        for (var key in src) {
+			if(dest[key] !== undefined && merge) {
+				continue;
+			}
+            dest[key] = src[key];
+        }
+        return dest;
+    },
+
+
+    /**
+     * find if a node is in the given parent
+     * used for event delegation tricks
+     * @param   {HTMLElement}   node
+     * @param   {HTMLElement}   parent
+     * @returns {boolean}       has_parent
+     */
+    hasParent: function(node, parent) {
+        while(node){
+            if(node == parent) {
+                return true;
+            }
+            node = node.parentNode;
+        }
+        return false;
+    },
+
+
+    /**
+     * get the center of all the touches
+     * @param   {Array}     touches
+     * @returns {Object}    center
+     */
+    getCenter: function getCenter(touches) {
+        var valuesX = [], valuesY = [];
+
+        for(var t= 0,len=touches.length; t<len; t++) {
+            valuesX.push(touches[t].pageX);
+            valuesY.push(touches[t].pageY);
+        }
+
+        return {
+            pageX: ((Math.min.apply(Math, valuesX) + Math.max.apply(Math, valuesX)) / 2),
+            pageY: ((Math.min.apply(Math, valuesY) + Math.max.apply(Math, valuesY)) / 2)
+        };
+    },
+
+
+    /**
+     * calculate the velocity between two points
+     * @param   {Number}    delta_time
+     * @param   {Number}    delta_x
+     * @param   {Number}    delta_y
+     * @returns {Object}    velocity
+     */
+    getVelocity: function getVelocity(delta_time, delta_x, delta_y) {
+        return {
+            x: Math.abs(delta_x / delta_time) || 0,
+            y: Math.abs(delta_y / delta_time) || 0
+        };
+    },
+
+
+    /**
+     * calculate the angle between two coordinates
+     * @param   {Touch}     touch1
+     * @param   {Touch}     touch2
+     * @returns {Number}    angle
+     */
+    getAngle: function getAngle(touch1, touch2) {
+        var y = touch2.pageY - touch1.pageY,
+            x = touch2.pageX - touch1.pageX;
+        return Math.atan2(y, x) * 180 / Math.PI;
+    },
+
+
+    /**
+     * angle to direction define
+     * @param   {Touch}     touch1
+     * @param   {Touch}     touch2
+     * @returns {String}    direction constant, like Hammer.DIRECTION_LEFT
+     */
+    getDirection: function getDirection(touch1, touch2) {
+        var x = Math.abs(touch1.pageX - touch2.pageX),
+            y = Math.abs(touch1.pageY - touch2.pageY);
+
+        if(x >= y) {
+            return touch1.pageX - touch2.pageX > 0 ? Hammer.DIRECTION_LEFT : Hammer.DIRECTION_RIGHT;
+        }
+        else {
+            return touch1.pageY - touch2.pageY > 0 ? Hammer.DIRECTION_UP : Hammer.DIRECTION_DOWN;
+        }
+    },
+
+
+    /**
+     * calculate the distance between two touches
+     * @param   {Touch}     touch1
+     * @param   {Touch}     touch2
+     * @returns {Number}    distance
+     */
+    getDistance: function getDistance(touch1, touch2) {
+        var x = touch2.pageX - touch1.pageX,
+            y = touch2.pageY - touch1.pageY;
+        return Math.sqrt((x*x) + (y*y));
+    },
+
+
+    /**
+     * calculate the scale factor between two touchLists (fingers)
+     * no scale is 1, and goes down to 0 when pinched together, and bigger when pinched out
+     * @param   {Array}     start
+     * @param   {Array}     end
+     * @returns {Number}    scale
+     */
+    getScale: function getScale(start, end) {
+        // need two fingers...
+        if(start.length >= 2 && end.length >= 2) {
+            return this.getDistance(end[0], end[1]) /
+                this.getDistance(start[0], start[1]);
+        }
+        return 1;
+    },
+
+
+    /**
+     * calculate the rotation degrees between two touchLists (fingers)
+     * @param   {Array}     start
+     * @param   {Array}     end
+     * @returns {Number}    rotation
+     */
+    getRotation: function getRotation(start, end) {
+        // need two fingers
+        if(start.length >= 2 && end.length >= 2) {
+            return this.getAngle(end[1], end[0]) -
+                this.getAngle(start[1], start[0]);
+        }
+        return 0;
+    },
+
+
+    /**
+     * boolean if the direction is vertical
+     * @param    {String}    direction
+     * @returns  {Boolean}   is_vertical
+     */
+    isVertical: function isVertical(direction) {
+        return (direction == Hammer.DIRECTION_UP || direction == Hammer.DIRECTION_DOWN);
+    },
+
+
+    /**
+     * stop browser default behavior with css props
+     * @param   {HtmlElement}   element
+     * @param   {Object}        css_props
+     */
+    stopDefaultBrowserBehavior: function stopDefaultBrowserBehavior(element, css_props) {
+        var prop,
+            vendors = ['webkit','khtml','moz','ms','o',''];
+
+        if(!css_props || !element.style) {
+            return;
+        }
+
+        // with css properties for modern browsers
+        for(var i = 0; i < vendors.length; i++) {
+            for(var p in css_props) {
+                if(css_props.hasOwnProperty(p)) {
+                    prop = p;
+
+                    // vender prefix at the property
+                    if(vendors[i]) {
+                        prop = vendors[i] + prop.substring(0, 1).toUpperCase() + prop.substring(1);
+                    }
+
+                    // set the style
+                    element.style[prop] = css_props[p];
+                }
+            }
+        }
+
+        // also the disable onselectstart
+        if(css_props.userSelect == 'none') {
+            element.onselectstart = function() {
+                return false;
+            };
+        }
+    }
+};
+
+Hammer.detection = {
+    // contains all registred Hammer.gestures in the correct order
+    gestures: [],
+
+    // data of the current Hammer.gesture detection session
+    current: null,
+
+    // the previous Hammer.gesture session data
+    // is a full clone of the previous gesture.current object
+    previous: null,
+
+    // when this becomes true, no gestures are fired
+    stopped: false,
+
+
+    /**
+     * start Hammer.gesture detection
+     * @param   {Hammer.Instance}   inst
+     * @param   {Object}            eventData
+     */
+    startDetect: function startDetect(inst, eventData) {
+        // already busy with a Hammer.gesture detection on an element
+        if(this.current) {
+            return;
+        }
+
+        this.stopped = false;
+
+        this.current = {
+            inst        : inst, // reference to HammerInstance we're working for
+            startEvent  : Hammer.utils.extend({}, eventData), // start eventData for distances, timing etc
+            lastEvent   : false, // last eventData
+            name        : '' // current gesture we're in/detected, can be 'tap', 'hold' etc
+        };
+
+        this.detect(eventData);
+    },
+
+
+    /**
+     * Hammer.gesture detection
+     * @param   {Object}    eventData
+     * @param   {Object}    eventData
+     */
+    detect: function detect(eventData) {
+        if(!this.current || this.stopped) {
+            return;
+        }
+
+        // extend event data with calculations about scale, distance etc
+        eventData = this.extendEventData(eventData);
+
+        // instance options
+        var inst_options = this.current.inst.options;
+
+        // call Hammer.gesture handlers
+        for(var g=0,len=this.gestures.length; g<len; g++) {
+            var gesture = this.gestures[g];
+
+            // only when the instance options have enabled this gesture
+            if(!this.stopped && inst_options[gesture.name] !== false) {
+                // if a handler returns false, we stop with the detection
+                if(gesture.handler.call(gesture, eventData, this.current.inst) === false) {
+                    this.stopDetect();
+                    break;
+                }
+            }
+        }
+
+        // store as previous event event
+        if(this.current) {
+            this.current.lastEvent = eventData;
+        }
+
+        // endevent, but not the last touch, so dont stop
+        if(eventData.eventType == Hammer.EVENT_END && !eventData.touches.length-1) {
+            this.stopDetect();
+        }
+
+        return eventData;
+    },
+
+
+    /**
+     * clear the Hammer.gesture vars
+     * this is called on endDetect, but can also be used when a final Hammer.gesture has been detected
+     * to stop other Hammer.gestures from being fired
+     */
+    stopDetect: function stopDetect() {
+        // clone current data to the store as the previous gesture
+        // used for the double tap gesture, since this is an other gesture detect session
+        this.previous = Hammer.utils.extend({}, this.current);
+
+        // reset the current
+        this.current = null;
+
+        // stopped!
+        this.stopped = true;
+    },
+
+
+    /**
+     * extend eventData for Hammer.gestures
+     * @param   {Object}   ev
+     * @returns {Object}   ev
+     */
+    extendEventData: function extendEventData(ev) {
+        var startEv = this.current.startEvent;
+
+        // if the touches change, set the new touches over the startEvent touches
+        // this because touchevents don't have all the touches on touchstart, or the
+        // user must place his fingers at the EXACT same time on the screen, which is not realistic
+        // but, sometimes it happens that both fingers are touching at the EXACT same time
+        if(startEv && (ev.touches.length != startEv.touches.length || ev.touches === startEv.touches)) {
+            // extend 1 level deep to get the touchlist with the touch objects
+            startEv.touches = [];
+            for(var i=0,len=ev.touches.length; i<len; i++) {
+                startEv.touches.push(Hammer.utils.extend({}, ev.touches[i]));
+            }
+        }
+
+        var delta_time = ev.timeStamp - startEv.timeStamp,
+            delta_x = ev.center.pageX - startEv.center.pageX,
+            delta_y = ev.center.pageY - startEv.center.pageY,
+            velocity = Hammer.utils.getVelocity(delta_time, delta_x, delta_y);
+
+        Hammer.utils.extend(ev, {
+            deltaTime   : delta_time,
+
+            deltaX      : delta_x,
+            deltaY      : delta_y,
+
+            velocityX   : velocity.x,
+            velocityY   : velocity.y,
+
+            distance    : Hammer.utils.getDistance(startEv.center, ev.center),
+            angle       : Hammer.utils.getAngle(startEv.center, ev.center),
+            direction   : Hammer.utils.getDirection(startEv.center, ev.center),
+
+            scale       : Hammer.utils.getScale(startEv.touches, ev.touches),
+            rotation    : Hammer.utils.getRotation(startEv.touches, ev.touches),
+
+            startEvent  : startEv
+        });
+
+        return ev;
+    },
+
+
+    /**
+     * register new gesture
+     * @param   {Object}    gesture object, see gestures.js for documentation
+     * @returns {Array}     gestures
+     */
+    register: function register(gesture) {
+        // add an enable gesture options if there is no given
+        var options = gesture.defaults || {};
+        if(options[gesture.name] === undefined) {
+            options[gesture.name] = true;
+        }
+
+        // extend Hammer default options with the Hammer.gesture options
+        Hammer.utils.extend(Hammer.defaults, options, true);
+
+        // set its index
+        gesture.index = gesture.index || 1000;
+
+        // add Hammer.gesture to the list
+        this.gestures.push(gesture);
+
+        // sort the list by index
+        this.gestures.sort(function(a, b) {
+            if (a.index < b.index) {
+                return -1;
+            }
+            if (a.index > b.index) {
+                return 1;
+            }
+            return 0;
+        });
+
+        return this.gestures;
+    }
+};
+
+
+Hammer.gestures = Hammer.gestures || {};
+
+/**
+ * Custom gestures
+ * ==============================
+ *
+ * Gesture object
+ * --------------------
+ * The object structure of a gesture:
+ *
+ * { name: 'mygesture',
+ *   index: 1337,
+ *   defaults: {
+ *     mygesture_option: true
+ *   }
+ *   handler: function(type, ev, inst) {
+ *     // trigger gesture event
+ *     inst.trigger(this.name, ev);
+ *   }
+ * }
+
+ * @param   {String}    name
+ * this should be the name of the gesture, lowercase
+ * it is also being used to disable/enable the gesture per instance config.
+ *
+ * @param   {Number}    [index=1000]
+ * the index of the gesture, where it is going to be in the stack of gestures detection
+ * like when you build an gesture that depends on the drag gesture, it is a good
+ * idea to place it after the index of the drag gesture.
+ *
+ * @param   {Object}    [defaults={}]
+ * the default settings of the gesture. these are added to the instance settings,
+ * and can be overruled per instance. you can also add the name of the gesture,
+ * but this is also added by default (and set to true).
+ *
+ * @param   {Function}  handler
+ * this handles the gesture detection of your custom gesture and receives the
+ * following arguments:
+ *
+ *      @param  {Object}    eventData
+ *      event data containing the following properties:
+ *          timeStamp   {Number}        time the event occurred
+ *          target      {HTMLElement}   target element
+ *          touches     {Array}         touches (fingers, pointers, mouse) on the screen
+ *          pointerType {String}        kind of pointer that was used. matches Hammer.POINTER_MOUSE|TOUCH
+ *          center      {Object}        center position of the touches. contains pageX and pageY
+ *          deltaTime   {Number}        the total time of the touches in the screen
+ *          deltaX      {Number}        the delta on x axis we haved moved
+ *          deltaY      {Number}        the delta on y axis we haved moved
+ *          velocityX   {Number}        the velocity on the x
+ *          velocityY   {Number}        the velocity on y
+ *          angle       {Number}        the angle we are moving
+ *          direction   {String}        the direction we are moving. matches Hammer.DIRECTION_UP|DOWN|LEFT|RIGHT
+ *          distance    {Number}        the distance we haved moved
+ *          scale       {Number}        scaling of the touches, needs 2 touches
+ *          rotation    {Number}        rotation of the touches, needs 2 touches *
+ *          eventType   {String}        matches Hammer.EVENT_START|MOVE|END
+ *          srcEvent    {Object}        the source event, like TouchStart or MouseDown *
+ *          startEvent  {Object}        contains the same properties as above,
+ *                                      but from the first touch. this is used to calculate
+ *                                      distances, deltaTime, scaling etc
+ *
+ *      @param  {Hammer.Instance}    inst
+ *      the instance we are doing the detection for. you can get the options from
+ *      the inst.options object and trigger the gesture event by calling inst.trigger
+ *
+ *
+ * Handle gestures
+ * --------------------
+ * inside the handler you can get/set Hammer.detection.current. This is the current
+ * detection session. It has the following properties
+ *      @param  {String}    name
+ *      contains the name of the gesture we have detected. it has not a real function,
+ *      only to check in other gestures if something is detected.
+ *      like in the drag gesture we set it to 'drag' and in the swipe gesture we can
+ *      check if the current gesture is 'drag' by accessing Hammer.detection.current.name
+ *
+ *      @readonly
+ *      @param  {Hammer.Instance}    inst
+ *      the instance we do the detection for
+ *
+ *      @readonly
+ *      @param  {Object}    startEvent
+ *      contains the properties of the first gesture detection in this session.
+ *      Used for calculations about timing, distance, etc.
+ *
+ *      @readonly
+ *      @param  {Object}    lastEvent
+ *      contains all the properties of the last gesture detect in this session.
+ *
+ * after the gesture detection session has been completed (user has released the screen)
+ * the Hammer.detection.current object is copied into Hammer.detection.previous,
+ * this is usefull for gestures like doubletap, where you need to know if the
+ * previous gesture was a tap
+ *
+ * options that have been set by the instance can be received by calling inst.options
+ *
+ * You can trigger a gesture event by calling inst.trigger("mygesture", event).
+ * The first param is the name of your gesture, the second the event argument
+ *
+ *
+ * Register gestures
+ * --------------------
+ * When an gesture is added to the Hammer.gestures object, it is auto registered
+ * at the setup of the first Hammer instance. You can also call Hammer.detection.register
+ * manually and pass your gesture object as a param
+ *
+ */
+
+/**
+ * Hold
+ * Touch stays at the same place for x time
+ * @events  hold
+ */
+Hammer.gestures.Hold = {
+    name: 'hold',
+    index: 10,
+    defaults: {
+        hold_timeout	: 500,
+        hold_threshold	: 1
+    },
+    timer: null,
+    handler: function holdGesture(ev, inst) {
+        switch(ev.eventType) {
+            case Hammer.EVENT_START:
+                // clear any running timers
+                clearTimeout(this.timer);
+
+                // set the gesture so we can check in the timeout if it still is
+                Hammer.detection.current.name = this.name;
+
+                // set timer and if after the timeout it still is hold,
+                // we trigger the hold event
+                this.timer = setTimeout(function() {
+                    if(Hammer.detection.current.name == 'hold') {
+                        inst.trigger('hold', ev);
+                    }
+                }, inst.options.hold_timeout);
+                break;
+
+            // when you move or end we clear the timer
+            case Hammer.EVENT_MOVE:
+                if(ev.distance > inst.options.hold_threshold) {
+                    clearTimeout(this.timer);
+                }
+                break;
+
+            case Hammer.EVENT_END:
+                clearTimeout(this.timer);
+                break;
+        }
+    }
+};
+
+
+/**
+ * Tap/DoubleTap
+ * Quick touch at a place or double at the same place
+ * @events  tap, doubletap
+ */
+Hammer.gestures.Tap = {
+    name: 'tap',
+    index: 100,
+    defaults: {
+        tap_max_touchtime	: 250,
+        tap_max_distance	: 10,
+		tap_always			: true,
+        doubletap_distance	: 20,
+        doubletap_interval	: 300
+    },
+    handler: function tapGesture(ev, inst) {
+        if(ev.eventType == Hammer.EVENT_END) {
+            // previous gesture, for the double tap since these are two different gesture detections
+            var prev = Hammer.detection.previous,
+				did_doubletap = false;
+
+            // when the touchtime is higher then the max touch time
+            // or when the moving distance is too much
+            if(ev.deltaTime > inst.options.tap_max_touchtime ||
+                ev.distance > inst.options.tap_max_distance) {
+                return;
+            }
+
+            // check if double tap
+            if(prev && prev.name == 'tap' &&
+                (ev.timeStamp - prev.lastEvent.timeStamp) < inst.options.doubletap_interval &&
+                ev.distance < inst.options.doubletap_distance) {
+				inst.trigger('doubletap', ev);
+				did_doubletap = true;
+            }
+
+			// do a single tap
+			if(!did_doubletap || inst.options.tap_always) {
+				Hammer.detection.current.name = 'tap';
+				inst.trigger(Hammer.detection.current.name, ev);
+			}
+        }
+    }
+};
+
+
+/**
+ * Swipe
+ * triggers swipe events when the end velocity is above the threshold
+ * @events  swipe, swipeleft, swiperight, swipeup, swipedown
+ */
+Hammer.gestures.Swipe = {
+    name: 'swipe',
+    index: 40,
+    defaults: {
+        // set 0 for unlimited, but this can conflict with transform
+        swipe_max_touches  : 1,
+        swipe_velocity     : 0.7
+    },
+    handler: function swipeGesture(ev, inst) {
+        if(ev.eventType == Hammer.EVENT_END) {
+            // max touches
+            if(inst.options.swipe_max_touches > 0 &&
+                ev.touches.length > inst.options.swipe_max_touches) {
+                return;
+            }
+
+            // when the distance we moved is too small we skip this gesture
+            // or we can be already in dragging
+            if(ev.velocityX > inst.options.swipe_velocity ||
+                ev.velocityY > inst.options.swipe_velocity) {
+                // trigger swipe events
+                inst.trigger(this.name, ev);
+                inst.trigger(this.name + ev.direction, ev);
+            }
+        }
+    }
+};
+
+
+/**
+ * Drag
+ * Move with x fingers (default 1) around on the page. Blocking the scrolling when
+ * moving left and right is a good practice. When all the drag events are blocking
+ * you disable scrolling on that area.
+ * @events  drag, drapleft, dragright, dragup, dragdown
+ */
+Hammer.gestures.Drag = {
+    name: 'drag',
+    index: 50,
+    defaults: {
+        drag_min_distance : 10,
+        // set 0 for unlimited, but this can conflict with transform
+        drag_max_touches  : 1,
+        // prevent default browser behavior when dragging occurs
+        // be careful with it, it makes the element a blocking element
+        // when you are using the drag gesture, it is a good practice to set this true
+        drag_block_horizontal   : false,
+        drag_block_vertical     : false,
+        // drag_lock_to_axis keeps the drag gesture on the axis that it started on,
+        // It disallows vertical directions if the initial direction was horizontal, and vice versa.
+        drag_lock_to_axis       : false,
+        // drag lock only kicks in when distance > drag_lock_min_distance
+        // This way, locking occurs only when the distance has become large enough to reliably determine the direction
+        drag_lock_min_distance : 25
+    },
+    triggered: false,
+    handler: function dragGesture(ev, inst) {
+        // current gesture isnt drag, but dragged is true
+        // this means an other gesture is busy. now call dragend
+        if(Hammer.detection.current.name != this.name && this.triggered) {
+            inst.trigger(this.name +'end', ev);
+            this.triggered = false;
+            return;
+        }
+
+        // max touches
+        if(inst.options.drag_max_touches > 0 &&
+            ev.touches.length > inst.options.drag_max_touches) {
+            return;
+        }
+
+        switch(ev.eventType) {
+            case Hammer.EVENT_START:
+                this.triggered = false;
+                break;
+
+            case Hammer.EVENT_MOVE:
+                // when the distance we moved is too small we skip this gesture
+                // or we can be already in dragging
+                if(ev.distance < inst.options.drag_min_distance &&
+                    Hammer.detection.current.name != this.name) {
+                    return;
+                }
+
+                // we are dragging!
+                Hammer.detection.current.name = this.name;
+
+                // lock drag to axis?
+                if(Hammer.detection.current.lastEvent.drag_locked_to_axis || (inst.options.drag_lock_to_axis && inst.options.drag_lock_min_distance<=ev.distance)) {
+                    ev.drag_locked_to_axis = true;
+                }
+                var last_direction = Hammer.detection.current.lastEvent.direction;
+                if(ev.drag_locked_to_axis && last_direction !== ev.direction) {
+                    // keep direction on the axis that the drag gesture started on
+                    if(Hammer.utils.isVertical(last_direction)) {
+                        ev.direction = (ev.deltaY < 0) ? Hammer.DIRECTION_UP : Hammer.DIRECTION_DOWN;
+                    }
+                    else {
+                        ev.direction = (ev.deltaX < 0) ? Hammer.DIRECTION_LEFT : Hammer.DIRECTION_RIGHT;
+                    }
+                }
+
+                // first time, trigger dragstart event
+                if(!this.triggered) {
+                    inst.trigger(this.name +'start', ev);
+                    this.triggered = true;
+                }
+
+                // trigger normal event
+                inst.trigger(this.name, ev);
+
+                // direction event, like dragdown
+                inst.trigger(this.name + ev.direction, ev);
+
+                // block the browser events
+                if( (inst.options.drag_block_vertical && Hammer.utils.isVertical(ev.direction)) ||
+                    (inst.options.drag_block_horizontal && !Hammer.utils.isVertical(ev.direction))) {
+                    ev.preventDefault();
+                }
+                break;
+
+            case Hammer.EVENT_END:
+                // trigger dragend
+                if(this.triggered) {
+                    inst.trigger(this.name +'end', ev);
+                }
+
+                this.triggered = false;
+                break;
+        }
+    }
+};
+
+
+/**
+ * Transform
+ * User want to scale or rotate with 2 fingers
+ * @events  transform, pinch, pinchin, pinchout, rotate
+ */
+Hammer.gestures.Transform = {
+    name: 'transform',
+    index: 45,
+    defaults: {
+        // factor, no scale is 1, zoomin is to 0 and zoomout until higher then 1
+        transform_min_scale     : 0.01,
+        // rotation in degrees
+        transform_min_rotation  : 1,
+        // prevent default browser behavior when two touches are on the screen
+        // but it makes the element a blocking element
+        // when you are using the transform gesture, it is a good practice to set this true
+        transform_always_block  : false
+    },
+    triggered: false,
+    handler: function transformGesture(ev, inst) {
+        // current gesture isnt drag, but dragged is true
+        // this means an other gesture is busy. now call dragend
+        if(Hammer.detection.current.name != this.name && this.triggered) {
+            inst.trigger(this.name +'end', ev);
+            this.triggered = false;
+            return;
+        }
+
+        // atleast multitouch
+        if(ev.touches.length < 2) {
+            return;
+        }
+
+        // prevent default when two fingers are on the screen
+        if(inst.options.transform_always_block) {
+            ev.preventDefault();
+        }
+
+        switch(ev.eventType) {
+            case Hammer.EVENT_START:
+                this.triggered = false;
+                break;
+
+            case Hammer.EVENT_MOVE:
+                var scale_threshold = Math.abs(1-ev.scale);
+                var rotation_threshold = Math.abs(ev.rotation);
+
+                // when the distance we moved is too small we skip this gesture
+                // or we can be already in dragging
+                if(scale_threshold < inst.options.transform_min_scale &&
+                    rotation_threshold < inst.options.transform_min_rotation) {
+                    return;
+                }
+
+                // we are transforming!
+                Hammer.detection.current.name = this.name;
+
+                // first time, trigger dragstart event
+                if(!this.triggered) {
+                    inst.trigger(this.name +'start', ev);
+                    this.triggered = true;
+                }
+
+                inst.trigger(this.name, ev); // basic transform event
+
+                // trigger rotate event
+                if(rotation_threshold > inst.options.transform_min_rotation) {
+                    inst.trigger('rotate', ev);
+                }
+
+                // trigger pinch event
+                if(scale_threshold > inst.options.transform_min_scale) {
+                    inst.trigger('pinch', ev);
+                    inst.trigger('pinch'+ ((ev.scale < 1) ? 'in' : 'out'), ev);
+                }
+                break;
+
+            case Hammer.EVENT_END:
+                // trigger dragend
+                if(this.triggered) {
+                    inst.trigger(this.name +'end', ev);
+                }
+
+                this.triggered = false;
+                break;
+        }
+    }
+};
+
+
+/**
+ * Touch
+ * Called as first, tells the user has touched the screen
+ * @events  touch
+ */
+Hammer.gestures.Touch = {
+    name: 'touch',
+    index: -Infinity,
+    defaults: {
+        // call preventDefault at touchstart, and makes the element blocking by
+        // disabling the scrolling of the page, but it improves gestures like
+        // transforming and dragging.
+        // be careful with using this, it can be very annoying for users to be stuck
+        // on the page
+        prevent_default: false,
+
+        // disable mouse events, so only touch (or pen!) input triggers events
+        prevent_mouseevents: false
+    },
+    handler: function touchGesture(ev, inst) {
+        if(inst.options.prevent_mouseevents && ev.pointerType == Hammer.POINTER_MOUSE) {
+            ev.stopDetect();
+            return;
+        }
+
+        if(inst.options.prevent_default) {
+            ev.preventDefault();
+        }
+
+        if(ev.eventType ==  Hammer.EVENT_START) {
+            inst.trigger(this.name, ev);
+        }
+    }
+};
+
+
+/**
+ * Release
+ * Called as last, tells the user has released the screen
+ * @events  release
+ */
+Hammer.gestures.Release = {
+    name: 'release',
+    index: Infinity,
+    handler: function releaseGesture(ev, inst) {
+        if(ev.eventType ==  Hammer.EVENT_END) {
+            inst.trigger(this.name, ev);
+        }
+    }
+};
+
+// node export
+if(typeof module === 'object' && typeof module.exports === 'object'){
+    module.exports = Hammer;
+}
+// just window export
+else {
+    window.Hammer = Hammer;
+
+    // requireJS module definition
+    if(typeof window.define === 'function' && window.define.amd) {
+        window.define('hammer', [], function() {
+            return Hammer;
+        });
+    }
+}
+})(this);
+
+(function($, undefined) {
+    'use strict';
+
+    // no jQuery or Zepto!
+    if($ === undefined) {
+        return;
+    }
+
+    /**
+     * bind dom events
+     * this overwrites addEventListener
+     * @param   {HTMLElement}   element
+     * @param   {String}        eventTypes
+     * @param   {Function}      handler
+     */
+    Hammer.event.bindDom = function(element, eventTypes, handler) {
+        $(element).on(eventTypes, function(ev) {
+            var data = ev.originalEvent || ev;
+
+            // IE pageX fix
+            if(data.pageX === undefined) {
+                data.pageX = ev.pageX;
+                data.pageY = ev.pageY;
+            }
+
+            // IE target fix
+            if(!data.target) {
+                data.target = ev.target;
+            }
+
+            // IE button fix
+            if(data.which === undefined) {
+                data.which = data.button;
+            }
+
+            // IE preventDefault
+            if(!data.preventDefault) {
+                data.preventDefault = ev.preventDefault;
+            }
+
+            // IE stopPropagation
+            if(!data.stopPropagation) {
+                data.stopPropagation = ev.stopPropagation;
+            }
+
+            handler.call(this, data);
+        });
+    };
+
+    /**
+     * the methods are called by the instance, but with the jquery plugin
+     * we use the jquery event methods instead.
+     * @this    {Hammer.Instance}
+     * @return  {jQuery}
+     */
+    Hammer.Instance.prototype.on = function(types, handler) {
+        return $(this.element).on(types, handler);
+    };
+    Hammer.Instance.prototype.off = function(types, handler) {
+        return $(this.element).off(types, handler);
+    };
+
+
+    /**
+     * trigger events
+     * this is called by the gestures to trigger an event like 'tap'
+     * @this    {Hammer.Instance}
+     * @param   {String}    gesture
+     * @param   {Object}    eventData
+     * @return  {jQuery}
+     */
+    Hammer.Instance.prototype.trigger = function(gesture, eventData){
+        var el = $(this.element);
+        if(el.has(eventData.target).length) {
+            el = $(eventData.target);
+        }
+
+        return el.trigger({
+            type: gesture,
+            gesture: eventData
+        });
+    };
+
+
+    /**
+     * jQuery plugin
+     * create instance of Hammer and watch for gestures,
+     * and when called again you can change the options
+     * @param   {Object}    [options={}]
+     * @return  {jQuery}
+     */
+    $.fn.hammer = function(options) {
+        return this.each(function() {
+            var el = $(this);
+            var inst = el.data('hammer');
+            // start new hammer instance
+            if(!inst) {
+                el.data('hammer', new Hammer(this, options || {}));
+            }
+            // change the options
+            else if(inst && options) {
+                Hammer.utils.extend(inst.options, options);
+            }
+        });
+    };
+
+})(window.jQuery || window.Zepto);
+
 ;/**
 * bootstrap.js v3.0.0 by @fat and @mdo
 * Copyright 2013 Twitter Inc.
@@ -14936,6 +16466,185 @@ if (!jQuery) { throw new Error("Bootstrap requires jQuery") }
   });
 })(jQuery);
 
+;/*!
+ * backbone.basicauth.js v0.4.0
+ *
+ * Adds HTTP Basic Authentication headers,
+ * either by reading them from a model property,
+ * or by parsing the model/collection.url.
+ *
+ * Copyright 2013, Tom Spencer (@fiznool), Luis Abreu (@lmjabreu)
+ * backbone.basicauth.js may be freely distributed under the MIT license.
+ */
+;( function (root, factory) {
+  // AMD module if available
+  if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['underscore', 'backbone'], factory);
+    } else {
+        // Browser globals
+        root.amdWeb = factory(root._, root.Backbone);
+    }
+}( this, function (_, Backbone) {
+
+  var btoa = window.btoa;
+
+  /**
+   * Returns a base64 encoded "user:pass" string
+   * @param  {string} username The http auth username
+   * @param  {string} password The http auth password
+   * @return {string}          The base64 encoded credentials pair
+   */
+  var encode = function(credentials) {
+    // Use Base64 encoding to create the authentication details
+    // If btoa is not available on your target browser there is a polyfill:
+    // https://github.com/davidchambers/Base64.js
+    // Using unescape and encodeURIComponent to allow for Unicode strings
+    // https://developer.mozilla.org/en-US/docs/Web/API/window.btoa#Unicode_Strings
+    return btoa(unescape(encodeURIComponent(
+      [credentials.username, credentials.password].join(':'))));
+  };
+
+  // Add a public method so that anything else can also create the header
+  Backbone.BasicAuth = {
+    getHeader: function(credentials) {
+      return {
+        'Authorization': 'Basic ' + encode(credentials)
+      };
+    }
+  };
+
+  // Store a copy of the original Backbone.sync
+  var originalSync = Backbone.sync;
+
+  /**
+   * Override Backbone.sync
+   *
+   * If a token is present, set the Basic Auth header before the sync is performed.
+   *
+   * @param  {string} method  Contains the backbone operation. e.g.: read, reset, set
+   * @param  {object} model   A Backbone model or collection
+   * @param  {object} options Options to be passed over to Backbone.sync and jQuery
+   * @return {object}         Reference to Backbone.sync for chaining
+   */
+  Backbone.sync = function (method, model, options) {
+
+    // Basic Auth supports two modes: URL-based and function-based.
+    var credentials, remoteUrl, remoteUrlParts;
+
+    if(model.credentials) {
+      // Try function-based.
+      credentials = _.result(model, 'credentials');
+    }
+
+    if(credentials == null) {
+      // Try URL-based.
+      // Handle both string and function urls
+      remoteURL = options.url || _.result(model, 'url');
+
+      // Retrieve the auth credentials from the model url
+      remoteUrlParts = remoteURL.match(/\/\/(.*):(.*)@/);
+      if (remoteUrlParts && remoteUrlParts.length === 3) {
+        credentials = {
+          username: remoteUrlParts[1],
+          password: remoteUrlParts[2]
+        };
+      }
+    }
+
+    // Add the token to the request headers if available
+    if (credentials != null) {
+      options.headers = options.headers || {};
+      _.extend(options.headers, Backbone.BasicAuth.getHeader(credentials));
+    }
+
+    // Perform the sync
+    return originalSync.call(model, method, model, options);
+  };
+
+}));
+
+;(function(root, factory) {
+  // Set up Backbone appropriately for the environment.
+  if (typeof define === 'function' && define.amd) {
+    // AMD
+    define(['underscore', 'backbone', 'hammer'], function(_, Backbone) {
+      factory(root, _, Backbone);
+    });
+  } else {
+    // Browser globals
+    factory(root, root._, root.Backbone);
+  }
+}(this, function(root, _, Backbone) {
+  var $ = Backbone.$;
+
+  if( !$.fn.hammer ){
+    throw new Error('Hammer jQuery plugin not loaded.');
+  }
+
+  var delegateEventSplitter = /^(\S+)\s*(.*)$/;
+  var viewOptions = ['hammerEvents', 'hammerOptions'];
+
+  var View = Backbone.View;
+  var delegateEvents = View.prototype.delegateEvents;
+  var undelegateEvents = View.prototype.undelegateEvents;
+
+  Backbone.View = View.extend({
+    constructor: function(options){
+      options = options || {};
+      _.extend(this, _.pick(options, viewOptions));
+      return View.apply(this, arguments);
+    },
+
+    _hammered: false,
+
+    undelegateEvents: function(){
+      this.undelegateHammerEvents();
+      return undelegateEvents.apply(this, arguments);
+    },
+
+    undelegateHammerEvents: function(){
+      if (this._hammered) {
+        this.hammer().off('.hammerEvents' + this.cid);
+      }
+      return this;
+    },
+
+    delegateEvents: function(){
+      delegateEvents.apply(this, arguments);
+      this.delegateHammerEvents();
+      return this;
+    },
+
+    delegateHammerEvents: function(events){
+      var options = _.defaults(this.hammerOptions || {}, Backbone.hammerOptions);
+      if (!(events || (events = _.result(this, 'hammerEvents')))) return this;
+      this.undelegateHammerEvents();
+      for(var key in events) {
+        var method = events[key];
+        if (!_.isFunction(method)) method = this[events[key]];
+        if (!method) continue;
+
+        var match = key.match(delegateEventSplitter);
+        var eventName = match[1], selector = match[2];
+        eventName += '.hammerEvents' + this.cid;
+        method = _.bind(method, this);
+        if (selector === '') {
+          this.hammer(options).on(eventName, method);
+        } else {
+          this.hammer(options).on(eventName, selector, method);
+        }
+      }
+      return this;
+    },
+
+    hammer: function(options){
+      this._hammered = true;
+      return this.$el.hammer(options);
+    }
+  });
+}));
+
 ;// Console-polyfill. MIT license.
 // https://github.com/paulmillr/console-polyfill
 // Make it safe to do console.log() always.
@@ -14951,1782 +16660,6 @@ if (!jQuery) { throw new Error("Bootstrap requires jQuery") }
   while (prop = properties.pop()) con[prop] = con[prop] || empty;
   while (method = methods.pop()) con[method] = con[method] || dummy;
 })(window.console = window.console || {});
-
-;//! moment.js
-//! version : 2.2.1
-//! authors : Tim Wood, Iskren Chernev, Moment.js contributors
-//! license : MIT
-//! momentjs.com
-
-(function (undefined) {
-
-    /************************************
-        Constants
-    ************************************/
-
-    var moment,
-        VERSION = "2.2.1",
-        round = Math.round, i,
-        // internal storage for language config files
-        languages = {},
-
-        // check for nodeJS
-        hasModule = (typeof module !== 'undefined' && module.exports),
-
-        // ASP.NET json date format regex
-        aspNetJsonRegex = /^\/?Date\((\-?\d+)/i,
-        aspNetTimeSpanJsonRegex = /(\-)?(?:(\d*)\.)?(\d+)\:(\d+)\:(\d+)\.?(\d{3})?/,
-
-        // format tokens
-        formattingTokens = /(\[[^\[]*\])|(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|mm?|ss?|SS?S?|X|zz?|ZZ?|.)/g,
-        localFormattingTokens = /(\[[^\[]*\])|(\\)?(LT|LL?L?L?|l{1,4})/g,
-
-        // parsing token regexes
-        parseTokenOneOrTwoDigits = /\d\d?/, // 0 - 99
-        parseTokenOneToThreeDigits = /\d{1,3}/, // 0 - 999
-        parseTokenThreeDigits = /\d{3}/, // 000 - 999
-        parseTokenFourDigits = /\d{1,4}/, // 0 - 9999
-        parseTokenSixDigits = /[+\-]?\d{1,6}/, // -999,999 - 999,999
-        parseTokenWord = /[0-9]*['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+|[\u0600-\u06FF\/]+(\s*?[\u0600-\u06FF]+){1,2}/i, // any word (or two) characters or numbers including two/three word month in arabic.
-        parseTokenTimezone = /Z|[\+\-]\d\d:?\d\d/i, // +00:00 -00:00 +0000 -0000 or Z
-        parseTokenT = /T/i, // T (ISO seperator)
-        parseTokenTimestampMs = /[\+\-]?\d+(\.\d{1,3})?/, // 123456789 123456789.123
-
-        // preliminary iso regex
-        // 0000-00-00 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000
-        isoRegex = /^\s*\d{4}-\d\d-\d\d((T| )(\d\d(:\d\d(:\d\d(\.\d\d?\d?)?)?)?)?([\+\-]\d\d:?\d\d)?)?/,
-        isoFormat = 'YYYY-MM-DDTHH:mm:ssZ',
-
-        // iso time formats and regexes
-        isoTimes = [
-            ['HH:mm:ss.S', /(T| )\d\d:\d\d:\d\d\.\d{1,3}/],
-            ['HH:mm:ss', /(T| )\d\d:\d\d:\d\d/],
-            ['HH:mm', /(T| )\d\d:\d\d/],
-            ['HH', /(T| )\d\d/]
-        ],
-
-        // timezone chunker "+10:00" > ["10", "00"] or "-1530" > ["-15", "30"]
-        parseTimezoneChunker = /([\+\-]|\d\d)/gi,
-
-        // getter and setter names
-        proxyGettersAndSetters = 'Date|Hours|Minutes|Seconds|Milliseconds'.split('|'),
-        unitMillisecondFactors = {
-            'Milliseconds' : 1,
-            'Seconds' : 1e3,
-            'Minutes' : 6e4,
-            'Hours' : 36e5,
-            'Days' : 864e5,
-            'Months' : 2592e6,
-            'Years' : 31536e6
-        },
-
-        unitAliases = {
-            ms : 'millisecond',
-            s : 'second',
-            m : 'minute',
-            h : 'hour',
-            d : 'day',
-            w : 'week',
-            W : 'isoweek',
-            M : 'month',
-            y : 'year'
-        },
-
-        // format function strings
-        formatFunctions = {},
-
-        // tokens to ordinalize and pad
-        ordinalizeTokens = 'DDD w W M D d'.split(' '),
-        paddedTokens = 'M D H h m s w W'.split(' '),
-
-        formatTokenFunctions = {
-            M    : function () {
-                return this.month() + 1;
-            },
-            MMM  : function (format) {
-                return this.lang().monthsShort(this, format);
-            },
-            MMMM : function (format) {
-                return this.lang().months(this, format);
-            },
-            D    : function () {
-                return this.date();
-            },
-            DDD  : function () {
-                return this.dayOfYear();
-            },
-            d    : function () {
-                return this.day();
-            },
-            dd   : function (format) {
-                return this.lang().weekdaysMin(this, format);
-            },
-            ddd  : function (format) {
-                return this.lang().weekdaysShort(this, format);
-            },
-            dddd : function (format) {
-                return this.lang().weekdays(this, format);
-            },
-            w    : function () {
-                return this.week();
-            },
-            W    : function () {
-                return this.isoWeek();
-            },
-            YY   : function () {
-                return leftZeroFill(this.year() % 100, 2);
-            },
-            YYYY : function () {
-                return leftZeroFill(this.year(), 4);
-            },
-            YYYYY : function () {
-                return leftZeroFill(this.year(), 5);
-            },
-            gg   : function () {
-                return leftZeroFill(this.weekYear() % 100, 2);
-            },
-            gggg : function () {
-                return this.weekYear();
-            },
-            ggggg : function () {
-                return leftZeroFill(this.weekYear(), 5);
-            },
-            GG   : function () {
-                return leftZeroFill(this.isoWeekYear() % 100, 2);
-            },
-            GGGG : function () {
-                return this.isoWeekYear();
-            },
-            GGGGG : function () {
-                return leftZeroFill(this.isoWeekYear(), 5);
-            },
-            e : function () {
-                return this.weekday();
-            },
-            E : function () {
-                return this.isoWeekday();
-            },
-            a    : function () {
-                return this.lang().meridiem(this.hours(), this.minutes(), true);
-            },
-            A    : function () {
-                return this.lang().meridiem(this.hours(), this.minutes(), false);
-            },
-            H    : function () {
-                return this.hours();
-            },
-            h    : function () {
-                return this.hours() % 12 || 12;
-            },
-            m    : function () {
-                return this.minutes();
-            },
-            s    : function () {
-                return this.seconds();
-            },
-            S    : function () {
-                return ~~(this.milliseconds() / 100);
-            },
-            SS   : function () {
-                return leftZeroFill(~~(this.milliseconds() / 10), 2);
-            },
-            SSS  : function () {
-                return leftZeroFill(this.milliseconds(), 3);
-            },
-            Z    : function () {
-                var a = -this.zone(),
-                    b = "+";
-                if (a < 0) {
-                    a = -a;
-                    b = "-";
-                }
-                return b + leftZeroFill(~~(a / 60), 2) + ":" + leftZeroFill(~~a % 60, 2);
-            },
-            ZZ   : function () {
-                var a = -this.zone(),
-                    b = "+";
-                if (a < 0) {
-                    a = -a;
-                    b = "-";
-                }
-                return b + leftZeroFill(~~(10 * a / 6), 4);
-            },
-            z : function () {
-                return this.zoneAbbr();
-            },
-            zz : function () {
-                return this.zoneName();
-            },
-            X    : function () {
-                return this.unix();
-            }
-        };
-
-    function padToken(func, count) {
-        return function (a) {
-            return leftZeroFill(func.call(this, a), count);
-        };
-    }
-    function ordinalizeToken(func, period) {
-        return function (a) {
-            return this.lang().ordinal(func.call(this, a), period);
-        };
-    }
-
-    while (ordinalizeTokens.length) {
-        i = ordinalizeTokens.pop();
-        formatTokenFunctions[i + 'o'] = ordinalizeToken(formatTokenFunctions[i], i);
-    }
-    while (paddedTokens.length) {
-        i = paddedTokens.pop();
-        formatTokenFunctions[i + i] = padToken(formatTokenFunctions[i], 2);
-    }
-    formatTokenFunctions.DDDD = padToken(formatTokenFunctions.DDD, 3);
-
-
-    /************************************
-        Constructors
-    ************************************/
-
-    function Language() {
-
-    }
-
-    // Moment prototype object
-    function Moment(config) {
-        extend(this, config);
-    }
-
-    // Duration Constructor
-    function Duration(duration) {
-        var years = duration.years || duration.year || duration.y || 0,
-            months = duration.months || duration.month || duration.M || 0,
-            weeks = duration.weeks || duration.week || duration.w || 0,
-            days = duration.days || duration.day || duration.d || 0,
-            hours = duration.hours || duration.hour || duration.h || 0,
-            minutes = duration.minutes || duration.minute || duration.m || 0,
-            seconds = duration.seconds || duration.second || duration.s || 0,
-            milliseconds = duration.milliseconds || duration.millisecond || duration.ms || 0;
-
-        // store reference to input for deterministic cloning
-        this._input = duration;
-
-        // representation for dateAddRemove
-        this._milliseconds = +milliseconds +
-            seconds * 1e3 + // 1000
-            minutes * 6e4 + // 1000 * 60
-            hours * 36e5; // 1000 * 60 * 60
-        // Because of dateAddRemove treats 24 hours as different from a
-        // day when working around DST, we need to store them separately
-        this._days = +days +
-            weeks * 7;
-        // It is impossible translate months into days without knowing
-        // which months you are are talking about, so we have to store
-        // it separately.
-        this._months = +months +
-            years * 12;
-
-        this._data = {};
-
-        this._bubble();
-    }
-
-
-    /************************************
-        Helpers
-    ************************************/
-
-
-    function extend(a, b) {
-        for (var i in b) {
-            if (b.hasOwnProperty(i)) {
-                a[i] = b[i];
-            }
-        }
-        return a;
-    }
-
-    function absRound(number) {
-        if (number < 0) {
-            return Math.ceil(number);
-        } else {
-            return Math.floor(number);
-        }
-    }
-
-    // left zero fill a number
-    // see http://jsperf.com/left-zero-filling for performance comparison
-    function leftZeroFill(number, targetLength) {
-        var output = number + '';
-        while (output.length < targetLength) {
-            output = '0' + output;
-        }
-        return output;
-    }
-
-    // helper function for _.addTime and _.subtractTime
-    function addOrSubtractDurationFromMoment(mom, duration, isAdding, ignoreUpdateOffset) {
-        var milliseconds = duration._milliseconds,
-            days = duration._days,
-            months = duration._months,
-            minutes,
-            hours;
-
-        if (milliseconds) {
-            mom._d.setTime(+mom._d + milliseconds * isAdding);
-        }
-        // store the minutes and hours so we can restore them
-        if (days || months) {
-            minutes = mom.minute();
-            hours = mom.hour();
-        }
-        if (days) {
-            mom.date(mom.date() + days * isAdding);
-        }
-        if (months) {
-            mom.month(mom.month() + months * isAdding);
-        }
-        if (milliseconds && !ignoreUpdateOffset) {
-            moment.updateOffset(mom);
-        }
-        // restore the minutes and hours after possibly changing dst
-        if (days || months) {
-            mom.minute(minutes);
-            mom.hour(hours);
-        }
-    }
-
-    // check if is an array
-    function isArray(input) {
-        return Object.prototype.toString.call(input) === '[object Array]';
-    }
-
-    // compare two arrays, return the number of differences
-    function compareArrays(array1, array2) {
-        var len = Math.min(array1.length, array2.length),
-            lengthDiff = Math.abs(array1.length - array2.length),
-            diffs = 0,
-            i;
-        for (i = 0; i < len; i++) {
-            if (~~array1[i] !== ~~array2[i]) {
-                diffs++;
-            }
-        }
-        return diffs + lengthDiff;
-    }
-
-    function normalizeUnits(units) {
-        return units ? unitAliases[units] || units.toLowerCase().replace(/(.)s$/, '$1') : units;
-    }
-
-
-    /************************************
-        Languages
-    ************************************/
-
-
-    extend(Language.prototype, {
-
-        set : function (config) {
-            var prop, i;
-            for (i in config) {
-                prop = config[i];
-                if (typeof prop === 'function') {
-                    this[i] = prop;
-                } else {
-                    this['_' + i] = prop;
-                }
-            }
-        },
-
-        _months : "January_February_March_April_May_June_July_August_September_October_November_December".split("_"),
-        months : function (m) {
-            return this._months[m.month()];
-        },
-
-        _monthsShort : "Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec".split("_"),
-        monthsShort : function (m) {
-            return this._monthsShort[m.month()];
-        },
-
-        monthsParse : function (monthName) {
-            var i, mom, regex;
-
-            if (!this._monthsParse) {
-                this._monthsParse = [];
-            }
-
-            for (i = 0; i < 12; i++) {
-                // make the regex if we don't have it already
-                if (!this._monthsParse[i]) {
-                    mom = moment.utc([2000, i]);
-                    regex = '^' + this.months(mom, '') + '|^' + this.monthsShort(mom, '');
-                    this._monthsParse[i] = new RegExp(regex.replace('.', ''), 'i');
-                }
-                // test the regex
-                if (this._monthsParse[i].test(monthName)) {
-                    return i;
-                }
-            }
-        },
-
-        _weekdays : "Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),
-        weekdays : function (m) {
-            return this._weekdays[m.day()];
-        },
-
-        _weekdaysShort : "Sun_Mon_Tue_Wed_Thu_Fri_Sat".split("_"),
-        weekdaysShort : function (m) {
-            return this._weekdaysShort[m.day()];
-        },
-
-        _weekdaysMin : "Su_Mo_Tu_We_Th_Fr_Sa".split("_"),
-        weekdaysMin : function (m) {
-            return this._weekdaysMin[m.day()];
-        },
-
-        weekdaysParse : function (weekdayName) {
-            var i, mom, regex;
-
-            if (!this._weekdaysParse) {
-                this._weekdaysParse = [];
-            }
-
-            for (i = 0; i < 7; i++) {
-                // make the regex if we don't have it already
-                if (!this._weekdaysParse[i]) {
-                    mom = moment([2000, 1]).day(i);
-                    regex = '^' + this.weekdays(mom, '') + '|^' + this.weekdaysShort(mom, '') + '|^' + this.weekdaysMin(mom, '');
-                    this._weekdaysParse[i] = new RegExp(regex.replace('.', ''), 'i');
-                }
-                // test the regex
-                if (this._weekdaysParse[i].test(weekdayName)) {
-                    return i;
-                }
-            }
-        },
-
-        _longDateFormat : {
-            LT : "h:mm A",
-            L : "MM/DD/YYYY",
-            LL : "MMMM D YYYY",
-            LLL : "MMMM D YYYY LT",
-            LLLL : "dddd, MMMM D YYYY LT"
-        },
-        longDateFormat : function (key) {
-            var output = this._longDateFormat[key];
-            if (!output && this._longDateFormat[key.toUpperCase()]) {
-                output = this._longDateFormat[key.toUpperCase()].replace(/MMMM|MM|DD|dddd/g, function (val) {
-                    return val.slice(1);
-                });
-                this._longDateFormat[key] = output;
-            }
-            return output;
-        },
-
-        isPM : function (input) {
-            // IE8 Quirks Mode & IE7 Standards Mode do not allow accessing strings like arrays
-            // Using charAt should be more compatible.
-            return ((input + '').toLowerCase().charAt(0) === 'p');
-        },
-
-        _meridiemParse : /[ap]\.?m?\.?/i,
-        meridiem : function (hours, minutes, isLower) {
-            if (hours > 11) {
-                return isLower ? 'pm' : 'PM';
-            } else {
-                return isLower ? 'am' : 'AM';
-            }
-        },
-
-        _calendar : {
-            sameDay : '[Today at] LT',
-            nextDay : '[Tomorrow at] LT',
-            nextWeek : 'dddd [at] LT',
-            lastDay : '[Yesterday at] LT',
-            lastWeek : '[Last] dddd [at] LT',
-            sameElse : 'L'
-        },
-        calendar : function (key, mom) {
-            var output = this._calendar[key];
-            return typeof output === 'function' ? output.apply(mom) : output;
-        },
-
-        _relativeTime : {
-            future : "in %s",
-            past : "%s ago",
-            s : "a few seconds",
-            m : "a minute",
-            mm : "%d minutes",
-            h : "an hour",
-            hh : "%d hours",
-            d : "a day",
-            dd : "%d days",
-            M : "a month",
-            MM : "%d months",
-            y : "a year",
-            yy : "%d years"
-        },
-        relativeTime : function (number, withoutSuffix, string, isFuture) {
-            var output = this._relativeTime[string];
-            return (typeof output === 'function') ?
-                output(number, withoutSuffix, string, isFuture) :
-                output.replace(/%d/i, number);
-        },
-        pastFuture : function (diff, output) {
-            var format = this._relativeTime[diff > 0 ? 'future' : 'past'];
-            return typeof format === 'function' ? format(output) : format.replace(/%s/i, output);
-        },
-
-        ordinal : function (number) {
-            return this._ordinal.replace("%d", number);
-        },
-        _ordinal : "%d",
-
-        preparse : function (string) {
-            return string;
-        },
-
-        postformat : function (string) {
-            return string;
-        },
-
-        week : function (mom) {
-            return weekOfYear(mom, this._week.dow, this._week.doy).week;
-        },
-        _week : {
-            dow : 0, // Sunday is the first day of the week.
-            doy : 6  // The week that contains Jan 1st is the first week of the year.
-        }
-    });
-
-    // Loads a language definition into the `languages` cache.  The function
-    // takes a key and optionally values.  If not in the browser and no values
-    // are provided, it will load the language file module.  As a convenience,
-    // this function also returns the language values.
-    function loadLang(key, values) {
-        values.abbr = key;
-        if (!languages[key]) {
-            languages[key] = new Language();
-        }
-        languages[key].set(values);
-        return languages[key];
-    }
-
-    // Remove a language from the `languages` cache. Mostly useful in tests.
-    function unloadLang(key) {
-        delete languages[key];
-    }
-
-    // Determines which language definition to use and returns it.
-    //
-    // With no parameters, it will return the global language.  If you
-    // pass in a language key, such as 'en', it will return the
-    // definition for 'en', so long as 'en' has already been loaded using
-    // moment.lang.
-    function getLangDefinition(key) {
-        if (!key) {
-            return moment.fn._lang;
-        }
-        if (!languages[key] && hasModule) {
-            try {
-                require('./lang/' + key);
-            } catch (e) {
-                // call with no params to set to default
-                return moment.fn._lang;
-            }
-        }
-        return languages[key] || moment.fn._lang;
-    }
-
-
-    /************************************
-        Formatting
-    ************************************/
-
-
-    function removeFormattingTokens(input) {
-        if (input.match(/\[.*\]/)) {
-            return input.replace(/^\[|\]$/g, "");
-        }
-        return input.replace(/\\/g, "");
-    }
-
-    function makeFormatFunction(format) {
-        var array = format.match(formattingTokens), i, length;
-
-        for (i = 0, length = array.length; i < length; i++) {
-            if (formatTokenFunctions[array[i]]) {
-                array[i] = formatTokenFunctions[array[i]];
-            } else {
-                array[i] = removeFormattingTokens(array[i]);
-            }
-        }
-
-        return function (mom) {
-            var output = "";
-            for (i = 0; i < length; i++) {
-                output += array[i] instanceof Function ? array[i].call(mom, format) : array[i];
-            }
-            return output;
-        };
-    }
-
-    // format date using native date object
-    function formatMoment(m, format) {
-
-        format = expandFormat(format, m.lang());
-
-        if (!formatFunctions[format]) {
-            formatFunctions[format] = makeFormatFunction(format);
-        }
-
-        return formatFunctions[format](m);
-    }
-
-    function expandFormat(format, lang) {
-        var i = 5;
-
-        function replaceLongDateFormatTokens(input) {
-            return lang.longDateFormat(input) || input;
-        }
-
-        while (i-- && (localFormattingTokens.lastIndex = 0,
-                    localFormattingTokens.test(format))) {
-            format = format.replace(localFormattingTokens, replaceLongDateFormatTokens);
-        }
-
-        return format;
-    }
-
-
-    /************************************
-        Parsing
-    ************************************/
-
-
-    // get the regex to find the next token
-    function getParseRegexForToken(token, config) {
-        switch (token) {
-        case 'DDDD':
-            return parseTokenThreeDigits;
-        case 'YYYY':
-            return parseTokenFourDigits;
-        case 'YYYYY':
-            return parseTokenSixDigits;
-        case 'S':
-        case 'SS':
-        case 'SSS':
-        case 'DDD':
-            return parseTokenOneToThreeDigits;
-        case 'MMM':
-        case 'MMMM':
-        case 'dd':
-        case 'ddd':
-        case 'dddd':
-            return parseTokenWord;
-        case 'a':
-        case 'A':
-            return getLangDefinition(config._l)._meridiemParse;
-        case 'X':
-            return parseTokenTimestampMs;
-        case 'Z':
-        case 'ZZ':
-            return parseTokenTimezone;
-        case 'T':
-            return parseTokenT;
-        case 'MM':
-        case 'DD':
-        case 'YY':
-        case 'HH':
-        case 'hh':
-        case 'mm':
-        case 'ss':
-        case 'M':
-        case 'D':
-        case 'd':
-        case 'H':
-        case 'h':
-        case 'm':
-        case 's':
-            return parseTokenOneOrTwoDigits;
-        default :
-            return new RegExp(token.replace('\\', ''));
-        }
-    }
-
-    function timezoneMinutesFromString(string) {
-        var tzchunk = (parseTokenTimezone.exec(string) || [])[0],
-            parts = (tzchunk + '').match(parseTimezoneChunker) || ['-', 0, 0],
-            minutes = +(parts[1] * 60) + ~~parts[2];
-
-        return parts[0] === '+' ? -minutes : minutes;
-    }
-
-    // function to convert string input to date
-    function addTimeToArrayFromToken(token, input, config) {
-        var a, datePartArray = config._a;
-
-        switch (token) {
-        // MONTH
-        case 'M' : // fall through to MM
-        case 'MM' :
-            if (input != null) {
-                datePartArray[1] = ~~input - 1;
-            }
-            break;
-        case 'MMM' : // fall through to MMMM
-        case 'MMMM' :
-            a = getLangDefinition(config._l).monthsParse(input);
-            // if we didn't find a month name, mark the date as invalid.
-            if (a != null) {
-                datePartArray[1] = a;
-            } else {
-                config._isValid = false;
-            }
-            break;
-        // DAY OF MONTH
-        case 'D' : // fall through to DD
-        case 'DD' :
-            if (input != null) {
-                datePartArray[2] = ~~input;
-            }
-            break;
-        // DAY OF YEAR
-        case 'DDD' : // fall through to DDDD
-        case 'DDDD' :
-            if (input != null) {
-                datePartArray[1] = 0;
-                datePartArray[2] = ~~input;
-            }
-            break;
-        // YEAR
-        case 'YY' :
-            datePartArray[0] = ~~input + (~~input > 68 ? 1900 : 2000);
-            break;
-        case 'YYYY' :
-        case 'YYYYY' :
-            datePartArray[0] = ~~input;
-            break;
-        // AM / PM
-        case 'a' : // fall through to A
-        case 'A' :
-            config._isPm = getLangDefinition(config._l).isPM(input);
-            break;
-        // 24 HOUR
-        case 'H' : // fall through to hh
-        case 'HH' : // fall through to hh
-        case 'h' : // fall through to hh
-        case 'hh' :
-            datePartArray[3] = ~~input;
-            break;
-        // MINUTE
-        case 'm' : // fall through to mm
-        case 'mm' :
-            datePartArray[4] = ~~input;
-            break;
-        // SECOND
-        case 's' : // fall through to ss
-        case 'ss' :
-            datePartArray[5] = ~~input;
-            break;
-        // MILLISECOND
-        case 'S' :
-        case 'SS' :
-        case 'SSS' :
-            datePartArray[6] = ~~ (('0.' + input) * 1000);
-            break;
-        // UNIX TIMESTAMP WITH MS
-        case 'X':
-            config._d = new Date(parseFloat(input) * 1000);
-            break;
-        // TIMEZONE
-        case 'Z' : // fall through to ZZ
-        case 'ZZ' :
-            config._useUTC = true;
-            config._tzm = timezoneMinutesFromString(input);
-            break;
-        }
-
-        // if the input is null, the date is not valid
-        if (input == null) {
-            config._isValid = false;
-        }
-    }
-
-    // convert an array to a date.
-    // the array should mirror the parameters below
-    // note: all values past the year are optional and will default to the lowest possible value.
-    // [year, month, day , hour, minute, second, millisecond]
-    function dateFromArray(config) {
-        var i, date, input = [], currentDate;
-
-        if (config._d) {
-            return;
-        }
-
-        // Default to current date.
-        // * if no year, month, day of month are given, default to today
-        // * if day of month is given, default month and year
-        // * if month is given, default only year
-        // * if year is given, don't default anything
-        currentDate = currentDateArray(config);
-        for (i = 0; i < 3 && config._a[i] == null; ++i) {
-            config._a[i] = input[i] = currentDate[i];
-        }
-
-        // Zero out whatever was not defaulted, including time
-        for (; i < 7; i++) {
-            config._a[i] = input[i] = (config._a[i] == null) ? (i === 2 ? 1 : 0) : config._a[i];
-        }
-
-        // add the offsets to the time to be parsed so that we can have a clean array for checking isValid
-        input[3] += ~~((config._tzm || 0) / 60);
-        input[4] += ~~((config._tzm || 0) % 60);
-
-        date = new Date(0);
-
-        if (config._useUTC) {
-            date.setUTCFullYear(input[0], input[1], input[2]);
-            date.setUTCHours(input[3], input[4], input[5], input[6]);
-        } else {
-            date.setFullYear(input[0], input[1], input[2]);
-            date.setHours(input[3], input[4], input[5], input[6]);
-        }
-
-        config._d = date;
-    }
-
-    function dateFromObject(config) {
-        var o = config._i;
-
-        if (config._d) {
-            return;
-        }
-
-        config._a = [
-            o.years || o.year || o.y,
-            o.months || o.month || o.M,
-            o.days || o.day || o.d,
-            o.hours || o.hour || o.h,
-            o.minutes || o.minute || o.m,
-            o.seconds || o.second || o.s,
-            o.milliseconds || o.millisecond || o.ms
-        ];
-
-        dateFromArray(config);
-    }
-
-    function currentDateArray(config) {
-        var now = new Date();
-        if (config._useUTC) {
-            return [
-                now.getUTCFullYear(),
-                now.getUTCMonth(),
-                now.getUTCDate()
-            ];
-        } else {
-            return [now.getFullYear(), now.getMonth(), now.getDate()];
-        }
-    }
-
-    // date from string and format string
-    function makeDateFromStringAndFormat(config) {
-        // This array is used to make a Date, either with `new Date` or `Date.UTC`
-        var lang = getLangDefinition(config._l),
-            string = '' + config._i,
-            i, parsedInput, tokens;
-
-        tokens = expandFormat(config._f, lang).match(formattingTokens);
-
-        config._a = [];
-
-        for (i = 0; i < tokens.length; i++) {
-            parsedInput = (getParseRegexForToken(tokens[i], config).exec(string) || [])[0];
-            if (parsedInput) {
-                string = string.slice(string.indexOf(parsedInput) + parsedInput.length);
-            }
-            // don't parse if its not a known token
-            if (formatTokenFunctions[tokens[i]]) {
-                addTimeToArrayFromToken(tokens[i], parsedInput, config);
-            }
-        }
-
-        // add remaining unparsed input to the string
-        if (string) {
-            config._il = string;
-        }
-
-        // handle am pm
-        if (config._isPm && config._a[3] < 12) {
-            config._a[3] += 12;
-        }
-        // if is 12 am, change hours to 0
-        if (config._isPm === false && config._a[3] === 12) {
-            config._a[3] = 0;
-        }
-        // return
-        dateFromArray(config);
-    }
-
-    // date from string and array of format strings
-    function makeDateFromStringAndArray(config) {
-        var tempConfig,
-            tempMoment,
-            bestMoment,
-
-            scoreToBeat = 99,
-            i,
-            currentScore;
-
-        for (i = 0; i < config._f.length; i++) {
-            tempConfig = extend({}, config);
-            tempConfig._f = config._f[i];
-            makeDateFromStringAndFormat(tempConfig);
-            tempMoment = new Moment(tempConfig);
-
-            currentScore = compareArrays(tempConfig._a, tempMoment.toArray());
-
-            // if there is any input that was not parsed
-            // add a penalty for that format
-            if (tempMoment._il) {
-                currentScore += tempMoment._il.length;
-            }
-
-            if (currentScore < scoreToBeat) {
-                scoreToBeat = currentScore;
-                bestMoment = tempMoment;
-            }
-        }
-
-        extend(config, bestMoment);
-    }
-
-    // date from iso format
-    function makeDateFromString(config) {
-        var i,
-            string = config._i,
-            match = isoRegex.exec(string);
-
-        if (match) {
-            // match[2] should be "T" or undefined
-            config._f = 'YYYY-MM-DD' + (match[2] || " ");
-            for (i = 0; i < 4; i++) {
-                if (isoTimes[i][1].exec(string)) {
-                    config._f += isoTimes[i][0];
-                    break;
-                }
-            }
-            if (parseTokenTimezone.exec(string)) {
-                config._f += " Z";
-            }
-            makeDateFromStringAndFormat(config);
-        } else {
-            config._d = new Date(string);
-        }
-    }
-
-    function makeDateFromInput(config) {
-        var input = config._i,
-            matched = aspNetJsonRegex.exec(input);
-
-        if (input === undefined) {
-            config._d = new Date();
-        } else if (matched) {
-            config._d = new Date(+matched[1]);
-        } else if (typeof input === 'string') {
-            makeDateFromString(config);
-        } else if (isArray(input)) {
-            config._a = input.slice(0);
-            dateFromArray(config);
-        } else if (input instanceof Date) {
-            config._d = new Date(+input);
-        } else if (typeof(input) === 'object') {
-            dateFromObject(config);
-        } else {
-            config._d = new Date(input);
-        }
-    }
-
-
-    /************************************
-        Relative Time
-    ************************************/
-
-
-    // helper function for moment.fn.from, moment.fn.fromNow, and moment.duration.fn.humanize
-    function substituteTimeAgo(string, number, withoutSuffix, isFuture, lang) {
-        return lang.relativeTime(number || 1, !!withoutSuffix, string, isFuture);
-    }
-
-    function relativeTime(milliseconds, withoutSuffix, lang) {
-        var seconds = round(Math.abs(milliseconds) / 1000),
-            minutes = round(seconds / 60),
-            hours = round(minutes / 60),
-            days = round(hours / 24),
-            years = round(days / 365),
-            args = seconds < 45 && ['s', seconds] ||
-                minutes === 1 && ['m'] ||
-                minutes < 45 && ['mm', minutes] ||
-                hours === 1 && ['h'] ||
-                hours < 22 && ['hh', hours] ||
-                days === 1 && ['d'] ||
-                days <= 25 && ['dd', days] ||
-                days <= 45 && ['M'] ||
-                days < 345 && ['MM', round(days / 30)] ||
-                years === 1 && ['y'] || ['yy', years];
-        args[2] = withoutSuffix;
-        args[3] = milliseconds > 0;
-        args[4] = lang;
-        return substituteTimeAgo.apply({}, args);
-    }
-
-
-    /************************************
-        Week of Year
-    ************************************/
-
-
-    // firstDayOfWeek       0 = sun, 6 = sat
-    //                      the day of the week that starts the week
-    //                      (usually sunday or monday)
-    // firstDayOfWeekOfYear 0 = sun, 6 = sat
-    //                      the first week is the week that contains the first
-    //                      of this day of the week
-    //                      (eg. ISO weeks use thursday (4))
-    function weekOfYear(mom, firstDayOfWeek, firstDayOfWeekOfYear) {
-        var end = firstDayOfWeekOfYear - firstDayOfWeek,
-            daysToDayOfWeek = firstDayOfWeekOfYear - mom.day(),
-            adjustedMoment;
-
-
-        if (daysToDayOfWeek > end) {
-            daysToDayOfWeek -= 7;
-        }
-
-        if (daysToDayOfWeek < end - 7) {
-            daysToDayOfWeek += 7;
-        }
-
-        adjustedMoment = moment(mom).add('d', daysToDayOfWeek);
-        return {
-            week: Math.ceil(adjustedMoment.dayOfYear() / 7),
-            year: adjustedMoment.year()
-        };
-    }
-
-
-    /************************************
-        Top Level Functions
-    ************************************/
-
-    function makeMoment(config) {
-        var input = config._i,
-            format = config._f;
-
-        if (input === null || input === '') {
-            return null;
-        }
-
-        if (typeof input === 'string') {
-            config._i = input = getLangDefinition().preparse(input);
-        }
-
-        if (moment.isMoment(input)) {
-            config = extend({}, input);
-            config._d = new Date(+input._d);
-        } else if (format) {
-            if (isArray(format)) {
-                makeDateFromStringAndArray(config);
-            } else {
-                makeDateFromStringAndFormat(config);
-            }
-        } else {
-            makeDateFromInput(config);
-        }
-
-        return new Moment(config);
-    }
-
-    moment = function (input, format, lang) {
-        return makeMoment({
-            _i : input,
-            _f : format,
-            _l : lang,
-            _isUTC : false
-        });
-    };
-
-    // creating with utc
-    moment.utc = function (input, format, lang) {
-        return makeMoment({
-            _useUTC : true,
-            _isUTC : true,
-            _l : lang,
-            _i : input,
-            _f : format
-        }).utc();
-    };
-
-    // creating with unix timestamp (in seconds)
-    moment.unix = function (input) {
-        return moment(input * 1000);
-    };
-
-    // duration
-    moment.duration = function (input, key) {
-        var isDuration = moment.isDuration(input),
-            isNumber = (typeof input === 'number'),
-            duration = (isDuration ? input._input : (isNumber ? {} : input)),
-            matched = aspNetTimeSpanJsonRegex.exec(input),
-            sign,
-            ret;
-
-        if (isNumber) {
-            if (key) {
-                duration[key] = input;
-            } else {
-                duration.milliseconds = input;
-            }
-        } else if (matched) {
-            sign = (matched[1] === "-") ? -1 : 1;
-            duration = {
-                y: 0,
-                d: ~~matched[2] * sign,
-                h: ~~matched[3] * sign,
-                m: ~~matched[4] * sign,
-                s: ~~matched[5] * sign,
-                ms: ~~matched[6] * sign
-            };
-        }
-
-        ret = new Duration(duration);
-
-        if (isDuration && input.hasOwnProperty('_lang')) {
-            ret._lang = input._lang;
-        }
-
-        return ret;
-    };
-
-    // version number
-    moment.version = VERSION;
-
-    // default format
-    moment.defaultFormat = isoFormat;
-
-    // This function will be called whenever a moment is mutated.
-    // It is intended to keep the offset in sync with the timezone.
-    moment.updateOffset = function () {};
-
-    // This function will load languages and then set the global language.  If
-    // no arguments are passed in, it will simply return the current global
-    // language key.
-    moment.lang = function (key, values) {
-        if (!key) {
-            return moment.fn._lang._abbr;
-        }
-        key = key.toLowerCase();
-        key = key.replace('_', '-');
-        if (values) {
-            loadLang(key, values);
-        } else if (values === null) {
-            unloadLang(key);
-            key = 'en';
-        } else if (!languages[key]) {
-            getLangDefinition(key);
-        }
-        moment.duration.fn._lang = moment.fn._lang = getLangDefinition(key);
-    };
-
-    // returns language data
-    moment.langData = function (key) {
-        if (key && key._lang && key._lang._abbr) {
-            key = key._lang._abbr;
-        }
-        return getLangDefinition(key);
-    };
-
-    // compare moment object
-    moment.isMoment = function (obj) {
-        return obj instanceof Moment;
-    };
-
-    // for typechecking Duration objects
-    moment.isDuration = function (obj) {
-        return obj instanceof Duration;
-    };
-
-
-    /************************************
-        Moment Prototype
-    ************************************/
-
-
-    extend(moment.fn = Moment.prototype, {
-
-        clone : function () {
-            return moment(this);
-        },
-
-        valueOf : function () {
-            return +this._d + ((this._offset || 0) * 60000);
-        },
-
-        unix : function () {
-            return Math.floor(+this / 1000);
-        },
-
-        toString : function () {
-            return this.format("ddd MMM DD YYYY HH:mm:ss [GMT]ZZ");
-        },
-
-        toDate : function () {
-            return this._offset ? new Date(+this) : this._d;
-        },
-
-        toISOString : function () {
-            return formatMoment(moment(this).utc(), 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
-        },
-
-        toArray : function () {
-            var m = this;
-            return [
-                m.year(),
-                m.month(),
-                m.date(),
-                m.hours(),
-                m.minutes(),
-                m.seconds(),
-                m.milliseconds()
-            ];
-        },
-
-        isValid : function () {
-            if (this._isValid == null) {
-                if (this._a) {
-                    this._isValid = !compareArrays(this._a, (this._isUTC ? moment.utc(this._a) : moment(this._a)).toArray());
-                } else {
-                    this._isValid = !isNaN(this._d.getTime());
-                }
-            }
-            return !!this._isValid;
-        },
-
-        invalidAt: function () {
-            var i, arr1 = this._a, arr2 = (this._isUTC ? moment.utc(this._a) : moment(this._a)).toArray();
-            for (i = 6; i >= 0 && arr1[i] === arr2[i]; --i) {
-                // empty loop body
-            }
-            return i;
-        },
-
-        utc : function () {
-            return this.zone(0);
-        },
-
-        local : function () {
-            this.zone(0);
-            this._isUTC = false;
-            return this;
-        },
-
-        format : function (inputString) {
-            var output = formatMoment(this, inputString || moment.defaultFormat);
-            return this.lang().postformat(output);
-        },
-
-        add : function (input, val) {
-            var dur;
-            // switch args to support add('s', 1) and add(1, 's')
-            if (typeof input === 'string') {
-                dur = moment.duration(+val, input);
-            } else {
-                dur = moment.duration(input, val);
-            }
-            addOrSubtractDurationFromMoment(this, dur, 1);
-            return this;
-        },
-
-        subtract : function (input, val) {
-            var dur;
-            // switch args to support subtract('s', 1) and subtract(1, 's')
-            if (typeof input === 'string') {
-                dur = moment.duration(+val, input);
-            } else {
-                dur = moment.duration(input, val);
-            }
-            addOrSubtractDurationFromMoment(this, dur, -1);
-            return this;
-        },
-
-        diff : function (input, units, asFloat) {
-            var that = this._isUTC ? moment(input).zone(this._offset || 0) : moment(input).local(),
-                zoneDiff = (this.zone() - that.zone()) * 6e4,
-                diff, output;
-
-            units = normalizeUnits(units);
-
-            if (units === 'year' || units === 'month') {
-                // average number of days in the months in the given dates
-                diff = (this.daysInMonth() + that.daysInMonth()) * 432e5; // 24 * 60 * 60 * 1000 / 2
-                // difference in months
-                output = ((this.year() - that.year()) * 12) + (this.month() - that.month());
-                // adjust by taking difference in days, average number of days
-                // and dst in the given months.
-                output += ((this - moment(this).startOf('month')) -
-                        (that - moment(that).startOf('month'))) / diff;
-                // same as above but with zones, to negate all dst
-                output -= ((this.zone() - moment(this).startOf('month').zone()) -
-                        (that.zone() - moment(that).startOf('month').zone())) * 6e4 / diff;
-                if (units === 'year') {
-                    output = output / 12;
-                }
-            } else {
-                diff = (this - that);
-                output = units === 'second' ? diff / 1e3 : // 1000
-                    units === 'minute' ? diff / 6e4 : // 1000 * 60
-                    units === 'hour' ? diff / 36e5 : // 1000 * 60 * 60
-                    units === 'day' ? (diff - zoneDiff) / 864e5 : // 1000 * 60 * 60 * 24, negate dst
-                    units === 'week' ? (diff - zoneDiff) / 6048e5 : // 1000 * 60 * 60 * 24 * 7, negate dst
-                    diff;
-            }
-            return asFloat ? output : absRound(output);
-        },
-
-        from : function (time, withoutSuffix) {
-            return moment.duration(this.diff(time)).lang(this.lang()._abbr).humanize(!withoutSuffix);
-        },
-
-        fromNow : function (withoutSuffix) {
-            return this.from(moment(), withoutSuffix);
-        },
-
-        calendar : function () {
-            var diff = this.diff(moment().zone(this.zone()).startOf('day'), 'days', true),
-                format = diff < -6 ? 'sameElse' :
-                diff < -1 ? 'lastWeek' :
-                diff < 0 ? 'lastDay' :
-                diff < 1 ? 'sameDay' :
-                diff < 2 ? 'nextDay' :
-                diff < 7 ? 'nextWeek' : 'sameElse';
-            return this.format(this.lang().calendar(format, this));
-        },
-
-        isLeapYear : function () {
-            var year = this.year();
-            return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-        },
-
-        isDST : function () {
-            return (this.zone() < this.clone().month(0).zone() ||
-                this.zone() < this.clone().month(5).zone());
-        },
-
-        day : function (input) {
-            var day = this._isUTC ? this._d.getUTCDay() : this._d.getDay();
-            if (input != null) {
-                if (typeof input === 'string') {
-                    input = this.lang().weekdaysParse(input);
-                    if (typeof input !== 'number') {
-                        return this;
-                    }
-                }
-                return this.add({ d : input - day });
-            } else {
-                return day;
-            }
-        },
-
-        month : function (input) {
-            var utc = this._isUTC ? 'UTC' : '',
-                dayOfMonth;
-
-            if (input != null) {
-                if (typeof input === 'string') {
-                    input = this.lang().monthsParse(input);
-                    if (typeof input !== 'number') {
-                        return this;
-                    }
-                }
-
-                dayOfMonth = this.date();
-                this.date(1);
-                this._d['set' + utc + 'Month'](input);
-                this.date(Math.min(dayOfMonth, this.daysInMonth()));
-
-                moment.updateOffset(this);
-                return this;
-            } else {
-                return this._d['get' + utc + 'Month']();
-            }
-        },
-
-        startOf: function (units) {
-            units = normalizeUnits(units);
-            // the following switch intentionally omits break keywords
-            // to utilize falling through the cases.
-            switch (units) {
-            case 'year':
-                this.month(0);
-                /* falls through */
-            case 'month':
-                this.date(1);
-                /* falls through */
-            case 'week':
-            case 'isoweek':
-            case 'day':
-                this.hours(0);
-                /* falls through */
-            case 'hour':
-                this.minutes(0);
-                /* falls through */
-            case 'minute':
-                this.seconds(0);
-                /* falls through */
-            case 'second':
-                this.milliseconds(0);
-                /* falls through */
-            }
-
-            // weeks are a special case
-            if (units === 'week') {
-                this.weekday(0);
-            } else if (units === 'isoweek') {
-                this.isoWeekday(1);
-            }
-
-            return this;
-        },
-
-        endOf: function (units) {
-            units = normalizeUnits(units);
-            return this.startOf(units).add((units === 'isoweek' ? 'week' : units), 1).subtract('ms', 1);
-        },
-
-        isAfter: function (input, units) {
-            units = typeof units !== 'undefined' ? units : 'millisecond';
-            return +this.clone().startOf(units) > +moment(input).startOf(units);
-        },
-
-        isBefore: function (input, units) {
-            units = typeof units !== 'undefined' ? units : 'millisecond';
-            return +this.clone().startOf(units) < +moment(input).startOf(units);
-        },
-
-        isSame: function (input, units) {
-            units = typeof units !== 'undefined' ? units : 'millisecond';
-            return +this.clone().startOf(units) === +moment(input).startOf(units);
-        },
-
-        min: function (other) {
-            other = moment.apply(null, arguments);
-            return other < this ? this : other;
-        },
-
-        max: function (other) {
-            other = moment.apply(null, arguments);
-            return other > this ? this : other;
-        },
-
-        zone : function (input) {
-            var offset = this._offset || 0;
-            if (input != null) {
-                if (typeof input === "string") {
-                    input = timezoneMinutesFromString(input);
-                }
-                if (Math.abs(input) < 16) {
-                    input = input * 60;
-                }
-                this._offset = input;
-                this._isUTC = true;
-                if (offset !== input) {
-                    addOrSubtractDurationFromMoment(this, moment.duration(offset - input, 'm'), 1, true);
-                }
-            } else {
-                return this._isUTC ? offset : this._d.getTimezoneOffset();
-            }
-            return this;
-        },
-
-        zoneAbbr : function () {
-            return this._isUTC ? "UTC" : "";
-        },
-
-        zoneName : function () {
-            return this._isUTC ? "Coordinated Universal Time" : "";
-        },
-
-        hasAlignedHourOffset : function (input) {
-            if (!input) {
-                input = 0;
-            }
-            else {
-                input = moment(input).zone();
-            }
-
-            return (this.zone() - input) % 60 === 0;
-        },
-
-        daysInMonth : function () {
-            return moment.utc([this.year(), this.month() + 1, 0]).date();
-        },
-
-        dayOfYear : function (input) {
-            var dayOfYear = round((moment(this).startOf('day') - moment(this).startOf('year')) / 864e5) + 1;
-            return input == null ? dayOfYear : this.add("d", (input - dayOfYear));
-        },
-
-        weekYear : function (input) {
-            var year = weekOfYear(this, this.lang()._week.dow, this.lang()._week.doy).year;
-            return input == null ? year : this.add("y", (input - year));
-        },
-
-        isoWeekYear : function (input) {
-            var year = weekOfYear(this, 1, 4).year;
-            return input == null ? year : this.add("y", (input - year));
-        },
-
-        week : function (input) {
-            var week = this.lang().week(this);
-            return input == null ? week : this.add("d", (input - week) * 7);
-        },
-
-        isoWeek : function (input) {
-            var week = weekOfYear(this, 1, 4).week;
-            return input == null ? week : this.add("d", (input - week) * 7);
-        },
-
-        weekday : function (input) {
-            var weekday = (this._d.getDay() + 7 - this.lang()._week.dow) % 7;
-            return input == null ? weekday : this.add("d", input - weekday);
-        },
-
-        isoWeekday : function (input) {
-            // behaves the same as moment#day except
-            // as a getter, returns 7 instead of 0 (1-7 range instead of 0-6)
-            // as a setter, sunday should belong to the previous week.
-            return input == null ? this.day() || 7 : this.day(this.day() % 7 ? input : input - 7);
-        },
-
-        get : function (units) {
-            units = normalizeUnits(units);
-            return this[units.toLowerCase()]();
-        },
-
-        set : function (units, value) {
-            units = normalizeUnits(units);
-            this[units.toLowerCase()](value);
-        },
-
-        // If passed a language key, it will set the language for this
-        // instance.  Otherwise, it will return the language configuration
-        // variables for this instance.
-        lang : function (key) {
-            if (key === undefined) {
-                return this._lang;
-            } else {
-                this._lang = getLangDefinition(key);
-                return this;
-            }
-        }
-    });
-
-    // helper for adding shortcuts
-    function makeGetterAndSetter(name, key) {
-        moment.fn[name] = moment.fn[name + 's'] = function (input) {
-            var utc = this._isUTC ? 'UTC' : '';
-            if (input != null) {
-                this._d['set' + utc + key](input);
-                moment.updateOffset(this);
-                return this;
-            } else {
-                return this._d['get' + utc + key]();
-            }
-        };
-    }
-
-    // loop through and add shortcuts (Month, Date, Hours, Minutes, Seconds, Milliseconds)
-    for (i = 0; i < proxyGettersAndSetters.length; i ++) {
-        makeGetterAndSetter(proxyGettersAndSetters[i].toLowerCase().replace(/s$/, ''), proxyGettersAndSetters[i]);
-    }
-
-    // add shortcut for year (uses different syntax than the getter/setter 'year' == 'FullYear')
-    makeGetterAndSetter('year', 'FullYear');
-
-    // add plural methods
-    moment.fn.days = moment.fn.day;
-    moment.fn.months = moment.fn.month;
-    moment.fn.weeks = moment.fn.week;
-    moment.fn.isoWeeks = moment.fn.isoWeek;
-
-    // add aliased format methods
-    moment.fn.toJSON = moment.fn.toISOString;
-
-    /************************************
-        Duration Prototype
-    ************************************/
-
-
-    extend(moment.duration.fn = Duration.prototype, {
-
-        _bubble : function () {
-            var milliseconds = this._milliseconds,
-                days = this._days,
-                months = this._months,
-                data = this._data,
-                seconds, minutes, hours, years;
-
-            // The following code bubbles up values, see the tests for
-            // examples of what that means.
-            data.milliseconds = milliseconds % 1000;
-
-            seconds = absRound(milliseconds / 1000);
-            data.seconds = seconds % 60;
-
-            minutes = absRound(seconds / 60);
-            data.minutes = minutes % 60;
-
-            hours = absRound(minutes / 60);
-            data.hours = hours % 24;
-
-            days += absRound(hours / 24);
-            data.days = days % 30;
-
-            months += absRound(days / 30);
-            data.months = months % 12;
-
-            years = absRound(months / 12);
-            data.years = years;
-        },
-
-        weeks : function () {
-            return absRound(this.days() / 7);
-        },
-
-        valueOf : function () {
-            return this._milliseconds +
-              this._days * 864e5 +
-              (this._months % 12) * 2592e6 +
-              ~~(this._months / 12) * 31536e6;
-        },
-
-        humanize : function (withSuffix) {
-            var difference = +this,
-                output = relativeTime(difference, !withSuffix, this.lang());
-
-            if (withSuffix) {
-                output = this.lang().pastFuture(difference, output);
-            }
-
-            return this.lang().postformat(output);
-        },
-
-        add : function (input, val) {
-            // supports only 2.0-style add(1, 's') or add(moment)
-            var dur = moment.duration(input, val);
-
-            this._milliseconds += dur._milliseconds;
-            this._days += dur._days;
-            this._months += dur._months;
-
-            this._bubble();
-
-            return this;
-        },
-
-        subtract : function (input, val) {
-            var dur = moment.duration(input, val);
-
-            this._milliseconds -= dur._milliseconds;
-            this._days -= dur._days;
-            this._months -= dur._months;
-
-            this._bubble();
-
-            return this;
-        },
-
-        get : function (units) {
-            units = normalizeUnits(units);
-            return this[units.toLowerCase() + 's']();
-        },
-
-        as : function (units) {
-            units = normalizeUnits(units);
-            return this['as' + units.charAt(0).toUpperCase() + units.slice(1) + 's']();
-        },
-
-        lang : moment.fn.lang
-    });
-
-    function makeDurationGetter(name) {
-        moment.duration.fn[name] = function () {
-            return this._data[name];
-        };
-    }
-
-    function makeDurationAsGetter(name, factor) {
-        moment.duration.fn['as' + name] = function () {
-            return +this / factor;
-        };
-    }
-
-    for (i in unitMillisecondFactors) {
-        if (unitMillisecondFactors.hasOwnProperty(i)) {
-            makeDurationAsGetter(i, unitMillisecondFactors[i]);
-            makeDurationGetter(i.toLowerCase());
-        }
-    }
-
-    makeDurationAsGetter('Weeks', 6048e5);
-    moment.duration.fn.asMonths = function () {
-        return (+this - this.years() * 31536e6) / 2592e6 + this.years() * 12;
-    };
-
-
-    /************************************
-        Default Lang
-    ************************************/
-
-
-    // Set default language, other languages will inherit from English.
-    moment.lang('en', {
-        ordinal : function (number) {
-            var b = number % 10,
-                output = (~~ (number % 100 / 10) === 1) ? 'th' :
-                (b === 1) ? 'st' :
-                (b === 2) ? 'nd' :
-                (b === 3) ? 'rd' : 'th';
-            return number + output;
-        }
-    });
-
-    /* EMBED_LANGUAGES */
-
-    /************************************
-        Exposing Moment
-    ************************************/
-
-
-    // CommonJS module is defined
-    if (hasModule) {
-        module.exports = moment;
-    }
-    /*global ender:false */
-    if (typeof ender === 'undefined') {
-        // here, `this` means `window` in the browser, or `global` on the server
-        // add `moment` as a global object via a string identifier,
-        // for Closure Compiler "advanced" mode
-        this['moment'] = moment;
-    }
-    /*global define:false */
-    if (typeof define === "function" && define.amd) {
-        define("moment", [], function () {
-            return moment;
-        });
-    }
-}).call(this);
 
 ;// MarionetteJS (Backbone.Marionette)
 // ----------------------------------
@@ -19854,104 +19787,6 @@ if (typeof define !== 'undefined' && define.amd) {
 	window.FastClick = FastClick;
 }
 
-;/*!
- * backbone.basicauth.js v0.4.0
- *
- * Adds HTTP Basic Authentication headers,
- * either by reading them from a model property,
- * or by parsing the model/collection.url.
- *
- * Copyright 2013, Tom Spencer (@fiznool), Luis Abreu (@lmjabreu)
- * backbone.basicauth.js may be freely distributed under the MIT license.
- */
-;( function (root, factory) {
-  // AMD module if available
-  if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        define(['underscore', 'backbone'], factory);
-    } else {
-        // Browser globals
-        root.amdWeb = factory(root._, root.Backbone);
-    }
-}( this, function (_, Backbone) {
-
-  var btoa = window.btoa;
-
-  /**
-   * Returns a base64 encoded "user:pass" string
-   * @param  {string} username The http auth username
-   * @param  {string} password The http auth password
-   * @return {string}          The base64 encoded credentials pair
-   */
-  var encode = function(credentials) {
-    // Use Base64 encoding to create the authentication details
-    // If btoa is not available on your target browser there is a polyfill:
-    // https://github.com/davidchambers/Base64.js
-    // Using unescape and encodeURIComponent to allow for Unicode strings
-    // https://developer.mozilla.org/en-US/docs/Web/API/window.btoa#Unicode_Strings
-    return btoa(unescape(encodeURIComponent(
-      [credentials.username, credentials.password].join(':'))));
-  };
-
-  // Add a public method so that anything else can also create the header
-  Backbone.BasicAuth = {
-    getHeader: function(credentials) {
-      return {
-        'Authorization': 'Basic ' + encode(credentials)
-      };
-    }
-  };
-
-  // Store a copy of the original Backbone.sync
-  var originalSync = Backbone.sync;
-
-  /**
-   * Override Backbone.sync
-   *
-   * If a token is present, set the Basic Auth header before the sync is performed.
-   *
-   * @param  {string} method  Contains the backbone operation. e.g.: read, reset, set
-   * @param  {object} model   A Backbone model or collection
-   * @param  {object} options Options to be passed over to Backbone.sync and jQuery
-   * @return {object}         Reference to Backbone.sync for chaining
-   */
-  Backbone.sync = function (method, model, options) {
-
-    // Basic Auth supports two modes: URL-based and function-based.
-    var credentials, remoteUrl, remoteUrlParts;
-
-    if(model.credentials) {
-      // Try function-based.
-      credentials = _.result(model, 'credentials');
-    }
-
-    if(credentials == null) {
-      // Try URL-based.
-      // Handle both string and function urls
-      remoteURL = options.url || _.result(model, 'url');
-
-      // Retrieve the auth credentials from the model url
-      remoteUrlParts = remoteURL.match(/\/\/(.*):(.*)@/);
-      if (remoteUrlParts && remoteUrlParts.length === 3) {
-        credentials = {
-          username: remoteUrlParts[1],
-          password: remoteUrlParts[2]
-        };
-      }
-    }
-
-    // Add the token to the request headers if available
-    if (credentials != null) {
-      options.headers = options.headers || {};
-      _.extend(options.headers, Backbone.BasicAuth.getHeader(credentials));
-    }
-
-    // Perform the sync
-    return originalSync.call(model, method, model, options);
-  };
-
-}));
-
 ;/**
  * Backbone localStorage Adapter
  * Version 1.1.6
@@ -20174,6 +20009,1782 @@ Backbone.sync = function(method, model, options) {
 
 return Backbone.LocalStorage;
 }));
+
+;//! moment.js
+//! version : 2.2.1
+//! authors : Tim Wood, Iskren Chernev, Moment.js contributors
+//! license : MIT
+//! momentjs.com
+
+(function (undefined) {
+
+    /************************************
+        Constants
+    ************************************/
+
+    var moment,
+        VERSION = "2.2.1",
+        round = Math.round, i,
+        // internal storage for language config files
+        languages = {},
+
+        // check for nodeJS
+        hasModule = (typeof module !== 'undefined' && module.exports),
+
+        // ASP.NET json date format regex
+        aspNetJsonRegex = /^\/?Date\((\-?\d+)/i,
+        aspNetTimeSpanJsonRegex = /(\-)?(?:(\d*)\.)?(\d+)\:(\d+)\:(\d+)\.?(\d{3})?/,
+
+        // format tokens
+        formattingTokens = /(\[[^\[]*\])|(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|mm?|ss?|SS?S?|X|zz?|ZZ?|.)/g,
+        localFormattingTokens = /(\[[^\[]*\])|(\\)?(LT|LL?L?L?|l{1,4})/g,
+
+        // parsing token regexes
+        parseTokenOneOrTwoDigits = /\d\d?/, // 0 - 99
+        parseTokenOneToThreeDigits = /\d{1,3}/, // 0 - 999
+        parseTokenThreeDigits = /\d{3}/, // 000 - 999
+        parseTokenFourDigits = /\d{1,4}/, // 0 - 9999
+        parseTokenSixDigits = /[+\-]?\d{1,6}/, // -999,999 - 999,999
+        parseTokenWord = /[0-9]*['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+|[\u0600-\u06FF\/]+(\s*?[\u0600-\u06FF]+){1,2}/i, // any word (or two) characters or numbers including two/three word month in arabic.
+        parseTokenTimezone = /Z|[\+\-]\d\d:?\d\d/i, // +00:00 -00:00 +0000 -0000 or Z
+        parseTokenT = /T/i, // T (ISO seperator)
+        parseTokenTimestampMs = /[\+\-]?\d+(\.\d{1,3})?/, // 123456789 123456789.123
+
+        // preliminary iso regex
+        // 0000-00-00 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000
+        isoRegex = /^\s*\d{4}-\d\d-\d\d((T| )(\d\d(:\d\d(:\d\d(\.\d\d?\d?)?)?)?)?([\+\-]\d\d:?\d\d)?)?/,
+        isoFormat = 'YYYY-MM-DDTHH:mm:ssZ',
+
+        // iso time formats and regexes
+        isoTimes = [
+            ['HH:mm:ss.S', /(T| )\d\d:\d\d:\d\d\.\d{1,3}/],
+            ['HH:mm:ss', /(T| )\d\d:\d\d:\d\d/],
+            ['HH:mm', /(T| )\d\d:\d\d/],
+            ['HH', /(T| )\d\d/]
+        ],
+
+        // timezone chunker "+10:00" > ["10", "00"] or "-1530" > ["-15", "30"]
+        parseTimezoneChunker = /([\+\-]|\d\d)/gi,
+
+        // getter and setter names
+        proxyGettersAndSetters = 'Date|Hours|Minutes|Seconds|Milliseconds'.split('|'),
+        unitMillisecondFactors = {
+            'Milliseconds' : 1,
+            'Seconds' : 1e3,
+            'Minutes' : 6e4,
+            'Hours' : 36e5,
+            'Days' : 864e5,
+            'Months' : 2592e6,
+            'Years' : 31536e6
+        },
+
+        unitAliases = {
+            ms : 'millisecond',
+            s : 'second',
+            m : 'minute',
+            h : 'hour',
+            d : 'day',
+            w : 'week',
+            W : 'isoweek',
+            M : 'month',
+            y : 'year'
+        },
+
+        // format function strings
+        formatFunctions = {},
+
+        // tokens to ordinalize and pad
+        ordinalizeTokens = 'DDD w W M D d'.split(' '),
+        paddedTokens = 'M D H h m s w W'.split(' '),
+
+        formatTokenFunctions = {
+            M    : function () {
+                return this.month() + 1;
+            },
+            MMM  : function (format) {
+                return this.lang().monthsShort(this, format);
+            },
+            MMMM : function (format) {
+                return this.lang().months(this, format);
+            },
+            D    : function () {
+                return this.date();
+            },
+            DDD  : function () {
+                return this.dayOfYear();
+            },
+            d    : function () {
+                return this.day();
+            },
+            dd   : function (format) {
+                return this.lang().weekdaysMin(this, format);
+            },
+            ddd  : function (format) {
+                return this.lang().weekdaysShort(this, format);
+            },
+            dddd : function (format) {
+                return this.lang().weekdays(this, format);
+            },
+            w    : function () {
+                return this.week();
+            },
+            W    : function () {
+                return this.isoWeek();
+            },
+            YY   : function () {
+                return leftZeroFill(this.year() % 100, 2);
+            },
+            YYYY : function () {
+                return leftZeroFill(this.year(), 4);
+            },
+            YYYYY : function () {
+                return leftZeroFill(this.year(), 5);
+            },
+            gg   : function () {
+                return leftZeroFill(this.weekYear() % 100, 2);
+            },
+            gggg : function () {
+                return this.weekYear();
+            },
+            ggggg : function () {
+                return leftZeroFill(this.weekYear(), 5);
+            },
+            GG   : function () {
+                return leftZeroFill(this.isoWeekYear() % 100, 2);
+            },
+            GGGG : function () {
+                return this.isoWeekYear();
+            },
+            GGGGG : function () {
+                return leftZeroFill(this.isoWeekYear(), 5);
+            },
+            e : function () {
+                return this.weekday();
+            },
+            E : function () {
+                return this.isoWeekday();
+            },
+            a    : function () {
+                return this.lang().meridiem(this.hours(), this.minutes(), true);
+            },
+            A    : function () {
+                return this.lang().meridiem(this.hours(), this.minutes(), false);
+            },
+            H    : function () {
+                return this.hours();
+            },
+            h    : function () {
+                return this.hours() % 12 || 12;
+            },
+            m    : function () {
+                return this.minutes();
+            },
+            s    : function () {
+                return this.seconds();
+            },
+            S    : function () {
+                return ~~(this.milliseconds() / 100);
+            },
+            SS   : function () {
+                return leftZeroFill(~~(this.milliseconds() / 10), 2);
+            },
+            SSS  : function () {
+                return leftZeroFill(this.milliseconds(), 3);
+            },
+            Z    : function () {
+                var a = -this.zone(),
+                    b = "+";
+                if (a < 0) {
+                    a = -a;
+                    b = "-";
+                }
+                return b + leftZeroFill(~~(a / 60), 2) + ":" + leftZeroFill(~~a % 60, 2);
+            },
+            ZZ   : function () {
+                var a = -this.zone(),
+                    b = "+";
+                if (a < 0) {
+                    a = -a;
+                    b = "-";
+                }
+                return b + leftZeroFill(~~(10 * a / 6), 4);
+            },
+            z : function () {
+                return this.zoneAbbr();
+            },
+            zz : function () {
+                return this.zoneName();
+            },
+            X    : function () {
+                return this.unix();
+            }
+        };
+
+    function padToken(func, count) {
+        return function (a) {
+            return leftZeroFill(func.call(this, a), count);
+        };
+    }
+    function ordinalizeToken(func, period) {
+        return function (a) {
+            return this.lang().ordinal(func.call(this, a), period);
+        };
+    }
+
+    while (ordinalizeTokens.length) {
+        i = ordinalizeTokens.pop();
+        formatTokenFunctions[i + 'o'] = ordinalizeToken(formatTokenFunctions[i], i);
+    }
+    while (paddedTokens.length) {
+        i = paddedTokens.pop();
+        formatTokenFunctions[i + i] = padToken(formatTokenFunctions[i], 2);
+    }
+    formatTokenFunctions.DDDD = padToken(formatTokenFunctions.DDD, 3);
+
+
+    /************************************
+        Constructors
+    ************************************/
+
+    function Language() {
+
+    }
+
+    // Moment prototype object
+    function Moment(config) {
+        extend(this, config);
+    }
+
+    // Duration Constructor
+    function Duration(duration) {
+        var years = duration.years || duration.year || duration.y || 0,
+            months = duration.months || duration.month || duration.M || 0,
+            weeks = duration.weeks || duration.week || duration.w || 0,
+            days = duration.days || duration.day || duration.d || 0,
+            hours = duration.hours || duration.hour || duration.h || 0,
+            minutes = duration.minutes || duration.minute || duration.m || 0,
+            seconds = duration.seconds || duration.second || duration.s || 0,
+            milliseconds = duration.milliseconds || duration.millisecond || duration.ms || 0;
+
+        // store reference to input for deterministic cloning
+        this._input = duration;
+
+        // representation for dateAddRemove
+        this._milliseconds = +milliseconds +
+            seconds * 1e3 + // 1000
+            minutes * 6e4 + // 1000 * 60
+            hours * 36e5; // 1000 * 60 * 60
+        // Because of dateAddRemove treats 24 hours as different from a
+        // day when working around DST, we need to store them separately
+        this._days = +days +
+            weeks * 7;
+        // It is impossible translate months into days without knowing
+        // which months you are are talking about, so we have to store
+        // it separately.
+        this._months = +months +
+            years * 12;
+
+        this._data = {};
+
+        this._bubble();
+    }
+
+
+    /************************************
+        Helpers
+    ************************************/
+
+
+    function extend(a, b) {
+        for (var i in b) {
+            if (b.hasOwnProperty(i)) {
+                a[i] = b[i];
+            }
+        }
+        return a;
+    }
+
+    function absRound(number) {
+        if (number < 0) {
+            return Math.ceil(number);
+        } else {
+            return Math.floor(number);
+        }
+    }
+
+    // left zero fill a number
+    // see http://jsperf.com/left-zero-filling for performance comparison
+    function leftZeroFill(number, targetLength) {
+        var output = number + '';
+        while (output.length < targetLength) {
+            output = '0' + output;
+        }
+        return output;
+    }
+
+    // helper function for _.addTime and _.subtractTime
+    function addOrSubtractDurationFromMoment(mom, duration, isAdding, ignoreUpdateOffset) {
+        var milliseconds = duration._milliseconds,
+            days = duration._days,
+            months = duration._months,
+            minutes,
+            hours;
+
+        if (milliseconds) {
+            mom._d.setTime(+mom._d + milliseconds * isAdding);
+        }
+        // store the minutes and hours so we can restore them
+        if (days || months) {
+            minutes = mom.minute();
+            hours = mom.hour();
+        }
+        if (days) {
+            mom.date(mom.date() + days * isAdding);
+        }
+        if (months) {
+            mom.month(mom.month() + months * isAdding);
+        }
+        if (milliseconds && !ignoreUpdateOffset) {
+            moment.updateOffset(mom);
+        }
+        // restore the minutes and hours after possibly changing dst
+        if (days || months) {
+            mom.minute(minutes);
+            mom.hour(hours);
+        }
+    }
+
+    // check if is an array
+    function isArray(input) {
+        return Object.prototype.toString.call(input) === '[object Array]';
+    }
+
+    // compare two arrays, return the number of differences
+    function compareArrays(array1, array2) {
+        var len = Math.min(array1.length, array2.length),
+            lengthDiff = Math.abs(array1.length - array2.length),
+            diffs = 0,
+            i;
+        for (i = 0; i < len; i++) {
+            if (~~array1[i] !== ~~array2[i]) {
+                diffs++;
+            }
+        }
+        return diffs + lengthDiff;
+    }
+
+    function normalizeUnits(units) {
+        return units ? unitAliases[units] || units.toLowerCase().replace(/(.)s$/, '$1') : units;
+    }
+
+
+    /************************************
+        Languages
+    ************************************/
+
+
+    extend(Language.prototype, {
+
+        set : function (config) {
+            var prop, i;
+            for (i in config) {
+                prop = config[i];
+                if (typeof prop === 'function') {
+                    this[i] = prop;
+                } else {
+                    this['_' + i] = prop;
+                }
+            }
+        },
+
+        _months : "January_February_March_April_May_June_July_August_September_October_November_December".split("_"),
+        months : function (m) {
+            return this._months[m.month()];
+        },
+
+        _monthsShort : "Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec".split("_"),
+        monthsShort : function (m) {
+            return this._monthsShort[m.month()];
+        },
+
+        monthsParse : function (monthName) {
+            var i, mom, regex;
+
+            if (!this._monthsParse) {
+                this._monthsParse = [];
+            }
+
+            for (i = 0; i < 12; i++) {
+                // make the regex if we don't have it already
+                if (!this._monthsParse[i]) {
+                    mom = moment.utc([2000, i]);
+                    regex = '^' + this.months(mom, '') + '|^' + this.monthsShort(mom, '');
+                    this._monthsParse[i] = new RegExp(regex.replace('.', ''), 'i');
+                }
+                // test the regex
+                if (this._monthsParse[i].test(monthName)) {
+                    return i;
+                }
+            }
+        },
+
+        _weekdays : "Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),
+        weekdays : function (m) {
+            return this._weekdays[m.day()];
+        },
+
+        _weekdaysShort : "Sun_Mon_Tue_Wed_Thu_Fri_Sat".split("_"),
+        weekdaysShort : function (m) {
+            return this._weekdaysShort[m.day()];
+        },
+
+        _weekdaysMin : "Su_Mo_Tu_We_Th_Fr_Sa".split("_"),
+        weekdaysMin : function (m) {
+            return this._weekdaysMin[m.day()];
+        },
+
+        weekdaysParse : function (weekdayName) {
+            var i, mom, regex;
+
+            if (!this._weekdaysParse) {
+                this._weekdaysParse = [];
+            }
+
+            for (i = 0; i < 7; i++) {
+                // make the regex if we don't have it already
+                if (!this._weekdaysParse[i]) {
+                    mom = moment([2000, 1]).day(i);
+                    regex = '^' + this.weekdays(mom, '') + '|^' + this.weekdaysShort(mom, '') + '|^' + this.weekdaysMin(mom, '');
+                    this._weekdaysParse[i] = new RegExp(regex.replace('.', ''), 'i');
+                }
+                // test the regex
+                if (this._weekdaysParse[i].test(weekdayName)) {
+                    return i;
+                }
+            }
+        },
+
+        _longDateFormat : {
+            LT : "h:mm A",
+            L : "MM/DD/YYYY",
+            LL : "MMMM D YYYY",
+            LLL : "MMMM D YYYY LT",
+            LLLL : "dddd, MMMM D YYYY LT"
+        },
+        longDateFormat : function (key) {
+            var output = this._longDateFormat[key];
+            if (!output && this._longDateFormat[key.toUpperCase()]) {
+                output = this._longDateFormat[key.toUpperCase()].replace(/MMMM|MM|DD|dddd/g, function (val) {
+                    return val.slice(1);
+                });
+                this._longDateFormat[key] = output;
+            }
+            return output;
+        },
+
+        isPM : function (input) {
+            // IE8 Quirks Mode & IE7 Standards Mode do not allow accessing strings like arrays
+            // Using charAt should be more compatible.
+            return ((input + '').toLowerCase().charAt(0) === 'p');
+        },
+
+        _meridiemParse : /[ap]\.?m?\.?/i,
+        meridiem : function (hours, minutes, isLower) {
+            if (hours > 11) {
+                return isLower ? 'pm' : 'PM';
+            } else {
+                return isLower ? 'am' : 'AM';
+            }
+        },
+
+        _calendar : {
+            sameDay : '[Today at] LT',
+            nextDay : '[Tomorrow at] LT',
+            nextWeek : 'dddd [at] LT',
+            lastDay : '[Yesterday at] LT',
+            lastWeek : '[Last] dddd [at] LT',
+            sameElse : 'L'
+        },
+        calendar : function (key, mom) {
+            var output = this._calendar[key];
+            return typeof output === 'function' ? output.apply(mom) : output;
+        },
+
+        _relativeTime : {
+            future : "in %s",
+            past : "%s ago",
+            s : "a few seconds",
+            m : "a minute",
+            mm : "%d minutes",
+            h : "an hour",
+            hh : "%d hours",
+            d : "a day",
+            dd : "%d days",
+            M : "a month",
+            MM : "%d months",
+            y : "a year",
+            yy : "%d years"
+        },
+        relativeTime : function (number, withoutSuffix, string, isFuture) {
+            var output = this._relativeTime[string];
+            return (typeof output === 'function') ?
+                output(number, withoutSuffix, string, isFuture) :
+                output.replace(/%d/i, number);
+        },
+        pastFuture : function (diff, output) {
+            var format = this._relativeTime[diff > 0 ? 'future' : 'past'];
+            return typeof format === 'function' ? format(output) : format.replace(/%s/i, output);
+        },
+
+        ordinal : function (number) {
+            return this._ordinal.replace("%d", number);
+        },
+        _ordinal : "%d",
+
+        preparse : function (string) {
+            return string;
+        },
+
+        postformat : function (string) {
+            return string;
+        },
+
+        week : function (mom) {
+            return weekOfYear(mom, this._week.dow, this._week.doy).week;
+        },
+        _week : {
+            dow : 0, // Sunday is the first day of the week.
+            doy : 6  // The week that contains Jan 1st is the first week of the year.
+        }
+    });
+
+    // Loads a language definition into the `languages` cache.  The function
+    // takes a key and optionally values.  If not in the browser and no values
+    // are provided, it will load the language file module.  As a convenience,
+    // this function also returns the language values.
+    function loadLang(key, values) {
+        values.abbr = key;
+        if (!languages[key]) {
+            languages[key] = new Language();
+        }
+        languages[key].set(values);
+        return languages[key];
+    }
+
+    // Remove a language from the `languages` cache. Mostly useful in tests.
+    function unloadLang(key) {
+        delete languages[key];
+    }
+
+    // Determines which language definition to use and returns it.
+    //
+    // With no parameters, it will return the global language.  If you
+    // pass in a language key, such as 'en', it will return the
+    // definition for 'en', so long as 'en' has already been loaded using
+    // moment.lang.
+    function getLangDefinition(key) {
+        if (!key) {
+            return moment.fn._lang;
+        }
+        if (!languages[key] && hasModule) {
+            try {
+                require('./lang/' + key);
+            } catch (e) {
+                // call with no params to set to default
+                return moment.fn._lang;
+            }
+        }
+        return languages[key] || moment.fn._lang;
+    }
+
+
+    /************************************
+        Formatting
+    ************************************/
+
+
+    function removeFormattingTokens(input) {
+        if (input.match(/\[.*\]/)) {
+            return input.replace(/^\[|\]$/g, "");
+        }
+        return input.replace(/\\/g, "");
+    }
+
+    function makeFormatFunction(format) {
+        var array = format.match(formattingTokens), i, length;
+
+        for (i = 0, length = array.length; i < length; i++) {
+            if (formatTokenFunctions[array[i]]) {
+                array[i] = formatTokenFunctions[array[i]];
+            } else {
+                array[i] = removeFormattingTokens(array[i]);
+            }
+        }
+
+        return function (mom) {
+            var output = "";
+            for (i = 0; i < length; i++) {
+                output += array[i] instanceof Function ? array[i].call(mom, format) : array[i];
+            }
+            return output;
+        };
+    }
+
+    // format date using native date object
+    function formatMoment(m, format) {
+
+        format = expandFormat(format, m.lang());
+
+        if (!formatFunctions[format]) {
+            formatFunctions[format] = makeFormatFunction(format);
+        }
+
+        return formatFunctions[format](m);
+    }
+
+    function expandFormat(format, lang) {
+        var i = 5;
+
+        function replaceLongDateFormatTokens(input) {
+            return lang.longDateFormat(input) || input;
+        }
+
+        while (i-- && (localFormattingTokens.lastIndex = 0,
+                    localFormattingTokens.test(format))) {
+            format = format.replace(localFormattingTokens, replaceLongDateFormatTokens);
+        }
+
+        return format;
+    }
+
+
+    /************************************
+        Parsing
+    ************************************/
+
+
+    // get the regex to find the next token
+    function getParseRegexForToken(token, config) {
+        switch (token) {
+        case 'DDDD':
+            return parseTokenThreeDigits;
+        case 'YYYY':
+            return parseTokenFourDigits;
+        case 'YYYYY':
+            return parseTokenSixDigits;
+        case 'S':
+        case 'SS':
+        case 'SSS':
+        case 'DDD':
+            return parseTokenOneToThreeDigits;
+        case 'MMM':
+        case 'MMMM':
+        case 'dd':
+        case 'ddd':
+        case 'dddd':
+            return parseTokenWord;
+        case 'a':
+        case 'A':
+            return getLangDefinition(config._l)._meridiemParse;
+        case 'X':
+            return parseTokenTimestampMs;
+        case 'Z':
+        case 'ZZ':
+            return parseTokenTimezone;
+        case 'T':
+            return parseTokenT;
+        case 'MM':
+        case 'DD':
+        case 'YY':
+        case 'HH':
+        case 'hh':
+        case 'mm':
+        case 'ss':
+        case 'M':
+        case 'D':
+        case 'd':
+        case 'H':
+        case 'h':
+        case 'm':
+        case 's':
+            return parseTokenOneOrTwoDigits;
+        default :
+            return new RegExp(token.replace('\\', ''));
+        }
+    }
+
+    function timezoneMinutesFromString(string) {
+        var tzchunk = (parseTokenTimezone.exec(string) || [])[0],
+            parts = (tzchunk + '').match(parseTimezoneChunker) || ['-', 0, 0],
+            minutes = +(parts[1] * 60) + ~~parts[2];
+
+        return parts[0] === '+' ? -minutes : minutes;
+    }
+
+    // function to convert string input to date
+    function addTimeToArrayFromToken(token, input, config) {
+        var a, datePartArray = config._a;
+
+        switch (token) {
+        // MONTH
+        case 'M' : // fall through to MM
+        case 'MM' :
+            if (input != null) {
+                datePartArray[1] = ~~input - 1;
+            }
+            break;
+        case 'MMM' : // fall through to MMMM
+        case 'MMMM' :
+            a = getLangDefinition(config._l).monthsParse(input);
+            // if we didn't find a month name, mark the date as invalid.
+            if (a != null) {
+                datePartArray[1] = a;
+            } else {
+                config._isValid = false;
+            }
+            break;
+        // DAY OF MONTH
+        case 'D' : // fall through to DD
+        case 'DD' :
+            if (input != null) {
+                datePartArray[2] = ~~input;
+            }
+            break;
+        // DAY OF YEAR
+        case 'DDD' : // fall through to DDDD
+        case 'DDDD' :
+            if (input != null) {
+                datePartArray[1] = 0;
+                datePartArray[2] = ~~input;
+            }
+            break;
+        // YEAR
+        case 'YY' :
+            datePartArray[0] = ~~input + (~~input > 68 ? 1900 : 2000);
+            break;
+        case 'YYYY' :
+        case 'YYYYY' :
+            datePartArray[0] = ~~input;
+            break;
+        // AM / PM
+        case 'a' : // fall through to A
+        case 'A' :
+            config._isPm = getLangDefinition(config._l).isPM(input);
+            break;
+        // 24 HOUR
+        case 'H' : // fall through to hh
+        case 'HH' : // fall through to hh
+        case 'h' : // fall through to hh
+        case 'hh' :
+            datePartArray[3] = ~~input;
+            break;
+        // MINUTE
+        case 'm' : // fall through to mm
+        case 'mm' :
+            datePartArray[4] = ~~input;
+            break;
+        // SECOND
+        case 's' : // fall through to ss
+        case 'ss' :
+            datePartArray[5] = ~~input;
+            break;
+        // MILLISECOND
+        case 'S' :
+        case 'SS' :
+        case 'SSS' :
+            datePartArray[6] = ~~ (('0.' + input) * 1000);
+            break;
+        // UNIX TIMESTAMP WITH MS
+        case 'X':
+            config._d = new Date(parseFloat(input) * 1000);
+            break;
+        // TIMEZONE
+        case 'Z' : // fall through to ZZ
+        case 'ZZ' :
+            config._useUTC = true;
+            config._tzm = timezoneMinutesFromString(input);
+            break;
+        }
+
+        // if the input is null, the date is not valid
+        if (input == null) {
+            config._isValid = false;
+        }
+    }
+
+    // convert an array to a date.
+    // the array should mirror the parameters below
+    // note: all values past the year are optional and will default to the lowest possible value.
+    // [year, month, day , hour, minute, second, millisecond]
+    function dateFromArray(config) {
+        var i, date, input = [], currentDate;
+
+        if (config._d) {
+            return;
+        }
+
+        // Default to current date.
+        // * if no year, month, day of month are given, default to today
+        // * if day of month is given, default month and year
+        // * if month is given, default only year
+        // * if year is given, don't default anything
+        currentDate = currentDateArray(config);
+        for (i = 0; i < 3 && config._a[i] == null; ++i) {
+            config._a[i] = input[i] = currentDate[i];
+        }
+
+        // Zero out whatever was not defaulted, including time
+        for (; i < 7; i++) {
+            config._a[i] = input[i] = (config._a[i] == null) ? (i === 2 ? 1 : 0) : config._a[i];
+        }
+
+        // add the offsets to the time to be parsed so that we can have a clean array for checking isValid
+        input[3] += ~~((config._tzm || 0) / 60);
+        input[4] += ~~((config._tzm || 0) % 60);
+
+        date = new Date(0);
+
+        if (config._useUTC) {
+            date.setUTCFullYear(input[0], input[1], input[2]);
+            date.setUTCHours(input[3], input[4], input[5], input[6]);
+        } else {
+            date.setFullYear(input[0], input[1], input[2]);
+            date.setHours(input[3], input[4], input[5], input[6]);
+        }
+
+        config._d = date;
+    }
+
+    function dateFromObject(config) {
+        var o = config._i;
+
+        if (config._d) {
+            return;
+        }
+
+        config._a = [
+            o.years || o.year || o.y,
+            o.months || o.month || o.M,
+            o.days || o.day || o.d,
+            o.hours || o.hour || o.h,
+            o.minutes || o.minute || o.m,
+            o.seconds || o.second || o.s,
+            o.milliseconds || o.millisecond || o.ms
+        ];
+
+        dateFromArray(config);
+    }
+
+    function currentDateArray(config) {
+        var now = new Date();
+        if (config._useUTC) {
+            return [
+                now.getUTCFullYear(),
+                now.getUTCMonth(),
+                now.getUTCDate()
+            ];
+        } else {
+            return [now.getFullYear(), now.getMonth(), now.getDate()];
+        }
+    }
+
+    // date from string and format string
+    function makeDateFromStringAndFormat(config) {
+        // This array is used to make a Date, either with `new Date` or `Date.UTC`
+        var lang = getLangDefinition(config._l),
+            string = '' + config._i,
+            i, parsedInput, tokens;
+
+        tokens = expandFormat(config._f, lang).match(formattingTokens);
+
+        config._a = [];
+
+        for (i = 0; i < tokens.length; i++) {
+            parsedInput = (getParseRegexForToken(tokens[i], config).exec(string) || [])[0];
+            if (parsedInput) {
+                string = string.slice(string.indexOf(parsedInput) + parsedInput.length);
+            }
+            // don't parse if its not a known token
+            if (formatTokenFunctions[tokens[i]]) {
+                addTimeToArrayFromToken(tokens[i], parsedInput, config);
+            }
+        }
+
+        // add remaining unparsed input to the string
+        if (string) {
+            config._il = string;
+        }
+
+        // handle am pm
+        if (config._isPm && config._a[3] < 12) {
+            config._a[3] += 12;
+        }
+        // if is 12 am, change hours to 0
+        if (config._isPm === false && config._a[3] === 12) {
+            config._a[3] = 0;
+        }
+        // return
+        dateFromArray(config);
+    }
+
+    // date from string and array of format strings
+    function makeDateFromStringAndArray(config) {
+        var tempConfig,
+            tempMoment,
+            bestMoment,
+
+            scoreToBeat = 99,
+            i,
+            currentScore;
+
+        for (i = 0; i < config._f.length; i++) {
+            tempConfig = extend({}, config);
+            tempConfig._f = config._f[i];
+            makeDateFromStringAndFormat(tempConfig);
+            tempMoment = new Moment(tempConfig);
+
+            currentScore = compareArrays(tempConfig._a, tempMoment.toArray());
+
+            // if there is any input that was not parsed
+            // add a penalty for that format
+            if (tempMoment._il) {
+                currentScore += tempMoment._il.length;
+            }
+
+            if (currentScore < scoreToBeat) {
+                scoreToBeat = currentScore;
+                bestMoment = tempMoment;
+            }
+        }
+
+        extend(config, bestMoment);
+    }
+
+    // date from iso format
+    function makeDateFromString(config) {
+        var i,
+            string = config._i,
+            match = isoRegex.exec(string);
+
+        if (match) {
+            // match[2] should be "T" or undefined
+            config._f = 'YYYY-MM-DD' + (match[2] || " ");
+            for (i = 0; i < 4; i++) {
+                if (isoTimes[i][1].exec(string)) {
+                    config._f += isoTimes[i][0];
+                    break;
+                }
+            }
+            if (parseTokenTimezone.exec(string)) {
+                config._f += " Z";
+            }
+            makeDateFromStringAndFormat(config);
+        } else {
+            config._d = new Date(string);
+        }
+    }
+
+    function makeDateFromInput(config) {
+        var input = config._i,
+            matched = aspNetJsonRegex.exec(input);
+
+        if (input === undefined) {
+            config._d = new Date();
+        } else if (matched) {
+            config._d = new Date(+matched[1]);
+        } else if (typeof input === 'string') {
+            makeDateFromString(config);
+        } else if (isArray(input)) {
+            config._a = input.slice(0);
+            dateFromArray(config);
+        } else if (input instanceof Date) {
+            config._d = new Date(+input);
+        } else if (typeof(input) === 'object') {
+            dateFromObject(config);
+        } else {
+            config._d = new Date(input);
+        }
+    }
+
+
+    /************************************
+        Relative Time
+    ************************************/
+
+
+    // helper function for moment.fn.from, moment.fn.fromNow, and moment.duration.fn.humanize
+    function substituteTimeAgo(string, number, withoutSuffix, isFuture, lang) {
+        return lang.relativeTime(number || 1, !!withoutSuffix, string, isFuture);
+    }
+
+    function relativeTime(milliseconds, withoutSuffix, lang) {
+        var seconds = round(Math.abs(milliseconds) / 1000),
+            minutes = round(seconds / 60),
+            hours = round(minutes / 60),
+            days = round(hours / 24),
+            years = round(days / 365),
+            args = seconds < 45 && ['s', seconds] ||
+                minutes === 1 && ['m'] ||
+                minutes < 45 && ['mm', minutes] ||
+                hours === 1 && ['h'] ||
+                hours < 22 && ['hh', hours] ||
+                days === 1 && ['d'] ||
+                days <= 25 && ['dd', days] ||
+                days <= 45 && ['M'] ||
+                days < 345 && ['MM', round(days / 30)] ||
+                years === 1 && ['y'] || ['yy', years];
+        args[2] = withoutSuffix;
+        args[3] = milliseconds > 0;
+        args[4] = lang;
+        return substituteTimeAgo.apply({}, args);
+    }
+
+
+    /************************************
+        Week of Year
+    ************************************/
+
+
+    // firstDayOfWeek       0 = sun, 6 = sat
+    //                      the day of the week that starts the week
+    //                      (usually sunday or monday)
+    // firstDayOfWeekOfYear 0 = sun, 6 = sat
+    //                      the first week is the week that contains the first
+    //                      of this day of the week
+    //                      (eg. ISO weeks use thursday (4))
+    function weekOfYear(mom, firstDayOfWeek, firstDayOfWeekOfYear) {
+        var end = firstDayOfWeekOfYear - firstDayOfWeek,
+            daysToDayOfWeek = firstDayOfWeekOfYear - mom.day(),
+            adjustedMoment;
+
+
+        if (daysToDayOfWeek > end) {
+            daysToDayOfWeek -= 7;
+        }
+
+        if (daysToDayOfWeek < end - 7) {
+            daysToDayOfWeek += 7;
+        }
+
+        adjustedMoment = moment(mom).add('d', daysToDayOfWeek);
+        return {
+            week: Math.ceil(adjustedMoment.dayOfYear() / 7),
+            year: adjustedMoment.year()
+        };
+    }
+
+
+    /************************************
+        Top Level Functions
+    ************************************/
+
+    function makeMoment(config) {
+        var input = config._i,
+            format = config._f;
+
+        if (input === null || input === '') {
+            return null;
+        }
+
+        if (typeof input === 'string') {
+            config._i = input = getLangDefinition().preparse(input);
+        }
+
+        if (moment.isMoment(input)) {
+            config = extend({}, input);
+            config._d = new Date(+input._d);
+        } else if (format) {
+            if (isArray(format)) {
+                makeDateFromStringAndArray(config);
+            } else {
+                makeDateFromStringAndFormat(config);
+            }
+        } else {
+            makeDateFromInput(config);
+        }
+
+        return new Moment(config);
+    }
+
+    moment = function (input, format, lang) {
+        return makeMoment({
+            _i : input,
+            _f : format,
+            _l : lang,
+            _isUTC : false
+        });
+    };
+
+    // creating with utc
+    moment.utc = function (input, format, lang) {
+        return makeMoment({
+            _useUTC : true,
+            _isUTC : true,
+            _l : lang,
+            _i : input,
+            _f : format
+        }).utc();
+    };
+
+    // creating with unix timestamp (in seconds)
+    moment.unix = function (input) {
+        return moment(input * 1000);
+    };
+
+    // duration
+    moment.duration = function (input, key) {
+        var isDuration = moment.isDuration(input),
+            isNumber = (typeof input === 'number'),
+            duration = (isDuration ? input._input : (isNumber ? {} : input)),
+            matched = aspNetTimeSpanJsonRegex.exec(input),
+            sign,
+            ret;
+
+        if (isNumber) {
+            if (key) {
+                duration[key] = input;
+            } else {
+                duration.milliseconds = input;
+            }
+        } else if (matched) {
+            sign = (matched[1] === "-") ? -1 : 1;
+            duration = {
+                y: 0,
+                d: ~~matched[2] * sign,
+                h: ~~matched[3] * sign,
+                m: ~~matched[4] * sign,
+                s: ~~matched[5] * sign,
+                ms: ~~matched[6] * sign
+            };
+        }
+
+        ret = new Duration(duration);
+
+        if (isDuration && input.hasOwnProperty('_lang')) {
+            ret._lang = input._lang;
+        }
+
+        return ret;
+    };
+
+    // version number
+    moment.version = VERSION;
+
+    // default format
+    moment.defaultFormat = isoFormat;
+
+    // This function will be called whenever a moment is mutated.
+    // It is intended to keep the offset in sync with the timezone.
+    moment.updateOffset = function () {};
+
+    // This function will load languages and then set the global language.  If
+    // no arguments are passed in, it will simply return the current global
+    // language key.
+    moment.lang = function (key, values) {
+        if (!key) {
+            return moment.fn._lang._abbr;
+        }
+        key = key.toLowerCase();
+        key = key.replace('_', '-');
+        if (values) {
+            loadLang(key, values);
+        } else if (values === null) {
+            unloadLang(key);
+            key = 'en';
+        } else if (!languages[key]) {
+            getLangDefinition(key);
+        }
+        moment.duration.fn._lang = moment.fn._lang = getLangDefinition(key);
+    };
+
+    // returns language data
+    moment.langData = function (key) {
+        if (key && key._lang && key._lang._abbr) {
+            key = key._lang._abbr;
+        }
+        return getLangDefinition(key);
+    };
+
+    // compare moment object
+    moment.isMoment = function (obj) {
+        return obj instanceof Moment;
+    };
+
+    // for typechecking Duration objects
+    moment.isDuration = function (obj) {
+        return obj instanceof Duration;
+    };
+
+
+    /************************************
+        Moment Prototype
+    ************************************/
+
+
+    extend(moment.fn = Moment.prototype, {
+
+        clone : function () {
+            return moment(this);
+        },
+
+        valueOf : function () {
+            return +this._d + ((this._offset || 0) * 60000);
+        },
+
+        unix : function () {
+            return Math.floor(+this / 1000);
+        },
+
+        toString : function () {
+            return this.format("ddd MMM DD YYYY HH:mm:ss [GMT]ZZ");
+        },
+
+        toDate : function () {
+            return this._offset ? new Date(+this) : this._d;
+        },
+
+        toISOString : function () {
+            return formatMoment(moment(this).utc(), 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
+        },
+
+        toArray : function () {
+            var m = this;
+            return [
+                m.year(),
+                m.month(),
+                m.date(),
+                m.hours(),
+                m.minutes(),
+                m.seconds(),
+                m.milliseconds()
+            ];
+        },
+
+        isValid : function () {
+            if (this._isValid == null) {
+                if (this._a) {
+                    this._isValid = !compareArrays(this._a, (this._isUTC ? moment.utc(this._a) : moment(this._a)).toArray());
+                } else {
+                    this._isValid = !isNaN(this._d.getTime());
+                }
+            }
+            return !!this._isValid;
+        },
+
+        invalidAt: function () {
+            var i, arr1 = this._a, arr2 = (this._isUTC ? moment.utc(this._a) : moment(this._a)).toArray();
+            for (i = 6; i >= 0 && arr1[i] === arr2[i]; --i) {
+                // empty loop body
+            }
+            return i;
+        },
+
+        utc : function () {
+            return this.zone(0);
+        },
+
+        local : function () {
+            this.zone(0);
+            this._isUTC = false;
+            return this;
+        },
+
+        format : function (inputString) {
+            var output = formatMoment(this, inputString || moment.defaultFormat);
+            return this.lang().postformat(output);
+        },
+
+        add : function (input, val) {
+            var dur;
+            // switch args to support add('s', 1) and add(1, 's')
+            if (typeof input === 'string') {
+                dur = moment.duration(+val, input);
+            } else {
+                dur = moment.duration(input, val);
+            }
+            addOrSubtractDurationFromMoment(this, dur, 1);
+            return this;
+        },
+
+        subtract : function (input, val) {
+            var dur;
+            // switch args to support subtract('s', 1) and subtract(1, 's')
+            if (typeof input === 'string') {
+                dur = moment.duration(+val, input);
+            } else {
+                dur = moment.duration(input, val);
+            }
+            addOrSubtractDurationFromMoment(this, dur, -1);
+            return this;
+        },
+
+        diff : function (input, units, asFloat) {
+            var that = this._isUTC ? moment(input).zone(this._offset || 0) : moment(input).local(),
+                zoneDiff = (this.zone() - that.zone()) * 6e4,
+                diff, output;
+
+            units = normalizeUnits(units);
+
+            if (units === 'year' || units === 'month') {
+                // average number of days in the months in the given dates
+                diff = (this.daysInMonth() + that.daysInMonth()) * 432e5; // 24 * 60 * 60 * 1000 / 2
+                // difference in months
+                output = ((this.year() - that.year()) * 12) + (this.month() - that.month());
+                // adjust by taking difference in days, average number of days
+                // and dst in the given months.
+                output += ((this - moment(this).startOf('month')) -
+                        (that - moment(that).startOf('month'))) / diff;
+                // same as above but with zones, to negate all dst
+                output -= ((this.zone() - moment(this).startOf('month').zone()) -
+                        (that.zone() - moment(that).startOf('month').zone())) * 6e4 / diff;
+                if (units === 'year') {
+                    output = output / 12;
+                }
+            } else {
+                diff = (this - that);
+                output = units === 'second' ? diff / 1e3 : // 1000
+                    units === 'minute' ? diff / 6e4 : // 1000 * 60
+                    units === 'hour' ? diff / 36e5 : // 1000 * 60 * 60
+                    units === 'day' ? (diff - zoneDiff) / 864e5 : // 1000 * 60 * 60 * 24, negate dst
+                    units === 'week' ? (diff - zoneDiff) / 6048e5 : // 1000 * 60 * 60 * 24 * 7, negate dst
+                    diff;
+            }
+            return asFloat ? output : absRound(output);
+        },
+
+        from : function (time, withoutSuffix) {
+            return moment.duration(this.diff(time)).lang(this.lang()._abbr).humanize(!withoutSuffix);
+        },
+
+        fromNow : function (withoutSuffix) {
+            return this.from(moment(), withoutSuffix);
+        },
+
+        calendar : function () {
+            var diff = this.diff(moment().zone(this.zone()).startOf('day'), 'days', true),
+                format = diff < -6 ? 'sameElse' :
+                diff < -1 ? 'lastWeek' :
+                diff < 0 ? 'lastDay' :
+                diff < 1 ? 'sameDay' :
+                diff < 2 ? 'nextDay' :
+                diff < 7 ? 'nextWeek' : 'sameElse';
+            return this.format(this.lang().calendar(format, this));
+        },
+
+        isLeapYear : function () {
+            var year = this.year();
+            return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+        },
+
+        isDST : function () {
+            return (this.zone() < this.clone().month(0).zone() ||
+                this.zone() < this.clone().month(5).zone());
+        },
+
+        day : function (input) {
+            var day = this._isUTC ? this._d.getUTCDay() : this._d.getDay();
+            if (input != null) {
+                if (typeof input === 'string') {
+                    input = this.lang().weekdaysParse(input);
+                    if (typeof input !== 'number') {
+                        return this;
+                    }
+                }
+                return this.add({ d : input - day });
+            } else {
+                return day;
+            }
+        },
+
+        month : function (input) {
+            var utc = this._isUTC ? 'UTC' : '',
+                dayOfMonth;
+
+            if (input != null) {
+                if (typeof input === 'string') {
+                    input = this.lang().monthsParse(input);
+                    if (typeof input !== 'number') {
+                        return this;
+                    }
+                }
+
+                dayOfMonth = this.date();
+                this.date(1);
+                this._d['set' + utc + 'Month'](input);
+                this.date(Math.min(dayOfMonth, this.daysInMonth()));
+
+                moment.updateOffset(this);
+                return this;
+            } else {
+                return this._d['get' + utc + 'Month']();
+            }
+        },
+
+        startOf: function (units) {
+            units = normalizeUnits(units);
+            // the following switch intentionally omits break keywords
+            // to utilize falling through the cases.
+            switch (units) {
+            case 'year':
+                this.month(0);
+                /* falls through */
+            case 'month':
+                this.date(1);
+                /* falls through */
+            case 'week':
+            case 'isoweek':
+            case 'day':
+                this.hours(0);
+                /* falls through */
+            case 'hour':
+                this.minutes(0);
+                /* falls through */
+            case 'minute':
+                this.seconds(0);
+                /* falls through */
+            case 'second':
+                this.milliseconds(0);
+                /* falls through */
+            }
+
+            // weeks are a special case
+            if (units === 'week') {
+                this.weekday(0);
+            } else if (units === 'isoweek') {
+                this.isoWeekday(1);
+            }
+
+            return this;
+        },
+
+        endOf: function (units) {
+            units = normalizeUnits(units);
+            return this.startOf(units).add((units === 'isoweek' ? 'week' : units), 1).subtract('ms', 1);
+        },
+
+        isAfter: function (input, units) {
+            units = typeof units !== 'undefined' ? units : 'millisecond';
+            return +this.clone().startOf(units) > +moment(input).startOf(units);
+        },
+
+        isBefore: function (input, units) {
+            units = typeof units !== 'undefined' ? units : 'millisecond';
+            return +this.clone().startOf(units) < +moment(input).startOf(units);
+        },
+
+        isSame: function (input, units) {
+            units = typeof units !== 'undefined' ? units : 'millisecond';
+            return +this.clone().startOf(units) === +moment(input).startOf(units);
+        },
+
+        min: function (other) {
+            other = moment.apply(null, arguments);
+            return other < this ? this : other;
+        },
+
+        max: function (other) {
+            other = moment.apply(null, arguments);
+            return other > this ? this : other;
+        },
+
+        zone : function (input) {
+            var offset = this._offset || 0;
+            if (input != null) {
+                if (typeof input === "string") {
+                    input = timezoneMinutesFromString(input);
+                }
+                if (Math.abs(input) < 16) {
+                    input = input * 60;
+                }
+                this._offset = input;
+                this._isUTC = true;
+                if (offset !== input) {
+                    addOrSubtractDurationFromMoment(this, moment.duration(offset - input, 'm'), 1, true);
+                }
+            } else {
+                return this._isUTC ? offset : this._d.getTimezoneOffset();
+            }
+            return this;
+        },
+
+        zoneAbbr : function () {
+            return this._isUTC ? "UTC" : "";
+        },
+
+        zoneName : function () {
+            return this._isUTC ? "Coordinated Universal Time" : "";
+        },
+
+        hasAlignedHourOffset : function (input) {
+            if (!input) {
+                input = 0;
+            }
+            else {
+                input = moment(input).zone();
+            }
+
+            return (this.zone() - input) % 60 === 0;
+        },
+
+        daysInMonth : function () {
+            return moment.utc([this.year(), this.month() + 1, 0]).date();
+        },
+
+        dayOfYear : function (input) {
+            var dayOfYear = round((moment(this).startOf('day') - moment(this).startOf('year')) / 864e5) + 1;
+            return input == null ? dayOfYear : this.add("d", (input - dayOfYear));
+        },
+
+        weekYear : function (input) {
+            var year = weekOfYear(this, this.lang()._week.dow, this.lang()._week.doy).year;
+            return input == null ? year : this.add("y", (input - year));
+        },
+
+        isoWeekYear : function (input) {
+            var year = weekOfYear(this, 1, 4).year;
+            return input == null ? year : this.add("y", (input - year));
+        },
+
+        week : function (input) {
+            var week = this.lang().week(this);
+            return input == null ? week : this.add("d", (input - week) * 7);
+        },
+
+        isoWeek : function (input) {
+            var week = weekOfYear(this, 1, 4).week;
+            return input == null ? week : this.add("d", (input - week) * 7);
+        },
+
+        weekday : function (input) {
+            var weekday = (this._d.getDay() + 7 - this.lang()._week.dow) % 7;
+            return input == null ? weekday : this.add("d", input - weekday);
+        },
+
+        isoWeekday : function (input) {
+            // behaves the same as moment#day except
+            // as a getter, returns 7 instead of 0 (1-7 range instead of 0-6)
+            // as a setter, sunday should belong to the previous week.
+            return input == null ? this.day() || 7 : this.day(this.day() % 7 ? input : input - 7);
+        },
+
+        get : function (units) {
+            units = normalizeUnits(units);
+            return this[units.toLowerCase()]();
+        },
+
+        set : function (units, value) {
+            units = normalizeUnits(units);
+            this[units.toLowerCase()](value);
+        },
+
+        // If passed a language key, it will set the language for this
+        // instance.  Otherwise, it will return the language configuration
+        // variables for this instance.
+        lang : function (key) {
+            if (key === undefined) {
+                return this._lang;
+            } else {
+                this._lang = getLangDefinition(key);
+                return this;
+            }
+        }
+    });
+
+    // helper for adding shortcuts
+    function makeGetterAndSetter(name, key) {
+        moment.fn[name] = moment.fn[name + 's'] = function (input) {
+            var utc = this._isUTC ? 'UTC' : '';
+            if (input != null) {
+                this._d['set' + utc + key](input);
+                moment.updateOffset(this);
+                return this;
+            } else {
+                return this._d['get' + utc + key]();
+            }
+        };
+    }
+
+    // loop through and add shortcuts (Month, Date, Hours, Minutes, Seconds, Milliseconds)
+    for (i = 0; i < proxyGettersAndSetters.length; i ++) {
+        makeGetterAndSetter(proxyGettersAndSetters[i].toLowerCase().replace(/s$/, ''), proxyGettersAndSetters[i]);
+    }
+
+    // add shortcut for year (uses different syntax than the getter/setter 'year' == 'FullYear')
+    makeGetterAndSetter('year', 'FullYear');
+
+    // add plural methods
+    moment.fn.days = moment.fn.day;
+    moment.fn.months = moment.fn.month;
+    moment.fn.weeks = moment.fn.week;
+    moment.fn.isoWeeks = moment.fn.isoWeek;
+
+    // add aliased format methods
+    moment.fn.toJSON = moment.fn.toISOString;
+
+    /************************************
+        Duration Prototype
+    ************************************/
+
+
+    extend(moment.duration.fn = Duration.prototype, {
+
+        _bubble : function () {
+            var milliseconds = this._milliseconds,
+                days = this._days,
+                months = this._months,
+                data = this._data,
+                seconds, minutes, hours, years;
+
+            // The following code bubbles up values, see the tests for
+            // examples of what that means.
+            data.milliseconds = milliseconds % 1000;
+
+            seconds = absRound(milliseconds / 1000);
+            data.seconds = seconds % 60;
+
+            minutes = absRound(seconds / 60);
+            data.minutes = minutes % 60;
+
+            hours = absRound(minutes / 60);
+            data.hours = hours % 24;
+
+            days += absRound(hours / 24);
+            data.days = days % 30;
+
+            months += absRound(days / 30);
+            data.months = months % 12;
+
+            years = absRound(months / 12);
+            data.years = years;
+        },
+
+        weeks : function () {
+            return absRound(this.days() / 7);
+        },
+
+        valueOf : function () {
+            return this._milliseconds +
+              this._days * 864e5 +
+              (this._months % 12) * 2592e6 +
+              ~~(this._months / 12) * 31536e6;
+        },
+
+        humanize : function (withSuffix) {
+            var difference = +this,
+                output = relativeTime(difference, !withSuffix, this.lang());
+
+            if (withSuffix) {
+                output = this.lang().pastFuture(difference, output);
+            }
+
+            return this.lang().postformat(output);
+        },
+
+        add : function (input, val) {
+            // supports only 2.0-style add(1, 's') or add(moment)
+            var dur = moment.duration(input, val);
+
+            this._milliseconds += dur._milliseconds;
+            this._days += dur._days;
+            this._months += dur._months;
+
+            this._bubble();
+
+            return this;
+        },
+
+        subtract : function (input, val) {
+            var dur = moment.duration(input, val);
+
+            this._milliseconds -= dur._milliseconds;
+            this._days -= dur._days;
+            this._months -= dur._months;
+
+            this._bubble();
+
+            return this;
+        },
+
+        get : function (units) {
+            units = normalizeUnits(units);
+            return this[units.toLowerCase() + 's']();
+        },
+
+        as : function (units) {
+            units = normalizeUnits(units);
+            return this['as' + units.charAt(0).toUpperCase() + units.slice(1) + 's']();
+        },
+
+        lang : moment.fn.lang
+    });
+
+    function makeDurationGetter(name) {
+        moment.duration.fn[name] = function () {
+            return this._data[name];
+        };
+    }
+
+    function makeDurationAsGetter(name, factor) {
+        moment.duration.fn['as' + name] = function () {
+            return +this / factor;
+        };
+    }
+
+    for (i in unitMillisecondFactors) {
+        if (unitMillisecondFactors.hasOwnProperty(i)) {
+            makeDurationAsGetter(i, unitMillisecondFactors[i]);
+            makeDurationGetter(i.toLowerCase());
+        }
+    }
+
+    makeDurationAsGetter('Weeks', 6048e5);
+    moment.duration.fn.asMonths = function () {
+        return (+this - this.years() * 31536e6) / 2592e6 + this.years() * 12;
+    };
+
+
+    /************************************
+        Default Lang
+    ************************************/
+
+
+    // Set default language, other languages will inherit from English.
+    moment.lang('en', {
+        ordinal : function (number) {
+            var b = number % 10,
+                output = (~~ (number % 100 / 10) === 1) ? 'th' :
+                (b === 1) ? 'st' :
+                (b === 2) ? 'nd' :
+                (b === 3) ? 'rd' : 'th';
+            return number + output;
+        }
+    });
+
+    /* EMBED_LANGUAGES */
+
+    /************************************
+        Exposing Moment
+    ************************************/
+
+
+    // CommonJS module is defined
+    if (hasModule) {
+        module.exports = moment;
+    }
+    /*global ender:false */
+    if (typeof ender === 'undefined') {
+        // here, `this` means `window` in the browser, or `global` on the server
+        // add `moment` as a global object via a string identifier,
+        // for Closure Compiler "advanced" mode
+        this['moment'] = moment;
+    }
+    /*global define:false */
+    if (typeof define === "function" && define.amd) {
+        define("moment", [], function () {
+            return moment;
+        });
+    }
+}).call(this);
 
 ;/*
 

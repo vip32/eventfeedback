@@ -252,6 +252,11 @@ module.exports = AppLayout = (function(_super) {
     'click .page-content': 'onSidebarHide'
   };
 
+  AppLayout.prototype.hammerEvents = {
+    'swipeleft .page-content': 'onSidebarHide',
+    'swiperight .page-content': 'onSidebarToggle'
+  };
+
   AppLayout.prototype.onSidebarToggle = function() {
     return $('#wrapper').toggleClass('active');
   };
@@ -1681,7 +1686,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<!-- Sidebar -->\r\n<div id=\"sidebar-wrapper\" class=\"no-transition\">\r\n  <ul class=\"sidebar-nav js-headers\">\r\n    <li class=\"sidebar-brand\"><a href=\"#\">EventFeedback</a></li>\r\n    <!-- headers -->\r\n  </ul>\r\n</div>\r\n\r\n<!-- Page header -->\r\n<div id=\"page-content-wrapper\">\r\n  <div class=\"content-header\">\r\n    <h1>\r\n      <a id=\"menu-toggle\" href=\"#\" class=\"btn btn-default\">\r\n         <span class=\"glyphicon glyphicon-align-justify\"></span>\r\n      </a>\r\n      EventFeedback\r\n    </h1>\r\n  </div>\r\n</div>\r\n\r\n\r\n<!--\r\n  <div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav\">\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div> -->";
+  return "<div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n<!-- Sidebar -->\r\n<div id=\"sidebar-wrapper\" class=\"no-transition\">\r\n  <ul class=\"sidebar-nav js-headers\">\r\n    <li class=\"sidebar-brand\"><a href=\"#\">EventFeedback</a></li>\r\n    <!-- headers -->\r\n  </ul>\r\n</div>\r\n\r\n<!-- Page header -->\r\n<div id=\"page-content-wrapper\">\r\n  <div class=\"content-header\">\r\n    <h1>\r\n      <a id=\"menu-toggle\" href=\"#\" class=\"btn btn-default\">\r\n         <span class=\"glyphicon glyphicon-align-justify\"></span>\r\n      </a>\r\n      EventFeedback\r\n    </h1>\r\n  </div>\r\n</div>\r\n</div>\r\n\r\n<!--\r\n  <div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav\">\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div> -->";
   });
 });
 
