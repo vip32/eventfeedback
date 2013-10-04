@@ -253,13 +253,8 @@ module.exports = AppLayout = (function(_super) {
   };
 
   AppLayout.prototype.hammerEvents = {
-    'touchmove .page-content': 'test',
     'swipeleft .page-content': 'onSidebarHide',
     'swiperight .page-content': 'onSidebarToggle'
-  };
-
-  AppLayout.prototype.test = function(e) {
-    return e.preventDefault();
   };
 
   AppLayout.prototype.onSidebarToggle = function() {
