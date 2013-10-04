@@ -243,6 +243,23 @@ module.exports = AppLayout = (function(_super) {
     footer: "#footer"
   };
 
+  AppLayout.prototype.initialize = function() {
+    application.on('sidebar:toggle', this.onSidebarToggle);
+    return application.on('sidebar:hide', this.onSidebarHide);
+  };
+
+  AppLayout.prototype.events = {
+    'click .page-content': 'onSidebarHide'
+  };
+
+  AppLayout.prototype.onSidebarToggle = function() {
+    return $('#wrapper').toggleClass('active');
+  };
+
+  AppLayout.prototype.onSidebarHide = function() {
+    return $('#wrapper').removeClass('active');
+  };
+
   return AppLayout;
 
 })(Backbone.Marionette.Layout);
@@ -256,7 +273,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div id=\"header\" class=\"container\"></div>\r\n<div id=\"content\" class=\"container\"></div>\r\n<hr/>\r\n<div id=\"footer\" class=\"container\"></div>\r\n";
+  return "<div id=\"wrapper\">\r\n\r\n  <div id=\"header\" class=\"container\"></div>\r\n  <div class=\"page-content inset\">\r\n    <div id=\"content\" class=\"container\"></div>\r\n  </div>\r\n\r\n  <hr/>\r\n  <div id=\"footer\" class=\"container\"></div>\r\n\r\n</div>";
   });
 });
 
@@ -882,7 +899,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>About</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n    <p>\r\n      <a class=\"btn btn-lg btn-primary\" href=\"#\">More &raquo;</a>\r\n    </p>\r\n  </div>\r\n</div>";
+  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>About</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n    <p>\r\n      <a class=\"btn btn-lg btn-primary\" href=\"#\">More &raquo;</a>\r\n    </p>\r\n  </div>\r\n  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n</div>";
   });
 });
 
@@ -1597,9 +1614,9 @@ module.exports.HeaderItem = ItemView = (function(_super) {
   };
 
   ItemView.prototype.onClick = function(e) {
-    $('.navbar-collapse').collapse('hide');
-    application.trigger(this.model.get('trigger'));
-    return e.preventDefault();
+    e.preventDefault();
+    application.trigger('sidebar:hide');
+    return application.trigger(this.model.get('trigger'));
   };
 
   return ItemView;
@@ -1621,6 +1638,15 @@ module.exports.Header = View = (function(_super) {
   View.prototype.itemView = module.exports.HeaderItem;
 
   View.prototype.itemViewContainer = '.js-headers';
+
+  View.prototype.events = {
+    'click #menu-toggle': 'onSidebarToggle'
+  };
+
+  View.prototype.onSidebarToggle = function(e) {
+    e.preventDefault();
+    return application.trigger('sidebar:toggle');
+  };
 
   return View;
 
@@ -1655,7 +1681,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav js-headers\">\r\n        <!-- headers-->\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div>";
+  return "<!-- Sidebar -->\r\n<div id=\"sidebar-wrapper\" class=\"no-transition\">\r\n  <ul class=\"sidebar-nav js-headers\">\r\n    <li class=\"sidebar-brand\"><a href=\"#\">EventFeedback</a></li>\r\n    <!-- headers -->\r\n  </ul>\r\n</div>\r\n\r\n<!-- Page header -->\r\n<div id=\"page-content-wrapper\">\r\n  <div class=\"content-header\">\r\n    <h1>\r\n      <a id=\"menu-toggle\" href=\"#\" class=\"btn btn-default\">\r\n         <span class=\"glyphicon glyphicon-align-justify\"></span>\r\n      </a>\r\n      EventFeedback\r\n    </h1>\r\n  </div>\r\n</div>\r\n\r\n\r\n<!--\r\n  <div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav\">\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div> -->";
   });
 });
 

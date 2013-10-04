@@ -9,3 +9,15 @@ module.exports = class AppLayout extends Backbone.Marionette.Layout
     content: "#content"
     footer: "#footer"
 
+  initialize: ->
+    application.on 'sidebar:toggle', @onSidebarToggle
+    application.on 'sidebar:hide', @onSidebarHide
+
+  events:
+    'click .page-content': 'onSidebarHide'
+
+  onSidebarToggle: ->
+    $('#wrapper').toggleClass('active')
+
+  onSidebarHide: ->
+    $('#wrapper').removeClass('active')
