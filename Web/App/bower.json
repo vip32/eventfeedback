@@ -19,8 +19,7 @@
     "jquery": "~2.0.3",
     "moment": "~2.2.1",
     "bootstrap-switch": "*",
-    "fastclick": "~0.6.10",
-    "jquery-touchswipe": "~1.6.4"
+    "fastclick": "~0.6.10"
   },
   "overrides": {
     "backbone": {
