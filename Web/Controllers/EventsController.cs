@@ -22,17 +22,37 @@ namespace EventFeedback.Web.Controllers
             _context = context;
         }
 
-        public IEnumerable<Event> Get()
+        public IEnumerable<Event> Get([FromUri] string filter = "")
         {
             _traceSource.TraceInformation("eventscontroller get all");
-            var result = _context.Events.AsEnumerable(); //.Include("Sessions")
-            return result.Any() ? result : null;
+            IEnumerable<Event> result;
+
+            if (filter.Equals("current", StringComparison.CurrentCultureIgnoreCase))
+                result = _context.Events.OrderBy(e => e.StartDate)
+                                 .Where(d => !(d.Active != null && !(bool) d.Active))
+                                 .Where(d => !(d.Deleted != null && (bool) d.Deleted))
+                                 .ToList().Where(e => e.IsCurrent());
+            else if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase))
+                result = _context.Events.OrderBy(e => e.StartDate);
+            else
+                result = _context.Events.OrderBy(e => e.StartDate) //.Include("Sessions")
+                                 .Where(d => !(d.Active != null && !(bool)d.Active))
+                                 .Where(d => !(d.Deleted != null && (bool)d.Deleted));
+            
+            return result.NullToEmpty().Any() ? result : null;
         }
 
-        public Event Get(int id)
+        public Event Get(int id, [FromUri] string filter = "")
         {
             _traceSource.TraceInformation("eventscontroller get " + id);
-            return _context.Events.FirstOrDefault(x => x.Id == id); //.Include("Sessions")
+            if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase))
+                return _context.Events
+                               .FirstOrDefault(x => x.Id == id); //.Include("Sessions")
+
+            return _context.Events
+                           .Where(d => !(d.Active != null && !(bool) d.Active))
+                           .Where(d => !(d.Deleted != null && (bool) d.Deleted))
+                           .FirstOrDefault(x => x.Id == id); //.Include("Sessions")
         }
 
         [Authorize(Roles = "Administrator")]

@@ -22,17 +22,41 @@ namespace EventFeedback.Web.Controllers
             _context = context;
         }
 
-        public IEnumerable<Session> Get(int eventId)
+        public IEnumerable<Session> Get(int eventId, [FromUri] string filter = "")
         {
             _traceSource.TraceInformation("eventscontroller get all");
-            var result =  _context.Sessions.Where(s => s.EventId == eventId).AsEnumerable();
-            return result.Any() ? result : null;
+            IEnumerable<Session> result;
+
+            if (filter.Equals("current", StringComparison.CurrentCultureIgnoreCase))
+                result = _context.Sessions.OrderBy(e => e.StartDate)
+                                 .Where(s => s.EventId == eventId)
+                                 .Where(d => !(d.Active != null && !(bool)d.Active))
+                                 .Where(d => !(d.Deleted != null && (bool)d.Deleted))
+                                 .ToList().Where(s => s.IsCurrent());
+            else if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase))
+                result = _context.Sessions.OrderBy(e => e.StartDate);
+            else
+                result = _context.Sessions.OrderBy(e => e.StartDate)
+                                 .Where(s => s.EventId == eventId)
+                                 .Where(d => !(d.Active != null && !(bool)d.Active))
+                                 .Where(d => !(d.Deleted != null && (bool)d.Deleted));
+
+            return result.NullToEmpty().Any() ? result : null;
         }
 
-        public Session Get(int eventId, int id)
+        public Session Get(int eventId, int id, [FromUri] string filter = "")
         {
             _traceSource.TraceInformation("eventscontroller get " + id);
-            return _context.Sessions.Where(s => s.EventId == eventId).FirstOrDefault(x => x.Id == id);
+            if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase))
+                return _context.Sessions
+                               .Where(s => s.EventId == eventId)
+                               .FirstOrDefault(x => x.Id == id);
+
+            return _context.Sessions
+                           .Where(s => s.EventId == eventId)
+                           .Where(d => !(d.Active != null && !(bool) d.Active))
+                           .Where(d => !(d.Deleted != null && (bool) d.Deleted))
+                           .FirstOrDefault(x => x.Id == id);
         }
 
         [Authorize(Roles = "Administrator")]

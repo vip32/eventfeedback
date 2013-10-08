@@ -52,6 +52,8 @@ namespace EventFeedback.Web.Controllers
             if (_context.SessionFeedbacks.Any(f => f.UserId == user.Id && f.SessionId == entity.SessionId))
                 throw new HttpResponseException(HttpStatusCode.NotModified);
 
+            // TODO: check if the event is still active
+
             entity.UserId = user.Id;
             _context.SessionFeedbacks.Add(entity);
             _context.SaveChanges();
@@ -70,6 +72,8 @@ namespace EventFeedback.Web.Controllers
             var oldEntity = _context.SessionFeedbacks.Find(entity.Id);
             if (oldEntity == null) throw new HttpResponseException(HttpStatusCode.NotFound);
             if (oldEntity.UserId != user.Id) throw new HttpResponseException(HttpStatusCode.Unauthorized);
+
+            // TODO: check if the event is still active
 
             entity.Id = id;
             entity.SessionId = oldEntity.SessionId;

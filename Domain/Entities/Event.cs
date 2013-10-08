@@ -50,8 +50,10 @@ namespace EventFeedback.Domain
             Tags = new Collection<string>();
         }
 
-        public bool IsActive()
+        public bool IsCurrent()
         {
+            // TODO: calculate current event (datarange)
+            //       1 week before startdate and 2 weeks after end date
             return false;
         }
 

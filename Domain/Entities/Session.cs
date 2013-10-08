@@ -74,8 +74,9 @@ namespace EventFeedback.Domain
             Tags = new Collection<string>();
         }
 
-        public bool IsActive()
+        public bool IsCurrent()
         {
+            // TODO: calculate current event (datarange)
             return false;
         }
 
