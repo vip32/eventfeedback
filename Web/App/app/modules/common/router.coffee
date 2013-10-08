@@ -4,9 +4,9 @@ Controller = require './controller'
 module.exports = class Router extends Backbone.Marionette.AppRouter
 
   appRoutes:
+    'home': 'showHome'
     'about': 'showAbout'
     'debug': 'showDebug'
-    'home': 'showHome'
     'signin': 'showSignin'
 
   initialize: (options)  ->

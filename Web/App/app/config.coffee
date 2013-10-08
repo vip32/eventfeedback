@@ -1,5 +1,6 @@
 # The config object
 class Config
+  apptitle: 'Event|Feedback'
   appcontainer: 'content'
   approot: '/'
   apiroot: '/api'
@@ -7,8 +8,8 @@ class Config
   brandtrigger: 'home:index'
   layout: 'layouts/app-layout'
   modules:
-    'common': 'modules/common/router'
     'header': 'modules/header/router'
+    'common': 'modules/common/router'
     'contact': 'modules/contact/router'
     'event': 'modules/event/router'
 

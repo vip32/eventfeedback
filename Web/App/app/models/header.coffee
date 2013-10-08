@@ -49,7 +49,7 @@ module.exports.TestData = class TestData
     order: 2
   ,
     id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f5"
-    title: "Sign in"
+    title: "Sign-in"
     trigger: "signin:index"
     intern: true
     order: 4

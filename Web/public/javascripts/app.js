@@ -128,9 +128,9 @@ Application = (function(_super) {
       }
       Backbone.history.start();
       console.log('current route', _this.getCurrentRoute());
-      if (_this.getCurrentRoute() === '') {
+      return _this.on('start', function() {
         return _this.trigger(config.startuptrigger);
-      }
+      });
     });
     this.addInitializer(function(options) {
       _this.layout = new (require(config.layout));
@@ -179,6 +179,8 @@ var Config;
 Config = (function() {
   function Config() {}
 
+  Config.prototype.apptitle = 'Event|Feedback';
+
   Config.prototype.appcontainer = 'content';
 
   Config.prototype.approot = '/';
@@ -192,8 +194,8 @@ Config = (function() {
   Config.prototype.layout = 'layouts/app-layout';
 
   Config.prototype.modules = {
-    'common': 'modules/common/router',
     'header': 'modules/header/router',
+    'common': 'modules/common/router',
     'contact': 'modules/contact/router',
     'event': 'modules/event/router'
   };
@@ -613,7 +615,7 @@ module.exports.TestData = TestData = (function() {
       order: 2
     }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f5",
-      title: "Sign in",
+      title: "Sign-in",
       trigger: "signin:index",
       intern: true,
       order: 4
@@ -648,24 +650,28 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showHome = function() {
     var view;
+    application.trigger('set:active:header', 'Home');
     view = new (require('./views/home-view'));
     return application.layout.content.show(view);
   };
 
   Controller.prototype.showSignin = function() {
     var view;
+    application.trigger('set:active:header', 'Sign-in');
     view = new (require('./views/signin-view'));
     return application.layout.content.show(view);
   };
 
   Controller.prototype.showAbout = function() {
     var view;
+    application.trigger('set:active:header', 'About');
     view = new (require('./views/about-view'));
     return application.layout.content.show(view);
   };
 
   Controller.prototype.showDebug = function() {
     var view;
+    application.trigger('set:active:header', 'Debug');
     view = new (require('./views/debug-view'));
     return application.layout.content.show(view);
   };
@@ -698,9 +704,9 @@ module.exports = Router = (function(_super) {
   }
 
   Router.prototype.appRoutes = {
+    'home': 'showHome',
     'about': 'showAbout',
     'debug': 'showDebug',
-    'home': 'showHome',
     'signin': 'showSignin'
   };
 
@@ -827,9 +833,11 @@ module.exports = FooterView = (function(_super) {
 });
 
 ;require.register("modules/common/views/home-view", function(exports, require, module) {
-var HomeView, _ref,
+var HomeView, application, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
 
 module.exports = HomeView = (function(_super) {
   __extends(HomeView, _super);
@@ -993,11 +1001,24 @@ module.exports = Controller = (function(_super) {
   }
 
   Controller.prototype.showContactsIndex = function() {
+    application.trigger('set:active:header', 'Contacts');
     return this.contacts.fetch().done(function(models) {
       var View, view;
       View = require('./views/contacts-index-view');
       view = new View({
         collection: models
+      });
+      return application.layout.content.show(view);
+    });
+  };
+
+  Controller.prototype.showContactDetails = function(id) {
+    application.trigger('set:active:header', 'Contacts');
+    return this.contacts.fetch().done(function(models) {
+      var View, view;
+      View = require('./views/contact-details-view');
+      view = new View({
+        model: models.get(id)
       });
       return application.layout.content.show(view);
     });
@@ -1015,17 +1036,6 @@ module.exports = Controller = (function(_super) {
     } else {
       return console.warn(model.validationError);
     }
-  };
-
-  Controller.prototype.showContactDetails = function(id) {
-    return this.contacts.fetch().done(function(models) {
-      var View, view;
-      View = require('./views/contact-details-view');
-      view = new View({
-        model: models.get(id)
-      });
-      return application.layout.content.show(view);
-    });
   };
 
   Controller.prototype.onClose = function() {
@@ -1590,11 +1600,13 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/header/views/header-view", function(exports, require, module) {
-var ItemView, View, application, _ref, _ref1,
+var ItemView, View, application, config, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+config = require('config');
 
 module.exports.HeaderItem = ItemView = (function(_super) {
   __extends(ItemView, _super);
@@ -1614,10 +1626,29 @@ module.exports.HeaderItem = ItemView = (function(_super) {
     'click': 'onClick'
   };
 
+  ItemView.prototype.initialize = function() {
+    var _this = this;
+    return application.on('set:active:header', function(title) {
+      if (title === _this.model.get('title')) {
+        return _this.setActive();
+      } else {
+        return _this.setInactive();
+      }
+    });
+  };
+
   ItemView.prototype.onClick = function(e) {
     e.preventDefault();
     application.trigger('sidebar:hide');
     return application.trigger(this.model.get('trigger'));
+  };
+
+  ItemView.prototype.setActive = function() {
+    return this.$el.addClass('active');
+  };
+
+  ItemView.prototype.setInactive = function() {
+    return this.$el.removeClass('active');
   };
 
   return ItemView;
@@ -1644,9 +1675,24 @@ module.exports.Header = View = (function(_super) {
     'click #menu-toggle': 'onSidebarToggle'
   };
 
+  View.prototype.initialize = function() {
+    var _this = this;
+    return application.on('set:active:header', function(title) {
+      return _this.setSubHeader(title);
+    });
+  };
+
+  View.prototype.onShow = function() {
+    return this.$('.js-apptitle').text(config.apptitle);
+  };
+
   View.prototype.onSidebarToggle = function(e) {
     e.preventDefault();
     return application.trigger('sidebar:toggle');
+  };
+
+  View.prototype.setSubHeader = function(title) {
+    return this.$('.js-subtitle').text(title);
   };
 
   return View;
@@ -1682,7 +1728,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <!-- Sidebar -->\r\n  <div id=\"sidebar-wrapper\">\r\n    <ul class=\"sidebar-nav js-headers\">\r\n      <!-- <li class=\"sidebar-brand\">\r\n        <a id=\"menu-toggle\" href=\"#\">&nbsp;&nbsp;&nbsp;&nbsp; -->\r\n          <!-- <span class=\"glyphicon glyphicon-align-justify\"></span> -->\r\n        <!-- </a>\r\n      </li> -->\r\n      <!-- headers -->\r\n    </ul>\r\n  </div>\r\n\r\n  <!-- Page header -->\r\n  <div id=\"page-content-wrapper\">\r\n    <div class=\"content-header\">\r\n      <h1>\r\n        <a id=\"menu-toggle\" href=\"#\" class=\"btn btn-primary\">\r\n           <span class=\"glyphicon glyphicon-align-justify\"></span>\r\n        </a>\r\n        &nbsp;Event|Feedback\r\n        <div class=\"content-header-sub\">Home</div>\r\n      </h1>\r\n    </div>\r\n  </div>\r\n</div>\r\n\r\n<!--\r\n  <div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav\">\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div> -->";
+  return "<div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <!-- Sidebar -->\r\n  <div id=\"sidebar-wrapper\">\r\n    <ul class=\"sidebar-nav js-headers\">\r\n      <!-- <li class=\"sidebar-brand\">\r\n        <a id=\"menu-toggle\" href=\"#\">&nbsp;&nbsp;&nbsp;&nbsp; -->\r\n          <!-- <span class=\"glyphicon glyphicon-align-justify\"></span> -->\r\n        <!-- </a>\r\n      </li> -->\r\n      <!-- headers -->\r\n    </ul>\r\n  </div>\r\n\r\n  <!-- Page header -->\r\n  <div id=\"page-content-wrapper\">\r\n    <div class=\"content-header\">\r\n      <h1>\r\n        <a id=\"menu-toggle\" href=\"#\" class=\"btn btn-primary\">\r\n           <span class=\"glyphicon glyphicon-align-justify\"></span>\r\n        </a>\r\n        <span class=\"js-apptitle\"></span>\r\n        <span class=\"content-header-sub js-subtitle\"></span>\r\n      </h1>\r\n    </div>\r\n  </div>\r\n</div>\r\n\r\n<!--\r\n  <div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav\">\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div> -->";
   });
 });
 

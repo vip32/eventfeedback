@@ -18,8 +18,9 @@ class Application extends Backbone.Marionette.Application
 
       Backbone.history.start()
       console.log 'current route', @getCurrentRoute()
-      if @getCurrentRoute() is ''
-        @trigger(config.startuptrigger)
+      @on 'start', =>
+        # if @getCurrentRoute() is ''
+          @trigger(config.startuptrigger)
 
     @addInitializer (options) =>
       @layout = new (require config.layout)

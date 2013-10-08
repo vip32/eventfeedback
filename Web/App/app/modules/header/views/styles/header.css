@@ -60,9 +60,9 @@
   text-decoration: none;
 }
 
-.sidebar-nav li a:active,
-.sidebar-nav li a:focus {
+.sidebar-nav .active{
   text-decoration: none;
+  background-color: #90BFD8;
 }
 
 .sidebar-nav > .sidebar-brand {
@@ -141,6 +141,7 @@
 
   #menu-toggle {
     display: inline-block;
+    margin-left: -5px;
   }
 
   .inset {
@@ -148,10 +149,9 @@
   }
 
   .content-header-sub {
-    padding-left:65px;
+    padding-left:53px;
     font-size:.5em;
     margin-top: -13px;
     display: block;
   }
-
 }

@@ -25,9 +25,17 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         new Contact.TestData().addTo(@contacts)
 
   showContactsIndex: ->
+    application.trigger 'set:active:header', 'Contacts'
     @contacts.fetch().done (models) ->
       View = require './views/contacts-index-view'
       view = new View(collection: models)
+      application.layout.content.show(view)
+
+  showContactDetails: (id) ->
+    application.trigger 'set:active:header', 'Contacts'
+    @contacts.fetch().done (models) ->
+      View = require './views/contact-details-view'
+      view = new View(model: models.get(id))
       application.layout.content.show(view)
 
   addContact: (model) ->
@@ -43,11 +51,6 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     else
       console.warn model.validationError
 
-  showContactDetails: (id) ->
-    @contacts.fetch().done (models) ->
-      View = require './views/contact-details-view'
-      view = new View(model: models.get(id))
-      application.layout.content.show(view)
 
   onClose: ->
     console.log 'contact controller close'
