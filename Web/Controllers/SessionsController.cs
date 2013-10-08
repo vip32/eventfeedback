@@ -27,13 +27,7 @@ namespace EventFeedback.Web.Controllers
             _traceSource.TraceInformation("eventscontroller get all");
             IEnumerable<Session> result;
 
-            if (filter.Equals("current", StringComparison.CurrentCultureIgnoreCase))
-                result = _context.Sessions.OrderBy(e => e.StartDate)
-                                 .Where(s => s.EventId == eventId)
-                                 .Where(d => !(d.Active != null && !(bool)d.Active))
-                                 .Where(d => !(d.Deleted != null && (bool)d.Deleted))
-                                 .ToList().Where(s => s.IsCurrent());
-            else if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase))
+            if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
                 result = _context.Sessions.OrderBy(e => e.StartDate);
             else
                 result = _context.Sessions.OrderBy(e => e.StartDate)
@@ -41,13 +35,16 @@ namespace EventFeedback.Web.Controllers
                                  .Where(d => !(d.Active != null && !(bool)d.Active))
                                  .Where(d => !(d.Deleted != null && (bool)d.Deleted));
 
+            if (filter.Equals("current", StringComparison.CurrentCultureIgnoreCase))
+                result = result.ToList().Where(e => e.IsCurrent());
+
             return result.NullToEmpty().Any() ? result : null;
         }
 
         public Session Get(int eventId, int id, [FromUri] string filter = "")
         {
             _traceSource.TraceInformation("eventscontroller get " + id);
-            if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase))
+            if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
                 return _context.Sessions
                                .Where(s => s.EventId == eventId)
                                .FirstOrDefault(x => x.Id == id);

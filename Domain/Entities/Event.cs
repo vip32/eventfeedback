@@ -54,7 +54,7 @@ namespace EventFeedback.Domain
         {
             // TODO: calculate current event (datarange)
             //       1 week before startdate and 2 weeks after end date
-            return false;
+            return true;
         }
 
         /// <summary>
