@@ -13,7 +13,7 @@
   overflow-y: auto;
   z-index: 1000;
   transition: all 0.1s ease 0s;
-  opacity: .5;
+  /*opacity: .5;*/
 }
 
 #page-content-wrapper {
@@ -46,6 +46,7 @@
   color: #FFFFFF;
   display: block;
   text-decoration: none;
+  text-transform: uppercase;
 }
 
 .sidebar-nav li a:hover {
@@ -60,7 +61,7 @@
 }
 
 .sidebar-nav > .sidebar-brand {
-  height: 65px;
+  height: 66px;
   line-height: 60px;
   font-size: 18px;
 }
@@ -101,12 +102,19 @@
   }
 
   #sidebar-wrapper {
+    margin-top: 66px;
     left: 0;
   }
 
   #wrapper.active {
     position: relative;
     left: 188px;
+  }
+
+  #wrapper.active .page-content{
+    opacity: 0.4;
+    /*filter:alpha(opacity=40);*/
+    /*background-color: gray;*/
   }
 
   #wrapper.active #sidebar-wrapper {
