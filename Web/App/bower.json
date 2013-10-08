@@ -54,7 +54,7 @@
     "pace": {
       "main": [
         "pace.js",
-        "themes/pace-theme-flat-top.css"
+        "themes/pace-theme-minimal.css"
       ]
     }
   }
