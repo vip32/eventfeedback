@@ -7401,7 +7401,7 @@ input.form-control {
 }
 
 #sidebar-wrapper {
-  margin-top: 66px;
+  margin-top: 56px;
   margin-left: -188px;
   left: 188px;
   width: 188px;
@@ -7463,7 +7463,7 @@ input.form-control {
 }
 
 .sidebar-nav > .sidebar-brand {
-  height: 66px;
+  height: 56px;
   line-height: 60px;
   font-size: 18px;
 }
@@ -7478,15 +7478,21 @@ input.form-control {
 }
 
 .content-header {
-  height: 65px;
+  height: 55px;
   line-height: 65px;
 }
 
 .content-header h1 {
   margin: 0;
-  margin-left: 10px;
-  line-height: 65px;
+  margin-top: 5px;
+  margin-left: 5px;
+  /*line-height: 65px;*/
   display: inline-block;
+  font-size: 2em;
+}
+
+.content-header-sub {
+  display: none;
 }
 
 .content-header h2 {
@@ -7511,7 +7517,7 @@ input.form-control {
   }
 
   #sidebar-wrapper {
-    margin-top: 66px;
+    margin-top: 56px;
     left: 0;
   }
 
@@ -7536,6 +7542,13 @@ input.form-control {
 
   .inset {
     padding: 15px;
+  }
+
+  .content-header-sub {
+    padding-left:65px;
+    font-size:.5em;
+    margin-top: -13px;
+    display: block;
   }
 
 }
