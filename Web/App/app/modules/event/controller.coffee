@@ -18,12 +18,14 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
   showEventsIndex: ->
     @events.fetch().done (models) ->
+      application.trigger 'set:active:header', 'Events'
       View = require './views/events-index-view'
       view = new View(collection: models)
       application.layout.content.show(view)
 
   showEventDetails: (id) ->
     @events.fetch().done (models) ->
+      application.trigger 'set:active:header', 'Events'
       View = require './views/event-details-view'
       view = new View(model: models.get(id))
       application.layout.content.show(view)

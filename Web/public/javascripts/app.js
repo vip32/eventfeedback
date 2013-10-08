@@ -1300,6 +1300,7 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.showEventsIndex = function() {
     return this.events.fetch().done(function(models) {
       var View, view;
+      application.trigger('set:active:header', 'Events');
       View = require('./views/events-index-view');
       view = new View({
         collection: models
@@ -1311,6 +1312,7 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.showEventDetails = function(id) {
     return this.events.fetch().done(function(models) {
       var View, view;
+      application.trigger('set:active:header', 'Events');
       View = require('./views/event-details-view');
       view = new View({
         model: models.get(id)
