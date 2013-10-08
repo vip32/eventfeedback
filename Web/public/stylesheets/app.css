@@ -7426,7 +7426,7 @@ input.form-control {
   font-size: 24px;
 }
 
-#page-content-wrapper h1{
+#page-content-wrapper h1, h2{
   color: #FFFFFF;
 }
 
@@ -7484,7 +7484,14 @@ input.form-control {
 
 .content-header h1 {
   margin: 0;
-  margin-left: 20px;
+  margin-left: 10px;
+  line-height: 65px;
+  display: inline-block;
+}
+
+.content-header h2 {
+  margin: 0;
+  margin-left: 10px;
   line-height: 65px;
   display: inline-block;
 }
