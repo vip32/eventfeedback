@@ -254,23 +254,11 @@ module.exports = AppLayout = (function(_super) {
   };
 
   AppLayout.prototype.onSidebarToggle = function() {
-    var html, scrollPosition;
-    $('#wrapper').toggleClass('active');
-    scrollPosition = [self.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft, self.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop];
-    html = jQuery("html");
-    html.data("scroll-position", scrollPosition);
-    html.data("previous-overflow", html.css("overflow"));
-    html.css("overflow", "hidden");
-    return window.scrollTo(scrollPosition[0], scrollPosition[1]);
+    return $('#wrapper').toggleClass('active');
   };
 
   AppLayout.prototype.onSidebarHide = function() {
-    var html, scrollPosition;
-    $('#wrapper').removeClass('active');
-    html = jQuery("html");
-    scrollPosition = html.data("scroll-position");
-    html.css("overflow", html.data("previous-overflow"));
-    return window.scrollTo(scrollPosition[0], scrollPosition[1]);
+    return $('#wrapper').removeClass('active');
   };
 
   return AppLayout;
