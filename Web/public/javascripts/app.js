@@ -1453,7 +1453,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <div class=\"btn-group pull-right\" style=\"margin-right:15px;\">\r\n      <button type=\"button\" class=\"btn btn-default active btn-group-lg\">All</button>\r\n      <button type=\"button\" class=\"btn btn-default btn-group-lg\">C#</button>\r\n      <button type=\"button\" class=\"btn btn-default btn-group-lg\">Java</button>\r\n      <button type=\"button\" class=\"btn btn-default btn-group-lg\">SAP</button>\r\n    </div>\r\n    <h3>Event: ";
+  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\"><h3>Event: ";
   if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -1461,7 +1461,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   if (stack1 = helpers.description) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.description; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</h3>\r\n    <div class=\"list-group js-sessions\">\r\n      <!-- sessions -->\r\n    </div>\r\n    <a href=\"#events\">< Events</a>\r\n  </div>\r\n</div>";
+    + "</h3></div>\r\n      <div class=\"col-xs-5\">\r\n        <div class=\"btn-group pull-right\">\r\n          <button type=\"button\" class=\"btn btn-default active btn-group-lg\">All</button>\r\n          <button type=\"button\" class=\"btn btn-default btn-group-lg\">C#</button>\r\n          <button type=\"button\" class=\"btn btn-default btn-group-lg\">Java</button>\r\n          <button type=\"button\" class=\"btn btn-default btn-group-lg\">SAP</button>\r\n        </div>\r\n      </div>\r\n    </div>\r\n    <div class=\"list-group js-sessions\">\r\n      <!-- sessions -->\r\n    </div>\r\n    <a href=\"#events\">< Events</a>\r\n  </div>\r\n</div>";
   return buffer;
   });
 });
