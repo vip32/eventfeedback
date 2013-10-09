@@ -7326,27 +7326,23 @@ input.form-control {
   -webkit-border-radius: 0px;
   border-radius: 0px;
 }
-.list-group-item:first-child {
-  -webkit-border-radius: 0px;
-  border-radius: 0px;
-  border-top-right-radius: 0px;
-  border-top-left-radius: 0px;
+.list-group-item {
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
 }
-.list-group-item:last-child {
-  -webkit-border-radius: 0px;
-  border-radius: 0px;
-  border-bottom-right-radius: 0px;
-  border-bottom-left-radius: 0px;
+.page-content .container {
+  padding-left: 0px;
+  padding-right: 0px;
 }
-.container .jumbotron {
+.page-content .container .jumbotron {
   -webkit-border-radius: 0px;
   border-radius: 0px;
   padding: 15px;
 }
-.container .jumbotron a {
+.page-content .container .jumbotron a {
   margin-bottom: 5px;
 }
-.container .jumbotron .list-group a:hover {
+.page-content .container .jumbotron .list-group a:hover {
   background-color: #90bfd8;
 }
 .no-transition {
@@ -7557,6 +7553,7 @@ input.form-control {
     font-size:.5em;
     margin-top: -13px;
     display: block;
+    color: #adadad;
   }
 }
 

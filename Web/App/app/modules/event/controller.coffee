@@ -34,12 +34,14 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     @events.fetch(
       data:
         filter: 'all'
-    ).done (models) ->
+    ).done (models) =>
       application.trigger 'set:active:header', 'Events'
       settings.set('active-event', id)
-      View = require './views/event-details-view'
-      view = new View(model: models.get(id))
-      application.layout.content.show(view)
+
+      @sessions.fetch().done (sessions) =>
+        View = require './views/event-details-view'
+        view = new View(model: models.get(id), collection: sessions)
+        application.layout.content.show(view)
 
   showSessionsIndex: ->
     @sessions.fetch(

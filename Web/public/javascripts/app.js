@@ -1112,7 +1112,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <form class=\"form-signin\">\r\n      <h3 class=\"form-signin-heading\">Please sign in</h3>\r\n      <input type=\"text\" class=\"form-control\" placeholder=\"username\" autofocus>\r\n      <input type=\"password\" class=\"form-control\" placeholder=\"password\">\r\n      <div class=\"form-group\">\r\n        <label for=\"notification1\">Remember me</label>\r\n        <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n          <input type=\"radio\" id=\"notification1\">\r\n        </div>\r\n      </div>\r\n      <button class=\"btn btn-lg btn-success btn-block js-signin\">Sign in</button>\r\n    </form>\r\n  </div>\r\n</div>";
+  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <form class=\"form-signin\">\r\n      <input type=\"text\" class=\"form-control\" placeholder=\"username\" autofocus>\r\n      <input type=\"password\" class=\"form-control\" placeholder=\"password\">\r\n      <div class=\"form-group\">\r\n        <label for=\"notification1\">Remember me</label>\r\n        <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n          <input type=\"radio\" id=\"notification1\">\r\n        </div>\r\n      </div>\r\n      <button class=\"btn btn-lg btn-success btn-block js-signin\">Sign in</button>\r\n    </form>\r\n  </div>\r\n</div>";
   });
 });
 
@@ -1165,19 +1165,23 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showEventDetails = function(id) {
+    var _this = this;
     return this.events.fetch({
       data: {
         filter: 'all'
       }
     }).done(function(models) {
-      var View, view;
       application.trigger('set:active:header', 'Events');
       settings.set('active-event', id);
-      View = require('./views/event-details-view');
-      view = new View({
-        model: models.get(id)
+      return _this.sessions.fetch().done(function(sessions) {
+        var View, view;
+        View = require('./views/event-details-view');
+        view = new View({
+          model: models.get(id),
+          collection: sessions
+        });
+        return application.layout.content.show(view);
       });
-      return application.layout.content.show(view);
     });
   };
 
@@ -1308,13 +1312,17 @@ module.exports = EventDetailsView = (function(_super) {
 
   EventDetailsView.prototype.template = require('./templates/event-details');
 
+  EventDetailsView.prototype.itemView = require('./session-item-view');
+
+  EventDetailsView.prototype.itemViewContainer = '.js-sessions';
+
   EventDetailsView.prototype.initialize = function(options) {
     return console.log('event id', options);
   };
 
   return EventDetailsView;
 
-})(Backbone.Marionette.ItemView);
+})(Backbone.Marionette.CompositeView);
 
 });
 
@@ -1432,7 +1440,7 @@ module.exports = SessionItemView = (function(_super) {
 
   SessionItemView.prototype.id = 'session-item-view';
 
-  SessionItemView.prototype.template = require('./templates/event-item');
+  SessionItemView.prototype.template = require('./templates/session-item');
 
   SessionItemView.prototype.tagName = 'a';
 
@@ -1492,7 +1500,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>";
+  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>Event: ";
   if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -1500,11 +1508,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   if (stack1 = helpers.description) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.description; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</h3>\r\n    <h3>";
-  if (stack1 = helpers.speaker) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.speaker; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>\r\n      <a class=\"btn btn-lg btn-primary\" href=\"#events\">&laquo; Back</a>\r\n    </p>\r\n  </div>\r\n</div>";
+    + "</h3>\r\n\r\n    <div class=\"list-group js-sessions\">\r\n      <!-- sessions -->\r\n    </div>\r\n    <a href=\"#events\">< Events</a>\r\n  </div>\r\n</div>";
   return buffer;
   });
 });
@@ -1516,6 +1520,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
+  buffer += "Event: ";
   if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -1535,6 +1540,25 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
 
   return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <div class=\"list-group js-events\">\r\n      <!-- events -->\r\n    </div>\r\n  </div>\r\n</div>";
+  });
+});
+
+;require.register("modules/event/views/templates/session-item", function(exports, require, module) {
+module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "Session: ";
+  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + " ";
+  if (stack1 = helpers.description) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.description; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1);
+  return buffer;
   });
 });
 
