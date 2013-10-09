@@ -42,6 +42,8 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       application.layout.content.show(view)
 
   showSessionsIndex: ->
+    @ensureActiveEvent()
+
     @sessions.fetch(
       reload: true
     ).done (models) ->
@@ -51,12 +53,20 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       application.layout.content.show(view)
 
   showSessionDetails: (id) ->
+    @ensureActiveEvent()
+
     @sessions.fetch().done (models) ->
       application.trigger 'set:active:header', 'Sessions'
       settings.set('active-session', id)
       View = require './views/session-details-view'
       view = new View(model: models.get(id))
       application.layout.content.show(view)
+
+  ensureActiveEvent: ->
+    if _.isEmpty(settings.get('active-event'))
+      application.trigger 'events:index'
+      # TODO : show info message why redirected
+      return
 
   onClose: ->
     console.log 'event controller close'

@@ -1182,6 +1182,7 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showSessionsIndex = function() {
+    this.ensureActiveEvent();
     return this.sessions.fetch({
       reload: true
     }).done(function(models) {
@@ -1196,6 +1197,7 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showSessionDetails = function(id) {
+    this.ensureActiveEvent();
     return this.sessions.fetch().done(function(models) {
       var View, view;
       application.trigger('set:active:header', 'Sessions');
@@ -1206,6 +1208,12 @@ module.exports = Controller = (function(_super) {
       });
       return application.layout.content.show(view);
     });
+  };
+
+  Controller.prototype.ensureActiveEvent = function() {
+    if (_.isEmpty(settings.get('active-event'))) {
+      application.trigger('events:index');
+    }
   };
 
   Controller.prototype.onClose = function() {
