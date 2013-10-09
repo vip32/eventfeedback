@@ -1331,7 +1331,6 @@ module.exports = EventItemView = (function(_super) {
 
   EventItemView.prototype.onclick = function(e) {
     e.preventDefault();
-    window.navigator.vibrate(200);
     settings.set('active-event', this.model.get('id'));
     return application.trigger('event:details', this.model.get('id'));
   };
@@ -1437,7 +1436,6 @@ module.exports = SessionItemView = (function(_super) {
 
   SessionItemView.prototype.onclick = function(e) {
     e.preventDefault();
-    window.navigator.vibrate(200);
     settings.set('active-session', this.model.get('id'));
     return application.trigger('session:details', this.model.get('id'));
   };
