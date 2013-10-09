@@ -15,5 +15,6 @@ module.exports = class EventItemView extends ItemView
 
   onclick: (e) ->
     e.preventDefault()
+    window.navigator.vibrate?(200)
     settings.set('active-event', @model.get('id'))
     application.trigger 'event:details', @model.get('id')
