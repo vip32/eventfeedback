@@ -1182,7 +1182,6 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showSessionsIndex = function() {
-    this.ensureActiveEvent();
     return this.sessions.fetch({
       reload: true
     }).done(function(models) {
@@ -1197,7 +1196,6 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showSessionDetails = function(id) {
-    this.ensureActiveEvent();
     return this.sessions.fetch().done(function(models) {
       var View, view;
       application.trigger('set:active:header', 'Sessions');
@@ -1208,12 +1206,6 @@ module.exports = Controller = (function(_super) {
       });
       return application.layout.content.show(view);
     });
-  };
-
-  Controller.prototype.ensureActiveEvent = function() {
-    if (_.isEmpty(settings.get('active-event'))) {
-      application.trigger('events:index');
-    }
   };
 
   Controller.prototype.onClose = function() {
@@ -1227,11 +1219,13 @@ module.exports = Controller = (function(_super) {
 });
 
 ;require.register("modules/event/router", function(exports, require, module) {
-var Controller, Router, application, _ref,
+var Controller, Router, application, settings, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+settings = require('settings');
 
 Controller = require('./controller');
 
@@ -1259,18 +1253,34 @@ module.exports = Router = (function(_super) {
         return _this.controller.showEventsIndex();
       });
       application.on('event:details', function(id) {
-        application.navigate('event', id);
-        return _this.controller.showEventDetails(id);
+        if (_this.noActiveEvent()) {
+          return application.trigger('events:index');
+        } else {
+          application.navigate('event', id);
+          return _this.controller.showEventDetails(id);
+        }
       });
       application.on('sessions:index', function() {
-        application.navigate('sessions');
-        return _this.controller.showSessionsIndex();
+        if (_this.noActiveEvent()) {
+          return application.trigger('events:index');
+        } else {
+          application.navigate('sessions');
+          return _this.controller.showSessionsIndex();
+        }
       });
       return application.on('session:details', function(id) {
-        application.navigate('session', id);
-        return _this.controller.showSessionDetails(id);
+        if (_this.noActiveEvent()) {
+          return application.trigger('events:index');
+        } else {
+          application.navigate('session', id);
+          return _this.controller.showSessionDetails(id);
+        }
       });
     });
+  };
+
+  Router.prototype.noActiveEvent = function() {
+    return _.isEmpty(settings.get('active-event'));
   };
 
   Router.prototype.controller = new Controller();
