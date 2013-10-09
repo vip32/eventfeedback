@@ -13770,7 +13770,7 @@ if (!jQuery) { throw new Error("Bootstrap requires jQuery") }
 }(window.jQuery);
 
 ;(function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, firstLoad, getFromDOM, getIntercept, handlePushState, init, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _intercept, _pushState, _ref, _replaceState,
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, init, now, options, requestAnimationFrame, result, runAnimation, scalers, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _intercept, _pushState, _ref, _replaceState,
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -13785,7 +13785,6 @@ if (!jQuery) { throw new Error("Bootstrap requires jQuery") }
     easeFactor: 1.25,
     startOnPageLoad: true,
     restartOnPushState: true,
-    restartOnBackboneRoute: true,
     restartOnRequestAfter: 500,
     target: 'body',
     elements: {
@@ -13799,7 +13798,7 @@ if (!jQuery) { throw new Error("Bootstrap requires jQuery") }
     },
     ajax: {
       trackMethods: ['GET'],
-      trackWebSockets: true
+      trackWebSockets: false
     }
   };
 
@@ -13967,14 +13966,14 @@ if (!jQuery) { throw new Error("Bootstrap requires jQuery") }
       el = this.getElement();
       el.children[0].style.width = "" + this.progress + "%";
       if (!this.lastRenderedProgress || this.lastRenderedProgress | 0 !== this.progress | 0) {
-        el.setAttribute('data-progress-text', "" + (this.progress | 0) + "%");
+        el.children[0].setAttribute('data-progress-text', "" + (this.progress | 0) + "%");
         if (this.progress >= 100) {
           progressStr = '99';
         } else {
           progressStr = this.progress < 10 ? "0" : "";
           progressStr += this.progress | 0;
         }
-        el.setAttribute('data-progress', "" + progressStr);
+        el.children[0].setAttribute('data-progress', "" + progressStr);
       }
       return this.lastRenderedProgress = this.progress;
     };
@@ -14406,40 +14405,6 @@ if (!jQuery) { throw new Error("Bootstrap requires jQuery") }
     };
   }
 
-  firstLoad = true;
-
-  if (options.restartOnBackboneRoute) {
-    setTimeout(function() {
-      if (window.Backbone == null) {
-        return;
-      }
-      return Backbone.history.on('route', function(router, name) {
-        var routeName, rule, _i, _len, _results;
-        if (!(rule = options.restartOnBackboneRoute)) {
-          return;
-        }
-        if (firstLoad) {
-          firstLoad = false;
-          return;
-        }
-        if (typeof rule === 'object') {
-          _results = [];
-          for (_i = 0, _len = rule.length; _i < _len; _i++) {
-            routeName = rule[_i];
-            if (!(routeName === name)) {
-              continue;
-            }
-            Pace.restart();
-            break;
-          }
-          return _results;
-        } else {
-          return Pace.restart();
-        }
-      });
-    }, 0);
-  }
-
   SOURCE_KEYS = {
     ajax: AjaxMonitor,
     elements: ElementMonitor,
@@ -14616,7 +14581,7 @@ if (!jQuery) { throw new Error("Bootstrap requires jQuery") }
               .addClass("switch-left")
               .addClass(myClasses)
               .addClass(color)
-              .html(onLabel);
+              .html('' + onLabel + '');
 
             color = '';
             if ($element.data('off') !== undefined)
@@ -14626,7 +14591,7 @@ if (!jQuery) { throw new Error("Bootstrap requires jQuery") }
               .addClass("switch-right")
               .addClass(myClasses)
               .addClass(color)
-              .html(offLabel);
+              .html('' + offLabel + '');
 
             $label = $('<label>')
               .html("&nbsp;")
@@ -14935,177 +14900,6 @@ if (!jQuery) { throw new Error("Bootstrap requires jQuery") }
     $('.make-switch')['bootstrapSwitch']();
   });
 })(jQuery);
-
-;/*!
- * backbone.cacheit.js v0.1.0-pre
- * Copyright 2013, Tim Branyen (@tbranyen)
- * backbone.cacheit.js may be freely distributed under the MIT license.
- */
-(function(window) { 
-"use strict";
-
-// Normalize the `define` and `require` calls.
-var require = window.require || function() {};
-// Call the exports function or the crafted one with the Node.js `require`.
-var define = window.define || function(cb) { cb.call(this, require); };
-
-// Define the module contents.
-define(function(require) {
-
-// Localize global dependency references.
-var Backbone = require("backbone") || window.Backbone;
-var _ = require("underscore") || window._;
-var $ = require("jquery") || Backbone.$;
-
-// Patch the fetch method to retain a reference.
-_.each(["Model", "Collection"], function(ctor) {
-  // Retain a copy of the original fetch method, since we are overidding it.
-  var oldFetch = Backbone[ctor].prototype.fetch;
-
-  // Override both Model and Collection `fetch` methods.
-  var newFetch = Backbone[ctor].prototype.fetch = function(options) {
-    options = options || {};
-
-    // Save a reference to the original deferred.
-    var oldDef = this._def;
-
-    // Return early.
-    if (this._def && !options.reload && !this.reload) {
-      return this._def.promise();
-    }
-
-    // If a deferred doesn't exist, create one.  If the clear flag is provided,
-    // jump in to create a new deferred.
-    this._def = newFetch.deferred();
-
-    // If the clear was provided and there is an existing deferred, resolve it
-    // once this has resolved.
-    if (options.reload && oldDef) {
-      this._def.done(oldDef.resolve);
-    }
-
-    // Call the original `fetch` method and store its return value (jqXHR).
-    var req = oldFetch.apply(this, arguments);
-
-    // Once the request has finished, resolve / reject this deferred as needed
-    req.done(_.bind(function() {
-      this._def.resolveWith(this, [this]);
-    }, this)).fail(_.bind(function() {
-      this._def.rejectWith(this, [this]);
-    }, this));
-
-    // Return the deferred to wait with.
-    return this._def.promise();
-  };
-
-  // Allow the jQuery dependency to be swapped out to use this in other
-  // enviornments.
-  Backbone[ctor].prototype.fetch.deferred = function() {
-    return $.Deferred();
-  };
-});
-
-});
-
-})(typeof global === "object" ? global : this);
-
-;/*!
- * backbone.basicauth.js v0.4.0
- *
- * Adds HTTP Basic Authentication headers,
- * either by reading them from a model property,
- * or by parsing the model/collection.url.
- *
- * Copyright 2013, Tom Spencer (@fiznool), Luis Abreu (@lmjabreu)
- * backbone.basicauth.js may be freely distributed under the MIT license.
- */
-;( function (root, factory) {
-  // AMD module if available
-  if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        define(['underscore', 'backbone'], factory);
-    } else {
-        // Browser globals
-        root.amdWeb = factory(root._, root.Backbone);
-    }
-}( this, function (_, Backbone) {
-
-  var btoa = window.btoa;
-
-  /**
-   * Returns a base64 encoded "user:pass" string
-   * @param  {string} username The http auth username
-   * @param  {string} password The http auth password
-   * @return {string}          The base64 encoded credentials pair
-   */
-  var encode = function(credentials) {
-    // Use Base64 encoding to create the authentication details
-    // If btoa is not available on your target browser there is a polyfill:
-    // https://github.com/davidchambers/Base64.js
-    // Using unescape and encodeURIComponent to allow for Unicode strings
-    // https://developer.mozilla.org/en-US/docs/Web/API/window.btoa#Unicode_Strings
-    return btoa(unescape(encodeURIComponent(
-      [credentials.username, credentials.password].join(':'))));
-  };
-
-  // Add a public method so that anything else can also create the header
-  Backbone.BasicAuth = {
-    getHeader: function(credentials) {
-      return {
-        'Authorization': 'Basic ' + encode(credentials)
-      };
-    }
-  };
-
-  // Store a copy of the original Backbone.sync
-  var originalSync = Backbone.sync;
-
-  /**
-   * Override Backbone.sync
-   *
-   * If a token is present, set the Basic Auth header before the sync is performed.
-   *
-   * @param  {string} method  Contains the backbone operation. e.g.: read, reset, set
-   * @param  {object} model   A Backbone model or collection
-   * @param  {object} options Options to be passed over to Backbone.sync and jQuery
-   * @return {object}         Reference to Backbone.sync for chaining
-   */
-  Backbone.sync = function (method, model, options) {
-
-    // Basic Auth supports two modes: URL-based and function-based.
-    var credentials, remoteUrl, remoteUrlParts;
-
-    if(model.credentials) {
-      // Try function-based.
-      credentials = _.result(model, 'credentials');
-    }
-
-    if(credentials == null) {
-      // Try URL-based.
-      // Handle both string and function urls
-      remoteURL = options.url || _.result(model, 'url');
-
-      // Retrieve the auth credentials from the model url
-      remoteUrlParts = remoteURL.match(/\/\/(.*):(.*)@/);
-      if (remoteUrlParts && remoteUrlParts.length === 3) {
-        credentials = {
-          username: remoteUrlParts[1],
-          password: remoteUrlParts[2]
-        };
-      }
-    }
-
-    // Add the token to the request headers if available
-    if (credentials != null) {
-      options.headers = options.headers || {};
-      _.extend(options.headers, Backbone.BasicAuth.getHeader(credentials));
-    }
-
-    // Perform the sync
-    return originalSync.call(model, method, model, options);
-  };
-
-}));
 
 ;// Console-polyfill. MIT license.
 // https://github.com/paulmillr/console-polyfill
@@ -20025,14 +19819,112 @@ if (typeof define !== 'undefined' && define.amd) {
 	window.FastClick = FastClick;
 }
 
+;/*!
+ * backbone.basicauth.js v0.4.0
+ *
+ * Adds HTTP Basic Authentication headers,
+ * either by reading them from a model property,
+ * or by parsing the model/collection.url.
+ *
+ * Copyright 2013, Tom Spencer (@fiznool), Luis Abreu (@lmjabreu)
+ * backbone.basicauth.js may be freely distributed under the MIT license.
+ */
+;( function (root, factory) {
+  // AMD module if available
+  if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['underscore', 'backbone'], factory);
+    } else {
+        // Browser globals
+        root.amdWeb = factory(root._, root.Backbone);
+    }
+}( this, function (_, Backbone) {
+
+  var btoa = window.btoa;
+
+  /**
+   * Returns a base64 encoded "user:pass" string
+   * @param  {string} username The http auth username
+   * @param  {string} password The http auth password
+   * @return {string}          The base64 encoded credentials pair
+   */
+  var encode = function(credentials) {
+    // Use Base64 encoding to create the authentication details
+    // If btoa is not available on your target browser there is a polyfill:
+    // https://github.com/davidchambers/Base64.js
+    // Using unescape and encodeURIComponent to allow for Unicode strings
+    // https://developer.mozilla.org/en-US/docs/Web/API/window.btoa#Unicode_Strings
+    return btoa(unescape(encodeURIComponent(
+      [credentials.username, credentials.password].join(':'))));
+  };
+
+  // Add a public method so that anything else can also create the header
+  Backbone.BasicAuth = {
+    getHeader: function(credentials) {
+      return {
+        'Authorization': 'Basic ' + encode(credentials)
+      };
+    }
+  };
+
+  // Store a copy of the original Backbone.sync
+  var originalSync = Backbone.sync;
+
+  /**
+   * Override Backbone.sync
+   *
+   * If a token is present, set the Basic Auth header before the sync is performed.
+   *
+   * @param  {string} method  Contains the backbone operation. e.g.: read, reset, set
+   * @param  {object} model   A Backbone model or collection
+   * @param  {object} options Options to be passed over to Backbone.sync and jQuery
+   * @return {object}         Reference to Backbone.sync for chaining
+   */
+  Backbone.sync = function (method, model, options) {
+
+    // Basic Auth supports two modes: URL-based and function-based.
+    var credentials, remoteUrl, remoteUrlParts;
+
+    if(model.credentials) {
+      // Try function-based.
+      credentials = _.result(model, 'credentials');
+    }
+
+    if(credentials == null) {
+      // Try URL-based.
+      // Handle both string and function urls
+      remoteURL = options.url || _.result(model, 'url');
+
+      // Retrieve the auth credentials from the model url
+      remoteUrlParts = remoteURL.match(/\/\/(.*):(.*)@/);
+      if (remoteUrlParts && remoteUrlParts.length === 3) {
+        credentials = {
+          username: remoteUrlParts[1],
+          password: remoteUrlParts[2]
+        };
+      }
+    }
+
+    // Add the token to the request headers if available
+    if (credentials != null) {
+      options.headers = options.headers || {};
+      _.extend(options.headers, Backbone.BasicAuth.getHeader(credentials));
+    }
+
+    // Perform the sync
+    return originalSync.call(model, method, model, options);
+  };
+
+}));
+
 ;/**
  * Backbone localStorage Adapter
- * Version 1.1.6
+ * Version 1.1.7
  *
  * https://github.com/jeromegn/Backbone.localStorage
  */
 (function (root, factory) {
-   if (typeof exports === 'object' && root.require) {
+   if (typeof exports === 'object' && typeof require === 'function') {
      module.exports = factory(require("underscore"), require("backbone"));
    } else if (typeof define === "function" && define.amd) {
       // AMD. Register as an anonymous module.
@@ -20610,6 +20502,79 @@ Handlebars.template = Handlebars.VM.template;
 // lib/handlebars/browser-suffix.js
 })(Handlebars);
 ;
+
+;/*!
+ * backbone.cacheit.js v0.1.0-pre
+ * Copyright 2013, Tim Branyen (@tbranyen)
+ * backbone.cacheit.js may be freely distributed under the MIT license.
+ */
+(function(window) {
+"use strict";
+
+// Normalize the `define` and `require` calls.
+var require = window.require || function() {};
+// Call the exports function or the crafted one with the Node.js `require`.
+var define = window.define || function(cb) { cb.call(this, require); };
+
+// Define the module contents.
+define(function(require) {
+
+// Localize global dependency references.
+var Backbone =  window.Backbone || require("backbone") ;
+var _ =  window._ || require("underscore") ;
+var $ =  Backbone.$ || require("jquery") ;
+
+// Patch the fetch method to retain a reference.
+_.each(["Model", "Collection"], function(ctor) {
+  // Retain a copy of the original fetch method, since we are overidding it.
+  var oldFetch = Backbone[ctor].prototype.fetch;
+
+  // Override both Model and Collection `fetch` methods.
+  var newFetch = Backbone[ctor].prototype.fetch = function(options) {
+    options = options || {};
+
+    // Save a reference to the original deferred.
+    var oldDef = this._def;
+
+    // Return early.
+    if (this._def && !options.reload && !this.reload) {
+      return this._def.promise();
+    }
+
+    // If a deferred doesn't exist, create one.  If the clear flag is provided,
+    // jump in to create a new deferred.
+    this._def = newFetch.deferred();
+
+    // If the clear was provided and there is an existing deferred, resolve it
+    // once this has resolved.
+    if (options.reload && oldDef) {
+      this._def.done(oldDef.resolve);
+    }
+
+    // Call the original `fetch` method and store its return value (jqXHR).
+    var req = oldFetch.apply(this, arguments);
+
+    // Once the request has finished, resolve / reject this deferred as needed
+    req.done(_.bind(function() {
+      this._def.resolveWith(this, [this]);
+    }, this)).fail(_.bind(function() {
+      this._def.rejectWith(this, [this]);
+    }, this));
+
+    // Return the deferred to wait with.
+    return this._def.promise();
+  };
+
+  // Allow the jQuery dependency to be swapped out to use this in other
+  // enviornments.
+  Backbone[ctor].prototype.fetch.deferred = function() {
+    return $.Deferred();
+  };
+});
+
+});
+
+})(typeof global === "object" ? global : this);
 
 ;// Backbone.Syphon, v0.4.1
 // Copyright (c)2012 Derick Bailey, Muted Solutions, LLC.

@@ -3,6 +3,10 @@ exports.config =
   paths:
     public: '../public'
 
+  # modules:
+  #   wrapper: 'amd'
+  #   definition: 'amd'
+
   files:
     javascripts:
       joinTo:
