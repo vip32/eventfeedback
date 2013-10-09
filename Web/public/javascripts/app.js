@@ -1330,13 +1330,10 @@ module.exports = EventItemView = (function(_super) {
   };
 
   EventItemView.prototype.onClick = function(e) {
-    var _this = this;
     e.preventDefault();
     this.$el.addClass('active');
-    return setTimeout(function() {
-      settings.set('active-event', _this.model.get('id'));
-      return application.trigger('event:details', _this.model.get('id'), 300);
-    });
+    settings.set('active-event', this.model.get('id'));
+    return application.trigger('event:details', this.model.get('id'));
   };
 
   return EventItemView;
@@ -1439,13 +1436,10 @@ module.exports = SessionItemView = (function(_super) {
   };
 
   SessionItemView.prototype.onClick = function(e) {
-    var _this = this;
     e.preventDefault();
     this.$el.addClass('active');
-    return setTimeout(function() {
-      settings.set('active-session', _this.model.get('id'));
-      return application.trigger('session:details', _this.model.get('id'), 300);
-    });
+    settings.set('active-session', this.model.get('id'));
+    return application.trigger('session:details', this.model.get('id'));
   };
 
   return SessionItemView;

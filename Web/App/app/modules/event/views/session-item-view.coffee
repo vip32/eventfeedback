@@ -16,7 +16,5 @@ module.exports = class SessionItemView extends ItemView
   onClick: (e) ->
     e.preventDefault()
     @$el.addClass('active')
-    setTimeout =>
-      settings.set('active-session', @model.get('id'))
-      application.trigger 'session:details', @model.get('id')
-      , 300
+    settings.set('active-session', @model.get('id'))
+    application.trigger 'session:details', @model.get('id')

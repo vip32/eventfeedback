@@ -16,7 +16,5 @@ module.exports = class EventItemView extends ItemView
   onClick: (e) ->
     e.preventDefault()
     @$el.addClass('active')
-    setTimeout =>
-      settings.set('active-event', @model.get('id'))
-      application.trigger 'event:details', @model.get('id')
-      , 300
+    settings.set('active-event', @model.get('id'))
+    application.trigger 'event:details', @model.get('id')
