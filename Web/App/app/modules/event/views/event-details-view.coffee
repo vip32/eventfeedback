@@ -6,11 +6,3 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
 
   initialize: (options) ->
     console.log 'event id', options
-
-  # onBeforeClose: ->
-  #   alert 'bbbbbbbbbb'
-
-
-  # onClose: ->
-  #   alert 'aaaa'
-
