@@ -1509,16 +1509,16 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, options, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
 
 
-  buffer += "<h3><strong>";
+  buffer += "<div><strong>";
   if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</strong></h3>\r\n<p>";
+    + "</strong></div>\r\n<div class=\"glyphicon glyphicon-time\">\r\n  ";
   options = {hash:{
     'format': ("DD.MM.YYYY")
   },data:data};
   buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.startDate, options) : helperMissing.call(depth0, "dateFormat", depth0.startDate, options)))
-    + "</p>";
+    + "\r\n</div>";
   return buffer;
   });
 });
@@ -1538,14 +1538,33 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, options, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
+  var buffer = "", stack1, stack2, options, functionType="function", escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
 
+function program1(depth0,data) {
+  
+  var buffer = "";
+  buffer += "<span class=\"badge pull-right\">"
+    + escapeExpression((typeof depth0 === functionType ? depth0.apply(depth0) : depth0))
+    + "</span>";
+  return buffer;
+  }
 
-  buffer += "<h3><strong>";
+function program3(depth0,data) {
+  
+  var buffer = "";
+  buffer += escapeExpression((typeof depth0 === functionType ? depth0.apply(depth0) : depth0))
+    + " ";
+  return buffer;
+  }
+
+  buffer += "<div><strong>";
   if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</strong></h3>\r\n<p>";
+    + "</strong></div>\r\n";
+  stack1 = helpers.each.call(depth0, depth0.tags, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\r\n<div class=\"glyphicon glyphicon-time\">\r\n  ";
   options = {hash:{
     'format': ("HH:mm")
   },data:data};
@@ -1555,7 +1574,10 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     'format': ("HH:mm")
   },data:data};
   buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.endDate, options) : helperMissing.call(depth0, "dateFormat", depth0.endDate, options)))
-    + "</p>";
+    + "\r\n</div>\r\n<div class=\"glyphicon glyphicon-user\">\r\n  ";
+  stack2 = helpers.each.call(depth0, depth0.speakers, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n</div>\r\n";
   return buffer;
   });
 });
