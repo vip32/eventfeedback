@@ -15,6 +15,6 @@ module.exports = class SessionItemView extends ItemView
 
   onclick: (e) ->
     e.preventDefault()
-    window.navigator.vibrate?(200)
+    window.navigator.vibrate(200)
     settings.set('active-session', @model.get('id'))
     application.trigger 'session:details', @model.get('id')
