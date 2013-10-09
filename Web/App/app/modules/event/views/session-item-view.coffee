@@ -1,9 +1,18 @@
+application = require 'application'
+settings = require 'settings'
 ItemView = require '../../../../lib/base/item-view'
 
 module.exports = class SessionItemView extends ItemView
   id: 'session-item-view'
   template: require './templates/session-item'
-  tagName: 'a'
+  tagName: 'div'
   className: 'list-group-item'
-  tagAttrs:
-    'href': (model) -> '#sessions/' + model.get('id')
+  # tagAttrs:
+  #   'href': (model) -> '#sessions/' + model.get('id')
+
+  events:
+    'click': 'onclick'
+
+  onclick: ->
+    settings.set('active-session', @model.get('id'))
+    application.trigger 'session:details', @model.get('id')

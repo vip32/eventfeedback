@@ -19,20 +19,20 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
         @controller.showEventsIndex()
 
       application.on 'event:details', (id) =>
-        if @noActiveEvent()
-          application.trigger 'events:index'
-        else
-          application.navigate 'event', id
-          @controller.showEventDetails(id)
+        # if @noActiveEvent()
+        #   application.trigger 'events:index'
+        # else
+        application.navigate 'events/' + id
+        @controller.showEventDetails(id)
 
       application.on 'session:details', (id) =>
-        if @noActiveEvent()
-          application.trigger 'events:index'
-        else
-          application.navigate 'session', id
-          @controller.showSessionDetails(id)
+        # if @noActiveEvent()
+        #   application.trigger 'events:index'
+        # else
+        application.navigate 'sessions/' + id
+        @controller.showSessionDetails(id)
 
-  noActiveEvent: ->
-    return _.isEmpty(settings.get('active-event'))
+  # noActiveEvent: ->
+  #   return _.isEmpty(settings.get('active-event'))
 
   controller: new Controller()

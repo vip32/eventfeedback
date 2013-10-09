@@ -1147,12 +1147,6 @@ module.exports = Controller = (function(_super) {
     var _this = this;
     console.log('event controller init');
     application.addInitializer(function(options) {
-      application.on('events:index', function() {
-        return application.navigate('events');
-      });
-      application.on('event:details', function(id) {
-        return application.navigate('events/' + id);
-      });
       _this.events = new Event.Collection();
       return _this.sessions = new Session.Collection();
     });
@@ -1255,26 +1249,14 @@ module.exports = Router = (function(_super) {
         return _this.controller.showEventsIndex();
       });
       application.on('event:details', function(id) {
-        if (_this.noActiveEvent()) {
-          return application.trigger('events:index');
-        } else {
-          application.navigate('event', id);
-          return _this.controller.showEventDetails(id);
-        }
+        application.navigate('events/' + id);
+        return _this.controller.showEventDetails(id);
       });
       return application.on('session:details', function(id) {
-        if (_this.noActiveEvent()) {
-          return application.trigger('events:index');
-        } else {
-          application.navigate('session', id);
-          return _this.controller.showSessionDetails(id);
-        }
+        application.navigate('sessions/' + id);
+        return _this.controller.showSessionDetails(id);
       });
     });
-  };
-
-  Router.prototype.noActiveEvent = function() {
-    return _.isEmpty(settings.get('active-event'));
   };
 
   Router.prototype.controller = new Controller();
@@ -1317,9 +1299,13 @@ module.exports = EventDetailsView = (function(_super) {
 });
 
 ;require.register("modules/event/views/event-item-view", function(exports, require, module) {
-var EventItemView, ItemView, _ref,
+var EventItemView, ItemView, application, settings, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+settings = require('settings');
 
 ItemView = require('../../../../lib/base/item-view');
 
@@ -1335,14 +1321,18 @@ module.exports = EventItemView = (function(_super) {
 
   EventItemView.prototype.template = require('./templates/event-item');
 
-  EventItemView.prototype.tagName = 'a';
+  EventItemView.prototype.tagName = 'div';
 
   EventItemView.prototype.className = 'list-group-item';
 
-  EventItemView.prototype.tagAttrs = {
-    'href': function(model) {
-      return '#events/' + model.get('id');
-    }
+  EventItemView.prototype.events = {
+    'click': 'onclick'
+  };
+
+  EventItemView.prototype.onclick = function(e) {
+    e.preventDefault();
+    settings.set('active-event', this.model.get('id'));
+    return application.trigger('event:details', this.model.get('id'));
   };
 
   return EventItemView;
@@ -1414,9 +1404,13 @@ module.exports = EventDetailsView = (function(_super) {
 });
 
 ;require.register("modules/event/views/session-item-view", function(exports, require, module) {
-var ItemView, SessionItemView, _ref,
+var ItemView, SessionItemView, application, settings, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+settings = require('settings');
 
 ItemView = require('../../../../lib/base/item-view');
 
@@ -1432,54 +1426,22 @@ module.exports = SessionItemView = (function(_super) {
 
   SessionItemView.prototype.template = require('./templates/session-item');
 
-  SessionItemView.prototype.tagName = 'a';
+  SessionItemView.prototype.tagName = 'div';
 
   SessionItemView.prototype.className = 'list-group-item';
 
-  SessionItemView.prototype.tagAttrs = {
-    'href': function(model) {
-      return '#sessions/' + model.get('id');
-    }
+  SessionItemView.prototype.events = {
+    'click': 'onclick'
+  };
+
+  SessionItemView.prototype.onclick = function() {
+    settings.set('active-session', this.model.get('id'));
+    return application.trigger('session:details', this.model.get('id'));
   };
 
   return SessionItemView;
 
 })(ItemView);
-
-});
-
-;require.register("modules/event/views/sessions-index-view", function(exports, require, module) {
-var Event, SessionIndexView, application, _ref,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-application = require('application');
-
-Event = require('../../../models/event');
-
-module.exports = SessionIndexView = (function(_super) {
-  __extends(SessionIndexView, _super);
-
-  function SessionIndexView() {
-    _ref = SessionIndexView.__super__.constructor.apply(this, arguments);
-    return _ref;
-  }
-
-  SessionIndexView.prototype.id = 'session-index-view';
-
-  SessionIndexView.prototype.template = require('./templates/events-index');
-
-  SessionIndexView.prototype.itemView = require('./session-item-view');
-
-  SessionIndexView.prototype.itemViewContainer = '.js-events';
-
-  SessionIndexView.prototype.onClose = function() {
-    return console.log('sessions-index view close');
-  };
-
-  return SessionIndexView;
-
-})(Backbone.Marionette.CompositeView);
 
 });
 

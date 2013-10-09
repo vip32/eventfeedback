@@ -10,12 +10,6 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
     application.addInitializer (options) =>
 
-      application.on 'events:index', =>
-        application.navigate 'events'
-
-      application.on 'event:details', (id) =>
-        application.navigate 'events/' + id
-
       @events = new Event.Collection()
       @sessions = new Session.Collection()
 

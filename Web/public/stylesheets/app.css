@@ -7354,10 +7354,10 @@ input.form-control {
   border-radius: 0px;
   padding: 15px;
 }
-.page-content .container .jumbotron a {
+.page-content .container .jumbotron div {
   margin-bottom: 5px;
 }
-.page-content .container .jumbotron .list-group a:hover {
+.page-content .container .jumbotron .list-group div:hover {
   background-color: #90bfd8;
 }
 .no-transition {
