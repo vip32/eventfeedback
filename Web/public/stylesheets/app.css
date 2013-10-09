@@ -7354,6 +7354,13 @@ input.form-control {
   border-radius: 0px;
   padding: 15px;
 }
+.badge {
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+  background-color: #fff;
+  color: #2986b9;
+  border: 1px solid #ddd !important;
+}
 .page-content .container .jumbotron div {
   margin-bottom: 5px;
 }
