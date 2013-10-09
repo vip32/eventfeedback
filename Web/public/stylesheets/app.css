@@ -7247,6 +7247,7 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  background-color: #eee;
 }
 .form-contact {
   padding: 15px;
@@ -7327,8 +7328,22 @@ input.form-control {
   border-radius: 0px;
 }
 .list-group-item {
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
+  border: 0px;
+  border-bottom: 5px solid #dbdbdb;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.list-group-item:first-child {
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+}
+.list-group-item:last-child {
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 3px;
 }
 .page-content .container {
   padding-left: 0px;
@@ -7553,7 +7568,7 @@ input.form-control {
     font-size:.5em;
     margin-top: -13px;
     display: block;
-    color: #adadad;
+    color: #DBDBDB;
   }
 }
 

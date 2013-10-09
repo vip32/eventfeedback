@@ -381,6 +381,16 @@ Handlebars.registerHelper('pick', function(val, options) {
   return options.hash[val];
 });
 
+Handlebars.registerHelper("dateFormat", function(context, block) {
+  var f;
+  if (window.moment) {
+    f = block.hash.format || "MMM DD, YYYY hh:mm:ss A";
+    return moment(context).format(f);
+  } else {
+    return context;
+  }
+});
+
 });
 
 ;require.register("models/contact", function(exports, require, module) {
@@ -1171,9 +1181,11 @@ module.exports = Controller = (function(_super) {
         filter: 'all'
       }
     }).done(function(models) {
-      application.trigger('set:active:header', 'Events');
+      application.trigger('set:active:header', 'Sessions');
       settings.set('active-event', id);
-      return _this.sessions.fetch().done(function(sessions) {
+      return _this.sessions.fetch({
+        reload: true
+      }).done(function(sessions) {
         var View, view;
         View = require('./views/event-details-view');
         view = new View({
@@ -1182,20 +1194,6 @@ module.exports = Controller = (function(_super) {
         });
         return application.layout.content.show(view);
       });
-    });
-  };
-
-  Controller.prototype.showSessionsIndex = function() {
-    return this.sessions.fetch({
-      reload: true
-    }).done(function(models) {
-      var View, view;
-      application.trigger('set:active:header', 'Sessions');
-      View = require('./views/sessions-index-view');
-      view = new View({
-        collection: models
-      });
-      return application.layout.content.show(view);
     });
   };
 
@@ -1244,7 +1242,6 @@ module.exports = Router = (function(_super) {
   Router.prototype.appRoutes = {
     'events': 'showEventsIndex',
     'events/:id': 'showEventDetails',
-    'sessions': 'showSessionsIndex',
     'sessions/:id': 'showSessionDetails'
   };
 
@@ -1262,14 +1259,6 @@ module.exports = Router = (function(_super) {
         } else {
           application.navigate('event', id);
           return _this.controller.showEventDetails(id);
-        }
-      });
-      application.on('sessions:index', function() {
-        if (_this.noActiveEvent()) {
-          return application.trigger('events:index');
-        } else {
-          application.navigate('sessions');
-          return _this.controller.showSessionsIndex();
         }
       });
       return application.on('session:details', function(id) {
@@ -1517,17 +1506,19 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, options, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
 
 
-  buffer += "Event: ";
+  buffer += "<h3><strong>";
   if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + " ";
-  if (stack1 = helpers.description) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.description; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1);
+    + "</strong></h3>\r\n<p>";
+  options = {hash:{
+    'format': ("DD.MM.YYYY")
+  },data:data};
+  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.startDate, options) : helperMissing.call(depth0, "dateFormat", depth0.startDate, options)))
+    + "</p>";
   return buffer;
   });
 });
@@ -1547,17 +1538,24 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, options, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
 
 
-  buffer += "Session: ";
+  buffer += "<h3><strong>";
   if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + " ";
-  if (stack1 = helpers.description) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.description; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1);
+    + "</strong></h3>\r\n<p>";
+  options = {hash:{
+    'format': ("HH:mm")
+  },data:data};
+  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.startDate, options) : helperMissing.call(depth0, "dateFormat", depth0.startDate, options)))
+    + "-";
+  options = {hash:{
+    'format': ("HH:mm")
+  },data:data};
+  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.endDate, options) : helperMissing.call(depth0, "dateFormat", depth0.endDate, options)))
+    + "</p>";
   return buffer;
   });
 });

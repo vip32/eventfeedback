@@ -7,7 +7,6 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
   appRoutes:
     'events': 'showEventsIndex'
     'events/:id': 'showEventDetails'
-    'sessions': 'showSessionsIndex'
     'sessions/:id': 'showSessionDetails'
 
   initialize: (options)  ->
@@ -25,13 +24,6 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
         else
           application.navigate 'event', id
           @controller.showEventDetails(id)
-
-      application.on 'sessions:index', =>
-        if @noActiveEvent()
-          application.trigger 'events:index'
-        else
-          application.navigate 'sessions'
-          @controller.showSessionsIndex()
 
       application.on 'session:details', (id) =>
         if @noActiveEvent()
