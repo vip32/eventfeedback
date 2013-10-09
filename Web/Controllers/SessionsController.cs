@@ -28,7 +28,8 @@ namespace EventFeedback.Web.Controllers
             IEnumerable<Session> result;
 
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
-                result = _context.Sessions.OrderBy(e => e.StartDate);
+                result = _context.Sessions.OrderBy(e => e.StartDate)
+                                 .Where(s => s.EventId == eventId);
             else
                 result = _context.Sessions.OrderBy(e => e.StartDate)
                                  .Where(s => s.EventId == eventId)

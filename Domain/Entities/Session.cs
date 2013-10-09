@@ -76,8 +76,12 @@ namespace EventFeedback.Domain
 
         public bool IsCurrent()
         {
-            // TODO: calculate current event (datarange)
-            return false;
+            var dateTime = SystemTime.Now();
+            var minDateTime = dateTime.AddMinutes(-15);
+            var maxDateTime = dateTime.AddMinutes(15);
+            return
+                ((!StartDate.HasValue) || (maxDateTime.CompareTo(StartDate.Value) == 1) || (maxDateTime.CompareTo(StartDate.Value) == 0)) &&
+                ((!EndDate.HasValue) || (minDateTime.CompareTo(EndDate.Value) == -1) || (minDateTime.CompareTo(EndDate.Value)) == 0);
         }
 
         /// <summary>

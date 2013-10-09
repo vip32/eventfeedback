@@ -26,6 +26,9 @@ module.exports.Model = class Contact extends Model
 module.exports.Collection = class ContactsCollection extends Collection
 
   localStorage: new Backbone.LocalStorage("contacts")
+  credentials:
+    username: 'admin'
+    password: 'admin'
   model: module.exports.Model
   comparator: 'firstName'
 

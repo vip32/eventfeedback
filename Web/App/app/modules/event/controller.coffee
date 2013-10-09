@@ -1,5 +1,7 @@
 application = require 'application'
+settings = require 'settings'
 Event = require '../../models/event'
+Session = require '../../models/session'
 
 module.exports = class Controller extends Backbone.Marionette.Controller
 
@@ -15,18 +17,44 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         application.navigate 'events/' + id
 
       @events = new Event.Collection()
+      @sessions = new Session.Collection()
 
   showEventsIndex: ->
-    @events.fetch().done (models) ->
+    @events.fetch(
+      reload: true
+      data:
+        filter: 'all'
+    ).done (models) ->
       application.trigger 'set:active:header', 'Events'
       View = require './views/events-index-view'
       view = new View(collection: models)
       application.layout.content.show(view)
 
   showEventDetails: (id) ->
-    @events.fetch().done (models) ->
+    @events.fetch(
+      data:
+        filter: 'all'
+    ).done (models) ->
       application.trigger 'set:active:header', 'Events'
+      settings.set('active-event', id)
       View = require './views/event-details-view'
+      view = new View(model: models.get(id))
+      application.layout.content.show(view)
+
+  showSessionsIndex: ->
+    @sessions.fetch(
+      reload: true
+    ).done (models) ->
+      application.trigger 'set:active:header', 'Sessions'
+      View = require './views/sessions-index-view'
+      view = new View(collection: models)
+      application.layout.content.show(view)
+
+  showSessionDetails: (id) ->
+    @sessions.fetch().done (models) ->
+      application.trigger 'set:active:header', 'Sessions'
+      settings.set('active-session', id)
+      View = require './views/session-details-view'
       view = new View(model: models.get(id))
       application.layout.content.show(view)
 

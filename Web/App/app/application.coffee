@@ -1,6 +1,7 @@
 require 'lib/marionette-renderer'
 require 'lib/view-helper'
 config = require 'config'
+settings = require 'settings'
 
 class Application extends Backbone.Marionette.Application
   routers: {}
@@ -25,6 +26,10 @@ class Application extends Backbone.Marionette.Application
     @addInitializer (options) =>
       @layout = new (require config.layout)
       @layout.render()
+
+    settings.set('last-visit', moment())
+    settings.set('username', 'admin')
+    settings.set('password', 'admin')
 
     @start()
 

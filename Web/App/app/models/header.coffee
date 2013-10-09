@@ -36,15 +36,15 @@ module.exports.TestData = class TestData
     intern: true
     order: 3
   ,
-    id: "9cf247f4-4c76-d453-bbec-1c40080e32e5"
-    title: "Contacts"
-    trigger: "contacts:index"
-    intern: true
-    order: 1
-  ,
     id: "1cf247f4-4c76-d453-bbec-1c40080e32e4"
     title: "Events"
     trigger: "events:index"
+    intern: true
+    order: 1
+  ,
+    id: "1cf247f4-4c76-d453-bbec-1c40080e32e1"
+    title: "Sessions"
+    trigger: "sessions:index"
     intern: true
     order: 2
   ,

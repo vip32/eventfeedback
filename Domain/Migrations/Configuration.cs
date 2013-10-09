@@ -182,8 +182,8 @@ namespace EventFeedback.Domain.Migrations
                 new Event
                     {
                         Title = "2013 ET 4",
-                        StartDate = new DateTime(2013, 10, 23),
-                        EndDate = new DateTime(2013, 10, 23),
+                        StartDate = new DateTime(2013, 10, 09),
+                        EndDate = new DateTime(2013, 10, 09),
                         Location = "Mannheim",
                         Sessions =
                             new Collection<Session>

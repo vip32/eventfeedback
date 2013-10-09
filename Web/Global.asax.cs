@@ -1,5 +1,7 @@
-﻿using System.Web.Http;
+﻿using System;
+using System.Web.Http;
 using System.Web.Mvc;
+using EventFeedback.Common;
 
 namespace EventFeedback.Web
 {
@@ -12,6 +14,8 @@ namespace EventFeedback.Web
             AuthConfig.Register(GlobalConfiguration.Configuration);
             WebApiConfig.Register(GlobalConfiguration.Configuration);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+
+            SystemTime.Now = () => new DateTime(2013, 10, 9);
         }
     }
 }

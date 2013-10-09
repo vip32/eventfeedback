@@ -52,9 +52,12 @@ namespace EventFeedback.Domain
 
         public bool IsCurrent()
         {
-            // TODO: calculate current event (datarange)
-            //       1 week before startdate and 2 weeks after end date
-            return true;
+            var dateTime = SystemTime.Now();
+            var minDateTime = dateTime.AddDays(-7);
+            var maxDateTime = dateTime.AddDays(7);
+            return
+                ((!StartDate.HasValue) || (maxDateTime.CompareTo(StartDate.Value) == 1) || (maxDateTime.CompareTo(StartDate.Value) == 0)) &&
+                ((!EndDate.HasValue) || (minDateTime.CompareTo(EndDate.Value) == -1) || (minDateTime.CompareTo(EndDate.Value)) == 0);
         }
 
         /// <summary>
@@ -71,5 +74,6 @@ namespace EventFeedback.Domain
         }
     }
 }
+
 
 

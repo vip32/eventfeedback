@@ -91,7 +91,7 @@
   globals.require.brunch = true;
 })();
 require.register("application", function(exports, require, module) {
-var Application, config, _ref,
+var Application, config, settings, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -101,6 +101,8 @@ require('lib/marionette-renderer');
 require('lib/view-helper');
 
 config = require('config');
+
+settings = require('settings');
 
 Application = (function(_super) {
   __extends(Application, _super);
@@ -136,6 +138,9 @@ Application = (function(_super) {
       _this.layout = new (require(config.layout));
       return _this.layout.render();
     });
+    settings.set('last-visit', moment());
+    settings.set('username', 'admin');
+    settings.set('password', 'admin');
     return this.start();
   };
 
@@ -187,16 +192,15 @@ Config = (function() {
 
   Config.prototype.apiroot = '/api';
 
-  Config.prototype.startuptrigger = 'home:index';
+  Config.prototype.startuptrigger = 'events:index';
 
-  Config.prototype.brandtrigger = 'home:index';
+  Config.prototype.brandtrigger = 'events:index';
 
   Config.prototype.layout = 'layouts/app-layout';
 
   Config.prototype.modules = {
     'header': 'modules/header/router',
     'common': 'modules/common/router',
-    'contact': 'modules/contact/router',
     'event': 'modules/event/router'
   };
 
@@ -436,6 +440,11 @@ module.exports.Collection = ContactsCollection = (function(_super) {
 
   ContactsCollection.prototype.localStorage = new Backbone.LocalStorage("contacts");
 
+  ContactsCollection.prototype.credentials = {
+    username: 'admin',
+    password: 'admin'
+  };
+
   ContactsCollection.prototype.model = module.exports.Model;
 
   ContactsCollection.prototype.comparator = 'firstName';
@@ -602,15 +611,15 @@ module.exports.TestData = TestData = (function() {
       intern: true,
       order: 3
     }, {
-      id: "9cf247f4-4c76-d453-bbec-1c40080e32e5",
-      title: "Contacts",
-      trigger: "contacts:index",
-      intern: true,
-      order: 1
-    }, {
       id: "1cf247f4-4c76-d453-bbec-1c40080e32e4",
       title: "Events",
       trigger: "events:index",
+      intern: true,
+      order: 1
+    }, {
+      id: "1cf247f4-4c76-d453-bbec-1c40080e32e1",
+      title: "Sessions",
+      trigger: "sessions:index",
       intern: true,
       order: 2
     }, {
@@ -631,6 +640,148 @@ module.exports.TestData = TestData = (function() {
   return TestData;
 
 })();
+
+});
+
+;require.register("models/session", function(exports, require, module) {
+var Collection, Contact, Model, SessionsCollection, config, settings, _ref, _ref1,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+config = require('../config');
+
+Model = require('../lib/base/model');
+
+Collection = require('../lib/base/collection');
+
+settings = require('../settings');
+
+module.exports.Model = Contact = (function(_super) {
+  __extends(Contact, _super);
+
+  function Contact() {
+    _ref = Contact.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  return Contact;
+
+})(Model);
+
+module.exports.Collection = SessionsCollection = (function(_super) {
+  __extends(SessionsCollection, _super);
+
+  function SessionsCollection() {
+    _ref1 = SessionsCollection.__super__.constructor.apply(this, arguments);
+    return _ref1;
+  }
+
+  SessionsCollection.prototype.url = function() {
+    return "" + config.apiroot + "/events/" + (settings.get('active-event')) + "/sessions";
+  };
+
+  SessionsCollection.prototype.credentials = {
+    username: 'admin',
+    password: 'admin'
+  };
+
+  SessionsCollection.prototype.model = module.exports.Model;
+
+  SessionsCollection.prototype.comparator = 'title';
+
+  return SessionsCollection;
+
+})(Collection);
+
+});
+
+;require.register("models/store", function(exports, require, module) {
+var Collection, StoreCollection, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+Collection = require('../lib/base/collection');
+
+module.exports.Collection = StoreCollection = (function(_super) {
+  __extends(StoreCollection, _super);
+
+  function StoreCollection() {
+    _ref = StoreCollection.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  StoreCollection.prototype.url = 'store';
+
+  StoreCollection.prototype.localStorage = new Backbone.LocalStorage('store');
+
+  StoreCollection.prototype.initialize = function(options) {
+    return this.name = options != null ? options.name : void 0;
+  };
+
+  StoreCollection.prototype.setValue = function(id, value) {
+    /*
+      add or opdate an item in the collection with the specified id and value.
+      if the item exists the value will be updated
+    */
+
+    var item;
+    item = this.get("" + this.name + "-" + id);
+    if (item != null) {
+      this.remove(item);
+      return this.create({
+        id: "" + this.name + "-" + id,
+        value: value
+      });
+    } else {
+      return this.create({
+        id: "" + this.name + "-" + id,
+        value: value
+      });
+    }
+  };
+
+  StoreCollection.prototype.getValue = function(id) {
+    /* get the value attribute for an item*/
+
+    return this.getValueOrDefault(id, '');
+  };
+
+  StoreCollection.prototype.getValueOrDefault = function(id, val) {
+    /* get the value attribute for an item*/
+
+    var item;
+    item = this.get("" + this.name + "-" + id);
+    if (item != null) {
+      return item.get('value');
+    } else {
+      return val;
+    }
+  };
+
+  StoreCollection.prototype.has = function(id) {
+    /* looks through the collection for the specified id*/
+
+    var item;
+    item = this.get("" + this.name + "-" + id);
+    return (item != null) === true;
+  };
+
+  StoreCollection.prototype.clear = function(options) {
+    var _this = this;
+    return this.fetch({
+      success: function(collection, response) {
+        return _this.each(function(item) {
+          return item.destroy({
+            wait: true
+          });
+        });
+      }
+    });
+  };
+
+  return StoreCollection;
+
+})(Collection);
 
 });
 
@@ -965,320 +1116,18 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   });
 });
 
-;require.register("modules/contact/controller", function(exports, require, module) {
-var Contact, Controller, application,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-application = require('application');
-
-Contact = require('../../models/contact');
-
-module.exports = Controller = (function(_super) {
-  __extends(Controller, _super);
-
-  function Controller(options) {
-    var _this = this;
-    console.log('contact controller init');
-    application.addInitializer(function(options) {
-      application.on('contacts:index', function() {
-        return application.navigate('contacts');
-      });
-      application.on('contact:details', function(id) {
-        return application.navigate('contacts/' + id);
-      });
-      application.on('contact:add', function(data) {
-        return _this.addContact(data);
-      });
-      application.on('contact:reset', function(data) {
-        return _this.contacts.destroyAll();
-      });
-      _this.contacts = new Contact.Collection();
-      return _this.contacts.fetch().done(function() {
-        return new Contact.TestData().addTo(_this.contacts);
-      });
-    });
-  }
-
-  Controller.prototype.showContactsIndex = function() {
-    application.trigger('set:active:header', 'Contacts');
-    return this.contacts.fetch().done(function(models) {
-      var View, view;
-      View = require('./views/contacts-index-view');
-      view = new View({
-        collection: models
-      });
-      return application.layout.content.show(view);
-    });
-  };
-
-  Controller.prototype.showContactDetails = function(id) {
-    application.trigger('set:active:header', 'Contacts');
-    return this.contacts.fetch().done(function(models) {
-      var View, view;
-      View = require('./views/contact-details-view');
-      view = new View({
-        model: models.get(id)
-      });
-      return application.layout.content.show(view);
-    });
-  };
-
-  Controller.prototype.addContact = function(model) {
-    var itemView, _ref;
-    console.log('controller:addNewContact', model);
-    if (model.isValid()) {
-      this.contacts.add(model);
-      model.save();
-      application.layout.content.currentView.render();
-      itemView = (_ref = application.layout.content.currentView.children) != null ? _ref.findByModel(model) : void 0;
-      return itemView != null ? itemView.flash('success') : void 0;
-    } else {
-      return console.warn(model.validationError);
-    }
-  };
-
-  Controller.prototype.onClose = function() {
-    return console.log('contact controller close');
-  };
-
-  return Controller;
-
-})(Backbone.Marionette.Controller);
-
-});
-
-;require.register("modules/contact/router", function(exports, require, module) {
-var Controller, Router, application, _ref,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-application = require('application');
-
-Controller = require('./controller');
-
-module.exports = Router = (function(_super) {
-  __extends(Router, _super);
-
-  function Router() {
-    _ref = Router.__super__.constructor.apply(this, arguments);
-    return _ref;
-  }
-
-  Router.prototype.appRoutes = {
-    'contacts': 'showContactsIndex',
-    'contacts/:id': 'showContactDetails'
-  };
-
-  Router.prototype.initialize = function(options) {
-    var _this = this;
-    console.log('contact router init');
-    return application.addInitializer(function(options) {
-      application.on('contacts:index', function() {
-        application.navigate('contacts');
-        return _this.controller.showContactsIndex();
-      });
-      return application.on('contact:details', function(id) {
-        application.navigate('contact', id);
-        return _this.controller.showContactDetails(id);
-      });
-    });
-  };
-
-  Router.prototype.controller = new Controller();
-
-  return Router;
-
-})(Backbone.Marionette.AppRouter);
-
-});
-
-;require.register("modules/contact/views/contact-details-view", function(exports, require, module) {
-var ContactDetailsView, _ref,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-module.exports = ContactDetailsView = (function(_super) {
-  __extends(ContactDetailsView, _super);
-
-  function ContactDetailsView() {
-    _ref = ContactDetailsView.__super__.constructor.apply(this, arguments);
-    return _ref;
-  }
-
-  ContactDetailsView.prototype.id = 'contact-details-view';
-
-  ContactDetailsView.prototype.template = require('./templates/contact-details');
-
-  ContactDetailsView.prototype.initialize = function(options) {
-    return console.log('contact id', options);
-  };
-
-  return ContactDetailsView;
-
-})(Backbone.Marionette.ItemView);
-
-});
-
-;require.register("modules/contact/views/contact-item-view", function(exports, require, module) {
-var ContactItemView, ItemView, _ref,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-ItemView = require('../../../../lib/base/item-view');
-
-module.exports = ContactItemView = (function(_super) {
-  __extends(ContactItemView, _super);
-
-  function ContactItemView() {
-    _ref = ContactItemView.__super__.constructor.apply(this, arguments);
-    return _ref;
-  }
-
-  ContactItemView.prototype.id = 'contact-item-view';
-
-  ContactItemView.prototype.template = require('./templates/contact-item');
-
-  ContactItemView.prototype.tagName = 'a';
-
-  ContactItemView.prototype.className = 'list-group-item';
-
-  ContactItemView.prototype.tagAttrs = {
-    'href': function(model) {
-      return '#contacts/' + model.get('id');
-    }
-  };
-
-  ContactItemView.prototype.flash = function(cssClass) {
-    var $view;
-    $view = this.$el;
-    return $view.hide().toggleClass(cssClass).fadeIn(500, function() {
-      return setTimeout(function() {
-        return $view.toggleClass(cssClass);
-      }, 500);
-    });
-  };
-
-  return ContactItemView;
-
-})(ItemView);
-
-});
-
-;require.register("modules/contact/views/contacts-index-view", function(exports, require, module) {
-var Contact, ContactIndexView, application, _ref,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-application = require('application');
-
-Contact = require('../../../models/contact');
-
-module.exports = ContactIndexView = (function(_super) {
-  __extends(ContactIndexView, _super);
-
-  function ContactIndexView() {
-    _ref = ContactIndexView.__super__.constructor.apply(this, arguments);
-    return _ref;
-  }
-
-  ContactIndexView.prototype.id = 'contact-index-view';
-
-  ContactIndexView.prototype.template = require('./templates/contacts-index');
-
-  ContactIndexView.prototype.itemView = require('./contact-item-view');
-
-  ContactIndexView.prototype.itemViewContainer = '.js-contacts';
-
-  ContactIndexView.prototype.events = {
-    'click .js-add': 'onAdd',
-    'click .js-reset': 'onReset'
-  };
-
-  ContactIndexView.prototype.onAdd = function(e) {
-    application.trigger('contact:add', new Contact.Model(Backbone.Syphon.serialize(this)));
-    this.$el.find('input[type=text]').val('');
-    return e.preventDefault();
-  };
-
-  ContactIndexView.prototype.onReset = function(e) {
-    if (confirm('Reset?')) {
-      application.trigger('contact:reset');
-    }
-    return e.preventDefault();
-  };
-
-  ContactIndexView.prototype.onClose = function() {
-    return console.log('contacts-index view close');
-  };
-
-  return ContactIndexView;
-
-})(Backbone.Marionette.CompositeView);
-
-});
-
-;require.register("modules/contact/views/templates/contact-details", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [4,'>= 1.0.0'];
-helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
-
-
-  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>";
-  if (stack1 = helpers.firstName) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.firstName; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + " ";
-  if (stack1 = helpers.lastName) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.lastName; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "</h3>\r\n    <h3>";
-  if (stack1 = helpers.phoneNumber) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.phoneNumber; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>\r\n      <a class=\"btn btn-lg btn-primary\" href=\"#contacts\">&laquo; Back</a>\r\n    </p>\r\n  </div>\r\n</div>";
-  return buffer;
-  });
-});
-
-;require.register("modules/contact/views/templates/contact-item", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [4,'>= 1.0.0'];
-helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
-
-
-  if (stack1 = helpers.firstName) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.firstName; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + " ";
-  if (stack1 = helpers.lastName) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.lastName; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1);
-  return buffer;
-  });
-});
-
-;require.register("modules/contact/views/templates/contacts-index", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [4,'>= 1.0.0'];
-helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  
-
-
-  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>Contacts</h3>\r\n    <div class=\"list-group js-contacts\">\r\n      <!-- contacts -->\r\n    </div>\r\n\r\n    <form class=\"form-contact\" role=\"form\">\r\n        <div class=\"row\">\r\n          <div class=\"col-xs-0 col-md-4\"></div>\r\n          <div class=\"col-xs-12 col-md-5\">\r\n            <input type=\"text\" class=\"form-control\" name=\"firstName\" placeholder=\"Enter firstname\">\r\n            <input type=\"text\" class=\"form-control\" name=\"lastName\" placeholder=\"Enter lastname\">\r\n          </div>\r\n          <div class=\"col-xs-0 col-md-3\"></div>\r\n        </div>\r\n        <div class=\"row\">\r\n          <div class=\"col-xs-0 col-md-4\"></div>\r\n          <div class=\"col-xs-7 col-md-3\">\r\n            <button class=\"btn btn-lg btn-success btn-block js-add\">Add</button>\r\n          </div>\r\n          <div class=\"col-xs-5 col-md-2\">\r\n            <button class=\"btn btn-lg btn-danger btn-block js-reset\">Reset</button>\r\n          </div>\r\n          <div class=\"col-xs-0 col-md-3\"></div>\r\n        </div>\r\n    </form>\r\n  </div>\r\n</div>";
-  });
-});
-
 ;require.register("modules/event/controller", function(exports, require, module) {
-var Controller, Event, application,
+var Controller, Event, Session, application, settings,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+settings = require('settings');
 
 Event = require('../../models/event');
+
+Session = require('../../models/session');
 
 module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
@@ -1293,12 +1142,18 @@ module.exports = Controller = (function(_super) {
       application.on('event:details', function(id) {
         return application.navigate('events/' + id);
       });
-      return _this.events = new Event.Collection();
+      _this.events = new Event.Collection();
+      return _this.sessions = new Session.Collection();
     });
   }
 
   Controller.prototype.showEventsIndex = function() {
-    return this.events.fetch().done(function(models) {
+    return this.events.fetch({
+      reload: true,
+      data: {
+        filter: 'all'
+      }
+    }).done(function(models) {
       var View, view;
       application.trigger('set:active:header', 'Events');
       View = require('./views/events-index-view');
@@ -1310,10 +1165,42 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showEventDetails = function(id) {
-    return this.events.fetch().done(function(models) {
+    return this.events.fetch({
+      data: {
+        filter: 'all'
+      }
+    }).done(function(models) {
       var View, view;
       application.trigger('set:active:header', 'Events');
+      settings.set('active-event', id);
       View = require('./views/event-details-view');
+      view = new View({
+        model: models.get(id)
+      });
+      return application.layout.content.show(view);
+    });
+  };
+
+  Controller.prototype.showSessionsIndex = function() {
+    return this.sessions.fetch({
+      reload: true
+    }).done(function(models) {
+      var View, view;
+      application.trigger('set:active:header', 'Sessions');
+      View = require('./views/sessions-index-view');
+      view = new View({
+        collection: models
+      });
+      return application.layout.content.show(view);
+    });
+  };
+
+  Controller.prototype.showSessionDetails = function(id) {
+    return this.sessions.fetch().done(function(models) {
+      var View, view;
+      application.trigger('set:active:header', 'Sessions');
+      settings.set('active-session', id);
+      View = require('./views/session-details-view');
       view = new View({
         model: models.get(id)
       });
@@ -1350,7 +1237,9 @@ module.exports = Router = (function(_super) {
 
   Router.prototype.appRoutes = {
     'events': 'showEventsIndex',
-    'events/:id': 'showEventDetails'
+    'events/:id': 'showEventDetails',
+    'sessions': 'showSessionsIndex',
+    'sessions/:id': 'showSessionDetails'
   };
 
   Router.prototype.initialize = function(options) {
@@ -1361,9 +1250,17 @@ module.exports = Router = (function(_super) {
         application.navigate('events');
         return _this.controller.showEventsIndex();
       });
-      return application.on('event:details', function(id) {
+      application.on('event:details', function(id) {
         application.navigate('event', id);
         return _this.controller.showEventDetails(id);
+      });
+      application.on('sessions:index', function() {
+        application.navigate('sessions');
+        return _this.controller.showSessionsIndex();
+      });
+      return application.on('session:details', function(id) {
+        application.navigate('session', id);
+        return _this.controller.showSessionDetails(id);
       });
     });
   };
@@ -1473,6 +1370,103 @@ module.exports = EventIndexView = (function(_super) {
 
 });
 
+;require.register("modules/event/views/session-details-view", function(exports, require, module) {
+var EventDetailsView, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = EventDetailsView = (function(_super) {
+  __extends(EventDetailsView, _super);
+
+  function EventDetailsView() {
+    _ref = EventDetailsView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  EventDetailsView.prototype.id = 'session-details-view';
+
+  EventDetailsView.prototype.template = require('./templates/event-details');
+
+  EventDetailsView.prototype.initialize = function(options) {
+    return console.log('session id', options);
+  };
+
+  return EventDetailsView;
+
+})(Backbone.Marionette.ItemView);
+
+});
+
+;require.register("modules/event/views/session-item-view", function(exports, require, module) {
+var ItemView, SessionItemView, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+ItemView = require('../../../../lib/base/item-view');
+
+module.exports = SessionItemView = (function(_super) {
+  __extends(SessionItemView, _super);
+
+  function SessionItemView() {
+    _ref = SessionItemView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  SessionItemView.prototype.id = 'session-item-view';
+
+  SessionItemView.prototype.template = require('./templates/event-item');
+
+  SessionItemView.prototype.tagName = 'a';
+
+  SessionItemView.prototype.className = 'list-group-item';
+
+  SessionItemView.prototype.tagAttrs = {
+    'href': function(model) {
+      return '#sessions/' + model.get('id');
+    }
+  };
+
+  return SessionItemView;
+
+})(ItemView);
+
+});
+
+;require.register("modules/event/views/sessions-index-view", function(exports, require, module) {
+var Event, SessionIndexView, application, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+Event = require('../../../models/event');
+
+module.exports = SessionIndexView = (function(_super) {
+  __extends(SessionIndexView, _super);
+
+  function SessionIndexView() {
+    _ref = SessionIndexView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  SessionIndexView.prototype.id = 'session-index-view';
+
+  SessionIndexView.prototype.template = require('./templates/events-index');
+
+  SessionIndexView.prototype.itemView = require('./session-item-view');
+
+  SessionIndexView.prototype.itemViewContainer = '.js-events';
+
+  SessionIndexView.prototype.onClose = function() {
+    return console.log('sessions-index view close');
+  };
+
+  return SessionIndexView;
+
+})(Backbone.Marionette.CompositeView);
+
+});
+
 ;require.register("modules/event/views/templates/event-details", function(exports, require, module) {
 module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
@@ -1522,7 +1516,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>Events</h3>\r\n    <div class=\"list-group js-events\">\r\n      <!-- events -->\r\n    </div>\r\n  </div>\r\n</div>";
+  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <div class=\"list-group js-events\">\r\n      <!-- events -->\r\n    </div>\r\n  </div>\r\n</div>";
   });
 });
 
@@ -1732,6 +1726,68 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
   return "<div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <!-- Sidebar -->\r\n  <div id=\"sidebar-wrapper\">\r\n    <ul class=\"sidebar-nav js-headers\">\r\n      <!-- <li class=\"sidebar-brand\">\r\n        <a id=\"menu-toggle\" href=\"#\">&nbsp;&nbsp;&nbsp;&nbsp; -->\r\n          <!-- <span class=\"glyphicon glyphicon-align-justify\"></span> -->\r\n        <!-- </a>\r\n      </li> -->\r\n      <!-- headers -->\r\n    </ul>\r\n  </div>\r\n\r\n  <!-- Page header -->\r\n  <div id=\"page-content-wrapper\">\r\n    <div class=\"content-header\">\r\n      <h1>\r\n        <a id=\"menu-toggle\" href=\"#\" class=\"btn btn-primary\">\r\n           <span class=\"glyphicon glyphicon-align-justify\"></span>\r\n        </a>\r\n        <span class=\"js-apptitle\"></span>\r\n        <span class=\"content-header-sub js-subtitle\"></span>\r\n      </h1>\r\n    </div>\r\n  </div>\r\n</div>\r\n\r\n<!--\r\n  <div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav\">\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div> -->";
   });
+});
+
+;require.register("settings", function(exports, require, module) {
+var Settings, Store;
+
+Store = require('models/store');
+
+Settings = (function() {
+  /*
+    encapsulates local storage (persistent)
+  */
+
+  function Settings() {
+    /* initializes this instance*/
+
+    console.log('settings store init');
+    this.store = new Store.Collection({
+      name: 'settings'
+    });
+    _.extend(this, Backbone.Events);
+    this.store.fetch({
+      async: false
+    });
+  }
+
+  Settings.prototype.set = function(id, value) {
+    /*
+      add or opdate an item in the collection with the specified id and value.
+      if the item exists the value will be updated
+    */
+
+    return this.store.setValue(id, value);
+  };
+
+  Settings.prototype.get = function(id) {
+    /* get the value attribute for an item*/
+
+    return this.store.getValue(id);
+  };
+
+  Settings.prototype.getValueOrDefault = function(id, val) {
+    /* get the value attribute for an item*/
+
+    return this.store.getValueOrDefault(id, val);
+  };
+
+  Settings.prototype.has = function(id) {
+    /* looks through the collection for the specified id*/
+
+    return this.store.has(id);
+  };
+
+  Settings.prototype.clear = function(options) {
+    return this.store.clear(options);
+  };
+
+  return Settings;
+
+})();
+
+module.exports = new Settings();
+
 });
 
 ;
