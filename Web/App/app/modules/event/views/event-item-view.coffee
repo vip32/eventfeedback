@@ -11,10 +11,12 @@ module.exports = class EventItemView extends ItemView
   #   'href': (model) -> '#events/' + model.get('id')
 
   events:
-    'click': 'onclick'
+    'click': 'onClick'
 
-  onclick: (e) ->
+  onClick: (e) ->
     e.preventDefault()
     @$el.addClass('active')
-    settings.set('active-event', @model.get('id'))
-    application.trigger 'event:details', @model.get('id')
+    setTimeout =>
+      settings.set('active-event', @model.get('id'))
+      application.trigger 'event:details', @model.get('id')
+      , 300

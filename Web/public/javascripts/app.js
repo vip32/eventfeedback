@@ -1326,14 +1326,17 @@ module.exports = EventItemView = (function(_super) {
   EventItemView.prototype.className = 'list-group-item';
 
   EventItemView.prototype.events = {
-    'click': 'onclick'
+    'click': 'onClick'
   };
 
-  EventItemView.prototype.onclick = function(e) {
+  EventItemView.prototype.onClick = function(e) {
+    var _this = this;
     e.preventDefault();
     this.$el.addClass('active');
-    settings.set('active-event', this.model.get('id'));
-    return application.trigger('event:details', this.model.get('id'));
+    return setTimeout(function() {
+      settings.set('active-event', _this.model.get('id'));
+      return application.trigger('event:details', _this.model.get('id'), 300);
+    });
   };
 
   return EventItemView;
@@ -1432,14 +1435,17 @@ module.exports = SessionItemView = (function(_super) {
   SessionItemView.prototype.className = 'list-group-item';
 
   SessionItemView.prototype.events = {
-    'click': 'onclick'
+    'click': 'onClick'
   };
 
-  SessionItemView.prototype.onclick = function(e) {
+  SessionItemView.prototype.onClick = function(e) {
+    var _this = this;
     e.preventDefault();
     this.$el.addClass('active');
-    settings.set('active-session', this.model.get('id'));
-    return application.trigger('session:details', this.model.get('id'));
+    return setTimeout(function() {
+      settings.set('active-session', _this.model.get('id'));
+      return application.trigger('session:details', _this.model.get('id'), 300);
+    });
   };
 
   return SessionItemView;

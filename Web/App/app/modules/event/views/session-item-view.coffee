@@ -11,10 +11,12 @@ module.exports = class SessionItemView extends ItemView
   #   'href': (model) -> '#sessions/' + model.get('id')
 
   events:
-    'click': 'onclick'
+    'click': 'onClick'
 
-  onclick: (e) ->
+  onClick: (e) ->
     e.preventDefault()
     @$el.addClass('active')
-    settings.set('active-session', @model.get('id'))
-    application.trigger 'session:details', @model.get('id')
+    setTimeout =>
+      settings.set('active-session', @model.get('id'))
+      application.trigger 'session:details', @model.get('id')
+      , 300
