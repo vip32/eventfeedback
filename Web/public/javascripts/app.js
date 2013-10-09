@@ -610,6 +610,7 @@ module.exports.TestData = TestData = (function() {
   TestData.prototype.data = [
     {
       id: "511b8984-8958-663d-4707-9378aa71776b",
+      visible: false,
       title: "Home",
       trigger: "home:index",
       intern: true,
@@ -1530,7 +1531,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <div class=\"list-group js-events\">\r\n      <!-- events -->\r\n    </div>\r\n  </div>\r\n</div>";
+  return "<div class=\"container\">\r\n    <div class=\"btn-group pull-right\" style=\"margin-right:15px;\">\r\n      <button type=\"button\" class=\"btn btn-default active btn-group-lg\">All</button>\r\n      <button type=\"button\" class=\"btn btn-default btn-group-lg\">C#</button>\r\n      <button type=\"button\" class=\"btn btn-default btn-group-lg\">Java</button>\r\n      <button type=\"button\" class=\"btn btn-default btn-group-lg\">SAP</button>\r\n    </div><br/><br/>\r\n  <div class=\"jumbotron\">\r\n    <div class=\"list-group js-events\">\r\n      <!-- events -->\r\n    </div>\r\n  </div>\r\n</div>";
   });
 });
 

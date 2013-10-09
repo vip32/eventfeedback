@@ -25,6 +25,7 @@ module.exports.TestData = class TestData
 
   data: [
     id: "511b8984-8958-663d-4707-9378aa71776b"
+    visible: false
     title: "Home"
     trigger: "home:index"
     intern: true
