@@ -15,5 +15,6 @@ module.exports = class SessionItemView extends ItemView
 
   onclick: (e) ->
     e.preventDefault()
+    @$el.addClass('active')
     settings.set('active-session', @model.get('id'))
     application.trigger 'session:details', @model.get('id')
