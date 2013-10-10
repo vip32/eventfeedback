@@ -99,6 +99,10 @@
     <Compile Include="Migrations\201310101007347_Domain_ResourceText.Designer.cs">
       <DependentUpon>201310101007347_Domain_ResourceText.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201310101634467_Domain_Session_Key.cs" />
+    <Compile Include="Migrations\201310101634467_Domain_Session_Key.Designer.cs">
+      <DependentUpon>201310101634467_Domain_Session_Key.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Entities\Session.cs" />
@@ -128,6 +132,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201310101007347_Domain_ResourceText.resx">
       <DependentUpon>201310101007347_Domain_ResourceText.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201310101634467_Domain_Session_Key.resx">
+      <DependentUpon>201310101634467_Domain_Session_Key.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

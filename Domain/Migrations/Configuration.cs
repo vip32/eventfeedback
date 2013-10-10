@@ -107,6 +107,7 @@ namespace EventFeedback.Domain.Migrations
                         StartDate = new DateTime(2013, 2, 18),
                         EndDate = new DateTime(2013, 2, 18),
                         Location = "Mannheim",
+                        Description = "Hast Du Ideen für neue Themen? Unter http://www/portfolio/Segmente/Loesungen/Entwicklertag kannst du diese erfassen und gleich angeben, ob du das Thema selbst präsentieren möchtest.",
                         Sessions =
                             new Collection<Session>
                                 {
@@ -147,6 +148,7 @@ namespace EventFeedback.Domain.Migrations
                         StartDate = new DateTime(2013, 5, 10),
                         EndDate = new DateTime(2013, 5, 10),
                         Location = "Mannheim",
+                        Description = "Hast Du Ideen für neue Themen? Unter http://www/portfolio/Segmente/Loesungen/Entwicklertag kannst du diese erfassen und gleich angeben, ob du das Thema selbst präsentieren möchtest.",
                         Sessions =
                             new Collection<Session>
                                 {
@@ -182,6 +184,7 @@ namespace EventFeedback.Domain.Migrations
                         StartDate = new DateTime(2013, 7, 1),
                         EndDate = new DateTime(2013, 7, 1),
                         Location = "Mannheim",
+                        Description = "Hast Du Ideen für neue Themen? Unter http://www/portfolio/Segmente/Loesungen/Entwicklertag kannst du diese erfassen und gleich angeben, ob du das Thema selbst präsentieren möchtest.",
                         Sessions =
                             new Collection<Session>
                                 {
@@ -217,6 +220,7 @@ namespace EventFeedback.Domain.Migrations
                         StartDate = new DateTime(2013, 10, 09),
                         EndDate = new DateTime(2013, 10, 09),
                         Location = "Mannheim",
+                        Description = "Hast Du Ideen für neue Themen? Unter http://www/portfolio/Segmente/Loesungen/Entwicklertag kannst du diese erfassen und gleich angeben, ob du das Thema selbst präsentieren möchtest.",
                         Sessions =
                             new Collection<Session>
                                 {

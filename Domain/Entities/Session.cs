@@ -31,6 +31,11 @@ namespace EventFeedback.Domain
         public string Type { get; set; } // Session/Workshop/Codemash
         [StringLength(128)]
         public string Track { get; set; } // C#/java/sap
+        [StringLength(128)]
+        public string Key { get; set; } // 101 (SessionID)
+        [StringLength(512)]
+        public string Link { get; set; }
+        public bool? FeedbackAllowed { get; set; }
 
         public int EventId { get; set; }
         //public Event Event { get; set; }
@@ -72,6 +77,7 @@ namespace EventFeedback.Domain
             CreateDate = DateTime.Now;
             Active = true;
             Tags = new Collection<string>();
+            FeedbackAllowed = true;
         }
 
         public bool IsCurrent()

@@ -20,6 +20,11 @@ namespace EventFeedback.Domain
         public string Title { get; set; }
         [StringLength(512)]
         public string Description { get; set; }
+        [StringLength(128)]
+        public string Key { get; set; } // 101 (EventID)
+        [StringLength(512)]
+        public string Link { get; set; }
+        //public bool? FeedbackAllowed { get; set; }
 
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
@@ -48,6 +53,7 @@ namespace EventFeedback.Domain
             CreateDate = DateTime.Now;
             Active = true;
             Tags = new Collection<string>();
+            //FeedbackAllowed = true;
         }
 
         public bool IsCurrent()

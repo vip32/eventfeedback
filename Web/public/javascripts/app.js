@@ -1496,9 +1496,9 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
   buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\"><h3>Event: "
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</h3></div>\r\n      <div class=\"col-xs-5\">\r\n        <div class=\"btn-group pull-right\">\r\n          <button type=\"button\" class=\"btn btn-default active badge\">All</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">C#</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">Java</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">SAP</button>\r\n        </div>\r\n      </div>\r\n    </div>\r\n    <div class=\"list-group js-sessions\">\r\n      <!-- sessions -->\r\n    </div>\r\n    <div>"
+    + "</h3></div>\r\n      <div class=\"col-xs-5\">\r\n        <div class=\"btn-group pull-right\">\r\n          <button type=\"button\" class=\"btn btn-default active badge\">All</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">C#</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">Java</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">SAP</button>\r\n        </div>\r\n      </div>\r\n    </div>\r\n    <div class=\"list-group js-sessions\">\r\n      <!-- sessions -->\r\n    </div>\r\n    <p>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n    <a href=\"#events\">< Events</a>\r\n  </div>\r\n</div>";
+    + "</p>\r\n    <a href=\"#events\">< Events</a>\r\n  </div>\r\n</div>";
   return buffer;
   });
 });
