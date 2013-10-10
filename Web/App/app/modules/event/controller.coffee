@@ -21,7 +21,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     ).done (models) ->
       application.trigger 'set:active:header', 'Events'
       View = require './views/events-index-view'
-      view = new View(collection: models)
+      view = new View(collection: models, resources: application.resources)
       application.layout.content.show(view)
 
   showEventDetails: (id) ->
@@ -34,7 +34,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
       @sessions.fetch(reload: true).done (sessions) =>
         View = require './views/event-details-view'
-        view = new View(model: models.get(id), collection: sessions)
+        view = new View(model: models.get(id), collection: sessions, resources: application.resources)
         application.layout.content.show(view)
 
   showSessionDetails: (id) ->
@@ -42,7 +42,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       application.trigger 'set:active:header', 'Sessions'
       settings.set('active-session', id)
       View = require './views/session-details-view'
-      view = new View(model: models.get(id))
+      view = new View(model: models.get(id), resources: application.resources)
       application.layout.content.show(view)
 
   onClose: ->

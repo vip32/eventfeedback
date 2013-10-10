@@ -7,6 +7,7 @@ class Config
   startuptrigger: 'events:index'
   brandtrigger: 'events:index'
   layout: 'layouts/app-layout'
+  sidebarglyphicon: 'minus'
   modules:
     'header': 'modules/header/router'
     'common': 'modules/common/router'

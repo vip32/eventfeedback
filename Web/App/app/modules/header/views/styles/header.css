@@ -80,6 +80,11 @@
   background: none;
 }
 
+.sidebar-nav li {
+  line-height: 40px;
+  text-indent: 10px;
+}
+
 .content-header {
   height: 55px;
   line-height: 65px;

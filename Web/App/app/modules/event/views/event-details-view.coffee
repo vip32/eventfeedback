@@ -5,4 +5,11 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
   itemViewContainer: '.js-sessions'
 
   initialize: (options) ->
-    console.log 'event id', options
+    @resources = options?.resources
+
+  serializeData: ->
+    resources: @resources?.toJSON()
+    model: @model.toJSON()
+
+  itemViewOptions: ->
+    resources: @resources

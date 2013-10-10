@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
 using EventFeedback.Domain.Membership;
+using System.Linq;
 
 namespace EventFeedback.Domain.Migrations
 {
@@ -67,11 +68,36 @@ namespace EventFeedback.Domain.Migrations
                     });
             context.UserRoles.AddOrUpdate(p => p.UserId, new UserRole{UserId = 1, RoleId = 1}); // admin Administrator role
 
-            context.ResourceTexts.AddOrUpdate(
-                p => p.Key,
-                new ResourceText {Key = "TestKey1", Value = "Value1"},
-                new ResourceText {Key = "TestKey2", Value = "Value2"}
-            );
+            if(!context.ResourceTexts.Any())
+            {
+                context.ResourceTexts.AddOrUpdate(
+                    p => p.Key,
+                    new ResourceText {Key = "TestKey1", Value = "Value1", Language = "en-US"},
+                    new ResourceText {Key = "TestKey2", Value = "Value2", Language = "en-US"},
+                    new ResourceText {Key = "Title_Home", Value = "Home", Language = "en-US"},
+                    new ResourceText {Key = "Title_About", Value = "About", Language = "en-US"},
+                    new ResourceText {Key = "Title_Events", Value = "Events", Language = "en-US"},
+                    new ResourceText {Key = "Title_Sessions", Value = "Sessions", Language = "en-US"},
+                    new ResourceText {Key = "Title_SignIn", Value = "Sign-in", Language = "en-US"},
+                    new ResourceText {Key = "Title_Debug", Value = "Debug", Language = "en-US"},
+                    new ResourceText {Key = "Title_Home", Value = "Heim", Language = "de-DE"},
+                    new ResourceText {Key = "Title_About", Value = "Über", Language = "de-DE"},
+                    new ResourceText {Key = "Title_Events", Value = "Veranstaltungen", Language = "de-DE"},
+                    new ResourceText {Key = "Title_Sessions", Value = "Sessionen", Language = "de-DE"},
+                    new ResourceText {Key = "Title_SignIn", Value = "Einloggen", Language = "de-DE"},
+                    new ResourceText { Key = "Title_Debug", Value = "Debug", Language = "de-DE" },
+                    new ResourceText { Key = "Question1_Title", Value = "Vortragsstil", Language = "de-DE" },
+                    new ResourceText { Key = "Question1_Description", Value = "Dein Kommentar zum Vortragstil und dem Transport von Inhalten", Language = "de-DE" },
+                    new ResourceText { Key = "Question2_Title", Value = "Folien", Language = "de-DE" },
+                    new ResourceText { Key = "Question2_Description", Value = "Dein Kommentar zu den Folien", Language = "de-DE" },
+                    new ResourceText { Key = "Question3_Title", Value = "Transport von Inhalten", Language = "de-DE" },
+                    new ResourceText {Key = "Question3_Description", Value = "", Language = "de-DE"},
+
+                    new ResourceText { Key = "Question4_Title", Value = "Dein Kommentar zum Vortragstil und dem Transport von Inhalten", Language = "de-DE" },
+                    new ResourceText { Key = "Question5_Title", Value = "Dein Kommentar zu den Folien", Language = "de-DE" },
+                    new ResourceText { Key = "Question6_Title", Value = "Dein Kommentar zum Thema", Language = "de-DE" }
+                    );
+            }
 
             context.Events.AddOrUpdate(
                 p => p.Title,

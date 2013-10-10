@@ -29,8 +29,10 @@ class Application extends Backbone.Marionette.Application
       @layout.render()
 
     @resources = new Resource.Collection()
-    @resources.fetch().done (resources) =>
-      console.log 'resources fetched'
+    @resources.fetch(
+      data:
+        language: 'de-DE'
+    ).done (resources) =>
       settings.set('last-visit', moment())
       settings.set('username', 'admin')
       settings.set('password', 'admin')

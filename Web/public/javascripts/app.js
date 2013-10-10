@@ -141,8 +141,11 @@ Application = (function(_super) {
       return _this.layout.render();
     });
     this.resources = new Resource.Collection();
-    return this.resources.fetch().done(function(resources) {
-      console.log('resources fetched');
+    return this.resources.fetch({
+      data: {
+        language: 'de-DE'
+      }
+    }).done(function(resources) {
       settings.set('last-visit', moment());
       settings.set('username', 'admin');
       settings.set('password', 'admin');
@@ -203,6 +206,8 @@ Config = (function() {
   Config.prototype.brandtrigger = 'events:index';
 
   Config.prototype.layout = 'layouts/app-layout';
+
+  Config.prototype.sidebarglyphicon = 'minus';
 
   Config.prototype.modules = {
     'header': 'modules/header/router',
@@ -505,6 +510,8 @@ module.exports.TestData = TestData = (function() {
     {
       id: "511b8984-8958-663d-4707-9378aa71776b",
       visible: false,
+      resource: 'Title_Home',
+      glyphicon: 'home',
       title: "Home",
       trigger: "home:index",
       intern: true,
@@ -512,30 +519,39 @@ module.exports.TestData = TestData = (function() {
     }, {
       id: "ce82ceb6-1104-aaa6-4fab-a4656694de17",
       title: "About",
+      resource: 'Title_About',
       trigger: "about:index",
       intern: true,
       order: 3
     }, {
       id: "1cf247f4-4c76-d453-bbec-1c40080e32e4",
       title: "Events",
+      resource: 'Title_Events',
+      glyphicon: 'bookmark',
       trigger: "events:index",
       intern: true,
       order: 1
     }, {
       id: "1cf247f4-4c76-d453-bbec-1c40080e32e1",
       title: "Sessions",
+      resource: 'Title_Sessions',
+      glyphicon: 'comment',
       trigger: "sessions:index",
       intern: true,
       order: 2
     }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f5",
       title: "Sign-in",
+      resource: 'Title_SignIn',
+      glyphicon: 'user',
       trigger: "signin:index",
       intern: true,
       order: 4
     }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f4",
       title: "Debug",
+      resource: 'Title_Debug',
+      glyphicon: 'cog',
       trigger: "debug:index",
       intern: true,
       order: 5
@@ -589,6 +605,15 @@ module.exports.Collection = ResourceCollection = (function(_super) {
   ResourceCollection.prototype.model = module.exports.Model;
 
   ResourceCollection.prototype.comparator = 'key';
+
+  ResourceCollection.prototype.toJSON = function() {
+    var result;
+    result = {};
+    this.each(function(model) {
+      return result[model.get('key')] = model.get('value');
+    });
+    return result;
+  };
 
   return ResourceCollection;
 
@@ -753,23 +778,32 @@ module.exports = Controller = (function(_super) {
   }
 
   Controller.prototype.showHome = function() {
-    var view;
+    var View, view;
     application.trigger('set:active:header', 'Home');
-    view = new (require('./views/home-view'));
+    View = require('./views/home-view');
+    view = new View({
+      resources: application.resources
+    });
     return application.layout.content.show(view);
   };
 
   Controller.prototype.showSignin = function() {
-    var view;
+    var View, view;
     application.trigger('set:active:header', 'Sign-in');
-    view = new (require('./views/signin-view'));
+    View = require('./views/signin-view');
+    view = new View({
+      resources: application.resources
+    });
     return application.layout.content.show(view);
   };
 
   Controller.prototype.showAbout = function() {
-    var view;
+    var View, view;
     application.trigger('set:active:header', 'About');
-    view = new (require('./views/about-view'));
+    View = require('./views/about-view');
+    view = new View({
+      resources: application.resources
+    });
     return application.layout.content.show(view);
   };
 
@@ -903,8 +937,9 @@ module.exports = DebugView = (function(_super) {
   };
 
   DebugView.prototype.serializeData = function() {
+    var _ref1;
     return {
-      resources: this.resources.toJSON()
+      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0
     };
   };
 
@@ -1041,8 +1076,8 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>Debug</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n    <form>\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n      <textarea></textarea>\r\n\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n      <textarea></textarea>\r\n      <br/>\r\n      <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n      <button class=\"js-triggerevent\">trigger</button>\r\n      resource: "
-    + escapeExpression(((stack1 = ((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.TestKey1)),stack1 == null || stack1 === false ? stack1 : stack1.value)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>Debug</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n    <form>\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n      <textarea></textarea>\r\n\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n      <textarea></textarea>\r\n      <br/>\r\n      <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n      <button class=\"js-triggerevent\">trigger</button>\r\n      resources: "
+    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.TestKey1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n    </form>\r\n  </div>\r\n</div>";
   return buffer;
   });
@@ -1125,7 +1160,8 @@ module.exports = Controller = (function(_super) {
       application.trigger('set:active:header', 'Events');
       View = require('./views/events-index-view');
       view = new View({
-        collection: models
+        collection: models,
+        resources: application.resources
       });
       return application.layout.content.show(view);
     });
@@ -1147,7 +1183,8 @@ module.exports = Controller = (function(_super) {
         View = require('./views/event-details-view');
         view = new View({
           model: models.get(id),
-          collection: sessions
+          collection: sessions,
+          resources: application.resources
         });
         return application.layout.content.show(view);
       });
@@ -1161,7 +1198,8 @@ module.exports = Controller = (function(_super) {
       settings.set('active-session', id);
       View = require('./views/session-details-view');
       view = new View({
-        model: models.get(id)
+        model: models.get(id),
+        resources: application.resources
       });
       return application.layout.content.show(view);
     });
@@ -1251,7 +1289,21 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.itemViewContainer = '.js-sessions';
 
   EventDetailsView.prototype.initialize = function(options) {
-    return console.log('event id', options);
+    return this.resources = options != null ? options.resources : void 0;
+  };
+
+  EventDetailsView.prototype.serializeData = function() {
+    var _ref1;
+    return {
+      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      model: this.model.toJSON()
+    };
+  };
+
+  EventDetailsView.prototype.itemViewOptions = function() {
+    return {
+      resources: this.resources
+    };
   };
 
   return EventDetailsView;
@@ -1357,7 +1409,16 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.template = require('./templates/session-details');
 
   EventDetailsView.prototype.initialize = function(options) {
-    return console.log('session id', options);
+    console.log('session id', options);
+    return this.resources = options != null ? options.resources : void 0;
+  };
+
+  EventDetailsView.prototype.serializeData = function() {
+    var _ref1;
+    return {
+      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      model: this.model.toJSON()
+    };
   };
 
   EventDetailsView.prototype.onShow = function() {
@@ -1401,6 +1462,18 @@ module.exports = SessionItemView = (function(_super) {
     'click': 'onClick'
   };
 
+  SessionItemView.prototype.initialize = function(options) {
+    return this.resources = options != null ? options.resources : void 0;
+  };
+
+  SessionItemView.prototype.serializeData = function() {
+    var _ref1;
+    return {
+      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      model: this.model.toJSON()
+    };
+  };
+
   SessionItemView.prototype.onClick = function(e) {
     e.preventDefault();
     this.$el.addClass('active');
@@ -1421,15 +1494,11 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\"><h3>Event: ";
-  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + " ";
-  if (stack1 = helpers.description) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.description; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "</h3></div>\r\n      <div class=\"col-xs-5\">\r\n        <div class=\"btn-group pull-right\">\r\n          <button type=\"button\" class=\"btn btn-default active badge\">All</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">C#</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">Java</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">SAP</button>\r\n        </div>\r\n      </div>\r\n    </div>\r\n    <div class=\"list-group js-sessions\">\r\n      <!-- sessions -->\r\n    </div>\r\n    <a href=\"#events\">< Events</a>\r\n  </div>\r\n</div>";
+  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\"><h3>Event: "
+    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</h3></div>\r\n      <div class=\"col-xs-5\">\r\n        <div class=\"btn-group pull-right\">\r\n          <button type=\"button\" class=\"btn btn-default active badge\">All</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">C#</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">Java</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">SAP</button>\r\n        </div>\r\n      </div>\r\n    </div>\r\n    <div class=\"list-group js-sessions\">\r\n      <!-- sessions -->\r\n    </div>\r\n    <div>"
+    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</div>\r\n    <a href=\"#events\">< Events</a>\r\n  </div>\r\n</div>";
   return buffer;
   });
 });
@@ -1470,17 +1539,27 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, stack2, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\"><h3>";
-  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "</h3></div>\r\n      <div class=\"col-xs-5\">&nbsp;\r\n      </div>\r\n    </div>\r\n\r\n    <form>\r\n      <div>Text1 Text1 Text1 </div>\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n      <textarea></textarea>\r\n\r\n      <div>Text2 Text2 Text2 </div>\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n      <textarea></textarea>\r\n\r\n      <div>Text3 Text3 Text3 </div>\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter3\" id=\"some_id3\" class=\"rating\" value=\"\" />\r\n      <textarea></textarea>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-7\">&nbsp;</div>\r\n        <div class=\"col-xs-5\"><button class=\"js-submit\">Save</button>\r\n      </div>\r\n    </form>\r\n\r\n    <a href=\"#sessions/";
-  if (stack1 = helpers.sessionId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.sessionId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
+  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\"><h3>"
+    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</h3></div>\r\n      <div class=\"col-xs-5\">&nbsp;</div>\r\n    </div>\r\n\r\n    <form>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
+    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question1_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</div>\r\n        <div class=\"col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"question1\" id=\"some_id1\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
+    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question2_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</div>\r\n        <div class=\"col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"question2\" id=\"some_id2\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
+    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question3_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</div>\r\n        <div class=\"col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"question3\" id=\"some_id3\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n      <div>"
+    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question4_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</div>\r\n      <textarea name=\"question4\"></textarea>\r\n\r\n      <div>"
+    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question5_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</div>\r\n      <textarea name=\"question5\"></textarea>\r\n\r\n      <div>"
+    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question6_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</div>\r\n      <textarea name=\"question6\"></textarea>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-7\">&nbsp;</div>\r\n        <div class=\"col-xs-5\"><button class=\"js-submit\">Save</button>\r\n      </div>\r\n    </form>\r\n\r\n    <a href=\"#sessions/";
+  if (stack2 = helpers.sessionId) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.sessionId; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
     + "\">< Sessions</a>\r\n  </div>\r\n</div>";
   return buffer;
   });
@@ -1509,25 +1588,23 @@ function program3(depth0,data) {
   return buffer;
   }
 
-  buffer += "<div><strong>";
-  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
+  buffer += "<div><strong>"
+    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</strong></div>\r\n";
-  stack1 = helpers.each.call(depth0, depth0.tags, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
-  if(stack1 || stack1 === 0) { buffer += stack1; }
+  stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.tags), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\r\n<div class=\"glyphicon glyphicon-time\">\r\n  ";
   options = {hash:{
     'format': ("HH:mm")
   },data:data};
-  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.startDate, options) : helperMissing.call(depth0, "dateFormat", depth0.startDate, options)))
+  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.startDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.startDate), options)))
     + "-";
   options = {hash:{
     'format': ("HH:mm")
   },data:data};
-  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.endDate, options) : helperMissing.call(depth0, "dateFormat", depth0.endDate, options)))
+  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options)))
     + "\r\n</div>\r\n<div class=\"glyphicon glyphicon-user\">\r\n  ";
-  stack2 = helpers.each.call(depth0, depth0.speakers, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
+  stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.speakers), {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\r\n</div>\r\n";
   return buffer;
@@ -1559,7 +1636,8 @@ module.exports = Controller = (function(_super) {
     var View, view;
     View = require('./views/header-view');
     view = new View.Header({
-      collection: this.headers
+      collection: this.headers,
+      resources: application.resources
     });
     return application.layout.header.show(view);
   };
@@ -1636,8 +1714,9 @@ module.exports.HeaderItem = ItemView = (function(_super) {
     'click': 'onClick'
   };
 
-  ItemView.prototype.initialize = function() {
+  ItemView.prototype.initialize = function(options) {
     var _this = this;
+    this.resources = options != null ? options.resources : void 0;
     return application.on('set:active:header', function(title) {
       if (title === _this.model.get('title')) {
         return _this.setActive();
@@ -1645,6 +1724,18 @@ module.exports.HeaderItem = ItemView = (function(_super) {
         return _this.setInactive();
       }
     });
+  };
+
+  ItemView.prototype.serializeData = function() {
+    var _ref1, _ref2, _ref3,
+      _this = this;
+    return {
+      title: (_ref1 = (_ref2 = this.resources.find((function(resource) {
+        return resource.get('key') === _this.model.get('resource');
+      }))) != null ? _ref2.get('value') : void 0) != null ? _ref1 : '-',
+      href: this.model.get('href'),
+      icon: (_ref3 = this.model.get('glyphicon')) != null ? _ref3 : config.sidebarglyphicon
+    };
   };
 
   ItemView.prototype.onClick = function(e) {
@@ -1685,11 +1776,25 @@ module.exports.Header = View = (function(_super) {
     'click #menu-toggle': 'onSidebarToggle'
   };
 
-  View.prototype.initialize = function() {
+  View.prototype.initialize = function(options) {
     var _this = this;
+    this.resources = options != null ? options.resources : void 0;
     return application.on('set:active:header', function(title) {
       return _this.setSubHeader(title);
     });
+  };
+
+  View.prototype.serializeData = function() {
+    var _ref2;
+    return {
+      resources: (_ref2 = this.resources) != null ? _ref2.toJSON() : void 0
+    };
+  };
+
+  View.prototype.itemViewOptions = function() {
+    return {
+      resources: this.resources
+    };
   };
 
   View.prototype.onShow = function() {
@@ -1722,11 +1827,15 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   if (stack1 = helpers.href) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.href; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\">";
+    + "\">\r\n  <span class=\"glyphicon glyphicon-";
+  if (stack1 = helpers.icon) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.icon; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\"></span>\r\n  &nbsp;";
   if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</a>";
+    + "\r\n</a>";
   return buffer;
   });
 });

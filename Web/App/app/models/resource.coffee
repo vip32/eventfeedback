@@ -13,3 +13,10 @@ module.exports.Collection = class ResourceCollection extends Collection
     password: 'admin'
   model: module.exports.Model
   comparator: 'key'
+
+  toJSON: ->
+    result = {}
+    @each (model) ->
+      result[model.get('key')] = model.get('value')
+    return result
+

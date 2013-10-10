@@ -7,18 +7,21 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
   showHome: ->
     application.trigger 'set:active:header', 'Home'
-    view = new (require './views/home-view')
+    View = require './views/home-view'
+    view = new View(resources: application.resources)
     application.layout.content.show(view)
 
   showSignin: ->
     application.trigger 'set:active:header', 'Sign-in'
     # application.execute('set:active:header', 'sign-in')
-    view = new (require './views/signin-view')
+    View = require './views/signin-view'
+    view = new View(resources: application.resources)
     application.layout.content.show(view)
 
   showAbout: ->
     application.trigger 'set:active:header', 'About'
-    view = new (require './views/about-view')
+    View = require './views/about-view'
+    view = new View(resources: application.resources)
     application.layout.content.show(view)
 
   showDebug: ->

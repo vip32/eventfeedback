@@ -13,6 +13,13 @@ module.exports = class SessionItemView extends ItemView
   events:
     'click': 'onClick'
 
+  initialize: (options) ->
+    @resources = options?.resources
+
+  serializeData: ->
+    resources: @resources?.toJSON()
+    model: @model.toJSON()
+
   onClick: (e) ->
     e.preventDefault()
     @$el.addClass('active')

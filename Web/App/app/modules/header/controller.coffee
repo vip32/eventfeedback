@@ -13,7 +13,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
   showHeader: ->
     View = require './views/header-view'
-    view = new View.Header(collection: @headers) # TODO: filter on 'visible'
+    view = new View.Header(collection: @headers, resources: application.resources) # TODO: filter on 'visible'
     application.layout.header.show(view)
 
   onClose: ->

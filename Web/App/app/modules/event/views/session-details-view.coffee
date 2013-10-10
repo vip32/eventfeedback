@@ -4,6 +4,11 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
 
   initialize: (options) ->
     console.log 'session id', options
+    @resources = options?.resources
+
+  serializeData: ->
+    resources: @resources?.toJSON()
+    model: @model.toJSON()
 
   onShow: ->
      $('input.rating[type=number]').rating();

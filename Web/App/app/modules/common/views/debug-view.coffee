@@ -10,7 +10,7 @@ module.exports = class DebugView extends Backbone.Marionette.ItemView
     @resources = options?.resources
 
   serializeData: ->
-    resources: @resources.toJSON()
+    resources: @resources?.toJSON()
 
   onTriggerEvent: (e) ->
     model = Backbone.Syphon.serialize(@)
