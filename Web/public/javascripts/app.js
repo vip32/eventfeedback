@@ -961,6 +961,10 @@ module.exports = DebugView = (function(_super) {
     return e.preventDefault();
   };
 
+  DebugView.prototype.onShow = function() {
+    return $('input.rating[type=number]').rating();
+  };
+
   DebugView.prototype.onClose = function() {
     return console.log('debug view close');
   };
@@ -1081,7 +1085,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>Debug</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n    <form>\r\n      <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n      <button class=\"js-triggerevent\">trigger</button>\r\n    </form>\r\n  </div>\r\n</div>";
+  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>Debug</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n    <form>\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n      <textarea></textarea>\r\n\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n      <textarea></textarea>\r\n      <br/>\r\n      <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n      <button class=\"js-triggerevent\">trigger</button>\r\n    </form>\r\n  </div>\r\n</div>";
   });
 });
 
@@ -1392,10 +1396,14 @@ module.exports = EventDetailsView = (function(_super) {
 
   EventDetailsView.prototype.id = 'session-details-view';
 
-  EventDetailsView.prototype.template = require('./templates/event-details');
+  EventDetailsView.prototype.template = require('./templates/session-details');
 
   EventDetailsView.prototype.initialize = function(options) {
     return console.log('session id', options);
+  };
+
+  EventDetailsView.prototype.onShow = function() {
+    return $('input.rating[type=number]').rating();
   };
 
   return EventDetailsView;
@@ -1497,6 +1505,26 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
 
   return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <div class=\"list-group js-events\">\r\n      <!-- events -->\r\n    </div>\r\n  </div>\r\n</div>";
+  });
+});
+
+;require.register("modules/event/views/templates/session-details", function(exports, require, module) {
+module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\"><h3>";
+  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h3></div>\r\n      <div class=\"col-xs-5\">&nbsp;\r\n      </div>\r\n    </div>\r\n\r\n    <form>\r\n      <div>Text1 Text1 Text1 </div>\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n      <textarea></textarea>\r\n\r\n      <div>Text2 Text2 Text2 </div>\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n      <textarea></textarea>\r\n\r\n      <div>Text3 Text3 Text3 </div>\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter3\" id=\"some_id3\" class=\"rating\" value=\"\" />\r\n      <textarea></textarea>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-7\">&nbsp;</div>\r\n        <div class=\"col-xs-5\"><button class=\"js-submit\">Save</button>\r\n      </div>\r\n    </form>\r\n\r\n    <a href=\"#sessions/";
+  if (stack1 = helpers.sessionId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.sessionId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\">< Sessions</a>\r\n  </div>\r\n</div>";
+  return buffer;
   });
 });
 

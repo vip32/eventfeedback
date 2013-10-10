@@ -12,5 +12,8 @@ module.exports = class DebugView extends Backbone.Marionette.ItemView
     application.trigger model.event
     e.preventDefault()
 
+  onShow: ->
+     $('input.rating[type=number]').rating();
+
   onClose: ->
     console.log 'debug view close'
