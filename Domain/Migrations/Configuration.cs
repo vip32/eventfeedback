@@ -67,6 +67,12 @@ namespace EventFeedback.Domain.Migrations
                     });
             context.UserRoles.AddOrUpdate(p => p.UserId, new UserRole{UserId = 1, RoleId = 1}); // admin Administrator role
 
+            context.ResourceTexts.AddOrUpdate(
+                p => p.Key,
+                new ResourceText {Key = "TestKey1", Value = "Value1"},
+                new ResourceText {Key = "TestKey2", Value = "Value2"}
+            );
+
             context.Events.AddOrUpdate(
                 p => p.Title,
                 new Event

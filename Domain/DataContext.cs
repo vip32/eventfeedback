@@ -14,6 +14,7 @@ namespace EventFeedback.Domain
             //_traceSource.TraceInformation("datacontext ctor ");    
         }
 
+        public DbSet<ResourceText> ResourceTexts { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<Session> Sessions { get; set; }
         public DbSet<SessionFeedback> SessionFeedbacks { get; set; }

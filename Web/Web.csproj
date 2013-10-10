@@ -57,6 +57,7 @@
     <Compile Include="Controllers\Admin\UserProfilesController.cs" />
     <Compile Include="Controllers\Admin\UsersController.cs" />
     <Compile Include="Controllers\Admin\EventStatusController.cs" />
+    <Compile Include="Controllers\ResourceTextsController.cs" />
     <Compile Include="Controllers\LookupController.cs" />
     <Compile Include="Controllers\FeedbacksController.cs" />
     <Compile Include="Controllers\SessionsController.cs" />

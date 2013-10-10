@@ -2,6 +2,7 @@ require 'lib/marionette-renderer'
 require 'lib/view-helper'
 config = require 'config'
 settings = require 'settings'
+Resource = require '../../models/resource'
 
 class Application extends Backbone.Marionette.Application
   routers: {}
@@ -27,11 +28,14 @@ class Application extends Backbone.Marionette.Application
       @layout = new (require config.layout)
       @layout.render()
 
-    settings.set('last-visit', moment())
-    settings.set('username', 'admin')
-    settings.set('password', 'admin')
+    @resources = new Resource.Collection()
+    @resources.fetch().done (resources) =>
+      console.log 'resources fetched'
+      settings.set('last-visit', moment())
+      settings.set('username', 'admin')
+      settings.set('password', 'admin')
 
-    @start()
+      @start()
 
   navigate: (route, options) ->
     console.log 'navigate', route

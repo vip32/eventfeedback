@@ -23,7 +23,8 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
   showDebug: ->
     application.trigger 'set:active:header', 'Debug'
-    view = new (require './views/debug-view')
+    View = require './views/debug-view'
+    view = new View(resources: application.resources)
     application.layout.content.show(view)
 
   onClose: ->

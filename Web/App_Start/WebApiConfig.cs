@@ -15,6 +15,13 @@ namespace EventFeedback.Web
         public static void Register(HttpConfiguration config)
         {
             config.Routes.MapHttpRoute(
+                name: "ResourcesApi",
+                routeTemplate: "api/resources/{id}",
+                defaults: new { controller = "resourcetexts", id = RouteParameter.Optional }
+                //constraints: new { id = @"^\d+$" }
+                );
+
+            config.Routes.MapHttpRoute(
                 name: "EventsApi",
                 routeTemplate: "api/events/{id}",
                 defaults: new { controller = "events", id = RouteParameter.Optional }

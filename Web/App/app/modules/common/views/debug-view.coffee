@@ -6,6 +6,12 @@ module.exports = class DebugView extends Backbone.Marionette.ItemView
   events:
     'click .js-triggerevent': 'onTriggerEvent'
 
+  initialize: (options) ->
+    @resources = options?.resources
+
+  serializeData: ->
+    resources: @resources.toJSON()
+
   onTriggerEvent: (e) ->
     model = Backbone.Syphon.serialize(@)
     console.log 'onTriggerEvent', model
@@ -13,7 +19,8 @@ module.exports = class DebugView extends Backbone.Marionette.ItemView
     e.preventDefault()
 
   onShow: ->
-     $('input.rating[type=number]').rating();
+    console.log 'resources', @resources
+    $('input.rating[type=number]').rating();
 
   onClose: ->
     console.log 'debug view close'

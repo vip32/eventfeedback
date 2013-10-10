@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="DataContext.cs" />
     <Compile Include="Entities\Event.cs" />
+    <Compile Include="Entities\ResourceText.cs" />
     <Compile Include="Migrations\201309181312149_Initial_Domain.cs" />
     <Compile Include="Migrations\201309181312149_Initial_Domain.Designer.cs">
       <DependentUpon>201309181312149_Initial_Domain.cs</DependentUpon>
@@ -93,6 +94,10 @@
     <Compile Include="Migrations\201310012108094_Domain_Feedback.cs" />
     <Compile Include="Migrations\201310012108094_Domain_Feedback.Designer.cs">
       <DependentUpon>201310012108094_Domain_Feedback.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201310101007347_Domain_ResourceText.cs" />
+    <Compile Include="Migrations\201310101007347_Domain_ResourceText.Designer.cs">
+      <DependentUpon>201310101007347_Domain_ResourceText.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -120,6 +125,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201310012108094_Domain_Feedback.resx">
       <DependentUpon>201310012108094_Domain_Feedback.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201310101007347_Domain_ResourceText.resx">
+      <DependentUpon>201310101007347_Domain_ResourceText.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

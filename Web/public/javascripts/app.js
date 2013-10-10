@@ -91,7 +91,7 @@
   globals.require.brunch = true;
 })();
 require.register("application", function(exports, require, module) {
-var Application, config, settings, _ref,
+var Application, Resource, config, settings, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -103,6 +103,8 @@ require('lib/view-helper');
 config = require('config');
 
 settings = require('settings');
+
+Resource = require('../../models/resource');
 
 Application = (function(_super) {
   __extends(Application, _super);
@@ -138,10 +140,14 @@ Application = (function(_super) {
       _this.layout = new (require(config.layout));
       return _this.layout.render();
     });
-    settings.set('last-visit', moment());
-    settings.set('username', 'admin');
-    settings.set('password', 'admin');
-    return this.start();
+    this.resources = new Resource.Collection();
+    return this.resources.fetch().done(function(resources) {
+      console.log('resources fetched');
+      settings.set('last-visit', moment());
+      settings.set('username', 'admin');
+      settings.set('password', 'admin');
+      return _this.start();
+    });
   };
 
   Application.prototype.navigate = function(route, options) {
@@ -393,120 +399,8 @@ Handlebars.registerHelper("dateFormat", function(context, block) {
 
 });
 
-;require.register("models/contact", function(exports, require, module) {
-var Collection, Contact, ContactsCollection, Model, TestData, _ref, _ref1,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-Model = require('../lib/base/model');
-
-Collection = require('../lib/base/collection');
-
-module.exports.Model = Contact = (function(_super) {
-  __extends(Contact, _super);
-
-  function Contact() {
-    _ref = Contact.__super__.constructor.apply(this, arguments);
-    return _ref;
-  }
-
-  Contact.prototype.urlRoot = "contacts";
-
-  Contact.prototype.defaults = {
-    firstName: '',
-    lastName: '',
-    phoneNumber: ''
-  };
-
-  Contact.prototype.validate = function(attrs, options) {
-    var errors;
-    errors = {};
-    if (_.isEmpty(attrs.firstName)) {
-      errors.firstName = "can't be blank";
-    }
-    if (_.isEmpty(attrs.lastName)) {
-      errors.lastName = "can't be blank";
-    } else {
-      if (attrs.lastName.length < 2) {
-        errors.lastName = "is too short";
-      }
-    }
-    if (!_.isEmpty(errors)) {
-      return errors;
-    }
-  };
-
-  return Contact;
-
-})(Model);
-
-module.exports.Collection = ContactsCollection = (function(_super) {
-  __extends(ContactsCollection, _super);
-
-  function ContactsCollection() {
-    _ref1 = ContactsCollection.__super__.constructor.apply(this, arguments);
-    return _ref1;
-  }
-
-  ContactsCollection.prototype.localStorage = new Backbone.LocalStorage("contacts");
-
-  ContactsCollection.prototype.credentials = {
-    username: 'admin',
-    password: 'admin'
-  };
-
-  ContactsCollection.prototype.model = module.exports.Model;
-
-  ContactsCollection.prototype.comparator = 'firstName';
-
-  return ContactsCollection;
-
-})(Collection);
-
-module.exports.TestData = TestData = (function() {
-  function TestData() {}
-
-  TestData.prototype.addTo = function(collection) {
-    if (collection.size() === 0) {
-      collection.reset(this.data);
-      return collection.forEach(function(model) {
-        return model.save();
-      });
-    }
-  };
-
-  TestData.prototype.data = [
-    {
-      id: "ce82ceb6-1104-aaa6-4fab-a4656694de17",
-      firstName: "Alice",
-      lastName: "Arten",
-      phoneNumber: "555-0184"
-    }, {
-      id: "9cf247f4-4c76-d453-bbec-1c40080e32e5",
-      firstName: "Bob",
-      lastName: "Brigham",
-      phoneNumber: "555-0163"
-    }, {
-      id: "511b8984-8958-663d-4707-9378aa71776b",
-      firstName: "Charlie",
-      lastName: "Campbell",
-      phoneNumber: "555-0129"
-    }, {
-      id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f5",
-      firstName: "Amy",
-      lastName: "Campbell",
-      phoneNumber: "555-0130"
-    }
-  ];
-
-  return TestData;
-
-})();
-
-});
-
 ;require.register("models/event", function(exports, require, module) {
-var Collection, Contact, EventsCollection, Model, config, _ref, _ref1,
+var Collection, Event, EventsCollection, Model, config, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -516,15 +410,15 @@ Model = require('../lib/base/model');
 
 Collection = require('../lib/base/collection');
 
-module.exports.Model = Contact = (function(_super) {
-  __extends(Contact, _super);
+module.exports.Model = Event = (function(_super) {
+  __extends(Event, _super);
 
-  function Contact() {
-    _ref = Contact.__super__.constructor.apply(this, arguments);
+  function Event() {
+    _ref = Event.__super__.constructor.apply(this, arguments);
     return _ref;
   }
 
-  return Contact;
+  return Event;
 
 })(Model);
 
@@ -651,6 +545,54 @@ module.exports.TestData = TestData = (function() {
   return TestData;
 
 })();
+
+});
+
+;require.register("models/resource", function(exports, require, module) {
+var Collection, Model, Resource, ResourceCollection, config, _ref, _ref1,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+config = require('../config');
+
+Model = require('../lib/base/model');
+
+Collection = require('../lib/base/collection');
+
+module.exports.Model = Resource = (function(_super) {
+  __extends(Resource, _super);
+
+  function Resource() {
+    _ref = Resource.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  return Resource;
+
+})(Model);
+
+module.exports.Collection = ResourceCollection = (function(_super) {
+  __extends(ResourceCollection, _super);
+
+  function ResourceCollection() {
+    _ref1 = ResourceCollection.__super__.constructor.apply(this, arguments);
+    return _ref1;
+  }
+
+  ResourceCollection.prototype.url = "" + config.apiroot + "/resources";
+
+  ResourceCollection.prototype.credentials = {
+    username: 'admin',
+    password: 'admin'
+  };
+
+  ResourceCollection.prototype.model = module.exports.Model;
+
+  ResourceCollection.prototype.comparator = 'key';
+
+  return ResourceCollection;
+
+})(Collection);
 
 });
 
@@ -832,9 +774,12 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showDebug = function() {
-    var view;
+    var View, view;
     application.trigger('set:active:header', 'Debug');
-    view = new (require('./views/debug-view'));
+    View = require('./views/debug-view');
+    view = new View({
+      resources: application.resources
+    });
     return application.layout.content.show(view);
   };
 
@@ -953,6 +898,16 @@ module.exports = DebugView = (function(_super) {
     'click .js-triggerevent': 'onTriggerEvent'
   };
 
+  DebugView.prototype.initialize = function(options) {
+    return this.resources = options != null ? options.resources : void 0;
+  };
+
+  DebugView.prototype.serializeData = function() {
+    return {
+      resources: this.resources.toJSON()
+    };
+  };
+
   DebugView.prototype.onTriggerEvent = function(e) {
     var model;
     model = Backbone.Syphon.serialize(this);
@@ -962,6 +917,7 @@ module.exports = DebugView = (function(_super) {
   };
 
   DebugView.prototype.onShow = function() {
+    console.log('resources', this.resources);
     return $('input.rating[type=number]').rating();
   };
 
@@ -1082,10 +1038,13 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>Debug</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n    <form>\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n      <textarea></textarea>\r\n\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n      <textarea></textarea>\r\n      <br/>\r\n      <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n      <button class=\"js-triggerevent\">trigger</button>\r\n    </form>\r\n  </div>\r\n</div>";
+  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>Debug</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n    <form>\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n      <textarea></textarea>\r\n\r\n      <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n      <textarea></textarea>\r\n      <br/>\r\n      <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n      <button class=\"js-triggerevent\">trigger</button>\r\n      resource: "
+    + escapeExpression(((stack1 = ((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.TestKey1)),stack1 == null || stack1 === false ? stack1 : stack1.value)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n    </form>\r\n  </div>\r\n</div>";
+  return buffer;
   });
 });
 
@@ -1158,7 +1117,6 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showEventsIndex = function() {
     return this.events.fetch({
-      reload: true,
       data: {
         filter: 'all'
       }
