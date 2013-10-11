@@ -14509,201 +14509,6 @@ if (!jQuery) { throw new Error("Bootstrap requires jQuery") }
 }));
 
 ;/**
- * Copyright (c) 2011-2013 Felix Gnass
- * Licensed under the MIT license
- */
-
-/*
-
-Basic Usage:
-============
-
-$('#el').spin(); // Creates a default Spinner using the text color of #el.
-$('#el').spin({ ... }); // Creates a Spinner using the provided options.
-
-$('#el').spin(false); // Stops and removes the spinner.
-
-Using Presets:
-==============
-
-$('#el').spin('small'); // Creates a 'small' Spinner using the text color of #el.
-$('#el').spin('large', '#fff'); // Creates a 'large' white Spinner.
-
-Adding a custom preset:
-=======================
-
-$.fn.spin.presets.flower = {
-  lines: 9
-  length: 10
-  width: 20
-  radius: 0
-}
-
-$('#el').spin('flower', 'red');
-
-*/
-
-(function(factory) {
-
-  if (typeof exports == 'object') {
-    // CommonJS
-    factory(require('jquery'), require('spin'))
-  }
-  else if (typeof define == 'function' && define.amd) {
-    // AMD, register as anonymous module
-    define(['jquery', 'spin'], factory)
-  }
-  else {
-    // Browser globals
-    if (!window.Spinner) throw new Error('Spin.js not present')
-    factory(window.jQuery, window.Spinner)
-  }
-
-}(function($, Spinner) {
-
-  $.fn.spin = function(opts, color) {
-
-    return this.each(function() {
-      var $this = $(this),
-        data = $this.data();
-
-      if (data.spinner) {
-        data.spinner.stop();
-        delete data.spinner;
-      }
-      if (opts !== false) {
-        opts = $.extend(
-          { color: color || $this.css('color') },
-          $.fn.spin.presets[opts] || opts
-        )
-        data.spinner = new Spinner(opts).spin(this)
-      }
-    })
-  }
-
-  $.fn.spin.presets = {
-    tiny: { lines: 8, length: 2, width: 2, radius: 3 },
-    small: { lines: 8, length: 4, width: 3, radius: 5 },
-    large: { lines: 10, length: 8, width: 4, radius: 8 }
-  }
-
-}));
-
-;// Console-polyfill. MIT license.
-// https://github.com/paulmillr/console-polyfill
-// Make it safe to do console.log() always.
-(function (con) {
-  'use strict';
-  var prop, method;
-  var empty = {};
-  var dummy = function() {};
-  var properties = 'memory'.split(',');
-  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
-     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
-     'time,timeEnd,trace,warn').split(',');
-  while (prop = properties.pop()) con[prop] = con[prop] || empty;
-  while (method = methods.pop()) con[method] = con[method] || dummy;
-})(window.console = window.console || {});
-
-;/*!
- * backbone.basicauth.js v0.4.0
- *
- * Adds HTTP Basic Authentication headers,
- * either by reading them from a model property,
- * or by parsing the model/collection.url.
- *
- * Copyright 2013, Tom Spencer (@fiznool), Luis Abreu (@lmjabreu)
- * backbone.basicauth.js may be freely distributed under the MIT license.
- */
-;( function (root, factory) {
-  // AMD module if available
-  if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        define(['underscore', 'backbone'], factory);
-    } else {
-        // Browser globals
-        root.amdWeb = factory(root._, root.Backbone);
-    }
-}( this, function (_, Backbone) {
-
-  var btoa = window.btoa;
-
-  /**
-   * Returns a base64 encoded "user:pass" string
-   * @param  {string} username The http auth username
-   * @param  {string} password The http auth password
-   * @return {string}          The base64 encoded credentials pair
-   */
-  var encode = function(credentials) {
-    // Use Base64 encoding to create the authentication details
-    // If btoa is not available on your target browser there is a polyfill:
-    // https://github.com/davidchambers/Base64.js
-    // Using unescape and encodeURIComponent to allow for Unicode strings
-    // https://developer.mozilla.org/en-US/docs/Web/API/window.btoa#Unicode_Strings
-    return btoa(unescape(encodeURIComponent(
-      [credentials.username, credentials.password].join(':'))));
-  };
-
-  // Add a public method so that anything else can also create the header
-  Backbone.BasicAuth = {
-    getHeader: function(credentials) {
-      return {
-        'Authorization': 'Basic ' + encode(credentials)
-      };
-    }
-  };
-
-  // Store a copy of the original Backbone.sync
-  var originalSync = Backbone.sync;
-
-  /**
-   * Override Backbone.sync
-   *
-   * If a token is present, set the Basic Auth header before the sync is performed.
-   *
-   * @param  {string} method  Contains the backbone operation. e.g.: read, reset, set
-   * @param  {object} model   A Backbone model or collection
-   * @param  {object} options Options to be passed over to Backbone.sync and jQuery
-   * @return {object}         Reference to Backbone.sync for chaining
-   */
-  Backbone.sync = function (method, model, options) {
-
-    // Basic Auth supports two modes: URL-based and function-based.
-    var credentials, remoteUrl, remoteUrlParts;
-
-    if(model.credentials) {
-      // Try function-based.
-      credentials = _.result(model, 'credentials');
-    }
-
-    if(credentials == null) {
-      // Try URL-based.
-      // Handle both string and function urls
-      remoteURL = options.url || _.result(model, 'url');
-
-      // Retrieve the auth credentials from the model url
-      remoteUrlParts = remoteURL.match(/\/\/(.*):(.*)@/);
-      if (remoteUrlParts && remoteUrlParts.length === 3) {
-        credentials = {
-          username: remoteUrlParts[1],
-          password: remoteUrlParts[2]
-        };
-      }
-    }
-
-    // Add the token to the request headers if available
-    if (credentials != null) {
-      options.headers = options.headers || {};
-      _.extend(options.headers, Backbone.BasicAuth.getHeader(credentials));
-    }
-
-    // Perform the sync
-    return originalSync.call(model, method, model, options);
-  };
-
-}));
-
-;/**
  * Backbone localStorage Adapter
  * Version 1.1.7
  *
@@ -14925,6 +14730,201 @@ Backbone.sync = function(method, model, options) {
 
 return Backbone.LocalStorage;
 }));
+
+;/**
+ * Copyright (c) 2011-2013 Felix Gnass
+ * Licensed under the MIT license
+ */
+
+/*
+
+Basic Usage:
+============
+
+$('#el').spin(); // Creates a default Spinner using the text color of #el.
+$('#el').spin({ ... }); // Creates a Spinner using the provided options.
+
+$('#el').spin(false); // Stops and removes the spinner.
+
+Using Presets:
+==============
+
+$('#el').spin('small'); // Creates a 'small' Spinner using the text color of #el.
+$('#el').spin('large', '#fff'); // Creates a 'large' white Spinner.
+
+Adding a custom preset:
+=======================
+
+$.fn.spin.presets.flower = {
+  lines: 9
+  length: 10
+  width: 20
+  radius: 0
+}
+
+$('#el').spin('flower', 'red');
+
+*/
+
+(function(factory) {
+
+  if (typeof exports == 'object') {
+    // CommonJS
+    factory(require('jquery'), require('spin'))
+  }
+  else if (typeof define == 'function' && define.amd) {
+    // AMD, register as anonymous module
+    define(['jquery', 'spin'], factory)
+  }
+  else {
+    // Browser globals
+    if (!window.Spinner) throw new Error('Spin.js not present')
+    factory(window.jQuery, window.Spinner)
+  }
+
+}(function($, Spinner) {
+
+  $.fn.spin = function(opts, color) {
+
+    return this.each(function() {
+      var $this = $(this),
+        data = $this.data();
+
+      if (data.spinner) {
+        data.spinner.stop();
+        delete data.spinner;
+      }
+      if (opts !== false) {
+        opts = $.extend(
+          { color: color || $this.css('color') },
+          $.fn.spin.presets[opts] || opts
+        )
+        data.spinner = new Spinner(opts).spin(this)
+      }
+    })
+  }
+
+  $.fn.spin.presets = {
+    tiny: { lines: 8, length: 2, width: 2, radius: 3 },
+    small: { lines: 8, length: 4, width: 3, radius: 5 },
+    large: { lines: 10, length: 8, width: 4, radius: 8 }
+  }
+
+}));
+
+;/*!
+ * backbone.basicauth.js v0.4.0
+ *
+ * Adds HTTP Basic Authentication headers,
+ * either by reading them from a model property,
+ * or by parsing the model/collection.url.
+ *
+ * Copyright 2013, Tom Spencer (@fiznool), Luis Abreu (@lmjabreu)
+ * backbone.basicauth.js may be freely distributed under the MIT license.
+ */
+;( function (root, factory) {
+  // AMD module if available
+  if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['underscore', 'backbone'], factory);
+    } else {
+        // Browser globals
+        root.amdWeb = factory(root._, root.Backbone);
+    }
+}( this, function (_, Backbone) {
+
+  var btoa = window.btoa;
+
+  /**
+   * Returns a base64 encoded "user:pass" string
+   * @param  {string} username The http auth username
+   * @param  {string} password The http auth password
+   * @return {string}          The base64 encoded credentials pair
+   */
+  var encode = function(credentials) {
+    // Use Base64 encoding to create the authentication details
+    // If btoa is not available on your target browser there is a polyfill:
+    // https://github.com/davidchambers/Base64.js
+    // Using unescape and encodeURIComponent to allow for Unicode strings
+    // https://developer.mozilla.org/en-US/docs/Web/API/window.btoa#Unicode_Strings
+    return btoa(unescape(encodeURIComponent(
+      [credentials.username, credentials.password].join(':'))));
+  };
+
+  // Add a public method so that anything else can also create the header
+  Backbone.BasicAuth = {
+    getHeader: function(credentials) {
+      return {
+        'Authorization': 'Basic ' + encode(credentials)
+      };
+    }
+  };
+
+  // Store a copy of the original Backbone.sync
+  var originalSync = Backbone.sync;
+
+  /**
+   * Override Backbone.sync
+   *
+   * If a token is present, set the Basic Auth header before the sync is performed.
+   *
+   * @param  {string} method  Contains the backbone operation. e.g.: read, reset, set
+   * @param  {object} model   A Backbone model or collection
+   * @param  {object} options Options to be passed over to Backbone.sync and jQuery
+   * @return {object}         Reference to Backbone.sync for chaining
+   */
+  Backbone.sync = function (method, model, options) {
+
+    // Basic Auth supports two modes: URL-based and function-based.
+    var credentials, remoteUrl, remoteUrlParts;
+
+    if(model.credentials) {
+      // Try function-based.
+      credentials = _.result(model, 'credentials');
+    }
+
+    if(credentials == null) {
+      // Try URL-based.
+      // Handle both string and function urls
+      remoteURL = options.url || _.result(model, 'url');
+
+      // Retrieve the auth credentials from the model url
+      remoteUrlParts = remoteURL.match(/\/\/(.*):(.*)@/);
+      if (remoteUrlParts && remoteUrlParts.length === 3) {
+        credentials = {
+          username: remoteUrlParts[1],
+          password: remoteUrlParts[2]
+        };
+      }
+    }
+
+    // Add the token to the request headers if available
+    if (credentials != null) {
+      options.headers = options.headers || {};
+      _.extend(options.headers, Backbone.BasicAuth.getHeader(credentials));
+    }
+
+    // Perform the sync
+    return originalSync.call(model, method, model, options);
+  };
+
+}));
+
+;// Console-polyfill. MIT license.
+// https://github.com/paulmillr/console-polyfill
+// Make it safe to do console.log() always.
+(function (con) {
+  'use strict';
+  var prop, method;
+  var empty = {};
+  var dummy = function() {};
+  var properties = 'memory'.split(',');
+  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
+     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
+     'time,timeEnd,trace,warn').split(',');
+  while (prop = properties.pop()) con[prop] = con[prop] || empty;
+  while (method = methods.pop()) con[method] = con[method] || dummy;
+})(window.console = window.console || {});
 
 ;// MarionetteJS (Backbone.Marionette)
 // ----------------------------------
