@@ -1066,9 +1066,11 @@ module.exports = HomeView = (function(_super) {
 });
 
 ;require.register("modules/common/views/signin-view", function(exports, require, module) {
-var SigninView, vent, _ref,
+var SigninView, application, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
 
 vent = require('vent');
 

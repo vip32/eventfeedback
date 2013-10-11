@@ -1,3 +1,4 @@
+application = require 'application'
 vent = require 'vent'
 
 module.exports = class SigninView extends Backbone.Marionette.ItemView
