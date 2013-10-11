@@ -5,9 +5,8 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
   template: require './templates/session-details'
 
   initialize: (options) ->
-    console.log 'session id', options
     @resources = options?.resources
-
+    application.trigger 'navigation:back:on'
     application.on 'navigation:back', @onBack
 
   serializeData: ->

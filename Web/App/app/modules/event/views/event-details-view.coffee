@@ -8,7 +8,7 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
 
   initialize: (options) ->
     @resources = options?.resources
-
+    application.trigger 'navigation:back:on'
     application.on 'navigation:back', @onBack
 
   serializeData: ->

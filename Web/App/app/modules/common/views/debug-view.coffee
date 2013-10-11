@@ -8,6 +8,7 @@ module.exports = class DebugView extends Backbone.Marionette.ItemView
 
   initialize: (options) ->
     @resources = options?.resources
+    application.trigger 'navigation:back:off'
 
   serializeData: ->
     resources: @resources?.toJSON()

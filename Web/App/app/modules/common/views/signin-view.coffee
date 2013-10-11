@@ -4,6 +4,9 @@ module.exports = class SigninView extends Backbone.Marionette.ItemView
   events:
     'click .js-signin': 'onSignin'
 
+  initialize: (options) ->
+    application.trigger 'navigation:back:off'
+
   onSignin: (e) ->
     e.preventDefault()
 

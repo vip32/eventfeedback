@@ -8,11 +8,7 @@ module.exports = class EventIndexView extends Backbone.Marionette.CompositeView
   itemViewContainer: '.js-events'
 
   initialize: (options) ->
-    application.on 'navigation:back', @onBack
-
-  onBack: ->
-    console.log 'back from events-index'
+    application.trigger 'navigation:back:off'
 
   onClose: ->
-    application.off 'navigation:back', @onBack
     console.log 'events-index view close'

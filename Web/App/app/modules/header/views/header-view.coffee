@@ -50,6 +50,11 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
     application.on 'set:active:header', (title) =>
       @setSubHeader(title)
 
+    application.on 'navigation:back:on', ->
+      $('#menu-back').show()
+    application.on 'navigation:back:off', ->
+      $('#menu-back').hide()
+
   serializeData: ->
     resources: @resources?.toJSON()
 
@@ -57,6 +62,7 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
     resources: @resources
 
   onShow: ->
+    $('#menu-back').hide()
     @$('.js-apptitle').text(config.apptitle)
 
   onSidebarToggle: (e) ->

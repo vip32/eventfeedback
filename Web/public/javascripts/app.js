@@ -883,9 +883,11 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/common/views/about-view", function(exports, require, module) {
-var AboutView, _ref,
+var AboutView, application, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
 
 module.exports = AboutView = (function(_super) {
   __extends(AboutView, _super);
@@ -898,6 +900,10 @@ module.exports = AboutView = (function(_super) {
   AboutView.prototype.id = 'about-view';
 
   AboutView.prototype.template = require('./templates/about');
+
+  AboutView.prototype.initialize = function(options) {
+    return application.trigger('navigation:back:off');
+  };
 
   AboutView.prototype.onClose = function() {
     return console.log('about view close');
@@ -933,7 +939,8 @@ module.exports = DebugView = (function(_super) {
   };
 
   DebugView.prototype.initialize = function(options) {
-    return this.resources = options != null ? options.resources : void 0;
+    this.resources = options != null ? options.resources : void 0;
+    return application.trigger('navigation:back:off');
   };
 
   DebugView.prototype.serializeData = function() {
@@ -1008,6 +1015,10 @@ module.exports = HomeView = (function(_super) {
 
   HomeView.prototype.template = require('./templates/home');
 
+  HomeView.prototype.initialize = function(options) {
+    return application.trigger('navigation:back:off');
+  };
+
   HomeView.prototype.onClose = function() {
     return console.log('home view close');
   };
@@ -1037,6 +1048,10 @@ module.exports = SigninView = (function(_super) {
 
   SigninView.prototype.events = {
     'click .js-signin': 'onSignin'
+  };
+
+  SigninView.prototype.initialize = function(options) {
+    return application.trigger('navigation:back:off');
   };
 
   SigninView.prototype.onSignin = function(e) {
@@ -1293,6 +1308,7 @@ module.exports = EventDetailsView = (function(_super) {
 
   EventDetailsView.prototype.initialize = function(options) {
     this.resources = options != null ? options.resources : void 0;
+    application.trigger('navigation:back:on');
     return application.on('navigation:back', this.onBack);
   };
 
@@ -1396,15 +1412,10 @@ module.exports = EventIndexView = (function(_super) {
   EventIndexView.prototype.itemViewContainer = '.js-events';
 
   EventIndexView.prototype.initialize = function(options) {
-    return application.on('navigation:back', this.onBack);
-  };
-
-  EventIndexView.prototype.onBack = function() {
-    return console.log('back from events-index');
+    return application.trigger('navigation:back:off');
   };
 
   EventIndexView.prototype.onClose = function() {
-    application.off('navigation:back', this.onBack);
     return console.log('events-index view close');
   };
 
@@ -1436,8 +1447,8 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.template = require('./templates/session-details');
 
   EventDetailsView.prototype.initialize = function(options) {
-    console.log('session id', options);
     this.resources = options != null ? options.resources : void 0;
+    application.trigger('navigation:back:on');
     return application.on('navigation:back', this.onBack);
   };
 
@@ -1815,8 +1826,14 @@ module.exports.Header = View = (function(_super) {
   View.prototype.initialize = function(options) {
     var _this = this;
     this.resources = options != null ? options.resources : void 0;
-    return application.on('set:active:header', function(title) {
+    application.on('set:active:header', function(title) {
       return _this.setSubHeader(title);
+    });
+    application.on('navigation:back:on', function() {
+      return $('#menu-back').show();
+    });
+    return application.on('navigation:back:off', function() {
+      return $('#menu-back').hide();
     });
   };
 
@@ -1834,6 +1851,7 @@ module.exports.Header = View = (function(_super) {
   };
 
   View.prototype.onShow = function() {
+    $('#menu-back').hide();
     return this.$('.js-apptitle').text(config.apptitle);
   };
 
