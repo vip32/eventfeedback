@@ -53,16 +53,9 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
 
     vent.on 'fetch:start', (title) =>
       $('#spinner').spin
-        lines: 5
-        length: 8
-        width: 5
-        radius: 4
-        corners: 0
-        rotate: 56
-        trail: 40
-        speed: 1.5
-        direction: 1
-        color: '#64b92a'
+        lines: 5, length: 8, width: 5, radius: 4
+        corners: 0, rotate: 56, trail: 40, speed: 1.5,
+        direction: 1, color: '#64b92a'
       $('.page-content').addClass('loading')
     vent.on 'fetch:done', =>
       $('#spinner').spin(false)

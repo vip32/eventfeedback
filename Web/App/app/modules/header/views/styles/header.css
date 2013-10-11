@@ -148,6 +148,13 @@
   #menu-toggle {
     display: inline-block;
     margin-left: -5px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+  }
+
+  #menu-back {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
   }
 
   .inset {
