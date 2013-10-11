@@ -4,6 +4,8 @@ vent = require 'vent'
 module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
   id: 'session-details-view'
   template: require './templates/session-details'
+  events:
+    'click .js-submit': 'onSubmit'
 
   initialize: (options) ->
     @resources = options?.resources
@@ -21,6 +23,10 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
   onShow: ->
      $('input.rating[type=number]').rating()
      $('textarea').autosize()
+
+  onSubmit: (e) ->
+    e.preventDefault()
+    alert('todo')
 
   onClose: ->
     application.off 'navigation:back', @onBack

@@ -1499,6 +1499,10 @@ module.exports = EventDetailsView = (function(_super) {
 
   EventDetailsView.prototype.template = require('./templates/session-details');
 
+  EventDetailsView.prototype.events = {
+    'click .js-submit': 'onSubmit'
+  };
+
   EventDetailsView.prototype.initialize = function(options) {
     this.resources = options != null ? options.resources : void 0;
     application.trigger('navigation:back:on');
@@ -1521,6 +1525,11 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.onShow = function() {
     $('input.rating[type=number]').rating();
     return $('textarea').autosize();
+  };
+
+  EventDetailsView.prototype.onSubmit = function(e) {
+    e.preventDefault();
+    return alert('todo');
   };
 
   EventDetailsView.prototype.onClose = function() {

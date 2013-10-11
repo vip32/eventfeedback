@@ -25,7 +25,7 @@ namespace EventFeedback.Web.Controllers
 
         public IEnumerable<Event> Get([FromUri] string filter = "")
         {
-            Thread.Sleep(2500);
+            Thread.Sleep(1500);
 
             _traceSource.TraceInformation("eventscontroller get all");
             IEnumerable<Event> result;
@@ -45,7 +45,7 @@ namespace EventFeedback.Web.Controllers
 
         public Event Get(int id, [FromUri] string filter = "")
         {
-            Thread.Sleep(2500);
+            Thread.Sleep(1500);
             
             _traceSource.TraceInformation("eventscontroller get " + id);
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
