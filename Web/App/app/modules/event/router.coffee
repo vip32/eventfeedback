@@ -1,4 +1,5 @@
 application = require 'application'
+vent = require 'vent'
 settings = require 'settings'
 Controller = require './controller'
 

@@ -1,5 +1,6 @@
 application = require 'application'
 config = require 'config'
+vent = require 'vent'
 
 module.exports.HeaderItem = class ItemView extends Backbone.Marionette.ItemView
   id: 'header-item-view'
@@ -49,6 +50,26 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
 
     application.on 'set:active:header', (title) =>
       @setSubHeader(title)
+
+    vent.on 'fetch:start', (title) =>
+      $('#spinner').spin
+        lines: 5
+        length: 8
+        width: 5
+        radius: 4
+        corners: 0
+        rotate: 56
+        trail: 40
+        speed: 1.5
+        direction: 1
+        color: '#64b92a'
+      $('.page-content').addClass('loading')
+    vent.on 'fetch:done', =>
+      $('#spinner').spin(false)
+      $('.page-content').removeClass('loading')
+    vent.on 'fetch:fail', =>
+      $('#spinner').spin(false)
+      $('.page-content').removeClass('loading')
 
     application.on 'navigation:back:on', ->
       $('#menu-back').show()

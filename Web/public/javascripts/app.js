@@ -91,7 +91,7 @@
   globals.require.brunch = true;
 })();
 require.register("application", function(exports, require, module) {
-var Application, Resource, config, settings, _ref,
+var Application, Resource, config, settings, vent, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -103,6 +103,8 @@ require('lib/view-helper');
 config = require('config');
 
 settings = require('settings');
+
+vent = require('vent');
 
 Resource = require('../../models/resource');
 
@@ -236,11 +238,13 @@ $(function() {
 });
 
 ;require.register("layouts/app-layout", function(exports, require, module) {
-var AppLayout, application, _ref,
+var AppLayout, application, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+vent = require('vent');
 
 module.exports = AppLayout = (function(_super) {
   __extends(AppLayout, _super);
@@ -296,9 +300,11 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 });
 
 ;require.register("lib/base/collection", function(exports, require, module) {
-var Collection, _ref,
+var Collection, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+vent = require('vent');
 
 module.exports = Collection = (function(_super) {
   __extends(Collection, _super);
@@ -319,6 +325,20 @@ module.exports = Collection = (function(_super) {
     });
   };
 
+  Collection.prototype.fetch = function(options) {
+    console.log('fetch:start', this.constructor.name);
+    this.trigger('fetch:start');
+    vent.trigger('fetch:start');
+    return Collection.__super__.fetch.call(this, options).done(function(models) {
+      this.trigger('fetch:done');
+      vent.trigger('fetch:done');
+      return console.log('fetch:off', this.constructor.name);
+    }).fail(function(models) {
+      vent.trigger('fetch:fail');
+      return console.log('fetch:fail', this.constructor.name);
+    });
+  };
+
   return Collection;
 
 })(Backbone.Collection);
@@ -326,9 +346,11 @@ module.exports = Collection = (function(_super) {
 });
 
 ;require.register("lib/base/item-view", function(exports, require, module) {
-var ItemView, _ref,
+var ItemView, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+vent = require('vent');
 
 module.exports = ItemView = (function(_super) {
   __extends(ItemView, _super);
@@ -356,9 +378,11 @@ module.exports = ItemView = (function(_super) {
 });
 
 ;require.register("lib/base/model", function(exports, require, module) {
-var Model, _ref,
+var Model, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+vent = require('vent');
 
 module.exports = Model = (function(_super) {
   __extends(Model, _super);
@@ -764,11 +788,13 @@ module.exports.Collection = StoreCollection = (function(_super) {
 });
 
 ;require.register("modules/common/controller", function(exports, require, module) {
-var Controller, application,
+var Controller, application, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+vent = require('vent');
 
 module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
@@ -828,11 +854,13 @@ module.exports = Controller = (function(_super) {
 });
 
 ;require.register("modules/common/router", function(exports, require, module) {
-var Controller, Router, application, _ref,
+var Controller, Router, application, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+vent = require('vent');
 
 Controller = require('./controller');
 
@@ -883,11 +911,13 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/common/views/about-view", function(exports, require, module) {
-var AboutView, application, _ref,
+var AboutView, application, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+vent = require('vent');
 
 module.exports = AboutView = (function(_super) {
   __extends(AboutView, _super);
@@ -916,11 +946,13 @@ module.exports = AboutView = (function(_super) {
 });
 
 ;require.register("modules/common/views/debug-view", function(exports, require, module) {
-var DebugView, application, _ref,
+var DebugView, application, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+vent = require('vent');
 
 module.exports = DebugView = (function(_super) {
   __extends(DebugView, _super);
@@ -974,9 +1006,11 @@ module.exports = DebugView = (function(_super) {
 });
 
 ;require.register("modules/common/views/footer-view", function(exports, require, module) {
-var FooterView, _ref,
+var FooterView, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+vent = require('vent');
 
 module.exports = FooterView = (function(_super) {
   __extends(FooterView, _super);
@@ -997,11 +1031,13 @@ module.exports = FooterView = (function(_super) {
 });
 
 ;require.register("modules/common/views/home-view", function(exports, require, module) {
-var HomeView, application, _ref,
+var HomeView, application, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+vent = require('vent');
 
 module.exports = HomeView = (function(_super) {
   __extends(HomeView, _super);
@@ -1030,9 +1066,11 @@ module.exports = HomeView = (function(_super) {
 });
 
 ;require.register("modules/common/views/signin-view", function(exports, require, module) {
-var SigninView, _ref,
+var SigninView, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+vent = require('vent');
 
 module.exports = SigninView = (function(_super) {
   __extends(SigninView, _super);
@@ -1140,11 +1178,13 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 });
 
 ;require.register("modules/event/controller", function(exports, require, module) {
-var Controller, Event, Session, application, settings,
+var Controller, Event, Session, application, settings, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+vent = require('vent');
 
 settings = require('settings');
 
@@ -1166,6 +1206,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showEventsIndex = function() {
     return this.events.fetch({
+      reload: true,
       data: {
         filter: 'all'
       }
@@ -1230,11 +1271,13 @@ module.exports = Controller = (function(_super) {
 });
 
 ;require.register("modules/event/router", function(exports, require, module) {
-var Controller, Router, application, settings, _ref,
+var Controller, Router, application, settings, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+vent = require('vent');
 
 settings = require('settings');
 
@@ -1282,12 +1325,14 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/event/views/event-details-view", function(exports, require, module) {
-var EventDetailsView, application, _ref,
+var EventDetailsView, application, vent, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+vent = require('vent');
 
 module.exports = EventDetailsView = (function(_super) {
   __extends(EventDetailsView, _super);
@@ -1343,11 +1388,13 @@ module.exports = EventDetailsView = (function(_super) {
 });
 
 ;require.register("modules/event/views/event-item-view", function(exports, require, module) {
-var EventItemView, ItemView, application, settings, _ref,
+var EventItemView, ItemView, application, settings, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+vent = require('vent');
 
 settings = require('settings');
 
@@ -1387,11 +1434,13 @@ module.exports = EventItemView = (function(_super) {
 });
 
 ;require.register("modules/event/views/events-index-view", function(exports, require, module) {
-var Event, EventIndexView, application, _ref,
+var Event, EventIndexView, application, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+vent = require('vent');
 
 Event = require('../../../models/event');
 
@@ -1426,12 +1475,14 @@ module.exports = EventIndexView = (function(_super) {
 });
 
 ;require.register("modules/event/views/session-details-view", function(exports, require, module) {
-var EventDetailsView, application, _ref,
+var EventDetailsView, application, vent, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+vent = require('vent');
 
 module.exports = EventDetailsView = (function(_super) {
   __extends(EventDetailsView, _super);
@@ -1482,11 +1533,13 @@ module.exports = EventDetailsView = (function(_super) {
 });
 
 ;require.register("modules/event/views/session-item-view", function(exports, require, module) {
-var ItemView, SessionItemView, application, settings, _ref,
+var ItemView, SessionItemView, application, settings, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+vent = require('vent');
 
 settings = require('settings');
 
@@ -1734,13 +1787,15 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/header/views/header-view", function(exports, require, module) {
-var ItemView, View, application, config, _ref, _ref1,
+var ItemView, View, application, config, vent, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
 
 config = require('config');
+
+vent = require('vent');
 
 module.exports.HeaderItem = ItemView = (function(_super) {
   __extends(ItemView, _super);
@@ -1829,6 +1884,29 @@ module.exports.Header = View = (function(_super) {
     application.on('set:active:header', function(title) {
       return _this.setSubHeader(title);
     });
+    vent.on('fetch:start', function(title) {
+      $('#spinner').spin({
+        lines: 5,
+        length: 8,
+        width: 5,
+        radius: 4,
+        corners: 0,
+        rotate: 56,
+        trail: 40,
+        speed: 1.5,
+        direction: 1,
+        color: '#64b92a'
+      });
+      return $('.page-content').addClass('loading');
+    });
+    vent.on('fetch:done', function() {
+      $('#spinner').spin(false);
+      return $('.page-content').removeClass('loading');
+    });
+    vent.on('fetch:fail', function() {
+      $('#spinner').spin(false);
+      return $('.page-content').removeClass('loading');
+    });
     application.on('navigation:back:on', function() {
       return $('#menu-back').show();
     });
@@ -1906,7 +1984,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <!-- Sidebar -->\r\n  <div id=\"sidebar-wrapper\">\r\n    <ul class=\"sidebar-nav js-headers\">\r\n      <!-- <li class=\"sidebar-brand\">\r\n        <a id=\"menu-toggle\" href=\"#\">&nbsp;&nbsp;&nbsp;&nbsp; -->\r\n          <!-- <span class=\"glyphicon glyphicon-align-justify\"></span> -->\r\n        <!-- </a>\r\n      </li> -->\r\n      <!-- headers -->\r\n    </ul>\r\n  </div>\r\n\r\n  <!-- Page header -->\r\n  <div id=\"page-content-wrapper\">\r\n    <div class=\"content-header row\">\r\n      <div class=\"col-xs-2 col-md-1\">\r\n        <a id=\"menu-toggle\" href=\"#\" class=\"btn btn-primary pull-left\">\r\n           <span class=\"glyphicon glyphicon-align-justify\"></span>\r\n        </a>\r\n      </div>\r\n      <div class=\"col-xs-8 col-md-10\">\r\n        <div>\r\n          <div class=\"content-header-title js-apptitle\"></div>\r\n          <div class=\"content-header-subtitle js-subtitle\"></div>\r\n        </div>\r\n      </div>\r\n      <div class=\"col-xs-2 col-md-1\">\r\n        <a id=\"menu-back\" href=\"#\" class=\"btn btn-default pull-right\">\r\n          <span class=\"glyphicon glyphicon-chevron-left\"></span>\r\n        </a>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</div>\r\n\r\n<!--\r\n  <div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav\">\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div> -->";
+  return "<div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <!-- Sidebar -->\r\n  <div id=\"sidebar-wrapper\">\r\n    <ul class=\"sidebar-nav js-headers\">\r\n      <!-- <li class=\"sidebar-brand\">\r\n        <a id=\"menu-toggle\" href=\"#\">&nbsp;&nbsp;&nbsp;&nbsp; -->\r\n          <!-- <span class=\"glyphicon glyphicon-align-justify\"></span> -->\r\n        <!-- </a>\r\n      </li> -->\r\n      <!-- headers -->\r\n    </ul>\r\n  </div>\r\n\r\n  <!-- Page header -->\r\n  <div id=\"page-content-wrapper\">\r\n    <div class=\"content-header row\">\r\n      <div class=\"col-xs-2 col-md-1\">\r\n        <a id=\"menu-toggle\" href=\"#\" class=\"btn btn-primary pull-left\">\r\n           <span class=\"glyphicon glyphicon-align-justify\"></span>\r\n        </a>\r\n      </div>\r\n      <div class=\"col-xs-7 col-md-9\">\r\n        <div>\r\n          <div class=\"content-header-title js-apptitle\"></div>\r\n          <div class=\"content-header-subtitle js-subtitle\"></div>\r\n        </div>\r\n      </div>\r\n      <div class=\"col-xs-1 col-md-1\" style=\"margin-top:27px\">\r\n        <span id=\"spinner\"></span>\r\n      </div>\r\n      <div class=\"col-xs-2 col-md-1\">\r\n        <a id=\"menu-back\" href=\"#\" class=\"btn btn-default pull-right\">\r\n          <span class=\"glyphicon glyphicon-chevron-left\"></span>\r\n        </a>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</div>\r\n\r\n<!--\r\n  <div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav\">\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div> -->";
   });
 });
 
@@ -1969,6 +2047,25 @@ Settings = (function() {
 })();
 
 module.exports = new Settings();
+
+});
+
+;require.register("vent", function(exports, require, module) {
+var Vent, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = Vent = (function(_super) {
+  __extends(Vent, _super);
+
+  function Vent() {
+    _ref = Vent.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  return Vent;
+
+})(Backbone.Events);
 
 });
 

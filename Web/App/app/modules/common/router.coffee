@@ -1,4 +1,5 @@
 application = require 'application'
+vent = require 'vent'
 Controller = require './controller'
 
 module.exports = class Router extends Backbone.Marionette.AppRouter

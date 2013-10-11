@@ -8,6 +8,7 @@
     "bower_components"
   ],
   "dependencies": {
+    "pace": "~0.4.13",
     "backbone": "~1.0.0",
     "backbone.marionette": "~1.1.0",
     "Backbone.localStorage": "~1.1.6",
@@ -19,8 +20,7 @@
     "moment": "~2.2.1",
     "bootstrap-switch": "*",
     "fastclick": "~0.6.10",
-    "jquery-autosize": "~1.17.8",
-    "spin.js": "~1.3.2"
+    "jquery-autosize": "~1.17.8"
   },
   "overrides": {
     "backbone": {
@@ -58,8 +58,11 @@
     "underscore": {
       "main": "underscore.js"
     },
-    "spin.js": {
-      "main": ["spin.js", "jquery.spin.js"]
+    "pace": {
+      "main": [
+        "pace.js",
+        "themes/pace-theme-minimal.css"
+      ]
     }
   }
 }

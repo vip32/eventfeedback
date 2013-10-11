@@ -1,4 +1,5 @@
 application = require 'application'
+vent = require 'vent'
 settings = require 'settings'
 Event = require '../../models/event'
 Session = require '../../models/session'
@@ -15,7 +16,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
   showEventsIndex: ->
     @events.fetch(
-      # reload: true
+      reload: true
       data:
         filter: 'all'
     ).done (models) ->

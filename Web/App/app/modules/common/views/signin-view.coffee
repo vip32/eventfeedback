@@ -1,3 +1,5 @@
+vent = require 'vent'
+
 module.exports = class SigninView extends Backbone.Marionette.ItemView
   id: 'signin-view'
   template: require './templates/signin'

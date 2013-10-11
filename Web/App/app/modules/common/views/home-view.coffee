@@ -1,4 +1,5 @@
 application = require 'application'
+vent = require 'vent'
 
 module.exports = class HomeView extends Backbone.Marionette.ItemView
   id: 'home-view'

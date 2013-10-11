@@ -1,4 +1,5 @@
 application = require 'application'
+vent = require 'vent'
 settings = require 'settings'
 ItemView = require '../../../../lib/base/item-view'
 

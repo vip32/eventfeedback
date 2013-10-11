@@ -1,3 +1,5 @@
+vent = require 'vent'
+
 module.exports = class ItemView extends Backbone.Marionette.ItemView
 
   onShow: ->

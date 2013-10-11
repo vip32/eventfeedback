@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 using System.Web.Http;
 using EventFeedback.Common;
 using EventFeedback.Domain;
@@ -24,6 +25,8 @@ namespace EventFeedback.Web.Controllers
 
         public IEnumerable<Session> Get(int eventId, [FromUri] string filter = "")
         {
+            Thread.Sleep(2500);
+
             _traceSource.TraceInformation("eventscontroller get all");
             IEnumerable<Session> result;
 
@@ -44,6 +47,8 @@ namespace EventFeedback.Web.Controllers
 
         public Session Get(int eventId, int id, [FromUri] string filter = "")
         {
+            Thread.Sleep(2500);
+
             _traceSource.TraceInformation("eventscontroller get " + id);
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
                 return _context.Sessions

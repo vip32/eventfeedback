@@ -1,4 +1,5 @@
 application = require 'application'
+vent = require 'vent'
 
 module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
   id: 'session-details-view'

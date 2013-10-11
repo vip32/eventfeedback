@@ -2,6 +2,7 @@ require 'lib/marionette-renderer'
 require 'lib/view-helper'
 config = require 'config'
 settings = require 'settings'
+vent = require 'vent'
 Resource = require '../../models/resource'
 
 class Application extends Backbone.Marionette.Application

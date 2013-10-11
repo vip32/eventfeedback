@@ -1,4 +1,5 @@
 application = require 'application'
+vent = require 'vent'
 
 module.exports = class AppLayout extends Backbone.Marionette.Layout
   template: 'layouts/templates/app-layout'
