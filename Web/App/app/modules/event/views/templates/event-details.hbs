@@ -1,19 +1,17 @@
 <div class="container">
-  <div class="jumbotron">
-    <div class="row">
-      <div class="col-xs-7"><h3>Event: {{model.title}}</h3></div>
-      <div class="col-xs-5">
-        <div class="btn-group pull-right">
-          <button type="button" class="btn btn-default active badge">All</button>
-          <button type="button" class="btn btn-default badge">C#</button>
-          <button type="button" class="btn btn-default badge">Java</button>
-          <button type="button" class="btn btn-default badge">SAP</button>
-        </div>
+  <div class="row">
+    <div class="col-xs-7"><h3>Event: {{model.title}}</h3></div>
+    <div class="col-xs-5">
+      <div class="btn-group pull-right">
+        <button type="button" class="btn btn-default active badge">All</button>
+        <button type="button" class="btn btn-default badge">C#</button>
+        <button type="button" class="btn btn-default badge">Java</button>
+        <button type="button" class="btn btn-default badge">SAP</button>
       </div>
     </div>
-    <div class="list-group js-sessions">
-      <!-- sessions -->
-    </div>
-    <p>{{model.description}}</p>
   </div>
+  <div class="list-group js-sessions">
+    <!-- sessions -->
+  </div>
+  <p>{{model.description}}</p>
 </div>
