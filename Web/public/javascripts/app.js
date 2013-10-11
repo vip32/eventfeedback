@@ -1618,7 +1618,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-12\">\r\n      <div class=\"btn-group pull-right\">\r\n        <button type=\"button\" class=\"btn btn-default active badge\">All</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">C#</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">Java</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">SAP</button>\r\n      </div>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n  <p>"
+  buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"btn-group pull-right\">\r\n      <button type=\"button\" class=\"btn btn-default active badge\">All</button>\r\n      <button type=\"button\" class=\"btn btn-default badge\">C#</button>\r\n      <button type=\"button\" class=\"btn btn-default badge\">Java</button>\r\n      <button type=\"button\" class=\"btn btn-default badge\">SAP</button>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n  <p>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</p>\r\n</div>";
   return buffer;

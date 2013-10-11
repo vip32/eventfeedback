@@ -20,7 +20,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       data:
         filter: 'all'
     ).done (models) ->
-      application.trigger 'set:active:header', application.resources.key('Title_Events')
+      application.trigger 'set:active:header', application.resources.key('Title_Events') # TODO: breaks sidebar highlight
       View = require './views/events-index-view'
       view = new View(collection: models, resources: application.resources)
       application.layout.content.show(view)
@@ -30,17 +30,19 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       data:
         filter: 'all'
     ).done (models) =>
-      application.trigger 'set:active:header', models.get(id).get('title')
+      application.trigger 'set:active:header', models.get(id).get('title') # TODO: breaks sidebar highlight
       settings.set('active-event', id)
 
-      @sessions.fetch(reload: true).done (sessions) =>
+      @sessions.fetch(
+        reload: true
+      ).done (sessions) =>
         View = require './views/event-details-view'
         view = new View(model: models.get(id), collection: sessions, resources: application.resources)
         application.layout.content.show(view)
 
   showSessionDetails: (id) ->
     @sessions.fetch().done (models) ->
-      application.trigger 'set:active:header', models.get(id).get('title')
+      application.trigger 'set:active:header', models.get(id).get('title') # TODO: breaks sidebar highlight
       settings.set('active-session', id)
       View = require './views/session-details-view'
       view = new View(model: models.get(id), resources: application.resources)
