@@ -1,10 +1,17 @@
 <div class="container">
 
-    <div class="row">
-      <div class="col-xs-9"><h3>{{model.title}}</h3></div>
-      <div class="col-xs-3">&nbsp;
-      </div>
+  <div class="row">
+    <div class="col-xs-4 col-md-3 glyphicon glyphicon-time">
+      {{dateFormat model.startDate format="HH:mm"}}-{{dateFormat model.endDate format="HH:mm"}}
     </div>
+    <div class="col-xs-8 col-md-9 glyphicon glyphicon-user">
+      {{#each model.speakers}}{{this}} {{/each}}
+    </div>
+  </div>
+
+  <div class="row">
+    &nbsp;
+  </div>
 
     <form>
 
@@ -12,7 +19,7 @@
         <div class="col-xs-4 col-md-3">{{resources.Question1_Title}}</div>
         <div class="col-xs-8 col-md-9">
           <input type="number" data-max="5" data-min="1"
-               name="rate1" id="rate1" class="rating pull-right" value="0" />
+               name="rate1" id="rate1" class="rating" value="0" />
         </div>
       </div>
 

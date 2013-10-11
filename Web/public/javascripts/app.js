@@ -630,6 +630,16 @@ module.exports.Collection = ResourceCollection = (function(_super) {
 
   ResourceCollection.prototype.comparator = 'key';
 
+  ResourceCollection.prototype.key = function(key) {
+    var result, _ref2,
+      _this = this;
+    result = this.find(function(model) {
+      console.log(model.get('key'), key);
+      return model.get('key') === key;
+    });
+    return (_ref2 = result != null ? result.get('value') : void 0) != null ? _ref2 : '';
+  };
+
   ResourceCollection.prototype.toJSON = function() {
     var result;
     result = {};
@@ -1214,7 +1224,7 @@ module.exports = Controller = (function(_super) {
       }
     }).done(function(models) {
       var View, view;
-      application.trigger('set:active:header', 'Events');
+      application.trigger('set:active:header', application.resources.key('Title_Events'));
       View = require('./views/events-index-view');
       view = new View({
         collection: models,
@@ -1231,7 +1241,7 @@ module.exports = Controller = (function(_super) {
         filter: 'all'
       }
     }).done(function(models) {
-      application.trigger('set:active:header', 'Sessions');
+      application.trigger('set:active:header', models.get(id).get('title'));
       settings.set('active-event', id);
       return _this.sessions.fetch({
         reload: true
@@ -1251,7 +1261,7 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.showSessionDetails = function(id) {
     return this.sessions.fetch().done(function(models) {
       var View, view;
-      application.trigger('set:active:header', 'Sessions');
+      application.trigger('set:active:header', models.get(id).get('title'));
       settings.set('active-session', id);
       View = require('./views/session-details-view');
       view = new View({
@@ -1608,9 +1618,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-7\"><h3>Event: "
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</h3></div>\r\n    <div class=\"col-xs-5\">\r\n      <div class=\"btn-group pull-right\">\r\n        <button type=\"button\" class=\"btn btn-default active badge\">All</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">C#</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">Java</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">SAP</button>\r\n      </div>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n  <p>"
+  buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-12\">\r\n      <div class=\"btn-group pull-right\">\r\n        <button type=\"button\" class=\"btn btn-default active badge\">All</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">C#</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">Java</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">SAP</button>\r\n      </div>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n  <p>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</p>\r\n</div>";
   return buffer;
@@ -1653,14 +1661,32 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, stack2, options, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
 
+function program1(depth0,data) {
+  
+  var buffer = "";
+  buffer += escapeExpression((typeof depth0 === functionType ? depth0.apply(depth0) : depth0))
+    + " ";
+  return buffer;
+  }
 
-  buffer += "<div class=\"container\">\r\n\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-9\"><h3>"
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</h3></div>\r\n      <div class=\"col-xs-3\">&nbsp;\r\n      </div>\r\n    </div>\r\n\r\n    <form>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-4 col-md-3\">"
+  buffer += "<div class=\"container\">\r\n\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-4 col-md-3 glyphicon glyphicon-time\">\r\n      ";
+  options = {hash:{
+    'format': ("HH:mm")
+  },data:data};
+  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.startDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.startDate), options)))
+    + "-";
+  options = {hash:{
+    'format': ("HH:mm")
+  },data:data};
+  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options)))
+    + "\r\n    </div>\r\n    <div class=\"col-xs-8 col-md-9 glyphicon glyphicon-user\">\r\n      ";
+  stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.speakers), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"row\">\r\n    &nbsp;\r\n  </div>\r\n\r\n    <form>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question1_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n        <div class=\"col-xs-8 col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"rate1\" id=\"rate1\" class=\"rating pull-right\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-4 col-md-3\">"
+    + "</div>\r\n        <div class=\"col-xs-8 col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"rate1\" id=\"rate1\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question2_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n        <div class=\"col-xs-8 col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"rate2\" id=\"rate2\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question3_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))

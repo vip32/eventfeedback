@@ -20,7 +20,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       data:
         filter: 'all'
     ).done (models) ->
-      application.trigger 'set:active:header', 'Events'
+      application.trigger 'set:active:header', application.resources.key('Title_Events')
       View = require './views/events-index-view'
       view = new View(collection: models, resources: application.resources)
       application.layout.content.show(view)
@@ -30,7 +30,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       data:
         filter: 'all'
     ).done (models) =>
-      application.trigger 'set:active:header', 'Sessions'
+      application.trigger 'set:active:header', models.get(id).get('title')
       settings.set('active-event', id)
 
       @sessions.fetch(reload: true).done (sessions) =>
@@ -40,7 +40,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
   showSessionDetails: (id) ->
     @sessions.fetch().done (models) ->
-      application.trigger 'set:active:header', 'Sessions'
+      application.trigger 'set:active:header', models.get(id).get('title')
       settings.set('active-session', id)
       View = require './views/session-details-view'
       view = new View(model: models.get(id), resources: application.resources)

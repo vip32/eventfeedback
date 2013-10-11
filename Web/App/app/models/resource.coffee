@@ -14,6 +14,12 @@ module.exports.Collection = class ResourceCollection extends Collection
   model: module.exports.Model
   comparator: 'key'
 
+  key: (key) ->
+    result = @find (model) =>
+      console.log model.get('key'), key
+      model.get('key') is key
+    result?.get('value') ? ''
+
   toJSON: ->
     result = {}
     @each (model) ->

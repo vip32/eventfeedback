@@ -108,7 +108,10 @@
 }
 
 .content-header-subtitle {
-  display: none;
+    font-size:1.1em;
+    margin-top: -5px;
+    display: block;
+    color: #DBDBDB;
 }
 
 #menu-toggle {
@@ -159,12 +162,5 @@
 
   .inset {
     padding: 15px;
-  }
-
-  .content-header-subtitle {
-    font-size:1.1em;
-    margin-top: -5px;
-    display: block;
-    color: #DBDBDB;
   }
 }
