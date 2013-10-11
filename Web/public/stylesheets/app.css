@@ -7371,6 +7371,16 @@ input.form-control {
 .rating-input {
   font-size: 40px;
 }
+.row {
+  margin-bottom: 5px;
+}
+textarea {
+  width: 100%;
+  border: 0px;
+  border-bottom: 5px solid #dbdbdb;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
 .no-transition {
   -webkit-transition: height 0.01s;
   -moz-transition: height 0.01s;
@@ -7430,7 +7440,7 @@ input.form-control {
 }
 
 #sidebar-wrapper {
-  margin-top: 56px;
+  margin-top: 61px;
   margin-left: -188px;
   left: 188px;
   width: 188px;
@@ -7512,8 +7522,9 @@ input.form-control {
 }
 
 .content-header {
-  height: 55px;
-  line-height: 65px;
+  height: 50px;
+  /*line-height: 55px;*/
+  margin-top: 5px;
 }
 
 .content-header h1 {
@@ -7525,15 +7536,15 @@ input.form-control {
   font-size: 2em;
 }
 
-.content-header-sub {
-  display: none;
+.content-header-title {
+  font-size:1.5em;
+  margin-top: -5px;
+  display: block;
+  color: #FFF;
 }
 
-.content-header h2 {
-  margin: 0;
-  margin-left: 10px;
-  line-height: 65px;
-  display: inline-block;
+.content-header-subtitle {
+  display: none;
 }
 
 #menu-toggle {
@@ -7551,7 +7562,7 @@ input.form-control {
   }
 
   #sidebar-wrapper {
-    margin-top: 56px;
+    margin-top: 61px;
     left: 0;
   }
 
@@ -7579,10 +7590,9 @@ input.form-control {
     padding: 15px;
   }
 
-  .content-header-sub {
-    padding-left:53px;
-    font-size:.5em;
-    margin-top: -13px;
+  .content-header-subtitle {
+    font-size:1.1em;
+    margin-top: -5px;
     display: block;
     color: #DBDBDB;
   }

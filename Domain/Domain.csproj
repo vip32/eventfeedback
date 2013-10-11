@@ -107,6 +107,14 @@
     <Compile Include="Migrations\201310101645196_Domain_FeedbackAllowed.Designer.cs">
       <DependentUpon>201310101645196_Domain_FeedbackAllowed.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201310110749583_Domain_MoreFeedback.cs" />
+    <Compile Include="Migrations\201310110749583_Domain_MoreFeedback.Designer.cs">
+      <DependentUpon>201310110749583_Domain_MoreFeedback.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201310110752391_Domain_Rate_Nullable.cs" />
+    <Compile Include="Migrations\201310110752391_Domain_Rate_Nullable.Designer.cs">
+      <DependentUpon>201310110752391_Domain_Rate_Nullable.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Entities\Session.cs" />
@@ -142,6 +150,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201310101645196_Domain_FeedbackAllowed.resx">
       <DependentUpon>201310101645196_Domain_FeedbackAllowed.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201310110749583_Domain_MoreFeedback.resx">
+      <DependentUpon>201310110749583_Domain_MoreFeedback.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201310110752391_Domain_Rate_Nullable.resx">
+      <DependentUpon>201310110752391_Domain_Rate_Nullable.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

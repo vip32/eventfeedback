@@ -1040,7 +1040,6 @@ module.exports = SigninView = (function(_super) {
   };
 
   SigninView.prototype.onSignin = function(e) {
-    console.log('ssssssssssssss');
     return e.preventDefault();
   };
 
@@ -1268,14 +1267,18 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/event/views/event-details-view", function(exports, require, module) {
-var EventDetailsView, _ref,
+var EventDetailsView, application, _ref,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
 
 module.exports = EventDetailsView = (function(_super) {
   __extends(EventDetailsView, _super);
 
   function EventDetailsView() {
+    this.onBack = __bind(this.onBack, this);
     _ref = EventDetailsView.__super__.constructor.apply(this, arguments);
     return _ref;
   }
@@ -1289,7 +1292,8 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.itemViewContainer = '.js-sessions';
 
   EventDetailsView.prototype.initialize = function(options) {
-    return this.resources = options != null ? options.resources : void 0;
+    this.resources = options != null ? options.resources : void 0;
+    return application.on('navigation:back', this.onBack);
   };
 
   EventDetailsView.prototype.serializeData = function() {
@@ -1304,6 +1308,16 @@ module.exports = EventDetailsView = (function(_super) {
     return {
       resources: this.resources
     };
+  };
+
+  EventDetailsView.prototype.onBack = function() {
+    console.log('back from event-details');
+    return application.trigger('events:index');
+  };
+
+  EventDetailsView.prototype.onClose = function() {
+    application.off('navigation:back', this.onBack);
+    return console.log('events-details view close');
   };
 
   return EventDetailsView;
@@ -1381,7 +1395,16 @@ module.exports = EventIndexView = (function(_super) {
 
   EventIndexView.prototype.itemViewContainer = '.js-events';
 
+  EventIndexView.prototype.initialize = function(options) {
+    return application.on('navigation:back', this.onBack);
+  };
+
+  EventIndexView.prototype.onBack = function() {
+    return console.log('back from events-index');
+  };
+
   EventIndexView.prototype.onClose = function() {
+    application.off('navigation:back', this.onBack);
     return console.log('events-index view close');
   };
 
@@ -1392,14 +1415,18 @@ module.exports = EventIndexView = (function(_super) {
 });
 
 ;require.register("modules/event/views/session-details-view", function(exports, require, module) {
-var EventDetailsView, _ref,
+var EventDetailsView, application, _ref,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
 
 module.exports = EventDetailsView = (function(_super) {
   __extends(EventDetailsView, _super);
 
   function EventDetailsView() {
+    this.onBack = __bind(this.onBack, this);
     _ref = EventDetailsView.__super__.constructor.apply(this, arguments);
     return _ref;
   }
@@ -1410,7 +1437,8 @@ module.exports = EventDetailsView = (function(_super) {
 
   EventDetailsView.prototype.initialize = function(options) {
     console.log('session id', options);
-    return this.resources = options != null ? options.resources : void 0;
+    this.resources = options != null ? options.resources : void 0;
+    return application.on('navigation:back', this.onBack);
   };
 
   EventDetailsView.prototype.serializeData = function() {
@@ -1421,8 +1449,19 @@ module.exports = EventDetailsView = (function(_super) {
     };
   };
 
+  EventDetailsView.prototype.onBack = function() {
+    console.log('back from session-details');
+    return application.trigger('event:details', this.model.get('eventId'));
+  };
+
   EventDetailsView.prototype.onShow = function() {
-    return $('input.rating[type=number]').rating();
+    $('input.rating[type=number]').rating();
+    return $('textarea').autosize();
+  };
+
+  EventDetailsView.prototype.onClose = function() {
+    application.off('navigation:back', this.onBack);
+    return console.log('session-details view close');
   };
 
   return EventDetailsView;
@@ -1498,7 +1537,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</h3></div>\r\n      <div class=\"col-xs-5\">\r\n        <div class=\"btn-group pull-right\">\r\n          <button type=\"button\" class=\"btn btn-default active badge\">All</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">C#</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">Java</button>\r\n          <button type=\"button\" class=\"btn btn-default badge\">SAP</button>\r\n        </div>\r\n      </div>\r\n    </div>\r\n    <div class=\"list-group js-sessions\">\r\n      <!-- sessions -->\r\n    </div>\r\n    <p>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</p>\r\n    <a href=\"#events\">< Events</a>\r\n  </div>\r\n</div>";
+    + "</p>\r\n  </div>\r\n</div>";
   return buffer;
   });
 });
@@ -1539,28 +1578,24 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, stack2, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\"><h3>"
+  buffer += "<div class=\"container\">\r\n\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-9\"><h3>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</h3></div>\r\n      <div class=\"col-xs-5\">&nbsp;</div>\r\n    </div>\r\n\r\n    <form>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
+    + "</h3></div>\r\n      <div class=\"col-xs-3\">&nbsp;\r\n      </div>\r\n    </div>\r\n\r\n    <form>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question1_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n        <div class=\"col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"question1\" id=\"some_id1\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
+    + "</div>\r\n        <div class=\"col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"rate1\" id=\"rate1\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question2_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n        <div class=\"col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"question2\" id=\"some_id2\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
+    + "</div>\r\n        <div class=\"col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"rate2\" id=\"rate2\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question3_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n        <div class=\"col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"question3\" id=\"some_id3\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n      <div>"
+    + "</div>\r\n        <div class=\"col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"rate3\" id=\"rate3\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question4_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <textarea name=\"question4\"></textarea>\r\n\r\n      <div>"
+    + "</div>\r\n          <div class=\"col-md-9\">\r\n            <textarea name=\"question4\"></textarea>\r\n          </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question5_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <textarea name=\"question5\"></textarea>\r\n\r\n      <div>"
+    + "</div>\r\n          <div class=\"col-md-9\">\r\n            <textarea name=\"question5\"></textarea>\r\n          </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question6_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <textarea name=\"question6\"></textarea>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-7\">&nbsp;</div>\r\n        <div class=\"col-xs-5\"><button class=\"js-submit\">Save</button>\r\n      </div>\r\n    </form>\r\n\r\n    <a href=\"#sessions/";
-  if (stack2 = helpers.sessionId) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
-  else { stack2 = depth0.sessionId; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
-  buffer += escapeExpression(stack2)
-    + "\">< Sessions</a>\r\n  </div>\r\n</div>";
+    + "</div>\r\n          <div class=\"col-md-9\">\r\n            <textarea name=\"question6\"></textarea>\r\n          </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-7\">&nbsp;</div>\r\n        <div class=\"col-xs-5\"><button class=\"btn btn-primary btn-lg pull-right js-submit\">Save</button>\r\n      </div>\r\n    </form>\r\n\r\n</div>";
   return buffer;
   });
 });
@@ -1773,7 +1808,8 @@ module.exports.Header = View = (function(_super) {
   View.prototype.itemViewContainer = '.js-headers';
 
   View.prototype.events = {
-    'click #menu-toggle': 'onSidebarToggle'
+    'click #menu-toggle': 'onSidebarToggle',
+    'click #menu-back': 'onBack'
   };
 
   View.prototype.initialize = function(options) {
@@ -1804,6 +1840,11 @@ module.exports.Header = View = (function(_super) {
   View.prototype.onSidebarToggle = function(e) {
     e.preventDefault();
     return application.trigger('sidebar:toggle');
+  };
+
+  View.prototype.onBack = function(e) {
+    e.preventDefault();
+    return application.trigger('navigation:back');
   };
 
   View.prototype.setSubHeader = function(title) {
@@ -1847,7 +1888,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <!-- Sidebar -->\r\n  <div id=\"sidebar-wrapper\">\r\n    <ul class=\"sidebar-nav js-headers\">\r\n      <!-- <li class=\"sidebar-brand\">\r\n        <a id=\"menu-toggle\" href=\"#\">&nbsp;&nbsp;&nbsp;&nbsp; -->\r\n          <!-- <span class=\"glyphicon glyphicon-align-justify\"></span> -->\r\n        <!-- </a>\r\n      </li> -->\r\n      <!-- headers -->\r\n    </ul>\r\n  </div>\r\n\r\n  <!-- Page header -->\r\n  <div id=\"page-content-wrapper\">\r\n    <div class=\"content-header\">\r\n      <h1>\r\n        <a id=\"menu-toggle\" href=\"#\" class=\"btn btn-primary\">\r\n           <span class=\"glyphicon glyphicon-align-justify\"></span>\r\n        </a>\r\n        <span class=\"js-apptitle\"></span>\r\n        <span class=\"content-header-sub js-subtitle\"></span>\r\n      </h1>\r\n    </div>\r\n  </div>\r\n</div>\r\n\r\n<!--\r\n  <div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav\">\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div> -->";
+  return "<div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <!-- Sidebar -->\r\n  <div id=\"sidebar-wrapper\">\r\n    <ul class=\"sidebar-nav js-headers\">\r\n      <!-- <li class=\"sidebar-brand\">\r\n        <a id=\"menu-toggle\" href=\"#\">&nbsp;&nbsp;&nbsp;&nbsp; -->\r\n          <!-- <span class=\"glyphicon glyphicon-align-justify\"></span> -->\r\n        <!-- </a>\r\n      </li> -->\r\n      <!-- headers -->\r\n    </ul>\r\n  </div>\r\n\r\n  <!-- Page header -->\r\n  <div id=\"page-content-wrapper\">\r\n    <div class=\"content-header row\">\r\n      <div class=\"col-xs-2 col-md-1\">\r\n        <a id=\"menu-toggle\" href=\"#\" class=\"btn btn-primary pull-left\">\r\n           <span class=\"glyphicon glyphicon-align-justify\"></span>\r\n        </a>\r\n      </div>\r\n      <div class=\"col-xs-8 col-md-10\">\r\n        <div>\r\n          <div class=\"content-header-title js-apptitle\"></div>\r\n          <div class=\"content-header-subtitle js-subtitle\"></div>\r\n        </div>\r\n      </div>\r\n      <div class=\"col-xs-2 col-md-1\">\r\n        <a id=\"menu-back\" href=\"#\" class=\"btn btn-default pull-right\">\r\n          <span class=\"glyphicon glyphicon-chevron-left\"></span>\r\n        </a>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</div>\r\n\r\n<!--\r\n  <div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav\">\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div> -->";
   });
 });
 

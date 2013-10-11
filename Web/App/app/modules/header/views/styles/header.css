@@ -4,7 +4,7 @@
 }
 
 #sidebar-wrapper {
-  margin-top: 56px;
+  margin-top: 61px;
   margin-left: -188px;
   left: 188px;
   width: 188px;
@@ -86,8 +86,9 @@
 }
 
 .content-header {
-  height: 55px;
-  line-height: 65px;
+  height: 50px;
+  /*line-height: 55px;*/
+  margin-top: 5px;
 }
 
 .content-header h1 {
@@ -99,15 +100,15 @@
   font-size: 2em;
 }
 
-.content-header-sub {
-  display: none;
+.content-header-title {
+  font-size:1.5em;
+  margin-top: -5px;
+  display: block;
+  color: #FFF;
 }
 
-.content-header h2 {
-  margin: 0;
-  margin-left: 10px;
-  line-height: 65px;
-  display: inline-block;
+.content-header-subtitle {
+  display: none;
 }
 
 #menu-toggle {
@@ -125,7 +126,7 @@
   }
 
   #sidebar-wrapper {
-    margin-top: 56px;
+    margin-top: 61px;
     left: 0;
   }
 
@@ -153,10 +154,9 @@
     padding: 15px;
   }
 
-  .content-header-sub {
-    padding-left:53px;
-    font-size:.5em;
-    margin-top: -13px;
+  .content-header-subtitle {
+    font-size:1.1em;
+    margin-top: -5px;
     display: block;
     color: #DBDBDB;
   }

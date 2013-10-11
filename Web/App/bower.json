@@ -19,7 +19,8 @@
     "jquery": "~2.0.3",
     "moment": "~2.2.1",
     "bootstrap-switch": "*",
-    "fastclick": "~0.6.10"
+    "fastclick": "~0.6.10",
+    "jquery-autosize": "~1.17.8"
   },
   "overrides": {
     "backbone": {

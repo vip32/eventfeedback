@@ -1,8 +1,9 @@
 <div class="container">
-  <div class="jumbotron">
+
     <div class="row">
-      <div class="col-xs-7"><h3>{{model.title}}</h3></div>
-      <div class="col-xs-5">&nbsp;</div>
+      <div class="col-xs-9"><h3>{{model.title}}</h3></div>
+      <div class="col-xs-3">&nbsp;
+      </div>
     </div>
 
     <form>
@@ -11,7 +12,7 @@
         <div class="col-md-3">{{resources.Question1_Title}}</div>
         <div class="col-md-9">
           <input type="number" data-max="5" data-min="1"
-               name="question1" id="some_id1" class="rating" value="0" />
+               name="rate1" id="rate1" class="rating" value="0" />
         </div>
       </div>
 
@@ -19,7 +20,7 @@
         <div class="col-md-3">{{resources.Question2_Title}}</div>
         <div class="col-md-9">
           <input type="number" data-max="5" data-min="1"
-               name="question2" id="some_id2" class="rating" value="0" />
+               name="rate2" id="rate2" class="rating" value="0" />
         </div>
       </div>
 
@@ -28,25 +29,35 @@
         <div class="col-md-3">{{resources.Question3_Title}}</div>
         <div class="col-md-9">
           <input type="number" data-max="5" data-min="1"
-               name="question3" id="some_id3" class="rating" value="0" />
+               name="rate3" id="rate3" class="rating" value="0" />
         </div>
       </div>
 
-      <div>{{resources.Question4_Title}}</div>
-      <textarea name="question4"></textarea>
+      <div class="row">
+        <div class="col-md-3">{{resources.Question4_Title}}</div>
+          <div class="col-md-9">
+            <textarea name="question4"></textarea>
+          </div>
+      </div>
 
-      <div>{{resources.Question5_Title}}</div>
-      <textarea name="question5"></textarea>
+      <div class="row">
+        <div class="col-md-3">{{resources.Question5_Title}}</div>
+          <div class="col-md-9">
+            <textarea name="question5"></textarea>
+          </div>
+      </div>
 
-      <div>{{resources.Question6_Title}}</div>
-      <textarea name="question6"></textarea>
+      <div class="row">
+        <div class="col-md-3">{{resources.Question6_Title}}</div>
+          <div class="col-md-9">
+            <textarea name="question6"></textarea>
+          </div>
+      </div>
 
       <div class="row">
         <div class="col-xs-7">&nbsp;</div>
-        <div class="col-xs-5"><button class="js-submit">Save</button>
+        <div class="col-xs-5"><button class="btn btn-primary btn-lg pull-right js-submit">Save</button>
       </div>
     </form>
 
-    <a href="#sessions/{{sessionId}}">< Sessions</a>
-  </div>
 </div>

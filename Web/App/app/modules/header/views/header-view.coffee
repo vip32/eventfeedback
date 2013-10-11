@@ -42,6 +42,7 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
   itemViewContainer: '.js-headers'
   events:
     'click #menu-toggle': 'onSidebarToggle'
+    'click #menu-back': 'onBack'
 
   initialize: (options) ->
     @resources = options?.resources
@@ -61,6 +62,10 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
   onSidebarToggle: (e) ->
     e.preventDefault()
     application.trigger 'sidebar:toggle'
+
+  onBack: (e) ->
+    e.preventDefault()
+    application.trigger 'navigation:back'
 
   setSubHeader: (title) ->
     @$('.js-subtitle').text(title)
