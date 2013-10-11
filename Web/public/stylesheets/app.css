@@ -7351,6 +7351,8 @@ input.form-control {
 }
 .rating-input {
   font-size: 35px;
+  cursor: pointer;
+  cursor: hand;
 }
 .row {
   margin-bottom: 5px;
