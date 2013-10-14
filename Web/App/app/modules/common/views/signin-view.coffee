@@ -1,6 +1,6 @@
 application = require 'application'
 vent = require 'vent'
-# test aaaa
+# test aaaaabbb
 module.exports = class SigninView extends Backbone.Marionette.ItemView
   id: 'signin-view'
   template: require './templates/signin'
