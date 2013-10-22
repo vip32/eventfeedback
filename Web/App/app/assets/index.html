@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -7,9 +7,13 @@
     <meta name="author" content="">
     <title>EventFeedback</title>
     <link rel="stylesheet" href="public/stylesheets/app.css">
+    <script type="text/javascript">
+        if (window.location.protocol != "https:")
+            window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
+    </script>
     <script src="public/javascripts/vendor.js"></script>
     <script src="public/javascripts/app.js"></script>
-  <script>require('initialize');</script>
+    <script>require('initialize');</script>
 
 </head>
 <body>
