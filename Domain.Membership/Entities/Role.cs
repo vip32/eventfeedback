@@ -15,7 +15,7 @@ namespace EventFeedback.Domain.Membership
 
             Members = new List<User>();
         }
-
+        
         [Key, Column("RoleId")]
         public int Id { get; set; }
         public bool? Active { get; set; }
