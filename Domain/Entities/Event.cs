@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using EventFeedback.Common;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EventFeedback.Domain
 {
@@ -24,7 +25,7 @@ namespace EventFeedback.Domain
         public string Key { get; set; } // 101 (EventID)
         [StringLength(512)]
         public string Link { get; set; }
-        //public bool? FeedbackAllowed { get; set; }
+        public bool? FeedbackAllowed { get; set; }
 
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
@@ -43,6 +44,10 @@ namespace EventFeedback.Domain
                 Tags = value.NullToEmpty().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             }
         }
+
+        [NotMapped]
+        public ICollection<Feedback> Feedbacks { get; set; }
+
         public ICollection<Session> Sessions { get; set; }
 
         /// <summary>

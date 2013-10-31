@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using EventFeedback.Common;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EventFeedback.Domain
 {
@@ -40,6 +41,9 @@ namespace EventFeedback.Domain
         public int EventId { get; set; }
         //public Event Event { get; set; }
 
+        [NotMapped]
+        public ICollection<Feedback> Feedbacks { get; set; }
+
         public ICollection<string> Speakers { get; set; }
         [StringLength(512)]
         public string SpeakerList
@@ -67,7 +71,8 @@ namespace EventFeedback.Domain
                 Tags = value.NullToEmpty().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             }
         }
-        public ICollection<SessionFeedback> Feedback { get; set; }
+
+        //public ICollection<Feedback> Feedbacks { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Session"/> class.

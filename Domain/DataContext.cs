@@ -17,9 +17,10 @@ namespace EventFeedback.Domain
         public DbSet<ResourceText> ResourceTexts { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<Session> Sessions { get; set; }
-        public DbSet<SessionFeedback> SessionFeedbacks { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
     }

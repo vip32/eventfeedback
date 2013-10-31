@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EventFeedback.Domain
 {
-    public class SessionFeedback
+    public class Feedback
     {
         public int Id { get; set; }
         public bool? Active { get; set; }
@@ -15,10 +15,9 @@ namespace EventFeedback.Domain
         public string DeletedBy { get; set; }
 
         public int UserId { get; set; }
-        //public User User { get; set; }
 
-        public int SessionId { get; set; }
-        //public Session Session { get; set; }
+        public int? SessionId { get; set; }
+        public int? EventId { get; set; }
 
         public int? AverageRate { get; set; }
 
@@ -91,7 +90,7 @@ namespace EventFeedback.Domain
         /// <summary>
         /// Initializes a new instance of the <see cref="Session"/> class.
         /// </summary>
-        public SessionFeedback()
+        public Feedback()
         {
             CreateDate = DateTime.Now;
             Active = true;

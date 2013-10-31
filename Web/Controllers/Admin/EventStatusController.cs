@@ -9,12 +9,12 @@ using EventFeedback.Domain;
 namespace EventFeedback.Web.Controllers
 {
     [Authorize(Roles = "Administrator")]
-    public class EventStatusController : ApiController
+    public class EventReportsController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
         private readonly DataContext _context;
 
-        public EventStatusController(DataContext context)
+        public EventReportsController(DataContext context)
         {
             Guard.Against<ArgumentNullException>(context == null, "context cannot be null");
             _context = context;
@@ -22,8 +22,12 @@ namespace EventFeedback.Web.Controllers
 
         public Event Get(int id)
         {
-            _traceSource.TraceInformation("eventstatuscontroller get " + id);
-            return _context.Events.Include("Sessions").Include("Sessions.Feedback").FirstOrDefault(x => x.Id == id);
+            _traceSource.TraceInformation("eventreportscontroller get " + id);
+            return _context.Events.Include("Sessions").FirstOrDefault(x => x.Id == id);
+            
+
+            // TODO: get event feedbacks and put on event.feedbacks
+            // TODO: get session feedbacks and put on event.session[x].feedbacks 
         }
     }
 }
