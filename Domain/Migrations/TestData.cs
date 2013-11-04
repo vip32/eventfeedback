@@ -10,11 +10,51 @@ namespace EventFeedback.Domain
 {
     public static class TestData
     {
-        private static readonly TraceSource TraceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name); 
+        private static readonly TraceSource TraceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
+        private const string Lorem1 = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
+        private static readonly Random Random = new Random();
 
         public static void Seed(DataContext context)
         {
             TraceSource.TraceInformation("seeding database");
+
+            var users = new List<User>
+            {
+                new User
+                {
+                    UserName = "admin",
+                    Organization = "acme",
+                    Email = "admin@acme.com"
+                },
+                new User
+                {
+                    UserName = "user1",
+                    Organization = "acme",
+                    Email = "user1@acme.com"
+                },
+                new User
+                {
+                    UserName = "user2",
+                    Organization = "acme",
+                    Email = "user2@acme.com"
+                },
+                new User
+                {
+                    UserName = "guest1",
+                    Organization = "acme",
+                    Email = "guest1@acme.com"
+                }
+            };
+            for (var i = 0; i < 100; i++)
+            {
+                var no = Random.Next(1000, 9999);
+                users.Add(new User
+                {
+                    UserName = "acmeuser" + no,
+                    Organization = "acme",
+                    Email = string.Format("user{0}@acme.com", no)
+                });
+            }
 
             if (!context.Users.Any())
             {
@@ -24,40 +64,33 @@ namespace EventFeedback.Domain
                 userService.CreateRole(new Role { Name = "User" });
                 userService.CreateRole(new Role { Name = "Guest" });
 
-                var user1 = new User
-                {
-                    UserName = "admin",
-                    Organization = "acme",
-                    Email = "admin@acme.com"
-                };
+                var user1 = users.FirstOrDefault(u => u.UserName.Equals("admin"));
                 userService.CreateUser(user1, "adminadmin");
-                var user2 = new User
-                {
-                    UserName = "user1",
-                    Organization = "acme",
-                    Email = "user1@acme.com"
-                };
+                var user2 = users.FirstOrDefault(u => u.UserName.Equals("user1"));
                 userService.CreateUser(user2, "useruser");
-                var user3 = new User
-                {
-                    UserName = "user2",
-                    Organization = "acme",
-                    Email = "user2@acme.com"
-                };
+                var user3 = users.FirstOrDefault(u => u.UserName.Equals("user2"));
                 userService.CreateUser(user3, "useruser");
-                var user4 = new User
-                {
-                    UserName = "guest1",
-                    Organization = "acme",
-                    Email = "guest1@acme.com"
-                };
+                var user4 = users.FirstOrDefault(u => u.UserName.Equals("guest1"));
                 userService.CreateUser(user4, "guestguest");
 
-                userService.AddUserToRole(user1.Id, "Administrator");
-                userService.AddUserToRole(user1.Id, "User");
-                userService.AddUserToRole(user2.Id, "User");
-                userService.AddUserToRole(user3.Id, "User");
-                userService.AddUserToRole(user4.Id, "Guest");
+                if (user1 != null)
+                {
+                    userService.AddUserToRole(user1.Id, "Administrator");
+                    userService.AddUserToRole(user1.Id, "User");
+                }
+                if (user2 != null) userService.AddUserToRole(user2.Id, "User");
+                if (user3 != null) userService.AddUserToRole(user3.Id, "User");
+                if (user4 != null) userService.AddUserToRole(user4.Id, "Guest");
+
+                foreach (var user in users.Where(u => u.UserName.StartsWith("acme")))
+                {
+                    userService.CreateUser(user, "useruser");
+                }
+                context.SaveChanges();
+                foreach (var user in users.Where(u => u.UserName.StartsWith("acme")))
+                {
+                    userService.AddUserToRole(user.Id, "User");
+                }
             }
 
             if (!context.ResourceTexts.Any())
@@ -281,7 +314,44 @@ namespace EventFeedback.Domain
                 p => p.Title,
                 events.ToArray()
                 );
+            context.SaveChanges();
 
+            if (!context.Feedbacks.Any())
+            {
+                foreach (var user in users)
+                {
+                    foreach (var e in events)
+                    {
+                        context.Feedbacks.Add(
+                            new Feedback
+                            {
+                                UserId = user.Id,
+                                EventId = e.Id,
+                                AverageRate = Random.Next(1, 5),
+                                Rate0 = Random.Next(1, 5),
+                                Rate1 = Random.Next(1, 5),
+                                Question0 = "event feedback q0 " + Lorem1,
+                                Question1 = "event feedback q1 " + Lorem1
+                            });
+
+                        foreach (var s in e.Sessions)
+                        {
+                            context.Feedbacks.Add(
+                                new Feedback
+                                {
+                                    UserId = user.Id,
+                                    SessionId = s.Id,
+                                    AverageRate = Random.Next(1, 5),
+                                    Rate0 = Random.Next(1, 5),
+                                    Rate1 = Random.Next(1, 5),
+                                    Question0 = "event feedback q0 " + Lorem1,
+                                    Question1 = "event feedback q1 " + Lorem1
+                                });
+                        }
+                    }
+                }
+                context.SaveChanges();
+            }
         }
     }
 }
