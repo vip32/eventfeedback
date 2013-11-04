@@ -102,7 +102,16 @@ namespace EventFeedback.Domain
         /// <returns></returns>
         public bool IsActive()
         {
-            return !(Active != null && !(bool)Active);
+            return !(Active != null && !(bool)Active) && !IsDeleted();
+        }
+
+        /// <summary>
+        /// Determines whether this instance is deleted.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsDeleted()
+        {
+            return (Deleted != null && !(bool)Deleted);
         }
 
         /// <summary>
