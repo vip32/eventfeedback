@@ -20,7 +20,7 @@ namespace EventFeedback.Domain
             {
                 var userService = new UserService(context);
 
-                userService.CreateRole(new Role {Name = "Administrator"});
+                userService.CreateRole(new Role { Name = "Administrator"});
                 userService.CreateRole(new Role { Name = "User" });
                 userService.CreateRole(new Role { Name = "Guest" });
 
@@ -37,23 +37,24 @@ namespace EventFeedback.Domain
                     Organization = "acme",
                     Email = "user1@acme.com"
                 };
-                userService.CreateUser(user2, "user1user1");
+                userService.CreateUser(user2, "useruser");
                 var user3 = new User
                 {
                     UserName = "user2",
                     Organization = "acme",
                     Email = "user2@acme.com"
                 };
-                userService.CreateUser(user2, "user1user1");
+                userService.CreateUser(user3, "useruser");
                 var user4 = new User
                 {
                     UserName = "guest1",
                     Organization = "acme",
                     Email = "guest1@acme.com"
                 };
-                userService.CreateUser(user4, "guest2guest2");
+                userService.CreateUser(user4, "guestguest");
 
                 userService.AddUserToRole(user1.Id, "Administrator");
+                userService.AddUserToRole(user1.Id, "User");
                 userService.AddUserToRole(user2.Id, "User");
                 userService.AddUserToRole(user3.Id, "User");
                 userService.AddUserToRole(user4.Id, "Guest");

@@ -55,9 +55,8 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="BasicAuthenticationHandler.cs" />
     <Compile Include="App_Start\DependencyResolverConfig.cs" />
-    <Compile Include="Controllers\Admin\UserProfilesController.cs" />
     <Compile Include="Controllers\Admin\UsersController.cs" />
-    <Compile Include="Controllers\Admin\EventStatusController.cs" />
+    <Compile Include="Controllers\Admin\EventReportsController.cs" />
     <Compile Include="Controllers\ResourceTextsController.cs" />
     <Compile Include="Controllers\LookupController.cs" />
     <Compile Include="Controllers\FeedbacksController.cs" />
