@@ -72,6 +72,15 @@ namespace EventFeedback.Domain
         }
 
         /// <summary>
+        /// Determines whether this instance is active.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsActive()
+        {
+            return !(Active != null && !(bool)Active);
+        }
+
+        /// <summary>
         /// Sets the deleted flag for this document.
         /// </summary>
         /// <param name="accountName">Name of the account of the deleter.</param>

@@ -1,6 +1,5 @@
 using System.Web.Http;
 using EventFeedback.Domain;
-using EventFeedback.Domain.Membership;
 using Microsoft.Practices.Unity;
 
 namespace EventFeedback.Web
@@ -19,8 +18,14 @@ namespace EventFeedback.Web
             var container = new UnityContainer();
 
             return container
-                .RegisterType<MembershipService, MembershipService>()
-                .RegisterType<DataContext, DataContext>();
+                //.RegisterType<IUserStore<User>, UserStore<User>>()
+                //.RegisterType<IRoleStore<IdentityRole>, RoleStore<IdentityRole>>()
+                //.RegisterType<UserManager<User>, UserManager<User>>()
+                //.RegisterType<RoleManager<IdentityRole>, RoleManager<IdentityRole>>()
+                .RegisterType<DataContext, DataContext>()
+                .RegisterType<UserService, UserService>()
+                .RegisterType<BasicAuthenticationHandler, BasicAuthenticationHandler>();
+
         }
     }
 }

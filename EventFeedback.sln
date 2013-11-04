@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{35B7497D-EF2C-4329-8FE8-440CF8833FD3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}"
@@ -13,8 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{5A88D1
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Membership", "Domain.Membership\Domain.Membership.csproj", "{E2532E42-3971-4BE7-8B09-B786CDE166F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,10 +34,6 @@ Global
 		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E2532E42-3971-4BE7-8B09-B786CDE166F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E2532E42-3971-4BE7-8B09-B786CDE166F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E2532E42-3971-4BE7-8B09-B786CDE166F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E2532E42-3971-4BE7-8B09-B786CDE166F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

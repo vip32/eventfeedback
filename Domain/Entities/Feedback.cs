@@ -14,7 +14,7 @@ namespace EventFeedback.Domain
         [StringLength(128)]
         public string DeletedBy { get; set; }
 
-        public int UserId { get; set; }
+        public string UserId { get; set; }
 
         public int? SessionId { get; set; }
         public int? EventId { get; set; }
@@ -94,6 +94,15 @@ namespace EventFeedback.Domain
         {
             CreateDate = DateTime.Now;
             Active = true;
+        }
+
+        /// <summary>
+        /// Determines whether this instance is active.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsActive()
+        {
+            return !(Active != null && !(bool)Active);
         }
 
         /// <summary>

@@ -10,6 +10,6 @@ module.exports.Collection = class EventsCollection extends Collection
   url: "#{config.apiroot}/events"
   credentials:
     username: 'admin'
-    password: 'admin'
+    password: 'adminadmin'
   model: module.exports.Model
   comparator: 'title'

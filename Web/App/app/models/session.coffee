@@ -12,6 +12,6 @@ module.exports.Collection = class SessionsCollection extends Collection
     "#{config.apiroot}/events/#{settings.get('active-event')}/sessions"
   credentials:
     username: 'admin'
-    password: 'admin'
+    password: 'adminadmin'
   model: module.exports.Model
   comparator: 'title'

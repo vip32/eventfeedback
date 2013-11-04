@@ -10,7 +10,7 @@ module.exports.Collection = class ResourceCollection extends Collection
   url: "#{config.apiroot}/resources"
   credentials:
     username: 'admin'
-    password: 'admin'
+    password: 'adminadmin'
   model: module.exports.Model
   comparator: 'key'
 

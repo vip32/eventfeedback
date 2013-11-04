@@ -5,25 +5,27 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EventFeedback.Common;
-using EventFeedback.Domain.Membership;
-using WebMatrix.WebData;
+using EventFeedback.Domain;
+using Microsoft.AspNet.Identity;
 
 namespace EventFeedback.Web
 {
     public class BasicAuthenticationHandler : DelegatingHandler
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
-        private readonly MembershipService _membershipService;
+        private readonly UserService _userService;
         private const string Scheme = "Basic";
 
-        public BasicAuthenticationHandler(MembershipService membershipService)
+        public BasicAuthenticationHandler(UserService userService)
         {
-            Guard.Against<ArgumentNullException>(membershipService == null, "membershipService");
-            _membershipService = membershipService;
+            Guard.Against<ArgumentNullException>(userService == null, "userService");
+
+            _userService = userService;
         }
 
         protected async override Task<HttpResponseMessage>
@@ -35,7 +37,7 @@ namespace EventFeedback.Web
                 var headers = request.Headers;
                 if (headers.Authorization != null && Scheme.Equals(headers.Authorization.Scheme))
                 {
-                    var authenticated = false;
+                    ClaimsIdentity identity = null;
                     var encoding = Encoding.GetEncoding("iso-8859-1");
                     var credentials = encoding.GetString(Convert.FromBase64String(headers.Authorization.Parameter));
                     var parts = credentials.Split(':');
@@ -43,16 +45,21 @@ namespace EventFeedback.Web
                     var password = parts[1].Trim();
 
                     if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
-                        authenticated = _membershipService.Login(username, password);
-
-                    if (authenticated)
                     {
-                        Thread.CurrentPrincipal = _membershipService.CreateClaimsPrincipal(username, AuthenticationMethods.Password, Scheme);
+                        var user = _userService.FindUser(username, password);
+                        if (user != null && user.IsActive())
+                        {
+                            identity = _userService.CreateIdentity(user);
+                        }
+                    }
+
+                    if (identity != null)
+                    {
+                        Thread.CurrentPrincipal = new ClaimsPrincipal(identity); //_membershipService.CreateClaimsPrincipal(username, AuthenticationMethods.Password, Scheme);
                     }
                     else
                     {
                         Thread.CurrentPrincipal = null;
-                        WebSecurity.Logout();
                     }
                 }
 

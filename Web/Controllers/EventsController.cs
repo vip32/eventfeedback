@@ -80,10 +80,10 @@ namespace EventFeedback.Web.Controllers
                 throw new HttpResponseException(HttpStatusCode.NotFound);
 
             var entry = _context.Entry(entity);
-            if (entry.State == System.Data.EntityState.Detached)
+            if (entry.State == System.Data.Entity.EntityState.Detached)
             {
                 _context.Events.Attach(entity);
-                entry.State = System.Data.EntityState.Modified;
+                entry.State = System.Data.Entity.EntityState.Modified;
             }
             _context.SaveChanges();
         }

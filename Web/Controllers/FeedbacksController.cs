@@ -27,7 +27,7 @@ namespace EventFeedback.Web.Controllers
         {
             _traceSource.TraceInformation("feedbackscontroller get all");
 
-            var user = _context.UserProfiles.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name));
+            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name));
             var result = _context.Feedbacks.Where(f => f.UserId == user.Id).AsEnumerable(); 
             return result.Any() ? result : null;
         }
@@ -35,7 +35,7 @@ namespace EventFeedback.Web.Controllers
         public Feedback Get(int id)
         {
             _traceSource.TraceInformation("eventscontroller get " + id);
-            var user = _context.UserProfiles.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name));
+            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name));
             return _context.Feedbacks.FirstOrDefault(f => f.UserId == user.Id);
         }
 
@@ -46,7 +46,7 @@ namespace EventFeedback.Web.Controllers
             Guard.Against<ArgumentException>(!entity.EventId.HasValue && !entity.SessionId.HasValue, "entity.eventid or entity.sessionid should be set");
             Guard.Against<ArgumentException>(entity.EventId.HasValue && entity.SessionId.HasValue, "entity.eventid or entity.sessionid should be set, not both");
 
-            var user = _context.UserProfiles.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name));
+            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name));
             if (user == null) throw new HttpResponseException(HttpStatusCode.Unauthorized);
 
             // check if feedback for this user allready present (event or session)
@@ -72,7 +72,7 @@ namespace EventFeedback.Web.Controllers
             //Guard.Against<ArgumentException>(entity.EventId.HasValue && entity.SessionId.HasValue, "entity.eventid or entity.sessionid should be set, not both");
 
             if (entity.Id == 0 && id != 0) entity.Id = id;
-            var user = _context.UserProfiles.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name));
+            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name));
             if (user == null) throw new HttpResponseException(HttpStatusCode.Unauthorized);
 
             var oldEntity = _context.Feedbacks.Find(entity.Id);
@@ -85,10 +85,10 @@ namespace EventFeedback.Web.Controllers
             entity.SessionId = oldEntity.SessionId;
             entity.EventId = oldEntity.EventId;
             var entry = _context.Entry(entity);
-            if (entry.State == System.Data.EntityState.Detached)
+            if (entry.State == System.Data.Entity.EntityState.Detached)
             {
                 _context.Feedbacks.Attach(entity);
-                entry.State = System.Data.EntityState.Modified;
+                entry.State = System.Data.Entity.EntityState.Modified;
             }
             _context.SaveChanges();
         }

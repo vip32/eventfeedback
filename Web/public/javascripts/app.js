@@ -150,7 +150,7 @@ Application = (function(_super) {
     }).done(function(resources) {
       settings.set('last-visit', moment());
       settings.set('username', 'admin');
-      settings.set('password', 'admin');
+      settings.set('password', 'adminadmin');
       return _this.start();
     });
   };
@@ -463,7 +463,7 @@ module.exports.Collection = EventsCollection = (function(_super) {
 
   EventsCollection.prototype.credentials = {
     username: 'admin',
-    password: 'admin'
+    password: 'adminadmin'
   };
 
   EventsCollection.prototype.model = module.exports.Model;
@@ -623,7 +623,7 @@ module.exports.Collection = ResourceCollection = (function(_super) {
 
   ResourceCollection.prototype.credentials = {
     username: 'admin',
-    password: 'admin'
+    password: 'adminadmin'
   };
 
   ResourceCollection.prototype.model = module.exports.Model;
@@ -694,7 +694,7 @@ module.exports.Collection = SessionsCollection = (function(_super) {
 
   SessionsCollection.prototype.credentials = {
     username: 'admin',
-    password: 'admin'
+    password: 'adminadmin'
   };
 
   SessionsCollection.prototype.model = module.exports.Model;
