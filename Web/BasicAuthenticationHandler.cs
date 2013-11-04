@@ -34,10 +34,10 @@ namespace EventFeedback.Web
             try
             {
                 // perform request processing 
+                Thread.CurrentPrincipal = null;
                 var headers = request.Headers;
                 if (headers.Authorization != null && Scheme.Equals(headers.Authorization.Scheme))
                 {
-                    ClaimsIdentity identity = null;
                     var encoding = Encoding.GetEncoding("iso-8859-1");
                     var credentials = encoding.GetString(Convert.FromBase64String(headers.Authorization.Parameter));
                     var parts = credentials.Split(':');
@@ -49,17 +49,9 @@ namespace EventFeedback.Web
                         var user = _userService.FindUser(username, password);
                         if (user != null && user.IsActive())
                         {
-                            identity = _userService.CreateIdentity(user);
+                            var identity = _userService.CreateIdentity(user);
+                            Thread.CurrentPrincipal = new ClaimsPrincipal(identity);
                         }
-                    }
-
-                    if (identity != null)
-                    {
-                        Thread.CurrentPrincipal = new ClaimsPrincipal(identity); //_membershipService.CreateClaimsPrincipal(username, AuthenticationMethods.Password, Scheme);
-                    }
-                    else
-                    {
-                        Thread.CurrentPrincipal = null;
                     }
                 }
 

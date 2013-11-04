@@ -12,7 +12,7 @@ namespace EventFeedback.Domain
     {
         private static readonly TraceSource TraceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name); 
 
-        public static async void Seed(DataContext context)
+        public static void Seed(DataContext context)
         {
             TraceSource.TraceInformation("seeding database");
 
