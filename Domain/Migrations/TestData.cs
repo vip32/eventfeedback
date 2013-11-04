@@ -5,8 +5,6 @@ using System.Data.Entity.Migrations;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace EventFeedback.Domain
 {
@@ -21,99 +19,45 @@ namespace EventFeedback.Domain
             if (!context.Users.Any())
             {
                 var userService = new UserService(context);
-                userService.CreateUser(
-                    new User
-                    {
-                        UserName = "admin",
-                        Organization = "acme",
-                        Email = "admin@acme.com"
-                    }, " adminadmin");
-                userService.CreateUser(
-                    new User
-                    {
-                        UserName = "user1",
-                        Organization = "acme",
-                        Email = "user1@acme.com"
-                    }, " user1user1");
-                userService.CreateUser(
-                    new User
-                    {
-                        UserName = "user2",
-                        Organization = "acme",
-                        Email = "user2@acme.com"
-                    }, " user2user2");
+
+                userService.CreateRole(new Role {Name = "Administrator"});
+                userService.CreateRole(new Role { Name = "User" });
+                userService.CreateRole(new Role { Name = "Guest" });
+
+                var user1 = new User
+                {
+                    UserName = "admin",
+                    Organization = "acme",
+                    Email = "admin@acme.com"
+                };
+                userService.CreateUser(user1, "adminadmin");
+                var user2 = new User
+                {
+                    UserName = "user1",
+                    Organization = "acme",
+                    Email = "user1@acme.com"
+                };
+                userService.CreateUser(user2, "user1user1");
+                var user3 = new User
+                {
+                    UserName = "user2",
+                    Organization = "acme",
+                    Email = "user2@acme.com"
+                };
+                userService.CreateUser(user2, "user1user1");
+                var user4 = new User
+                {
+                    UserName = "guest1",
+                    Organization = "acme",
+                    Email = "guest1@acme.com"
+                };
+                userService.CreateUser(user4, "guest2guest2");
+
+                userService.AddUserToRole(user1.Id, "Administrator");
+                userService.AddUserToRole(user2.Id, "User");
+                userService.AddUserToRole(user3.Id, "User");
+                userService.AddUserToRole(user4.Id, "Guest");
             }
-
-            //userManager.AddToRoleAsync(adminUser.Id, "Administrator");
-            //if (!result.Succeeded)
-            //{
-            //    throw new ApplicationException(result.Errors.First());
-            //}
-            //var userProfiles = new List<UserProfile>
-            //{
-            //    new UserProfile
-            //    {
-            //        UserName = "admin", // 1
-            //        Active = true
-            //    },
-            //    new UserProfile
-            //    {
-            //        UserName = "user1", // 2
-            //        Active = true
-            //    },
-            //    new UserProfile
-            //    {
-            //        UserName = "user2", // 3
-            //        Active = true
-            //    }
-            //};
-
-            //context.UserProfiles.AddOrUpdate(
-            //    p => p.UserName,
-            //    userProfiles.ToArray()
-            //    );
-
-            //var roles = new List<Role>
-            //{
-            //    new Role
-            //    {
-            //        Active = true,
-            //        RoleName = "Administrator"
-            //    }
-            //};
-            //context.Roles.AddOrUpdate(
-            //    p => p.RoleName,
-            //    roles.ToArray()
-            //    );
-            //context.SaveChanges();
-            //context.Users.AddOrUpdate(
-            //    p => p.Id,
-            //    new User
-            //    {
-            //        Id = context.Entry(userProfiles.First()).Entity.Id, // admin
-            //        CreateDate = DateTime.Now,
-            //        Password = "AFnDVLa9SaoEG+1HlylxQqpoWJ0Jm3cAfvkYnPONo34UMd/n4C/WV/u6zBqrCh5SCQ==", // admin
-            //        IsConfirmed = true,
-            //        PasswordFailuresSinceLastSuccess = 0,
-            //    },
-            //    new User
-            //    {
-            //        Id = context.Entry(userProfiles.Skip(1).Take(1).First()).Entity.Id, // user
-            //        CreateDate = DateTime.Now,
-            //        Password = "AFnDVLa9SaoEG+1HlylxQqpoWJ0Jm3cAfvkYnPONo34UMd/n4C/WV/u6zBqrCh5SCQ==", // admin
-            //        IsConfirmed = true,
-            //        PasswordFailuresSinceLastSuccess = 0
-            //    }
-            //    );
-            //if (!context.UserRoles.Any())
-            //{
-            //    context.UserRoles.AddOrUpdate(p => p.UserId,
-            //        new UserRole
-            //        {
-            //            UserId = context.Entry(userProfiles.First()).Entity.Id, // admin
-            //            RoleId = context.Entry(roles.First()).Entity.Id, // Administrator
-            //        }); // admin Administrator role
-            //}
 
             if (!context.ResourceTexts.Any())
             {
@@ -337,25 +281,6 @@ namespace EventFeedback.Domain
                 events.ToArray()
                 );
 
-
-            //if (!context.UserRoles.Any())
-            //{
-            //    context.SaveChanges();
-
-            //    var eventFeedbacks = new List<Feedback>
-            //    {
-            //        new Feedback
-            //        {
-            //            EventId = context.Entry(events.First()).Entity.Id,
-            //            UserId = context.Entry(userProfiles.First()).Entity.Id
-            //        }
-            //    };
-
-            //    //context.Feedbacks.AddOrUpdate(
-            //    //    p => p.Title,
-            //    //        events.ToArray()
-            //    //    );
-            //}
         }
     }
 }

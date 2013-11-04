@@ -31,5 +31,15 @@ namespace EventFeedback.Domain
         {
             return _userManager.CreateIdentity(user, AuthenticationMethods.Password);
         }
+
+        public IdentityResult CreateRole(Role role)
+        {
+            return _roleManager.Create(role);
+        }
+
+        public IdentityResult AddUserToRole(string userId, string role)
+        {
+            return _userManager.AddToRole(userId, role);
+        }
     }
 }
