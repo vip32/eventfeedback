@@ -479,13 +479,15 @@ module.exports.Collection = EventsCollection = (function(_super) {
 });
 
 ;require.register("models/header", function(exports, require, module) {
-var Collection, Header, HeadersCollection, Model, TestData, _ref, _ref1,
+var Collection, Header, HeadersCollection, Model, TestData, settings, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Model = require('../lib/base/model');
 
 Collection = require('../lib/base/collection');
+
+settings = require('settings');
 
 module.exports.Model = Header = (function(_super) {
   __extends(Header, _super);
@@ -519,6 +521,26 @@ module.exports.Collection = HeadersCollection = (function(_super) {
 
   HeadersCollection.prototype.comparator = 'order';
 
+  HeadersCollection.prototype.visible = function() {
+    var authenticated, filtered,
+      _this = this;
+    authenticated = settings.getValueOrDefault('api_authenticated', false);
+    filtered = this.filter(function(item) {
+      var itemAuthenticated, _ref2;
+      itemAuthenticated = (_ref2 = item.get("authenticated")) != null ? _ref2 : false;
+      if (itemAuthenticated === true && authenticated === true) {
+        return true;
+      }
+      if (itemAuthenticated === false && authenticated === true) {
+        return true;
+      }
+      if (itemAuthenticated === false && authenticated === false) {
+        return true;
+      }
+    });
+    return new HeadersCollection(filtered);
+  };
+
   return HeadersCollection;
 
 })(Collection);
@@ -535,7 +557,8 @@ module.exports.TestData = TestData = (function() {
   TestData.prototype.data = [
     {
       id: "511b8984-8958-663d-4707-9378aa71776b",
-      visible: false,
+      visible: true,
+      authenticated: false,
       resource: 'Title_Home',
       glyphicon: 'home',
       title: "Home",
@@ -545,6 +568,7 @@ module.exports.TestData = TestData = (function() {
     }, {
       id: "ce82ceb6-1104-aaa6-4fab-a4656694de17",
       title: "About",
+      authenticated: false,
       resource: 'Title_About',
       trigger: "about:index",
       intern: true,
@@ -552,22 +576,16 @@ module.exports.TestData = TestData = (function() {
     }, {
       id: "1cf247f4-4c76-d453-bbec-1c40080e32e4",
       title: "Events",
+      authenticated: true,
       resource: 'Title_Events',
       glyphicon: 'bookmark',
       trigger: "events:index",
       intern: true,
       order: 1
     }, {
-      id: "1cf247f4-4c76-d453-bbec-1c40080e32e1",
-      title: "Sessions",
-      resource: 'Title_Sessions',
-      glyphicon: 'comment',
-      trigger: "sessions:index",
-      intern: true,
-      order: 2
-    }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f5",
       title: "Sign-in",
+      authenticated: false,
       resource: 'Title_SignIn',
       glyphicon: 'user',
       trigger: "signin:index",
@@ -576,6 +594,7 @@ module.exports.TestData = TestData = (function() {
     }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f4",
       title: "Debug",
+      authenticated: false,
       resource: 'Title_Debug',
       glyphicon: 'cog',
       trigger: "debug:index",
@@ -1897,7 +1916,7 @@ module.exports = Controller = (function(_super) {
     var View, view;
     View = require('./views/header-view');
     view = new View.Header({
-      collection: this.headers,
+      collection: this.headers.visible(),
       resources: application.resources
     });
     return application.layout.header.show(view);
