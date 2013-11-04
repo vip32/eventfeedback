@@ -4,14 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Threading;
 using System.Web.Http;
 using EventFeedback.Common;
 using EventFeedback.Domain;
 
 namespace EventFeedback.Web.Controllers
 {
-    [Authorize]
     public class ResourceTextsController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

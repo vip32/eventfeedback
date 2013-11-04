@@ -25,7 +25,7 @@ namespace EventFeedback.Web.Controllers
 
         public IEnumerable<Session> Get(int eventId, [FromUri] string filter = "")
         {
-            Thread.Sleep(1500);
+            //Thread.Sleep(1500);
 
             _traceSource.TraceInformation("eventscontroller get all");
             IEnumerable<Session> result;

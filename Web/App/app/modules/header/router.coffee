@@ -1,5 +1,6 @@
 application = require 'application'
 Controller = require './controller'
+vent = require 'vent'
 
 module.exports = class Router extends Backbone.Marionette.AppRouter
 
@@ -9,6 +10,9 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
     application.addInitializer (options) =>
 
       application.on 'start', =>
+        @controller.showHeader()
+
+      vent.on 'navigation:signin', =>
         @controller.showHeader()
 
   controller: new Controller()

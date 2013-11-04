@@ -5,13 +5,12 @@ settings = require '../settings'
 
 module.exports.Model = class Contact extends Model
 
-
 module.exports.Collection = class SessionsCollection extends Collection
 
   url: ->
     "#{config.apiroot}/events/#{settings.get('active-event')}/sessions"
-  credentials:
-    username: 'admin'
-    password: 'adminadmin'
+  credentials: ->
+    username: settings.get('api_username')
+    password: settings.get('api_password')
   model: module.exports.Model
   comparator: 'title'

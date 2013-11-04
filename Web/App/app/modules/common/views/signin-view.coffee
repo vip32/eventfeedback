@@ -1,6 +1,7 @@
 application = require 'application'
 vent = require 'vent'
-# test aaaaabbb
+settings = require 'settings'
+
 module.exports = class SigninView extends Backbone.Marionette.ItemView
   id: 'signin-view'
   template: require './templates/signin'
@@ -10,8 +11,15 @@ module.exports = class SigninView extends Backbone.Marionette.ItemView
   initialize: (options) ->
     application.trigger 'navigation:back:off'
 
+  serializeData: ->
+    resources: @resources?.toJSON()
+    username: if settings.get('api_remember') then settings.get('api_username')
+    remember: settings.get('api_remember')
+
   onSignin: (e) ->
     e.preventDefault()
+    data = Backbone.Syphon.serialize(@)
+    vent.trigger 'view:signin:do', data
 
   onShow: ->
     $('.make-switch').bootstrapSwitch()

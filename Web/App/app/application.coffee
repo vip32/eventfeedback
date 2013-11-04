@@ -35,8 +35,6 @@ class Application extends Backbone.Marionette.Application
         language: 'de-DE'
     ).done (resources) =>
       settings.set('last-visit', moment())
-      settings.set('username', 'admin')
-      settings.set('password', 'adminadmin')
 
       @start()
 

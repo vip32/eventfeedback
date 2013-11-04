@@ -22,6 +22,13 @@ namespace EventFeedback.Web
                 );
 
             config.Routes.MapHttpRoute(
+                name: "UsersApi",
+                routeTemplate: "api/users/{id}",
+                defaults: new { controller = "users", id = RouteParameter.Optional }
+                //constraints: new { id = @"^\d+$" }
+                );
+
+            config.Routes.MapHttpRoute(
                 name: "EventsApi",
                 routeTemplate: "api/events/{id}",
                 defaults: new { controller = "events", id = RouteParameter.Optional }
@@ -61,6 +68,8 @@ namespace EventFeedback.Web
             config.Filters.Add(new ActivityTraceFilterAttribute());
             config.Filters.Add(new ExceptionHandlingAttribute());
             config.Filters.Add(new NullFilter());
+
+            config.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 
             config.Formatters.Remove(config.Formatters.XmlFormatter);
             var json = config.Formatters.JsonFormatter;

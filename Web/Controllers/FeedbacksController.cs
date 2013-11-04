@@ -27,7 +27,7 @@ namespace EventFeedback.Web.Controllers
         {
             _traceSource.TraceInformation("feedbackscontroller get all");
 
-            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name));
+            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name, StringComparison.CurrentCultureIgnoreCase));
             var result = _context.Feedbacks.Where(f => f.UserId == user.Id).AsEnumerable(); 
             return result.Any() ? result : null;
         }
@@ -46,7 +46,7 @@ namespace EventFeedback.Web.Controllers
             Guard.Against<ArgumentException>(!entity.EventId.HasValue && !entity.SessionId.HasValue, "entity.eventid or entity.sessionid should be set");
             Guard.Against<ArgumentException>(entity.EventId.HasValue && entity.SessionId.HasValue, "entity.eventid or entity.sessionid should be set, not both");
 
-            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name));
+            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name, StringComparison.CurrentCultureIgnoreCase));
             if (user == null) throw new HttpResponseException(HttpStatusCode.Unauthorized);
 
             // check if feedback for this user allready present (event or session)
@@ -72,7 +72,7 @@ namespace EventFeedback.Web.Controllers
             //Guard.Against<ArgumentException>(entity.EventId.HasValue && entity.SessionId.HasValue, "entity.eventid or entity.sessionid should be set, not both");
 
             if (entity.Id == 0 && id != 0) entity.Id = id;
-            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name));
+            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name, StringComparison.CurrentCultureIgnoreCase));
             if (user == null) throw new HttpResponseException(HttpStatusCode.Unauthorized);
 
             var oldEntity = _context.Feedbacks.Find(entity.Id);

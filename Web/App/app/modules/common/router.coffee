@@ -15,6 +15,10 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
 
     application.addInitializer (options) =>
 
+      vent.on 'navigation:signin', =>
+        application.navigate 'home'
+        @controller.showHome()
+
       application.on 'home:index', =>
         application.navigate 'home'
         @controller.showHome()

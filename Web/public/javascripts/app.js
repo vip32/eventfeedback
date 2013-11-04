@@ -149,8 +149,6 @@ Application = (function(_super) {
       }
     }).done(function(resources) {
       settings.set('last-visit', moment());
-      settings.set('username', 'admin');
-      settings.set('password', 'adminadmin');
       return _this.start();
     });
   };
@@ -429,7 +427,7 @@ Handlebars.registerHelper("dateFormat", function(context, block) {
 });
 
 ;require.register("models/event", function(exports, require, module) {
-var Collection, Event, EventsCollection, Model, config, _ref, _ref1,
+var Collection, Event, EventsCollection, Model, config, settings, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -438,6 +436,8 @@ config = require('../config');
 Model = require('../lib/base/model');
 
 Collection = require('../lib/base/collection');
+
+settings = require('settings');
 
 module.exports.Model = Event = (function(_super) {
   __extends(Event, _super);
@@ -461,9 +461,11 @@ module.exports.Collection = EventsCollection = (function(_super) {
 
   EventsCollection.prototype.url = "" + config.apiroot + "/events";
 
-  EventsCollection.prototype.credentials = {
-    username: 'admin',
-    password: 'adminadmin'
+  EventsCollection.prototype.credentials = function() {
+    return {
+      username: settings.get('api_username'),
+      password: settings.get('api_password')
+    };
   };
 
   EventsCollection.prototype.model = module.exports.Model;
@@ -589,7 +591,7 @@ module.exports.TestData = TestData = (function() {
 });
 
 ;require.register("models/resource", function(exports, require, module) {
-var Collection, Model, Resource, ResourceCollection, config, _ref, _ref1,
+var Collection, Model, Resource, ResourceCollection, config, settings, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -598,6 +600,8 @@ config = require('../config');
 Model = require('../lib/base/model');
 
 Collection = require('../lib/base/collection');
+
+settings = require('settings');
 
 module.exports.Model = Resource = (function(_super) {
   __extends(Resource, _super);
@@ -620,11 +624,6 @@ module.exports.Collection = ResourceCollection = (function(_super) {
   }
 
   ResourceCollection.prototype.url = "" + config.apiroot + "/resources";
-
-  ResourceCollection.prototype.credentials = {
-    username: 'admin',
-    password: 'adminadmin'
-  };
 
   ResourceCollection.prototype.model = module.exports.Model;
 
@@ -692,9 +691,11 @@ module.exports.Collection = SessionsCollection = (function(_super) {
     return "" + config.apiroot + "/events/" + (settings.get('active-event')) + "/sessions";
   };
 
-  SessionsCollection.prototype.credentials = {
-    username: 'admin',
-    password: 'adminadmin'
+  SessionsCollection.prototype.credentials = function() {
+    return {
+      username: settings.get('api_username'),
+      password: settings.get('api_password')
+    };
   };
 
   SessionsCollection.prototype.model = module.exports.Model;
@@ -797,20 +798,97 @@ module.exports.Collection = StoreCollection = (function(_super) {
 
 });
 
+;require.register("models/user", function(exports, require, module) {
+var Collection, Model, User, UserCollection, config, settings, _ref, _ref1,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+config = require('../config');
+
+Model = require('../lib/base/model');
+
+Collection = require('../lib/base/collection');
+
+settings = require('../settings');
+
+module.exports.Model = User = (function(_super) {
+  __extends(User, _super);
+
+  function User() {
+    _ref = User.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  return User;
+
+})(Model);
+
+module.exports.Collection = UserCollection = (function(_super) {
+  __extends(UserCollection, _super);
+
+  function UserCollection() {
+    _ref1 = UserCollection.__super__.constructor.apply(this, arguments);
+    return _ref1;
+  }
+
+  UserCollection.prototype.url = function() {
+    return "" + config.apiroot + "/users/current";
+  };
+
+  UserCollection.prototype.credentials = function() {
+    return {
+      username: settings.get('api_username'),
+      password: settings.get('api_password')
+    };
+  };
+
+  UserCollection.prototype.model = module.exports.Model;
+
+  UserCollection.prototype.comparator = 'username';
+
+  return UserCollection;
+
+})(Collection);
+
+});
+
 ;require.register("modules/common/controller", function(exports, require, module) {
-var Controller, application, vent,
+var Controller, User, application, settings, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
 
+User = require('../../models/user');
+
 vent = require('vent');
+
+settings = require('settings');
 
 module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
 
   function Controller(options) {
+    var _this = this;
     console.log('about controller init');
+    application.addInitializer(function(options) {
+      return vent.on('view:signin:do', function(data) {
+        settings.set('api_username', data.username);
+        settings.set('api_password', data.password);
+        settings.set('api_remember', data.remember === 'on');
+        _this.users = new User.Collection();
+        return _this.users.fetch().done(function() {
+          settings.set('api_authenticated', true);
+          vent.trigger('message:signin:success');
+          return vent.trigger('navigation:signin', data);
+        }).fail(function() {
+          settings.set('api_authenticated', false);
+          settings.set('api_username', '');
+          settings.set('api_password', '');
+          return vent.trigger('message:signin:failed');
+        });
+      });
+    });
   }
 
   Controller.prototype.showHome = function() {
@@ -832,6 +910,8 @@ module.exports = Controller = (function(_super) {
     });
     return application.layout.content.show(view);
   };
+
+  Controller.prototype.doSignin = function() {};
 
   Controller.prototype.showAbout = function() {
     var View, view;
@@ -893,6 +973,10 @@ module.exports = Router = (function(_super) {
     var _this = this;
     console.log('about router init');
     return application.addInitializer(function(options) {
+      vent.on('navigation:signin', function() {
+        application.navigate('home');
+        return _this.controller.showHome();
+      });
       application.on('home:index', function() {
         application.navigate('home');
         return _this.controller.showHome();
@@ -956,13 +1040,15 @@ module.exports = AboutView = (function(_super) {
 });
 
 ;require.register("modules/common/views/debug-view", function(exports, require, module) {
-var DebugView, application, vent, _ref,
+var DebugView, application, settings, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
 
 vent = require('vent');
+
+settings = require('settings');
 
 module.exports = DebugView = (function(_super) {
   __extends(DebugView, _super);
@@ -988,7 +1074,9 @@ module.exports = DebugView = (function(_super) {
   DebugView.prototype.serializeData = function() {
     var _ref1;
     return {
-      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0
+      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      username: settings.get('api_username'),
+      password: settings.get('api_password')
     };
   };
 
@@ -1076,13 +1164,15 @@ module.exports = HomeView = (function(_super) {
 });
 
 ;require.register("modules/common/views/signin-view", function(exports, require, module) {
-var SigninView, application, vent, _ref,
+var SigninView, application, settings, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
 
 vent = require('vent');
+
+settings = require('settings');
 
 module.exports = SigninView = (function(_super) {
   __extends(SigninView, _super);
@@ -1104,8 +1194,20 @@ module.exports = SigninView = (function(_super) {
     return application.trigger('navigation:back:off');
   };
 
+  SigninView.prototype.serializeData = function() {
+    var _ref1;
+    return {
+      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      username: settings.get('api_remember') ? settings.get('api_username') : void 0,
+      remember: settings.get('api_remember')
+    };
+  };
+
   SigninView.prototype.onSignin = function(e) {
-    return e.preventDefault();
+    var data;
+    e.preventDefault();
+    data = Backbone.Syphon.serialize(this);
+    return vent.trigger('view:signin:do', data);
   };
 
   SigninView.prototype.onShow = function() {
@@ -1140,9 +1242,17 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div class=\"container\">\r\n  <h3>Debug</h3>\r\n  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n  cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n  proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n  <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n  <form>\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n    <textarea></textarea>\r\n\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n    <textarea></textarea>\r\n    <br/>\r\n    <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n    <button class=\"js-triggerevent\">trigger</button>\r\n    resources: "
+  buffer += "<div class=\"container\">\r\n  <h3>Debug</h3>\r\n  <p>\r\n    api_username: ";
+  if (stack1 = helpers.username) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.username; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\r\n    api_password: ";
+  if (stack1 = helpers.password) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.password; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\r\n  </p>\r\n  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n  cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n  proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n  <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n  <form>\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n    <textarea></textarea>\r\n\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n    <textarea></textarea>\r\n    <br/>\r\n    <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n    <button class=\"js-triggerevent\">trigger</button>\r\n    resources: "
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.TestKey1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n  </form>\r\n</div>";
+    + "\r\n\r\n  </form>\r\n</div>";
   return buffer;
   });
 });
@@ -1182,10 +1292,23 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
+
+function program1(depth0,data) {
   
+  
+  return "checked";
+  }
 
-
-  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <form class=\"form-signin\">\r\n      <input type=\"text\" class=\"form-control\" placeholder=\"username\" autofocus>\r\n      <input type=\"password\" class=\"form-control\" placeholder=\"password\">\r\n      <div class=\"form-group\">\r\n        <label for=\"notification1\">Remember me</label>\r\n        <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n          <input type=\"radio\" id=\"notification1\">\r\n        </div>\r\n      </div>\r\n      <button class=\"btn btn-lg btn-success btn-block js-signin\">Sign in</button>\r\n    </form>\r\n  </div>\r\n</div>";
+  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <form class=\"form-signin\">\r\n      <input type=\"text\" class=\"form-control\" placeholder=\"username\" name=\"username\" autofocus value=\"";
+  if (stack1 = helpers.username) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.username; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\">\r\n      <input type=\"password\" class=\"form-control\" placeholder=\"password\" name=\"password\">\r\n      <div class=\"form-group\">\r\n        <label for=\"notification1\">Remember me</label>\r\n        <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n          <input type=\"radio\" id=\"notification1\" name=\"remember\" ";
+  stack1 = helpers['if'].call(depth0, depth0.remember, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += ">\r\n        </div>\r\n      </div>\r\n      <button class=\"btn btn-lg btn-success btn-block js-signin\">Sign in</button>\r\n    </form>\r\n  </div>\r\n</div>";
+  return buffer;
   });
 });
 
@@ -1791,13 +1914,15 @@ module.exports = Controller = (function(_super) {
 });
 
 ;require.register("modules/header/router", function(exports, require, module) {
-var Controller, Router, application, _ref,
+var Controller, Router, application, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
 
 Controller = require('./controller');
+
+vent = require('vent');
 
 module.exports = Router = (function(_super) {
   __extends(Router, _super);
@@ -1811,7 +1936,10 @@ module.exports = Router = (function(_super) {
     var _this = this;
     console.log('header router init');
     return application.addInitializer(function(options) {
-      return application.on('start', function() {
+      application.on('start', function() {
+        return _this.controller.showHeader();
+      });
+      return vent.on('navigation:signin', function() {
         return _this.controller.showHeader();
       });
     });
