@@ -9,7 +9,7 @@ namespace Web.IntegrationTests
     [TestClass]
     public class UserControllerTests
     {
-        private const string BaseUrl = "https://localhost:44300/api";
+        private const string BaseUrl = "https://localhost:44300/api/v1";
 
         public UserControllerTests()
         {

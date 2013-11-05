@@ -51,7 +51,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="App_Start\Startup.Auth.cs" />
-    <Compile Include="App_Start\Startup.WebApi.cs" />
+    <Compile Include="App_Start\Startup.WebApi.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Areas\HelpPage\ApiDescriptionExtensions.cs" />
     <Compile Include="Areas\HelpPage\App_Start\HelpPageConfig.cs" />
     <Compile Include="Areas\HelpPage\Controllers\HelpController.cs" />
