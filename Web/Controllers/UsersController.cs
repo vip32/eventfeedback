@@ -47,6 +47,7 @@ namespace EventFeedback.Web.Controllers
                         {
                             UserName = login.UserName,
                             AccessToken = Startup.OAuthBearerOptions.AccessTokenFormat.Protect(ticket),
+                            Issued = DateTime.UtcNow,
                             Expires = ticket.Properties.ExpiresUtc
                         }, Configuration.Formatters.JsonFormatter)
                     };
