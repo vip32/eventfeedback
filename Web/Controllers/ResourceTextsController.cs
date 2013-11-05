@@ -10,7 +10,7 @@ using EventFeedback.Domain;
 
 namespace EventFeedback.Web.Controllers
 {
-    [Route("api/resources")]
+    [Route("api/v1/resources")]
     public class ResourceTextsController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

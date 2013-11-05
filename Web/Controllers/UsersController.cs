@@ -13,6 +13,7 @@ using EventFeedback.Domain;
 
 namespace EventFeedback.Web.Controllers
 {
+    [RoutePrefix("api/v1/user")]
     public class UserController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
@@ -25,7 +26,7 @@ namespace EventFeedback.Web.Controllers
         }
 
         [HttpPost]
-        [Route("api/user/token")]
+        [Route("token")]
         public HttpResponseMessage Token(LoginBindingModel login)
         {
             if (login != null)
@@ -55,7 +56,7 @@ namespace EventFeedback.Web.Controllers
         }
 
         [HttpGet]
-        [Route("api/user/profile")]
+        [Route("profile")]
         [Authorize]
         public HttpResponseMessage Profile()
         {

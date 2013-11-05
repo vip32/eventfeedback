@@ -3,7 +3,7 @@ class Config
   apptitle: 'Event|Feedback'
   appcontainer: 'content'
   approot: '/'
-  apiroot: '/api'
+  apiroot: '/api/v1'
   startuptrigger: 'events:index'
   brandtrigger: 'events:index'
   layout: 'layouts/app-layout'

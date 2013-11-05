@@ -199,7 +199,7 @@ Config = (function() {
 
   Config.prototype.approot = '/';
 
-  Config.prototype.apiroot = '/api';
+  Config.prototype.apiroot = '/api/v1';
 
   Config.prototype.startuptrigger = 'events:index';
 

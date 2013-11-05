@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Web.Mvc;
 using EventFeedback.Common;
 using Owin;
 
@@ -10,7 +11,8 @@ namespace EventFeedback.Web
         {
             SystemTime.Now = () => new DateTime(2013, 10, 9);
 
-            //ConfigureResolver(app);
+            AreaRegistration.RegisterAllAreas();
+
             ConfigureAuth(app);
             ConfigureWebApi(app);
         }

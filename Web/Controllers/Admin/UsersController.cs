@@ -10,6 +10,7 @@
 //namespace EventFeedback.Web.Controllers
 //{
 //    [Authorize(Roles = "Administrator")]
+//    [Route("api/v1/admin/users")]      
 //    public class UsersController : ApiController
 //    {
 //        private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

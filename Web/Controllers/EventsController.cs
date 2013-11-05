@@ -12,6 +12,7 @@ using EventFeedback.Domain;
 namespace EventFeedback.Web.Controllers
 {
     [Authorize]
+    [Route("api/v1/events")]
     public class EventsController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

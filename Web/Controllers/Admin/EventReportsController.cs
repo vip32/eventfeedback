@@ -9,6 +9,7 @@ using EventFeedback.Domain;
 namespace EventFeedback.Web.Controllers
 {
     [Authorize(Roles = "Administrator")]
+    [Route("api/v1/admin/eventreports")]
     public class EventReportsController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
