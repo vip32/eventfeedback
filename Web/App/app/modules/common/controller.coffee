@@ -12,35 +12,13 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     application.addInitializer (options) =>
 
       vent.on 'view:signin:do', (data) =>
-        settings.set('api_token', '')
-        settings.set('api_authenticated', false)
-        settings.set('api_username', data.username)
-        settings.set('api_password', data.password)
-        settings.set('api_remember', data.remember is 'on')
-
-        # get the accesstoken
-        userToken = new UserToken.Model
-          userName: data.username
-          password: data.password
-        userToken.save null,
-          success:  (model, response, options) =>
-            settings.set('api_token', userToken.get('accessToken'))
-            settings.set('api_authenticated', true)
-
-            # get the userprofile
-            profile = new UserProfile.Model()
-            profile.fetch
-              success:  (model, response, options) =>
-                vent.trigger 'message:success:show', 'signed in ' + data.username
-                vent.trigger 'navigation:signin', data
-              error: (model, xhr, options) ->
-                # alert('profile fetch failed')
-                vent.trigger 'message:error:show', 'profile fetch failed'
-                vent.trigger 'navigation:signout', data
-          error: (model, xhr, options) ->
-            # alert('signin failed')
-            vent.trigger 'message:error:show', 'sign in failed'
-            vent.trigger 'navigation:signout', data
+        if not _.isEmpty(data.username) and not _.isEmpty(data.password)
+          settings.set('api_token', '')
+          settings.set('api_authenticated', false)
+          settings.set('api_username', data.username)
+          settings.set('api_password', data.password)
+          settings.set('api_remember', data.remember is 'on')
+          @doSignin(data.username, data.password)
 
       vent.on 'message:success:show', (data) =>
         @showMessage data, 'success'
@@ -66,7 +44,30 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     view = new View(resources: application.resources)
     application.layout.content.show(view)
 
-  doSignin: ->
+  doSignin: (username, password) ->
+    # get the accesstoken
+    userToken = new UserToken.Model
+      userName: username
+      password: password
+    userToken.save null,
+      success:  (model, response, options) =>
+        settings.set('api_token', userToken.get('accessToken'))
+        settings.set('api_authenticated', true)
+
+        # get the userprofile
+        profile = new UserProfile.Model()
+        profile.fetch
+          success:  (model, response, options) =>
+            vent.trigger 'message:success:show', 'signed in ' + username
+            vent.trigger 'navigation:signin'
+          error: (model, xhr, options) ->
+            # alert('profile fetch failed')
+            vent.trigger 'message:error:show', 'profile fetch failed'
+            vent.trigger 'navigation:signout'
+      error: (model, xhr, options) ->
+        # alert('signin failed')
+        vent.trigger 'message:error:show', 'sign in failed'
+        vent.trigger 'navigation:signout'
 
   showAbout: ->
     application.trigger 'set:active:header', 'About'

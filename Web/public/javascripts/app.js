@@ -902,38 +902,14 @@ module.exports = Controller = (function(_super) {
     console.log('about controller init');
     application.addInitializer(function(options) {
       vent.on('view:signin:do', function(data) {
-        var userToken;
-        settings.set('api_token', '');
-        settings.set('api_authenticated', false);
-        settings.set('api_username', data.username);
-        settings.set('api_password', data.password);
-        settings.set('api_remember', data.remember === 'on');
-        userToken = new UserToken.Model({
-          userName: data.username,
-          password: data.password
-        });
-        return userToken.save(null, {
-          success: function(model, response, options) {
-            var profile;
-            settings.set('api_token', userToken.get('accessToken'));
-            settings.set('api_authenticated', true);
-            profile = new UserProfile.Model();
-            return profile.fetch({
-              success: function(model, response, options) {
-                vent.trigger('message:success:show', 'signed in ' + data.username);
-                return vent.trigger('navigation:signin', data);
-              },
-              error: function(model, xhr, options) {
-                vent.trigger('message:error:show', 'profile fetch failed');
-                return vent.trigger('navigation:signout', data);
-              }
-            });
-          },
-          error: function(model, xhr, options) {
-            vent.trigger('message:error:show', 'sign in failed');
-            return vent.trigger('navigation:signout', data);
-          }
-        });
+        if (!_.isEmpty(data.username) && !_.isEmpty(data.password)) {
+          settings.set('api_token', '');
+          settings.set('api_authenticated', false);
+          settings.set('api_username', data.username);
+          settings.set('api_password', data.password);
+          settings.set('api_remember', data.remember === 'on');
+          return _this.doSignin(data.username, data.password);
+        }
       });
       vent.on('message:success:show', function(data) {
         return _this.showMessage(data, 'success');
@@ -971,7 +947,36 @@ module.exports = Controller = (function(_super) {
     return application.layout.content.show(view);
   };
 
-  Controller.prototype.doSignin = function() {};
+  Controller.prototype.doSignin = function(username, password) {
+    var userToken,
+      _this = this;
+    userToken = new UserToken.Model({
+      userName: username,
+      password: password
+    });
+    return userToken.save(null, {
+      success: function(model, response, options) {
+        var profile;
+        settings.set('api_token', userToken.get('accessToken'));
+        settings.set('api_authenticated', true);
+        profile = new UserProfile.Model();
+        return profile.fetch({
+          success: function(model, response, options) {
+            vent.trigger('message:success:show', 'signed in ' + username);
+            return vent.trigger('navigation:signin');
+          },
+          error: function(model, xhr, options) {
+            vent.trigger('message:error:show', 'profile fetch failed');
+            return vent.trigger('navigation:signout');
+          }
+        });
+      },
+      error: function(model, xhr, options) {
+        vent.trigger('message:error:show', 'sign in failed');
+        return vent.trigger('navigation:signout');
+      }
+    });
+  };
 
   Controller.prototype.showAbout = function() {
     var View, view;
@@ -1130,9 +1135,7 @@ module.exports = DebugView = (function(_super) {
   DebugView.prototype.serializeData = function() {
     var _ref1;
     return {
-      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
-      username: settings.get('api_username'),
-      password: settings.get('api_password')
+      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0
     };
   };
 
@@ -1288,7 +1291,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3>About</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n    <p>\r\n      <a class=\"btn btn-lg btn-primary\" href=\"#\">More &raquo;</a>\r\n    </p>\r\n  </div>\r\n  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n</div>";
+  return "<div class=\"container\">\r\n    <h3>About</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n    <p>\r\n      <a class=\"btn btn-lg btn-primary\" href=\"#\">More &raquo;</a>\r\n    </p>\r\n      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n</div>";
   });
 });
 
@@ -1299,17 +1302,9 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div class=\"container\">\r\n  <h3>Debug</h3>\r\n  <p>\r\n    api_username: ";
-  if (stack1 = helpers.username) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.username; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "\r\n    api_password: ";
-  if (stack1 = helpers.password) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.password; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "\r\n  </p>\r\n  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n  cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n  proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n  <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n  <form>\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n    <textarea></textarea>\r\n\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n    <textarea></textarea>\r\n    <br/>\r\n    <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n    <button class=\"js-triggerevent\">trigger</button>\r\n    resources: "
+  buffer += "<div class=\"container\">\r\n  <h3>Debug</h3>\r\n  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n  cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n  proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n  <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n  <form>\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n    <textarea></textarea>\r\n\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n    <textarea></textarea>\r\n    <br/>\r\n    <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n    <button class=\"js-triggerevent\">trigger</button>\r\n    resources: "
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.TestKey1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n\r\n  </form>\r\n</div>";
+    + "\r\n  </form>\r\n</div>";
   return buffer;
   });
 });
@@ -1357,18 +1352,18 @@ function program1(depth0,data) {
   return "checked";
   }
 
-  buffer += "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <form class=\"form-signin\">\r\n      <input type=\"text\" class=\"form-control\" placeholder=\"username\" name=\"username\" autofocus value=\"";
+  buffer += "<div class=\"container\">\r\n  <form class=\"form-signin\">\r\n    <input type=\"text\" class=\"form-control\" placeholder=\"username\" name=\"username\" autofocus value=\"";
   if (stack1 = helpers.username) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.username; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\">\r\n      <input type=\"password\" class=\"form-control\" placeholder=\"password\" name=\"password\" value=\"";
+    + "\">\r\n    <input type=\"password\" class=\"form-control\" placeholder=\"password\" name=\"password\" value=\"";
   if (stack1 = helpers.password) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.password; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\">\r\n      <div class=\"form-group\">\r\n        <label for=\"notification1\">Remember me</label>\r\n        <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n          <input type=\"radio\" id=\"notification1\" name=\"remember\" ";
+    + "\">\r\n    <div class=\"form-group\">\r\n      <label for=\"notification1\">Remember me</label>\r\n      <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n        <input type=\"radio\" id=\"notification1\" name=\"remember\" ";
   stack1 = helpers['if'].call(depth0, depth0.remember, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += ">\r\n        </div>\r\n      </div>\r\n      <button class=\"btn btn-lg btn-success btn-block js-signin\">Sign in</button>\r\n    </form>\r\n  </div>\r\n</div>";
+  buffer += ">\r\n      </div>\r\n    </div>\r\n    <button class=\"btn btn-lg btn-success btn-block js-signin\">Sign in</button>\r\n  </form>\r\n</div>";
   return buffer;
   });
 });

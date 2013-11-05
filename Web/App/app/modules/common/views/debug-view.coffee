@@ -14,8 +14,6 @@ module.exports = class DebugView extends Backbone.Marionette.ItemView
 
   serializeData: ->
     resources: @resources?.toJSON()
-    username: settings.get('api_username')
-    password: settings.get('api_password')
 
   onTriggerEvent: (e) ->
     model = Backbone.Syphon.serialize(@)
