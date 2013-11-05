@@ -15,4 +15,7 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
       vent.on 'navigation:signin', =>
         @controller.showHeader()
 
+      vent.on 'navigation:signout', =>
+        @controller.showHeader()
+
   controller: new Controller()

@@ -1,5 +1,6 @@
 application = require 'application'
 Header = require '../../models/header'
+vent = require 'vent'
 
 module.exports = class Controller extends Backbone.Marionette.Controller
 

@@ -15,6 +15,10 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
 
     application.addInitializer (options) =>
 
+      vent.on 'navigation:signin', =>
+        application.navigate 'events'
+        @controller.showEventsIndex()
+
       application.on 'events:index', =>
         application.navigate 'events'
         @controller.showEventsIndex()

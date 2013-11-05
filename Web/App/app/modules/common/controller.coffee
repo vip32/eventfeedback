@@ -31,14 +31,28 @@ module.exports = class Controller extends Backbone.Marionette.Controller
             profile = new UserProfile.Model()
             profile.fetch
               success:  (model, response, options) =>
-                vent.trigger 'message:success:show', 'signed in'
+                vent.trigger 'message:success:show', 'signed in ' + data.username
                 vent.trigger 'navigation:signin', data
               error: (model, xhr, options) ->
-                alert('profile fetch failed')
+                # alert('profile fetch failed')
                 vent.trigger 'message:error:show', 'profile fetch failed'
+                vent.trigger 'navigation:signout', data
           error: (model, xhr, options) ->
-            alert('signin failed')
+            # alert('signin failed')
             vent.trigger 'message:error:show', 'sign in failed'
+            vent.trigger 'navigation:signout', data
+
+      vent.on 'message:success:show', (data) =>
+        @showMessage data, 'success'
+
+      vent.on 'message:error:show', (data) =>
+        @showMessage data, 'danger'
+
+  showMessage: (data, type) ->
+    $('#messagebox').append('<div id="currentmessage" class="alert alert-' +  type + '"><a class="close" data-dismiss="alert">×</a><span>'+data+'</span></div>')
+    setTimeout ->
+      $("#currentmessage").remove();
+    , 3000
 
   showHome: ->
     application.trigger 'set:active:header', 'Home'

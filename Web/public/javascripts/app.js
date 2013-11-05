@@ -293,7 +293,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div id=\"wrapper\">\r\n\r\n  <div id=\"header\" class=\"container\"></div>\r\n  <div class=\"page-content inset\">\r\n    <div id=\"content\" class=\"container\"></div>\r\n  </div>\r\n\r\n  <hr/>\r\n  <div id=\"footer\" class=\"container\"></div>\r\n\r\n</div>";
+  return "<div id=\"wrapper\">\r\n\r\n  <div id=\"header\" class=\"container\"></div>\r\n  <div class=\"page-content inset\">\r\n    <div id=\"content\" class=\"container\"></div>\r\n  </div>\r\n  <div id=\"messagebox\"></div>\r\n  <hr/>\r\n  <div id=\"footer\" class=\"container\"></div>\r\n\r\n</div>";
   });
 });
 
@@ -901,7 +901,7 @@ module.exports = Controller = (function(_super) {
     var _this = this;
     console.log('about controller init');
     application.addInitializer(function(options) {
-      return vent.on('view:signin:do', function(data) {
+      vent.on('view:signin:do', function(data) {
         var userToken;
         settings.set('api_token', '');
         settings.set('api_authenticated', false);
@@ -920,23 +920,36 @@ module.exports = Controller = (function(_super) {
             profile = new UserProfile.Model();
             return profile.fetch({
               success: function(model, response, options) {
-                vent.trigger('message:success:show', 'signed in');
+                vent.trigger('message:success:show', 'signed in ' + data.username);
                 return vent.trigger('navigation:signin', data);
               },
               error: function(model, xhr, options) {
-                alert('profile fetch failed');
-                return vent.trigger('message:error:show', 'profile fetch failed');
+                vent.trigger('message:error:show', 'profile fetch failed');
+                return vent.trigger('navigation:signout', data);
               }
             });
           },
           error: function(model, xhr, options) {
-            alert('signin failed');
-            return vent.trigger('message:error:show', 'sign in failed');
+            vent.trigger('message:error:show', 'sign in failed');
+            return vent.trigger('navigation:signout', data);
           }
         });
       });
+      vent.on('message:success:show', function(data) {
+        return _this.showMessage(data, 'success');
+      });
+      return vent.on('message:error:show', function(data) {
+        return _this.showMessage(data, 'danger');
+      });
     });
   }
+
+  Controller.prototype.showMessage = function(data, type) {
+    $('#messagebox').append('<div id="currentmessage" class="alert alert-' + type + '"><a class="close" data-dismiss="alert">×</a><span>' + data + '</span></div>');
+    return setTimeout(function() {
+      return $("#currentmessage").remove();
+    }, 3000);
+  };
 
   Controller.prototype.showHome = function() {
     var View, view;
@@ -1020,10 +1033,6 @@ module.exports = Router = (function(_super) {
     var _this = this;
     console.log('about router init');
     return application.addInitializer(function(options) {
-      vent.on('navigation:signin', function() {
-        application.navigate('home');
-        return _this.controller.showHome();
-      });
       application.on('home:index', function() {
         application.navigate('home');
         return _this.controller.showHome();
@@ -1488,6 +1497,10 @@ module.exports = Router = (function(_super) {
     var _this = this;
     console.log('event router init');
     return application.addInitializer(function(options) {
+      vent.on('navigation:signin', function() {
+        application.navigate('events');
+        return _this.controller.showEventsIndex();
+      });
       application.on('events:index', function() {
         application.navigate('events');
         return _this.controller.showEventsIndex();
@@ -1925,13 +1938,15 @@ function program3(depth0,data) {
 });
 
 ;require.register("modules/header/controller", function(exports, require, module) {
-var Controller, Header, application,
+var Controller, Header, application, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
 
 Header = require('../../models/header');
+
+vent = require('vent');
 
 module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
@@ -1991,7 +2006,10 @@ module.exports = Router = (function(_super) {
       application.on('start', function() {
         return _this.controller.showHeader();
       });
-      return vent.on('navigation:signin', function() {
+      vent.on('navigation:signin', function() {
+        return _this.controller.showHeader();
+      });
+      return vent.on('navigation:signout', function() {
         return _this.controller.showHeader();
       });
     });
