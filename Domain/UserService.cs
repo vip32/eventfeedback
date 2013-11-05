@@ -18,6 +18,8 @@ namespace EventFeedback.Domain
         {
             _userManager = new UserManager<User>(new UserStore<User>(context));
             _roleManager = new RoleManager<Role>(new RoleStore<Role>(context));
+
+            _userManager.PasswordValidator = new MinimumLengthValidator(4);
         }
 
         /// <summary>

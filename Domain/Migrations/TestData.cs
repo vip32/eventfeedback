@@ -65,13 +65,13 @@ namespace EventFeedback.Domain
                 userService.CreateRole(new Role { Name = "Guest" });
 
                 var user1 = users.FirstOrDefault(u => u.UserName.Equals("admin"));
-                userService.CreateUser(user1, "adminadmin");
+                userService.CreateUser(user1, "admin");
                 var user2 = users.FirstOrDefault(u => u.UserName.Equals("user1"));
-                userService.CreateUser(user2, "useruser");
+                userService.CreateUser(user2, "user");
                 var user3 = users.FirstOrDefault(u => u.UserName.Equals("user2"));
-                userService.CreateUser(user3, "useruser");
+                userService.CreateUser(user3, "user");
                 var user4 = users.FirstOrDefault(u => u.UserName.Equals("guest1"));
-                userService.CreateUser(user4, "guestguest");
+                userService.CreateUser(user4, "guest");
 
                 if (user1 != null)
                 {
@@ -84,7 +84,7 @@ namespace EventFeedback.Domain
 
                 foreach (var user in users.Where(u => u.UserName.StartsWith("acme")))
                 {
-                    userService.CreateUser(user, "useruser");
+                    userService.CreateUser(user, "user");
                 }
                 context.SaveChanges();
                 foreach (var user in users.Where(u => u.UserName.StartsWith("acme")))
