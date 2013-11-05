@@ -10,12 +10,11 @@ namespace EventFeedback.Web
         protected void Application_Start()
         {
             //AreaRegistration.RegisterAllAreas();
-            DependencyResolverConfig.Setup();
-            AuthConfig.Register(GlobalConfiguration.Configuration);
-            WebApiConfig.Register(GlobalConfiguration.Configuration);
-            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+            //DependencyResolverConfig.Setup();
+            //AuthConfig.Register(GlobalConfiguration.Configuration);
+            //FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
 
-            SystemTime.Now = () => new DateTime(2013, 10, 9);
+            //SystemTime.Now = () => new DateTime(2013, 10, 9);
         }
     }
 }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Http;
+﻿using System.Diagnostics;
 using System.Reflection;
-using System.Web.Http;
 using System.Web.Http.Filters;
 
 namespace EventFeedback.Common

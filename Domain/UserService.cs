@@ -40,17 +40,32 @@ namespace EventFeedback.Domain
         /// <returns></returns>
         public User FindUser(string userName, string password)
         {
+            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password)) return null;
             return _userManager.Find(userName, password);
+        }
+
+        public User FindUserByName(string userName)
+        {
+            if (string.IsNullOrEmpty(userName)) return null;
+            return _userManager.FindByName(userName);
+        }
+
+        public User HideSensitiveData(User user)
+        {
+            user.PasswordHash = null;
+            user.SecurityStamp = null;
+            return user;
         }
 
         /// <summary>
         /// Creates the identity based on the user and its claims.
         /// </summary>
         /// <param name="user">The user.</param>
+        /// <param name="type">The authentication type.</param>
         /// <returns></returns>
-        public ClaimsIdentity CreateIdentity(User user)
+        public ClaimsIdentity CreateIdentity(User user, string type)
         {
-            return _userManager.CreateIdentity(user, AuthenticationMethods.Password);
+            return _userManager.CreateIdentity(user, type);
         }
 
         /// <summary>
