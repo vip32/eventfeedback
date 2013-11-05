@@ -463,8 +463,7 @@ module.exports.Collection = EventsCollection = (function(_super) {
 
   EventsCollection.prototype.credentials = function() {
     return {
-      username: settings.get('api_username'),
-      password: settings.get('api_password')
+      token: settings.get('api_token')
     };
   };
 
@@ -712,8 +711,7 @@ module.exports.Collection = SessionsCollection = (function(_super) {
 
   SessionsCollection.prototype.credentials = function() {
     return {
-      username: settings.get('api_username'),
-      password: settings.get('api_password')
+      token: settings.get('api_token')
     };
   };
 
@@ -817,8 +815,8 @@ module.exports.Collection = StoreCollection = (function(_super) {
 
 });
 
-;require.register("models/user", function(exports, require, module) {
-var Collection, Model, User, UserCollection, config, settings, _ref, _ref1,
+;require.register("models/userprofile", function(exports, require, module) {
+var Model, UserProfile, config, settings, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -826,59 +824,71 @@ config = require('../config');
 
 Model = require('../lib/base/model');
 
-Collection = require('../lib/base/collection');
-
 settings = require('../settings');
 
-module.exports.Model = User = (function(_super) {
-  __extends(User, _super);
+module.exports.Model = UserProfile = (function(_super) {
+  __extends(UserProfile, _super);
 
-  function User() {
-    _ref = User.__super__.constructor.apply(this, arguments);
+  function UserProfile() {
+    _ref = UserProfile.__super__.constructor.apply(this, arguments);
     return _ref;
   }
 
-  return User;
-
-})(Model);
-
-module.exports.Collection = UserCollection = (function(_super) {
-  __extends(UserCollection, _super);
-
-  function UserCollection() {
-    _ref1 = UserCollection.__super__.constructor.apply(this, arguments);
-    return _ref1;
-  }
-
-  UserCollection.prototype.url = function() {
-    return "" + config.apiroot + "/users/current";
+  UserProfile.prototype.urlRoot = function() {
+    return "" + config.apiroot + "/user/profile";
   };
 
-  UserCollection.prototype.credentials = function() {
+  UserProfile.prototype.credentials = function() {
     return {
-      username: settings.get('api_username'),
-      password: settings.get('api_password')
+      token: settings.get('api_token')
     };
   };
 
-  UserCollection.prototype.model = module.exports.Model;
+  return UserProfile;
 
-  UserCollection.prototype.comparator = 'username';
+})(Model);
 
-  return UserCollection;
+});
 
-})(Collection);
+;require.register("models/usertoken", function(exports, require, module) {
+var Model, UserToken, config, settings, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+config = require('../config');
+
+Model = require('../lib/base/model');
+
+settings = require('../settings');
+
+module.exports.Model = UserToken = (function(_super) {
+  __extends(UserToken, _super);
+
+  function UserToken() {
+    _ref = UserToken.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  UserToken.prototype.urlRoot = function() {
+    return "" + config.apiroot + "/user/token";
+  };
+
+  return UserToken;
+
+})(Model);
 
 });
 
 ;require.register("modules/common/controller", function(exports, require, module) {
-var Controller, User, application, settings, vent,
+var Controller, UserProfile, UserToken, application, settings, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
 
-User = require('../../models/user');
+UserProfile = require('../../models/userprofile');
+
+UserToken = require('../../models/usertoken');
 
 vent = require('vent');
 
@@ -892,19 +902,37 @@ module.exports = Controller = (function(_super) {
     console.log('about controller init');
     application.addInitializer(function(options) {
       return vent.on('view:signin:do', function(data) {
+        var userToken;
+        settings.set('api_token', '');
+        settings.set('api_authenticated', false);
         settings.set('api_username', data.username);
         settings.set('api_password', data.password);
         settings.set('api_remember', data.remember === 'on');
-        _this.users = new User.Collection();
-        return _this.users.fetch().done(function() {
-          settings.set('api_authenticated', true);
-          vent.trigger('message:signin:success');
-          return vent.trigger('navigation:signin', data);
-        }).fail(function() {
-          settings.set('api_authenticated', false);
-          settings.set('api_username', '');
-          settings.set('api_password', '');
-          return vent.trigger('message:signin:failed');
+        userToken = new UserToken.Model({
+          userName: data.username,
+          password: data.password
+        });
+        return userToken.save(null, {
+          success: function(model, response, options) {
+            var profile;
+            settings.set('api_token', userToken.get('accessToken'));
+            settings.set('api_authenticated', true);
+            profile = new UserProfile.Model();
+            return profile.fetch({
+              success: function(model, response, options) {
+                vent.trigger('message:success:show', 'signed in');
+                return vent.trigger('navigation:signin', data);
+              },
+              error: function(model, xhr, options) {
+                alert('profile fetch failed');
+                return vent.trigger('message:error:show', 'profile fetch failed');
+              }
+            });
+          },
+          error: function(model, xhr, options) {
+            alert('signin failed');
+            return vent.trigger('message:error:show', 'sign in failed');
+          }
         });
       });
     });
@@ -1218,7 +1246,8 @@ module.exports = SigninView = (function(_super) {
     return {
       resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
       username: settings.get('api_remember') ? settings.get('api_username') : void 0,
-      remember: settings.get('api_remember')
+      password: settings.get('api_remember') ? settings.get('api_password') : void 0,
+      remember: settings.get('api_remember') ? settings.get('api_remember') : void 0
     };
   };
 
@@ -1323,7 +1352,11 @@ function program1(depth0,data) {
   if (stack1 = helpers.username) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.username; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\">\r\n      <input type=\"password\" class=\"form-control\" placeholder=\"password\" name=\"password\">\r\n      <div class=\"form-group\">\r\n        <label for=\"notification1\">Remember me</label>\r\n        <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n          <input type=\"radio\" id=\"notification1\" name=\"remember\" ";
+    + "\">\r\n      <input type=\"password\" class=\"form-control\" placeholder=\"password\" name=\"password\" value=\"";
+  if (stack1 = helpers.password) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.password; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\">\r\n      <div class=\"form-group\">\r\n        <label for=\"notification1\">Remember me</label>\r\n        <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n          <input type=\"radio\" id=\"notification1\" name=\"remember\" ";
   stack1 = helpers['if'].call(depth0, depth0.remember, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += ">\r\n        </div>\r\n      </div>\r\n      <button class=\"btn btn-lg btn-success btn-block js-signin\">Sign in</button>\r\n    </form>\r\n  </div>\r\n</div>";

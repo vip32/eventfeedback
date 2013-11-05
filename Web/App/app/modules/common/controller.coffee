@@ -1,5 +1,6 @@
 application = require 'application'
-User = require '../../models/user'
+UserProfile = require '../../models/userprofile'
+UserToken = require '../../models/usertoken'
 vent = require 'vent'
 settings = require 'settings'
 
@@ -11,21 +12,33 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     application.addInitializer (options) =>
 
       vent.on 'view:signin:do', (data) =>
+        settings.set('api_token', '')
+        settings.set('api_authenticated', false)
         settings.set('api_username', data.username)
         settings.set('api_password', data.password)
         settings.set('api_remember', data.remember is 'on')
 
-        @users = new User.Collection()
-        @users.fetch()
-          .done =>
+        # get the accesstoken
+        userToken = new UserToken.Model
+          userName: data.username
+          password: data.password
+        userToken.save null,
+          success:  (model, response, options) =>
+            settings.set('api_token', userToken.get('accessToken'))
             settings.set('api_authenticated', true)
-            vent.trigger 'message:signin:success'
-            vent.trigger 'navigation:signin', data
-          .fail =>
-            settings.set('api_authenticated', false)
-            settings.set('api_username', '')
-            settings.set('api_password', '')
-            vent.trigger 'message:signin:failed'
+
+            # get the userprofile
+            profile = new UserProfile.Model()
+            profile.fetch
+              success:  (model, response, options) =>
+                vent.trigger 'message:success:show', 'signed in'
+                vent.trigger 'navigation:signin', data
+              error: (model, xhr, options) ->
+                alert('profile fetch failed')
+                vent.trigger 'message:error:show', 'profile fetch failed'
+          error: (model, xhr, options) ->
+            alert('signin failed')
+            vent.trigger 'message:error:show', 'sign in failed'
 
   showHome: ->
     application.trigger 'set:active:header', 'Home'
