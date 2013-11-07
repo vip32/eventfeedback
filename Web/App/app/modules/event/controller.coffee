@@ -16,7 +16,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
   showEventsIndex: ->
     @events.fetch(
-      reload: true
+      # reload: true
       data:
         filter: 'all'
     ).done (models) ->
@@ -34,7 +34,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       settings.set('active-event', id)
 
       @sessions.fetch(
-        reload: true
+        # reload: true
       ).done (sessions) =>
         View = require './views/event-details-view'
         view = new View(model: models.get(id), collection: sessions, resources: application.resources)

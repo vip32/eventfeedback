@@ -1398,7 +1398,6 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showEventsIndex = function() {
     return this.events.fetch({
-      reload: true,
       data: {
         filter: 'all'
       }
@@ -1423,9 +1422,7 @@ module.exports = Controller = (function(_super) {
     }).done(function(models) {
       application.trigger('set:active:header', models.get(id).get('title'));
       settings.set('active-event', id);
-      return _this.sessions.fetch({
-        reload: true
-      }).done(function(sessions) {
+      return _this.sessions.fetch().done(function(sessions) {
         var View, view;
         View = require('./views/event-details-view');
         view = new View({
