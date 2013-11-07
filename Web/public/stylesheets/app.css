@@ -7310,10 +7310,10 @@ input.form-control {
 }
 .list-group-item {
   border: 0px;
-  border-bottom: 5px solid #dbdbdb;
+  border-bottom: 3px solid #dbdbdb;
   -webkit-border-radius: 3px;
   border-radius: 3px;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
   cursor: pointer;
   cursor: hand;
 }
@@ -7365,9 +7365,10 @@ input.form-control {
 textarea {
   width: 100%;
   border: 0px;
-  border-bottom: 5px solid #dbdbdb;
+  border-bottom: 3px solid #dbdbdb;
   -webkit-border-radius: 3px;
   border-radius: 3px;
+  resize: none;
 }
 .no-transition {
   -webkit-transition: height 0.01s;
