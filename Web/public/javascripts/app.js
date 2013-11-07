@@ -1842,9 +1842,18 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, stack2, options, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
+  var buffer = "", stack1, stack2, options, functionType="function", escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
 
 function program1(depth0,data) {
+  
+  var buffer = "";
+  buffer += "<span class=\"badge pull-right\">"
+    + escapeExpression((typeof depth0 === functionType ? depth0.apply(depth0) : depth0))
+    + "</span>";
+  return buffer;
+  }
+
+function program3(depth0,data) {
   
   var buffer = "";
   buffer += escapeExpression((typeof depth0 === functionType ? depth0.apply(depth0) : depth0))
@@ -1852,7 +1861,12 @@ function program1(depth0,data) {
   return buffer;
   }
 
-  buffer += "<div class=\"container\">\r\n\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-4 col-md-3 glyphicon glyphicon-time\">\r\n      ";
+  buffer += "<div class=\"container\">\r\n\r\n  <div class=\"list-group\" style=\"margin-top:39px;\">\r\n      <div id=\"session-item-view\" class=\"list-group-item\">\r\n        <div><strong>"
+    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</strong></div>\r\n        ";
+  stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.tags), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        <div class=\"glyphicon glyphicon-time\">\r\n          ";
   options = {hash:{
     'format': ("HH:mm")
   },data:data};
@@ -1862,24 +1876,26 @@ function program1(depth0,data) {
     'format': ("HH:mm")
   },data:data};
   buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options)))
-    + "\r\n    </div>\r\n    <div class=\"col-xs-8 col-md-9 glyphicon glyphicon-user\">\r\n      ";
-  stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.speakers), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+    + "\r\n        </div>\r\n        <div class=\"glyphicon glyphicon-user\">\r\n          ";
+  stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.speakers), {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"row\">\r\n    &nbsp;\r\n  </div>\r\n\r\n    <form>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-4 col-md-3\">"
+  buffer += "\r\n        </div>\r\n        <br/><br/>\r\n        <p>"
+    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</p>\r\n      </div>\r\n  </div>\r\n\r\n  <form>\r\n\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question1_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n        <div class=\"col-xs-8 col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"rate1\" id=\"rate1\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-4 col-md-3\">"
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"rate1\" id=\"rate1\" class=\"rating\" value=\"0\" />\r\n      </div>\r\n    </div>\r\n\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question2_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n        <div class=\"col-xs-8 col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"rate2\" id=\"rate2\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-4 col-md-3\">"
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"rate2\" id=\"rate2\" class=\"rating\" value=\"0\" />\r\n      </div>\r\n    </div>\r\n\r\n\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question3_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n        <div class=\"col-xs-8 col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"rate3\" id=\"rate3\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-4 col-md-3\">"
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"rate3\" id=\"rate3\" class=\"rating\" value=\"0\" />\r\n      </div>\r\n    </div>\r\n\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question4_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n        <div class=\"col-xs-8 col-md-9\">\r\n          <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n               name=\"rate4\" id=\"rate4\" class=\"rating\" value=\"0\" />\r\n        </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"rate4\" id=\"rate4\" class=\"rating\" value=\"0\" />\r\n      </div>\r\n    </div>\r\n\r\n    <div class=\"row\">\r\n      <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question5_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n          <div class=\"col-md-9\">\r\n            <textarea name=\"question5\"></textarea>\r\n          </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
+    + "</div>\r\n        <div class=\"col-md-9\">\r\n          <textarea name=\"question5\"></textarea>\r\n        </div>\r\n    </div>\r\n\r\n    <div class=\"row\">\r\n      <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question6_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n          <div class=\"col-md-9\">\r\n            <textarea name=\"question6\"></textarea>\r\n          </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-md-3\">"
+    + "</div>\r\n        <div class=\"col-md-9\">\r\n          <textarea name=\"question6\"></textarea>\r\n        </div>\r\n    </div>\r\n\r\n    <div class=\"row\">\r\n      <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Question7_Title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n          <div class=\"col-md-9\">\r\n            <textarea name=\"question6\"></textarea>\r\n          </div>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"col-xs-7\">&nbsp;</div>\r\n        <div class=\"col-xs-5\"><button class=\"btn btn-primary btn-lg pull-right js-submit\">Save</button>\r\n      </div>\r\n    </form>\r\n\r\n</div>";
+    + "</div>\r\n        <div class=\"col-md-9\">\r\n          <textarea name=\"question6\"></textarea>\r\n        </div>\r\n    </div>\r\n\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\">&nbsp;</div>\r\n      <div class=\"col-xs-5\"><button class=\"btn btn-primary btn-lg pull-right js-submit\">Save</button>\r\n    </div>\r\n  </form>\r\n\r\n</div>";
   return buffer;
   });
 });

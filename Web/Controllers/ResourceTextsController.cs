@@ -25,7 +25,7 @@ namespace EventFeedback.Web.Controllers
 
         public IEnumerable<ResourceText> Get([FromUri] string filter = "", [FromUri] string language = "en-US")
         {
-            Thread.Sleep(3500);
+            //Thread.Sleep(3500);
 
             _traceSource.TraceInformation("ResourceTextsController get all");
             IEnumerable<ResourceText> result;
