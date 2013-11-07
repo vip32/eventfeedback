@@ -34,9 +34,11 @@ class Application extends Backbone.Marionette.Application
       data:
         language: 'de-DE'
     ).done (resources) =>
-      settings.set('last-visit', moment())
+      vent.trigger 'resources:loaded'
 
-      @start()
+    settings.set('last-visit', moment())
+
+    @start()
 
   navigate: (route, options) ->
     console.log 'navigate', route

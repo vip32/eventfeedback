@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Entity.Migrations;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
@@ -148,40 +149,103 @@ namespace EventFeedback.Domain
                     );
             }
 
+            var feedbackDefinitions = new List<FeedbackDefinition>
+            {
+                new FeedbackDefinition
+                {
+                    Title = "Acme Event",
+                    Active0 = true,
+                    QuestionType0 = FeedbackQuestionType.FiveStarRate,
+                    Title0 = "Vortragsstil",
+                    Active1 = true,
+                    QuestionType1 = FeedbackQuestionType.FiveStarRate,
+                    Title1 = "Folien",
+                    Active2 = true,
+                    QuestionType2 = FeedbackQuestionType.FiveStarRate,
+                    Title2 = "Transport von Inhalten",
+                    Active3 = true,
+                    QuestionType3 = FeedbackQuestionType.FiveStarRate,
+                    Title3 = "Business-Relevanz",
+                    Active4 = true,
+                    QuestionType4 = FeedbackQuestionType.Freetext,
+                    Title4 = "Dein Kommentar zum Vortragstil und dem Transport von Inhalten",
+                    Active5 = true,
+                    QuestionType5 = FeedbackQuestionType.Freetext,
+                    Title5 = "Dein Kommentar zu den Folien",
+                    Active6 = true,
+                    QuestionType6 = FeedbackQuestionType.Freetext,
+                    Title6 = "Dein Kommentar zum Thema",
+                    Active7 = true,
+                    QuestionType7 = FeedbackQuestionType.Freetext,
+                    Title7 = "Was sollte organisatorisch (Termin, Raum) verbessert werden?",
+                    Active8 = true,
+                    QuestionType8 = FeedbackQuestionType.Freetext,
+                    Title8 = "Feedback zum Auditorium (Hier kannst Du Bemerkungen zu den Zuhörern eingeben.)",
+                    Active9 = true,
+                    QuestionType9 = FeedbackQuestionType.Freetext,
+                    Title9 = "Welche Themen interessieren dich im allgemeinen Teil?"
+                },
+                new FeedbackDefinition
+                {
+                    Title = "Acme Session",
+                    Active0 = true,
+                    QuestionType0 = FeedbackQuestionType.FiveStarRate,
+                    Title0 = "Vortragsstil",
+                    Active1 = true,
+                    QuestionType1 = FeedbackQuestionType.FiveStarRate,
+                    Title1 = "Folien",
+                    Active2 = true,
+                    QuestionType2 = FeedbackQuestionType.FiveStarRate,
+                    Title2 = "Transport von Inhalten",
+                    Active3 = true,
+                    QuestionType3 = FeedbackQuestionType.FiveStarRate,
+                    Title3 = "Business-Relevanz",
+                    Active4 = true,
+                    QuestionType4 = FeedbackQuestionType.Freetext,
+                    Title4 = "Dein Kommentar zum Vortragstil und dem Transport von Inhalten",
+                    Active5 = true,
+                    QuestionType5 = FeedbackQuestionType.Freetext,
+                    Title5 = "Dein Kommentar zu den Folien",
+                    Active6 = true,
+                    QuestionType6 = FeedbackQuestionType.Freetext,
+                    Title6 = "Dein Kommentar zum Thema"
+                }
+            };
+
+            context.FeedbackDefinitions.AddOrUpdate(
+                p => p.Title,
+                feedbackDefinitions.ToArray()
+                );
+            context.SaveChanges();
+
             var events = new List<Event>
             {
                 new Event
                 {
                     Title = "2013 ET 1",
+                    FeedbackDefinitionId = feedbackDefinitions.First().Id,
                     StartDate = new DateTime(2013, 2, 18),
                     EndDate = new DateTime(2013, 2, 18),
                     Location = "Mannheim",
-                    Description =
-                        "Hast Du Ideen für neue Themen? Unter http://www/portfolio/Segmente/Loesungen/ Entwicklertag kannst du diese erfassen und gleich angeben, ob du das Thema selbst präsentieren möchtest.",
-                    //Feedbacks = new Collection<Feedback>
-                    //                        {
-                    //                            new Feedback {UserId = 1, Description0 = "event feedback1"},
-                    //                            new Feedback {UserId = 2, Description0 = "event feedback2"}
-                    //                        },
+                    Description = Lorem1,
                     Sessions =
                         new Collection<Session>
                         {
                             new Session
                             {
                                 Title = "Keynote ET1",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 2, 18, 9, 0, 0),
                                 EndDate = new DateTime(2013, 2, 18, 11, 30, 0),
                                 TagList = "C#;Java",
                                 SpeakerList = "Speaker1;Speaker2",
-                                //Feedbacks = new Collection<Feedback>
-                                //    {
-                                //        new Feedback {UserId = 1},
-                                //        new Feedback {UserId = 2},
-                                //    }
                             },
                             new Session
                             {
                                 Title = "Session1 ET1",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 2, 18, 11, 30, 0),
                                 EndDate = new DateTime(2013, 2, 18, 12, 30, 0),
                                 TagList = "C#",
@@ -190,8 +254,30 @@ namespace EventFeedback.Domain
                             new Session
                             {
                                 Title = "Session2 ET1",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 2, 18, 13, 0, 0),
                                 EndDate = new DateTime(2013, 2, 18, 14, 30, 0),
+                                TagList = "Java",
+                                SpeakerList = "Speaker1",
+                            },
+                            new Session
+                            {
+                                Title = "Session3 ET1",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
+                                StartDate = new DateTime(2013, 2, 18, 15, 00, 0),
+                                EndDate = new DateTime(2013, 2, 18, 16, 30, 0),
+                                TagList = "C#",
+                                SpeakerList = "Speaker1",
+                            },
+                            new Session
+                            {
+                                Title = "Session4 ET1",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
+                                StartDate = new DateTime(2013, 2, 18, 16, 30, 0),
+                                EndDate = new DateTime(2013, 2, 18, 17, 30, 0),
                                 TagList = "Java",
                                 SpeakerList = "Speaker1",
                             }
@@ -200,17 +286,19 @@ namespace EventFeedback.Domain
                 new Event
                 {
                     Title = "2013 ET 2",
+                    FeedbackDefinitionId = feedbackDefinitions.First().Id,
                     StartDate = new DateTime(2013, 5, 10),
                     EndDate = new DateTime(2013, 5, 10),
                     Location = "Mannheim",
-                    Description =
-                        "Hast Du Ideen für neue Themen? Unter http://www/portfolio/Segmente/Loesungen/ Entwicklertag kannst du diese erfassen und gleich angeben, ob du das Thema selbst präsentieren möchtest.",
+                    Description = Lorem1,
                     Sessions =
                         new Collection<Session>
                         {
                             new Session
                             {
                                 Title = "Keynote",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 5, 10, 9, 0, 0),
                                 EndDate = new DateTime(2013, 5, 10, 11, 30, 0),
                                 TagList = "C#;Java",
@@ -219,6 +307,8 @@ namespace EventFeedback.Domain
                             new Session
                             {
                                 Title = "Session1 ET2",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 5, 10, 11, 30, 0),
                                 EndDate = new DateTime(2013, 5, 10, 12, 30, 0),
                                 TagList = "C#",
@@ -227,6 +317,8 @@ namespace EventFeedback.Domain
                             new Session
                             {
                                 Title = "Session2 ET2",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 5, 10, 13, 0, 0),
                                 EndDate = new DateTime(2013, 5, 10, 14, 30, 0),
                                 TagList = "Java",
@@ -237,17 +329,19 @@ namespace EventFeedback.Domain
                 new Event
                 {
                     Title = "2013 ET 3",
+                    FeedbackDefinitionId = feedbackDefinitions.First().Id,
                     StartDate = new DateTime(2013, 7, 1),
                     EndDate = new DateTime(2013, 7, 1),
                     Location = "Mannheim",
-                    Description =
-                        "Hast Du Ideen für neue Themen? Unter http://www/portfolio/Segmente/Loesungen/ Entwicklertag kannst du diese erfassen und gleich angeben, ob du das Thema selbst präsentieren möchtest.",
+                    Description = Lorem1,
                     Sessions =
                         new Collection<Session>
                         {
                             new Session
                             {
                                 Title = "Keynote ET3",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 7, 1, 9, 0, 0),
                                 EndDate = new DateTime(2013, 7, 1, 11, 30, 0),
                                 TagList = "C#;Java",
@@ -256,6 +350,8 @@ namespace EventFeedback.Domain
                             new Session
                             {
                                 Title = "Session1 ET3",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 7, 1, 11, 30, 0),
                                 EndDate = new DateTime(2013, 7, 1, 12, 30, 0),
                                 TagList = "C#",
@@ -264,6 +360,8 @@ namespace EventFeedback.Domain
                             new Session
                             {
                                 Title = "Session2 ET3",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 7, 1, 13, 0, 0),
                                 EndDate = new DateTime(2013, 7, 1, 14, 30, 0),
                                 TagList = "Java",
@@ -274,17 +372,19 @@ namespace EventFeedback.Domain
                 new Event
                 {
                     Title = "2013 ET 4",
+                    FeedbackDefinitionId = feedbackDefinitions.First().Id,
                     StartDate = new DateTime(2013, 10, 09),
                     EndDate = new DateTime(2013, 10, 09),
                     Location = "Mannheim",
-                    Description =
-                        "Hast Du Ideen für neue Themen? Unter http://www/portfolio/Segmente/Loesungen/ Entwicklertag kannst du diese erfassen und gleich angeben, ob du das Thema selbst präsentieren möchtest.",
+                    Description = Lorem1,
                     Sessions =
                         new Collection<Session>
                         {
                             new Session
                             {
                                 Title = "Keynote ET4",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 10, 24, 9, 0, 0),
                                 EndDate = new DateTime(2013, 10, 24, 11, 30, 0),
                                 TagList = "C#;Java",
@@ -293,6 +393,8 @@ namespace EventFeedback.Domain
                             new Session
                             {
                                 Title = "Session1 ET4",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 10, 23, 11, 30, 0),
                                 EndDate = new DateTime(2013, 10, 23, 12, 30, 0),
                                 TagList = "C#",
@@ -301,6 +403,8 @@ namespace EventFeedback.Domain
                             new Session
                             {
                                 Title = "Session2 ET4",
+                                Description = Lorem1,
+                                FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 10, 23, 13, 0, 0),
                                 EndDate = new DateTime(2013, 10, 23, 14, 30, 0),
                                 TagList = "Java",
@@ -325,13 +429,20 @@ namespace EventFeedback.Domain
                         context.Feedbacks.Add(
                             new Feedback
                             {
+                                FeedbackDefinitionId = feedbackDefinitions.First().Id,
                                 UserId = user.Id,
                                 EventId = e.Id,
                                 AverageRate = Random.Next(1, 5),
-                                Rate0 = Random.Next(1, 5),
-                                Rate1 = Random.Next(1, 5),
-                                Question0 = "event feedback q0 " + Lorem1,
-                                Question1 = "event feedback q1 " + Lorem1
+                                Answer0 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
+                                Answer1 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
+                                Answer2 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
+                                Answer3 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
+                                Answer4 = "event feedback q4 " + Lorem1,
+                                Answer5 = "event feedback q5 " + Lorem1,
+                                Answer6 = "event feedback q6 " + Lorem1,
+                                Answer7 = "event feedback q7 " + Lorem1,
+                                Answer8 = "event feedback q8 " + Lorem1,
+                                Answer9 = "event feedback q9 " + Lorem1,
                             });
 
                         foreach (var s in e.Sessions)
@@ -339,13 +450,17 @@ namespace EventFeedback.Domain
                             context.Feedbacks.Add(
                                 new Feedback
                                 {
+                                    FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                     UserId = user.Id,
                                     SessionId = s.Id,
                                     AverageRate = Random.Next(1, 5),
-                                    Rate0 = Random.Next(1, 5),
-                                    Rate1 = Random.Next(1, 5),
-                                    Question0 = "event feedback q0 " + Lorem1,
-                                    Question1 = "event feedback q1 " + Lorem1
+                                    Answer0 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
+                                    Answer1 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
+                                    Answer2 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
+                                    Answer3 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
+                                    Answer4 = "session feedback q4 " + Lorem1,
+                                    Answer5 = "session feedback q5 " + Lorem1,
+                                    Answer6 = "session feedback q6 " + Lorem1,
                                 });
                         }
                     }

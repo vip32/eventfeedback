@@ -81,12 +81,26 @@
   <ItemGroup>
     <Compile Include="DataContext.cs" />
     <Compile Include="Entities\Event.cs" />
+    <Compile Include="Entities\FeedbackQuestionType.cs" />
+    <Compile Include="Entities\FeedbackDefinition.cs" />
     <Compile Include="Entities\ResourceText.cs" />
     <Compile Include="Entities\Role.cs" />
     <Compile Include="Entities\User.cs" />
     <Compile Include="Migrations\201311041728240_Init.cs" />
     <Compile Include="Migrations\201311041728240_Init.Designer.cs">
       <DependentUpon>201311041728240_Init.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201311071059269_FeedbackDefinition.cs" />
+    <Compile Include="Migrations\201311071059269_FeedbackDefinition.Designer.cs">
+      <DependentUpon>201311071059269_FeedbackDefinition.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201311071102179_FeedbackDefinition2.cs" />
+    <Compile Include="Migrations\201311071102179_FeedbackDefinition2.Designer.cs">
+      <DependentUpon>201311071102179_FeedbackDefinition2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201311071137468_FeedbackDefinition3.cs" />
+    <Compile Include="Migrations\201311071137468_FeedbackDefinition3.Designer.cs">
+      <DependentUpon>201311071137468_FeedbackDefinition3.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Migrations\TestData.cs" />
@@ -108,6 +122,15 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201311041728240_Init.resx">
       <DependentUpon>201311041728240_Init.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201311071059269_FeedbackDefinition.resx">
+      <DependentUpon>201311071059269_FeedbackDefinition.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201311071102179_FeedbackDefinition2.resx">
+      <DependentUpon>201311071102179_FeedbackDefinition2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201311071137468_FeedbackDefinition3.resx">
+      <DependentUpon>201311071137468_FeedbackDefinition3.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

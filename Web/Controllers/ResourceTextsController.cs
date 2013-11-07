@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 using System.Web.Http;
 using EventFeedback.Common;
 using EventFeedback.Domain;
@@ -24,7 +25,7 @@ namespace EventFeedback.Web.Controllers
 
         public IEnumerable<ResourceText> Get([FromUri] string filter = "", [FromUri] string language = "en-US")
         {
-            //Thread.Sleep(1500);
+            Thread.Sleep(3500);
 
             _traceSource.TraceInformation("ResourceTextsController get all");
             IEnumerable<ResourceText> result;

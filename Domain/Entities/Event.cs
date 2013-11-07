@@ -26,7 +26,8 @@ namespace EventFeedback.Domain
         [StringLength(512)]
         public string Link { get; set; }
         public bool? FeedbackAllowed { get; set; }
-
+        public int? FeedbackDefinitionId { get; set; }
+        public FeedbackDefinition FeedbackDefinition { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         [StringLength(128)]

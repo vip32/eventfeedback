@@ -19,6 +19,7 @@ namespace EventFeedback.Domain
         public DbSet<Event> Events { get; set; }
         public DbSet<Session> Sessions { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<FeedbackDefinition> FeedbackDefinitions { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

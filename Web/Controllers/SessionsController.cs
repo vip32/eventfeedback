@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Entity;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -32,10 +33,14 @@ namespace EventFeedback.Web.Controllers
             IEnumerable<Session> result;
 
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
-                result = _context.Sessions.OrderBy(e => e.StartDate)
+                result = _context.Sessions
+                                 .Include(s => s.FeedbackDefinition)
+                                 .OrderBy(e => e.StartDate)
                                  .Where(s => s.EventId == eventId);
             else
-                result = _context.Sessions.OrderBy(e => e.StartDate)
+                result = _context.Sessions
+                                 .Include(s => s.FeedbackDefinition)
+                                 .OrderBy(e => e.StartDate)
                                  .Where(s => s.EventId == eventId)
                                  .Where(d => !(d.Active != null && !(bool)d.Active))
                                  .Where(d => !(d.Deleted != null && (bool)d.Deleted));
@@ -53,10 +58,12 @@ namespace EventFeedback.Web.Controllers
             _traceSource.TraceInformation("eventscontroller get " + id);
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
                 return _context.Sessions
+                               .Include(s => s.FeedbackDefinition)
                                .Where(s => s.EventId == eventId)
                                .FirstOrDefault(x => x.Id == id);
 
             return _context.Sessions
+                           .Include(s => s.FeedbackDefinition)
                            .Where(s => s.EventId == eventId)
                            .Where(d => !(d.Active != null && !(bool) d.Active))
                            .Where(d => !(d.Deleted != null && (bool) d.Deleted))
@@ -69,7 +76,6 @@ namespace EventFeedback.Web.Controllers
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
             Guard.Against<ArgumentException>(entity.Id != 0, "entity.id must be empty");
             Guard.Against<ArgumentException>(entity.EventId == 0, "entity.eventid must be set");
-
 
             _context.Sessions.Add(entity);
             _context.SaveChanges();

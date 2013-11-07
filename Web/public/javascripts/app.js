@@ -143,14 +143,15 @@ Application = (function(_super) {
       return _this.layout.render();
     });
     this.resources = new Resource.Collection();
-    return this.resources.fetch({
+    this.resources.fetch({
       data: {
         language: 'de-DE'
       }
     }).done(function(resources) {
-      settings.set('last-visit', moment());
-      return _this.start();
+      return vent.trigger('resources:loaded');
     });
+    settings.set('last-visit', moment());
+    return this.start();
   };
 
   Application.prototype.navigate = function(route, options) {
@@ -1951,7 +1952,10 @@ module.exports = Controller = (function(_super) {
     console.log('about controller init');
     application.addInitializer(function(options) {
       _this.headers = new Header.Collection();
-      return new Header.TestData().addTo(_this.headers);
+      new Header.TestData().addTo(_this.headers);
+      return vent.on('resources:loaded', function() {
+        return _this.showHeader();
+      });
     });
   }
 

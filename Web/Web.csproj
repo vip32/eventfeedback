@@ -71,6 +71,9 @@
     <Compile Include="BasicAuthenticationHandler.cs" />
     <Compile Include="Controllers\Admin\UsersController.cs" />
     <Compile Include="Controllers\Admin\EventReportsController.cs" />
+    <Compile Include="Controllers\FeedbackDefinitionsController.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Controllers\ResourceTextsController.cs" />
     <Compile Include="Controllers\LookupController.cs" />
     <Compile Include="Controllers\FeedbacksController.cs" />
