@@ -1,0 +1,1606 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"usern",
+				"username"
+			],
+			[
+				"item",
+				"itemAuthenticated"
+			],
+			[
+				"_cont",
+				"_contains	Underscore.js contains"
+			],
+			[
+				"remove",
+				"removeclass1"
+			],
+			[
+				"_in",
+				"_intersection	Underscore.js intersection"
+			],
+			[
+				"response",
+				"responseModel"
+			],
+			[
+				"meldunga",
+				"meldunganlegen"
+			],
+			[
+				"respo",
+				"responseModel"
+			],
+			[
+				"respons",
+				"responseModel"
+			],
+			[
+				"key",
+				"keyOffset"
+			],
+			[
+				"respon",
+				"responseList"
+			],
+			[
+				"for",
+				"forin	Array Comprehension"
+			],
+			[
+				"zusatz",
+				"zusatzdaten"
+			],
+			[
+				"resp",
+				"responseModel"
+			],
+			[
+				"respone",
+				"responsemodel"
+			],
+			[
+				"sel",
+				"selectedCodeGroup"
+			],
+			[
+				"abili",
+				"abilities"
+			],
+			[
+				"margin",
+				"margin-top"
+			],
+			[
+				"text",
+				"textarea	Tag"
+			],
+			[
+				"mar",
+				"margin"
+			],
+			[
+				"start",
+				"startuptrigger"
+			],
+			[
+				"set",
+				"setInactive"
+			],
+			[
+				"back",
+				"background-color"
+			],
+			[
+				"bacl",
+				"background-color"
+			],
+			[
+				"bac",
+				"background-color"
+			],
+			[
+				"ali",
+				"text-align"
+			],
+			[
+				"hide",
+				"HideSidebae"
+			],
+			[
+				"about",
+				"aboutModule"
+			],
+			[
+				"form",
+				"form-control"
+			],
+			[
+				"border",
+				"border-radius"
+			],
+			[
+				"showc",
+				"showContactsIndex"
+			],
+			[
+				"conta",
+				"ContactCollectionTestData"
+			],
+			[
+				"Cont",
+				"ContactCollection"
+			],
+			[
+				"coll",
+				"collection"
+			],
+			[
+				"co",
+				"ContactCollectoin"
+			],
+			[
+				"font-",
+				"font-size"
+			],
+			[
+				"is",
+				"isUndefined"
+			],
+			[
+				"col",
+				"Collection"
+			],
+			[
+				"marg",
+				"margin-right"
+			],
+			[
+				"if",
+				"if	if(handlebars)"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "/C/data/projects/EnBW/WFM2/app/views/rueckmeldeuebersicht_view.coffee",
+			"settings":
+			{
+				"buffer_size": 6423,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/data/projects/EnBW/WFM2/app/assets/data/data_prozesse.json",
+			"settings":
+			{
+				"buffer_size": 115581,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/data/projects/EnBW/WFM2/app/assets/data/data_meldung_anlegen.json",
+			"settings":
+			{
+				"buffer_size": 1041,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/data/projects/EnBW/WFM2/app/assets/data/data_meldung_bearbeiten.json",
+			"settings":
+			{
+				"buffer_size": 1625,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/C/data/projects/EnBW/WFM2/app/navigation.coffee",
+			"settings":
+			{
+				"buffer_size": 2962,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/data/projects/EnBW/WFM2/config.coffee",
+			"settings":
+			{
+				"buffer_size": 2003,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "Packages/MSBuild/MSBuild.sublime-build",
+	"command_palette":
+	{
+		"height": 375.0,
+		"selected_items":
+		[
+			[
+				"prett",
+				"HTMLPrettify"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"enab",
+				"Package Control: Enable Package"
+			],
+			[
+				"list",
+				"Package Control: List Packages"
+			],
+			[
+				"lore",
+				"Snippet: Lorem ipsum"
+			],
+			[
+				"keym",
+				"Keymaps: Cheat Sheet"
+			],
+			[
+				"in",
+				"Indent JSON"
+			],
+			[
+				"indent",
+				"Indentation: Reindent Lines"
+			],
+			[
+				"inde",
+				"Indent JSON"
+			],
+			[
+				"inden",
+				"Indent JSON"
+			],
+			[
+				"index",
+				"Snippet: Underscore.js indexOf"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"ena",
+				"Package Control: Enable Package"
+			],
+			[
+				"isnta",
+				"Package Control: Install Package"
+			],
+			[
+				"upda",
+				"Package Control: Upgrade Package"
+			],
+			[
+				"todo",
+				"What Todo: Export list"
+			],
+			[
+				"remo",
+				"Package Control: Remove Package"
+			],
+			[
+				"update",
+				"Package Control: Upgrade/Overwrite All Packages"
+			],
+			[
+				"git",
+				"Git: Push"
+			],
+			[
+				"stat",
+				"Git: Status"
+			],
+			[
+				"git st",
+				"Git: Status"
+			],
+			[
+				"git p",
+				"Git: Push"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"pretty",
+				"HTMLPrettify"
+			],
+			[
+				"undersco",
+				"Snippet: Underscore.js contains"
+			],
+			[
+				"lis",
+				"Package Control: List Packages"
+			],
+			[
+				"keyma",
+				"Keymaps: Cheat Sheet"
+			],
+			[
+				"word",
+				"WordHighlight: Toggle Enabled"
+			],
+			[
+				"hist",
+				"Local History: Browse"
+			],
+			[
+				"html",
+				"HTMLPrettify"
+			],
+			[
+				"bower",
+				"Bower: Install"
+			],
+			[
+				"listp",
+				"Package Control: List Packages"
+			],
+			[
+				"emove ",
+				"Package Control: Remove Package"
+			],
+			[
+				"lista",
+				"Package Control: List Packages"
+			],
+			[
+				"removep",
+				"Package Control: Remove Package"
+			],
+			[
+				"ran",
+				"Generate Random Text"
+			],
+			[
+				"err",
+				"SublimeLinter: Show Error List"
+			],
+			[
+				"erro",
+				"SublimeLinter: Show Error List"
+			],
+			[
+				"lint",
+				"SublimeLinter: Show Error List"
+			],
+			[
+				"show er",
+				"SublimeLinter: Show Error List"
+			],
+			[
+				"sublimel",
+				"SublimeLinter: Show Error List"
+			],
+			[
+				"Package Control: ",
+				"Package Control: Discover Packages"
+			],
+			[
+				"handle",
+				"Snippet: else(handlebars)"
+			],
+			[
+				"rand",
+				"Generate Random Text"
+			],
+			[
+				"his",
+				"Local History: Browse"
+			],
+			[
+				"format",
+				"Format: Javascript"
+			],
+			[
+				"",
+				"Edit Preference: List Menus"
+			],
+			[
+				"insert",
+				"Edit Preference: List Shortcut Keys"
+			],
+			[
+				"edit",
+				"Edit Preference: List Plugins Commands"
+			],
+			[
+				"ed",
+				"Edit Preference: sublime-build"
+			],
+			[
+				"edit pre",
+				"Edit Preference: Theme"
+			],
+			[
+				"list set",
+				"Edit Preference: List Settings"
+			],
+			[
+				"surr",
+				"Surround: change surround"
+			],
+			[
+				"remove ",
+				"Package Control: Remove Package"
+			],
+			[
+				"package",
+				"Preferences: Browse Packages"
+			]
+		],
+		"width": 498.0
+	},
+	"console":
+	{
+		"height": 415.0,
+		"history":
+		[
+			"import urllib.request,os; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), 'wb').write(urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ','%20')).read())",
+			"view.run_command(\"delete_blank_lines\")",
+			"view.run_command(\"delete_blank_lines\");",
+			"view.run_command(\"delete_blank_linessadasd\");",
+			"view.run_command(\"delete_blank_lines\");",
+			"view.run_command(\"open_recently_closed_file\");",
+			";",
+			"view.run_command(\"open_recently_closed_file\")"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/models/header.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/event/views/templates/event-details.hbs",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/models/resource.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/models/session.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/packages/repositories.config",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/lib/base/collection.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/common/controller.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/event/controller.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/config.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/common/views/templates/signin.hbs",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/common/views/signin-view.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/models/userprofile.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/models/usertoken.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/bower.json.old",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/common/router.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/event/router.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/common/views/templates/debug.hbs",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/common/views/debug-view.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/header/router.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/header/controller.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/layouts/templates/app-layout.hbs",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/application.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/models/event.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/common/views/templates/about.hbs",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/lib/base/model.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/vendor/scripts/backbone.tokenauth.js",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/bower.json",
+		"/C/data/projects/EnBW/WFM2/app/session.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/settings.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/models/user.coffee",
+		"/C/data/projects/EnBW/WFM2/app/models/response_model.coffee",
+		"/C/data/projects/EnBW/WFM2/app/responseModelMapper.coffee",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_prozesse.json",
+		"/C/data/projects/EnBW/WFM2/app/views/meldungbearbeiten_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/meldunganlegen_auswahl_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_meldung_bearbeiten.json",
+		"/C/data/projects/EnBW/WFM2/app/views/befund_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/aktionsrueckmeldung_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/zusatzdaten_gas_wasser_view3.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/zusatzdaten_gas_wasser_view2.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/base/prozess_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/meldunganlegen_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/meldunganlegen.hbs",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_meldungsliste.json",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_meldungsliste_open.json",
+		"/C/data/projects/EnBW/WFM2/app/views/base/view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/aktionsrueckmeldung.hbs",
+		"/C/data/projects/EnBW/WFM2/app/models/prozess_collection.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/befund.hbs",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_einsatzrueckmeldung.json",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_meldung_anlegen.json",
+		"/C/data/projects/EnBW/WFM2/app/views/zusatzdaten_gas_wasser_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/zusatzdaten_gas_wasser3.hbs",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_aeltereaktionsrueckmeldungliste.json",
+		"/C/data/projects/EnBW/WFM2/app/application.coffee",
+		"/C/data/projects/EnBW/WFM2/app/navigation.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/event/views/session-details-view.coffee",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/event/views/templates/session-details.hbs",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/README.md",
+		"/C/data/projects/EnBW/WFM2/app/models/aktionsrueckmeldung_model.coffee",
+		"/C/data/projects/EnBW/WFM2/app/logger.coffee",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_helpval.json",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/zusatzdaten_gas_wasser.hbs",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/meldungbearbeiten.hbs",
+		"/C/data/projects/EnBW/WFM2/app/views/zusatzdaten_anzeige_gas_wasser_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_codegruppen.json",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/test.hbs",
+		"/C/data/projects/EnBW/WFM2/app/assets/viewporttest.html",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/Web.csproj",
+		"/C/Dropbox/projects/_github/eventfeedback/Web/App/app/modules/common/views/about-view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/zusatzdaten_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/zusatzdaten.hbs",
+		"/C/data/projects/EnBW/WFM2/app/models/code_codegroups_collection.coffee",
+		"/C/Users/vvproosdij/AppData/Roaming/Sublime Text 3/Packages/SVN/SVN.sublime-settings",
+		"/C/Users/vvproosdij/AppData/Roaming/Sublime Text 3/Packages/User/SVN.sublime-settings",
+		"/C/data/projects/EnBW/WFM2/app/resources.coffee",
+		"/C/data/projects/EnBW/WFM2/app/models/app_model.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/meldunganlegenauswahl.hbs",
+		"/C/data/projects/EnBW/WFM2/app/models/meldung_anlegen_collection.coffee",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/_data_environments.test.json",
+		"/C/data/projects/EnBW/WFM2/app/models/base/model.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/zustandserfassung_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/zugehoerige_einsaetze_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/meldungsdetails_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/zustandserfassung_huh_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/einsatzliste_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/einsatzdetails_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/einsatzdetails_small_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/debug_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/klassendaten_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/_data_environments.sup.json",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_meldunganlegen.json",
+		"/C/data/projects/EnBW/WFM2/app/models/einsatzstatus_collection.coffee",
+		"/C/data/projects/EnBW/WFM2/app/text.xml",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_app_model.json",
+		"/C/data/projects/EnBW/WFM2/build.cmd",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/einsatzdetails.hbs",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_einsatzliste.json",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_einsatzdetails.json",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_codes.json",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/debug.hbs",
+		"/C/data/projects/EnBW/WFM2/app/models/responselist_collections.coffee",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_meldungbearbeiten_response.json",
+		"/C/data/projects/EnBW/WFM2/app/styles/app.css",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/zusatzdaten_gas_wasser2.hbs",
+		"/C/data/projects/EnBW/WFM2/vendor/scripts/handlebars-helpers.js",
+		"/C/Dropbox/projects/_github/brunch-with-marionette3/node_modules/stylus-brunch/node_modules/node-sprite/lib/mapper.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/meldunganlegen_zusatzdatenstrom_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/titleheader_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/zeiterfassung_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/models/meldung_bearbeiten_collection.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/zusatzdaten_netz_gas_wasser_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/zusatzdaten_netz_gas_wasser.hbs",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/bestandsdaten.hbs",
+		"/C/data/projects/EnBW/WFM2/build/public/app.js",
+		"/C/data/projects/EnBW/WFM2/app/models/helpval_model.coffee",
+		"/C/data/projects/EnBW/WFM2/app/models/helpval_collection.coffee",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_filteredhelpval.json",
+		"/C/data/projects/EnBW/WFM2/app/models/filteredhelpval_collection.coffee",
+		"/C/data/projects/EnBW/RB1-2/app/models/app_model.coffee",
+		"/C/data/projects/EnBW/RB1-2/app/assets/data/data_prozesse.json",
+		"/C/data/projects/EnBW/RB1-2/app/views/zusatzdatenanzeige_gas_wasser_view.coffee",
+		"/C/data/projects/EnBW/WFM2/app/assets/data/data_codegroupcodesforcatprofileandtype.json",
+		"/C/data/projects/EnBW/WFM2/app/router.coffee",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/aktionsrueckmeldung_weitere.hbs",
+		"/C/data/projects/EnBW/WFM2/app/views/templates/zeiterfassung.hbs",
+		"/C/data/projects/EnBW/WFM2/vendor/scripts/jquery.mobile.datebox-1.1.0.js",
+		"/C/Users/vvproosdij/AppData/Roaming/Sublime Text 3/Packages/HTML-CSS-JS Prettify/.jsbeautifyrc"
+	],
+	"find":
+	{
+		"height": 36.0
+	},
+	"find_in_files":
+	{
+		"height": 100.0,
+		"where_history":
+		[
+			"C:\\data\\projects\\EnBW\\WFM2\\app",
+			"C:\\data\\projects\\EnBW\\WFM2",
+			"C:\\data\\projects\\EnBW\\WFM2\\app",
+			"C:\\Dropbox\\projects\\_github\\eventfeedback\\Web\\App\\app",
+			"C:\\data\\projects\\EnBW\\WFM2\\app",
+			"C:\\Dropbox\\projects\\_github\\eventfeedback\\Web\\App\\app",
+			"C:\\data\\projects\\EnBW\\RB1-2",
+			"C:\\data\\projects\\EnBW\\WFM2\\app"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"ausfuehrender",
+			"rueckmeldeuebersicht",
+			"42",
+			"fotoliste",
+			"3000",
+			"data.",
+			"===",
+			"messagediv",
+			"alertdiv",
+			"fetch:start",
+			"signout",
+			"alert",
+			"token",
+			"api_password",
+			"User",
+			"settings",
+			"usern",
+			"Basic",
+			"basic",
+			"BasicAuth",
+			"credentials",
+			"1",
+			"signedin",
+			"if",
+			"settings",
+			"adminadmin",
+			"add",
+			"password",
+			"username",
+			"admin",
+			"'===",
+			"112",
+			"meldung",
+			"fullfiller",
+			"201",
+			"102",
+			"dlCatTyp",
+			"112",
+			"102",
+			"\"N1",
+			"n1",
+			"acttext",
+			"}']\").",
+			"datebox",
+			"<input type=\"datetime\" name=\"actEndTime_{{id}}\" autocomplete=\"off\" x-blackberry-focusable=\"true\"\n                                           data-role=\"datebox\" data-icon=\"false\" data-options='{\"mode\": \"timebox\", \"focusMode\": true, \"useAnimation\": false, \"useCollapsedBut\":true, \"useNewStyle\":true, \"useModal\": true, \"minuteStep\": 10}'/> --}}",
+			"===",
+			"weitereaktionen",
+			"112",
+			"201",
+			"112",
+			"aktionAmount",
+			"fullfiller",
+			"isfournumbers",
+			"112",
+			"\"name\": \"ZusatzdatenGasWasserView3\",",
+			"isgreaterthan999",
+			"format",
+			"type=\"number\"",
+			"mask",
+			"NENN",
+			"startDate",
+			"\"name\": \"BefundView\",",
+			"versorgungsunterbrechung",
+			"zzRnDruck",
+			"true",
+			"112",
+			"\"name\": \"ZusatzdatenGasWasserView3\",",
+			"\">{{",
+			".GET",
+			"responseModel",
+			"123",
+			"201",
+			"[view",
+			"S",
+			"lageerg",
+			"F",
+			"nennw",
+			"112",
+			"aeltereaktionsrueckmeldungen",
+			"\"name\": \"BefundView\"",
+			"112",
+			"102",
+			"\"p",
+			"valkey",
+			"valkey1",
+			"{{resource.validation_error_invalidtime}}",
+			"beforeSave",
+			"201",
+			"DD",
+			"notifTyp",
+			"'notifType'",
+			"'notifTyp'",
+			"notifTyp",
+			"201",
+			"102",
+			"|",
+			"'has",
+			"hasNotifTypes",
+			",",
+			"|",
+			"data.get('notifType')",
+			"data.get('status')",
+			"activeCodeCroups",
+			"filter",
+			", silent: true",
+			"$",
+			"binder",
+			".select",
+			"#aktion_1 ",
+			"00001",
+			"RN002001",
+			"8888",
+			"model",
+			"status",
+			"codeGroup",
+			"fehlmeldun",
+			"status",
+			"getRenderData",
+			"session",
+			"[29826.287]",
+			"notift",
+			"catpr",
+			"item",
+			"112",
+			"202",
+			"201",
+			"success: (collection, response) ->",
+			"error: (collection, response) ->"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "/C/data/projects/EnBW/WFM2/app/views/rueckmeldeuebersicht_view.coffee",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6423,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3185,
+								3240
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close"
+							],
+							"bs_sintax": "coffeescript",
+							"buffer_scroll_name": "6d684a71",
+							"syntax": "Packages/Better CoffeeScript/CoffeeScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1200.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/C/data/projects/EnBW/WFM2/app/assets/data/data_prozesse.json",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 115581,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								114085,
+								114085
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close"
+							],
+							"bs_sintax": "json",
+							"buffer_scroll_name": "3bdf8386",
+							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 59914.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/C/data/projects/EnBW/WFM2/app/assets/data/data_meldung_anlegen.json",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1041,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								554,
+								541
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close"
+							],
+							"bs_sintax": "json",
+							"buffer_scroll_name": "d6e79d1f",
+							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/C/data/projects/EnBW/WFM2/app/assets/data/data_meldung_bearbeiten.json",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 1625,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								264,
+								264
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close"
+							],
+							"bs_sintax": "json",
+							"buffer_scroll_name": "098050bf",
+							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/C/data/projects/EnBW/WFM2/app/navigation.coffee",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2962,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2677,
+								2693
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close"
+							],
+							"bs_sintax": "coffeescript",
+							"buffer_scroll_name": "99a7e347",
+							"syntax": "Packages/Better CoffeeScript/CoffeeScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 660.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/C/data/projects/EnBW/WFM2/config.coffee",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2003,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2003,
+								2003
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"bh_regions":
+							[
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close"
+							],
+							"bs_sintax": "coffeescript",
+							"buffer_scroll_name": "b8e2df27",
+							"syntax": "Packages/Better CoffeeScript/CoffeeScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 660.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 28.0
+	},
+	"input":
+	{
+		"height": 35.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": false,
+	"output.coffee_compile_output":
+	{
+		"height": 124.0
+	},
+	"output.exec":
+	{
+		"height": 609.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.git-commit":
+	{
+		"height": 160.0
+	},
+	"output.git-pull":
+	{
+		"height": 0.0
+	},
+	"output.git-push":
+	{
+		"height": 160.0
+	},
+	"project": "eventfeedback.sublime-project",
+	"replace":
+	{
+		"height": 52.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"data_proze",
+				"app\\assets\\data\\data_prozesse.json"
+			],
+			[
+				"navi",
+				"app\\navigation.coffee"
+			],
+			[
+				"sess",
+				"WFM2\\app\\session.coffee"
+			],
+			[
+				"befund",
+				"WFM2\\app\\views\\befund_view.coffee"
+			],
+			[
+				"data_pro",
+				"WFM2\\app\\assets\\data\\data_prozesse.json"
+			],
+			[
+				"view",
+				"WFM2\\app\\views\\base\\view.coffee"
+			],
+			[
+				"proz",
+				"WFM2\\app\\models\\prozess_collection.coffee"
+			],
+			[
+				"app",
+				"app\\application.coffee"
+			],
+			[
+				"aktr",
+				"app\\views\\aktionsrueckmeldung_view.coffee"
+			],
+			[
+				"ak",
+				"app\\models\\aktionsrueckmeldung_model.coffee"
+			],
+			[
+				"prozes",
+				"app\\views\\base\\prozess_view.coffee"
+			],
+			[
+				"respo",
+				"app\\models\\response_model.coffee"
+			],
+			[
+				"proze",
+				"app\\views\\base\\prozess_view.coffee"
+			],
+			[
+				"appl",
+				"app\\application.coffee"
+			],
+			[
+				"akt",
+				"app\\views\\aktionsrueckmeldung_view.coffee"
+			],
+			[
+				"meld",
+				"app\\views\\meldungbearbeiten_view.coffee"
+			],
+			[
+				"zusa",
+				"app\\views\\zusatzdaten_gas_wasser_view.coffee"
+			],
+			[
+				"akti",
+				"app\\views\\aktionsrueckmeldung_view.coffee"
+			],
+			[
+				"resp",
+				"app\\responseModelMapper.coffee"
+			],
+			[
+				"me",
+				"app\\views\\meldungbearbeiten_view.coffee"
+			],
+			[
+				"prozess",
+				"app\\views\\base\\prozess_view.coffee"
+			],
+			[
+				"aktion",
+				"app\\views\\templates\\aktionsrueckmeldung.hbs"
+			],
+			[
+				"data_pr",
+				"app\\assets\\data\\data_prozesse.json"
+			],
+			[
+				"respon",
+				"app\\models\\response_model.coffee"
+			],
+			[
+				"resou",
+				"app\\resources.coffee"
+			],
+			[
+				".hbs",
+				"app\\views\\templates\\test.hbs"
+			],
+			[
+				"meldu",
+				"app\\views\\meldungbearbeiten_view.coffee"
+			],
+			[
+				"meldungan",
+				"app\\models\\meldung_anlegen_collection.coffee"
+			],
+			[
+				"meldun",
+				"app\\views\\meldungbearbeiten_view.coffee"
+			],
+			[
+				"aktiuo",
+				"app\\views\\aktionsrueckmeldung_view.coffee"
+			],
+			[
+				"aktions",
+				"app\\views\\templates\\aktionsrueckmeldung.hbs"
+			],
+			[
+				"dataproz",
+				"app\\assets\\data\\data_prozesse.json"
+			],
+			[
+				"aktuio",
+				"app\\models\\aktionsrueckmeldung_model.coffee"
+			],
+			[
+				"debug",
+				"app\\views\\debug_view.coffee"
+			],
+			[
+				"befudn",
+				"app\\views\\befund_view.coffee"
+			],
+			[
+				"aktio",
+				"app\\views\\aktionsrueckmeldung_view.coffee"
+			],
+			[
+				"zusta",
+				"app\\views\\zusatzdaten_gas_wasser_view2.coffee"
+			],
+			[
+				"hand",
+				"vendor\\scripts\\handlebars-helpers.js"
+			],
+			[
+				"ausw",
+				"app\\views\\meldunganlegen_auswahl_view.coffee"
+			],
+			[
+				"mapper",
+				"brunch-with-marionette3\\node_modules\\stylus-brunch\\node_modules\\node-sprite\\lib\\mapper.coffee"
+			],
+			[
+				"resonse",
+				"WFM2\\app\\models\\response_model.coffee"
+			],
+			[
+				".css",
+				"WFM2\\app\\styles\\app.css"
+			],
+			[
+				"zeit",
+				"WFM2\\app\\views\\zeiterfassung_view.coffee"
+			],
+			[
+				"aktui",
+				"WFM2\\app\\views\\aktionsrueckmeldung_view.coffee"
+			],
+			[
+				"respons",
+				"WFM2\\app\\models\\response_model.coffee"
+			],
+			[
+				"appm",
+				"WFM2\\app\\models\\app_model.coffee"
+			],
+			[
+				"sessio",
+				"WFM2\\app\\session.coffee"
+			],
+			[
+				"pro",
+				"WFM2\\app\\views\\base\\prozess_view.coffee"
+			],
+			[
+				"dateb",
+				"WFM2\\vendor\\scripts\\jquery.mobile.datebox-1.1.0.js"
+			],
+			[
+				"depe",
+				"WFM2\\vendor\\scripts\\jquery-depend-0.0.1.js"
+			],
+			[
+				"dataprozess",
+				"WFM2\\app\\assets\\data\\data_prozesse.json"
+			],
+			[
+				"pace",
+				"App\\bower_components\\pace\\pace.coffee"
+			],
+			[
+				"about",
+				"App\\app\\modules\\common\\views\\about-view.coffee"
+			],
+			[
+				"bestand",
+				"RB1-2\\app\\views\\bestandsdaten_view.coffee"
+			],
+			[
+				"sign",
+				"brunch-with-marionette3\\app\\modules\\common\\views\\signin-view.coffee"
+			],
+			[
+				"sync",
+				"RB1-2\\app\\views\\einsatzliste_sync_view.coffee"
+			],
+			[
+				"head",
+				"brunch-with-marionette3\\app\\views\\templates\\header.hbs"
+			],
+			[
+				"bootstr",
+				"bower_components\\bootstrap\\dist\\css\\bootstrap.css"
+			],
+			[
+				"marion",
+				"brunch-with-marionette\\bower_components\\backbone.marionette\\src\\marionette.application.js"
+			],
+			[
+				"ro",
+				"app\\lib\\router.coffee"
+			],
+			[
+				"laymana",
+				"brunch-with-backbone-and-bootstrap-mobile\\bower_components\\layoutmanager\\backbone.layoutmanager.js"
+			],
+			[
+				"ap",
+				"brunch-with-backbone-and-bootstrap-mobile\\app\\application.coffee"
+			],
+			[
+				"index",
+				"brunch-with-backbone-and-bootstrap-mobile\\public\\index.html"
+			],
+			[
+				"style",
+				"ThemeForest - First\\v.3.2.1\\css\\style.css"
+			],
+			[
+				"appli",
+				"brunch-with-chaplin-and-bootstrap2\\app\\application.coffee"
+			],
+			[
+				"model",
+				"bower_components\\backbone\\test\\model.coffee"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 389.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
