@@ -39,7 +39,8 @@ module.exports.TestData = class TestData
   data: [
     id: "511b8984-8958-663d-4707-9378aa71776b"
     visible: true
-    authenticated: false
+    authenticated: false,
+    roles: []
     resource: 'Title_Home'
     glyphicon: 'home'
     title: "Home"
@@ -50,6 +51,7 @@ module.exports.TestData = class TestData
     id: "ce82ceb6-1104-aaa6-4fab-a4656694de17"
     title: "About"
     authenticated: false
+    roles: []
     resource: 'Title_About'
     glyphicon: 'info-sign'
     trigger: "about:index"
@@ -59,6 +61,7 @@ module.exports.TestData = class TestData
     id: "1cf247f4-4c76-d453-bbec-1c40080e32e4"
     title: "Events"
     authenticated: true
+    roles: []
     resource: 'Title_Events'
     glyphicon: 'bookmark'
     trigger: "events:index"
@@ -67,6 +70,7 @@ module.exports.TestData = class TestData
   # ,
   #   id: "1cf247f4-4c76-d453-bbec-1c40080e32e1"
   #   title: "Sessions"
+  #   roles: []
   #   visible: false
   #   resource: 'Title_Sessions'
   #   glyphicon: 'comment'
@@ -77,6 +81,7 @@ module.exports.TestData = class TestData
     id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f5"
     title: "Sign-in"
     authenticated: false
+    roles: []
     resource: 'Title_SignIn'
     glyphicon: 'user'
     trigger: "signin:index"
@@ -86,9 +91,50 @@ module.exports.TestData = class TestData
     id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f4"
     title: "Debug"
     authenticated: false
+    roles: []
     resource: 'Title_Debug'
     glyphicon: 'cog'
     trigger: "debug:index"
+    intern: true
+    order: 5
+  ,
+    id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f6"
+    title: "Admin - Events"
+    authenticated: true
+    roles: ['Administrator']
+    resource: ''
+    glyphicon: 'bookmark'
+    trigger: "admin:events:edit"
+    intern: true
+    order: 5
+  ,
+    id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f7"
+    title: "Admin - Settings"
+    authenticated: true
+    roles: ['Administrator']
+    resource: ''
+    glyphicon: 'cog'
+    trigger: "admin:settings:index"
+    intern: true
+    order: 5
+  ,
+    id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f8"
+    title: "Admin - Reports"
+    authenticated: true
+    roles: ['Administrator']
+    resource: ''
+    glyphicon: 'list'
+    trigger: "admin:reports:index"
+    intern: true
+    order: 5
+  ,
+    id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f9"
+    title: "Admin - Users"
+    authenticated: true
+    roles: ['Administrator']
+    resource: ''
+    glyphicon: 'user'
+    trigger: "admin:users:edit"
     intern: true
     order: 5
   ]

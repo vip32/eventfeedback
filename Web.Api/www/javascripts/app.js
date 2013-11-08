@@ -212,7 +212,8 @@ Config = (function() {
   Config.prototype.modules = {
     'header': 'modules/header/router',
     'common': 'modules/common/router',
-    'event': 'modules/event/router'
+    'event': 'modules/event/router',
+    'admin': 'modules/admin/router'
   };
 
   return Config;
@@ -558,6 +559,7 @@ module.exports.TestData = TestData = (function() {
       id: "511b8984-8958-663d-4707-9378aa71776b",
       visible: true,
       authenticated: false,
+      roles: [],
       resource: 'Title_Home',
       glyphicon: 'home',
       title: "Home",
@@ -568,6 +570,7 @@ module.exports.TestData = TestData = (function() {
       id: "ce82ceb6-1104-aaa6-4fab-a4656694de17",
       title: "About",
       authenticated: false,
+      roles: [],
       resource: 'Title_About',
       glyphicon: 'info-sign',
       trigger: "about:index",
@@ -577,6 +580,7 @@ module.exports.TestData = TestData = (function() {
       id: "1cf247f4-4c76-d453-bbec-1c40080e32e4",
       title: "Events",
       authenticated: true,
+      roles: [],
       resource: 'Title_Events',
       glyphicon: 'bookmark',
       trigger: "events:index",
@@ -586,6 +590,7 @@ module.exports.TestData = TestData = (function() {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f5",
       title: "Sign-in",
       authenticated: false,
+      roles: [],
       resource: 'Title_SignIn',
       glyphicon: 'user',
       trigger: "signin:index",
@@ -595,9 +600,50 @@ module.exports.TestData = TestData = (function() {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f4",
       title: "Debug",
       authenticated: false,
+      roles: [],
       resource: 'Title_Debug',
       glyphicon: 'cog',
       trigger: "debug:index",
+      intern: true,
+      order: 5
+    }, {
+      id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f6",
+      title: "Admin - Events",
+      authenticated: true,
+      roles: ['Administrator'],
+      resource: '',
+      glyphicon: 'bookmark',
+      trigger: "admin:events:edit",
+      intern: true,
+      order: 5
+    }, {
+      id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f7",
+      title: "Admin - Settings",
+      authenticated: true,
+      roles: ['Administrator'],
+      resource: '',
+      glyphicon: 'cog',
+      trigger: "admin:settings:index",
+      intern: true,
+      order: 5
+    }, {
+      id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f8",
+      title: "Admin - Reports",
+      authenticated: true,
+      roles: ['Administrator'],
+      resource: '',
+      glyphicon: 'list',
+      trigger: "admin:reports:index",
+      intern: true,
+      order: 5
+    }, {
+      id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f9",
+      title: "Admin - Users",
+      authenticated: true,
+      roles: ['Administrator'],
+      resource: '',
+      glyphicon: 'user',
+      trigger: "admin:users:edit",
       intern: true,
       order: 5
     }
@@ -812,6 +858,56 @@ module.exports.Collection = StoreCollection = (function(_super) {
 })(Collection);
 });
 
+;require.register("models/user", function(exports, require, module) {
+var Account, Collection, Model, UsersCollection, config, settings, _ref, _ref1,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+config = require('../config');
+
+Model = require('../lib/base/model');
+
+Collection = require('../lib/base/collection');
+
+settings = require('settings');
+
+module.exports.Model = Account = (function(_super) {
+  __extends(Account, _super);
+
+  function Account() {
+    _ref = Account.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  return Account;
+
+})(Model);
+
+module.exports.Collection = UsersCollection = (function(_super) {
+  __extends(UsersCollection, _super);
+
+  function UsersCollection() {
+    _ref1 = UsersCollection.__super__.constructor.apply(this, arguments);
+    return _ref1;
+  }
+
+  UsersCollection.prototype.url = "" + config.apiroot + "/admin/users";
+
+  UsersCollection.prototype.credentials = function() {
+    return {
+      token: settings.get('api_token')
+    };
+  };
+
+  UsersCollection.prototype.model = module.exports.Model;
+
+  UsersCollection.prototype.comparator = 'username';
+
+  return UsersCollection;
+
+})(Collection);
+});
+
 ;require.register("models/userprofile", function(exports, require, module) {
 var Model, UserProfile, config, settings, _ref,
   __hasProp = {}.hasOwnProperty,
@@ -872,6 +968,307 @@ module.exports.Model = UserToken = (function(_super) {
   return UserToken;
 
 })(Model);
+});
+
+;require.register("modules/admin/controller", function(exports, require, module) {
+var Controller, Event, Session, User, application, settings, vent,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+vent = require('vent');
+
+settings = require('settings');
+
+Event = require('../../models/event');
+
+Session = require('../../models/session');
+
+User = require('../../models/user');
+
+module.exports = Controller = (function(_super) {
+  __extends(Controller, _super);
+
+  function Controller(options) {
+    var _this = this;
+    console.log('admin controller init');
+    application.addInitializer(function(options) {
+      _this.events = new Event.Collection();
+      _this.sessions = new Session.Collection();
+      return _this.users = new User.Collection();
+    });
+  }
+
+  Controller.prototype.showEventsEdit = function() {
+    return this.events.fetch({
+      reload: true,
+      data: {
+        filter: 'all'
+      }
+    }).done(function(models) {
+      var View, view;
+      application.trigger('set:active:header', 'Admin - Events', 'bookmark');
+      View = require('./views/events-edit-view');
+      view = new View({
+        collection: models,
+        resources: application.resources
+      });
+      return application.layout.content.show(view);
+    });
+  };
+
+  Controller.prototype.showSessionsEdit = function(id) {
+    var _this = this;
+    return this.events.fetch({
+      data: {
+        filter: 'all'
+      }
+    }).done(function(models) {
+      settings.set('active-event', id);
+      return _this.sessions.fetch({
+        reload: true
+      }).done(function(sessions) {
+        var View, view;
+        View = require('./views/sessions-edit-view');
+        view = new View({
+          model: models.get(id),
+          collection: sessions,
+          resources: application.resources
+        });
+        return application.layout.content.show(view);
+      });
+    });
+  };
+
+  Controller.prototype.showUsersEdit = function() {
+    return this.users.fetch({
+      reload: true,
+      data: {
+        filter: 'all'
+      }
+    }).done(function(models) {
+      var View, view;
+      application.trigger('set:active:header', 'Admin - Users', 'bookmark');
+      View = require('./views/users-edit-view');
+      view = new View({
+        collection: models,
+        resources: application.resources
+      });
+      return application.layout.content.show(view);
+    });
+  };
+
+  Controller.prototype.onClose = function() {
+    return console.log('admin controller close');
+  };
+
+  return Controller;
+
+})(Backbone.Marionette.Controller);
+});
+
+;require.register("modules/admin/router", function(exports, require, module) {
+var Controller, Router, application, settings, vent, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+vent = require('vent');
+
+settings = require('settings');
+
+Controller = require('./controller');
+
+module.exports = Router = (function(_super) {
+  __extends(Router, _super);
+
+  function Router() {
+    _ref = Router.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  Router.prototype.appRoutes = {
+    'admin/events': 'showEventsEdit',
+    'admin/events/:id': 'showSessionsEdit',
+    'admin/users': 'showUsersEdit'
+  };
+
+  Router.prototype.initialize = function(options) {
+    var _this = this;
+    console.log('admin router init');
+    return application.addInitializer(function(options) {
+      application.on('admin:events:edit', function() {
+        application.navigate('admin/events');
+        return _this.controller.showEventsEdit();
+      });
+      application.on('admin:sessions:edit', function(id) {
+        application.navigate('admin/events/' + id);
+        return _this.controller.showSessionsEdit(id);
+      });
+      return application.on('admin:users:edit', function() {
+        application.navigate('admin/users');
+        return _this.controller.showUsersEdit();
+      });
+    });
+  };
+
+  Router.prototype.controller = new Controller();
+
+  return Router;
+
+})(Backbone.Marionette.AppRouter);
+});
+
+;require.register("modules/admin/views/events-edit-view", function(exports, require, module) {
+var EventsEditView, application, vent, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+vent = require('vent');
+
+module.exports = EventsEditView = (function(_super) {
+  __extends(EventsEditView, _super);
+
+  function EventsEditView() {
+    _ref = EventsEditView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  EventsEditView.prototype.id = 'events-edit-view';
+
+  EventsEditView.prototype.template = require('./templates/events-edit');
+
+  EventsEditView.prototype.initialize = function(options) {
+    return this.resources = options != null ? options.resources : void 0;
+  };
+
+  return EventsEditView;
+
+})(Backbone.Marionette.ItemView);
+});
+
+;require.register("modules/admin/views/sessions-edit-view", function(exports, require, module) {
+var SessionsEditView, application, vent, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+vent = require('vent');
+
+module.exports = SessionsEditView = (function(_super) {
+  __extends(SessionsEditView, _super);
+
+  function SessionsEditView() {
+    _ref = SessionsEditView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  SessionsEditView.prototype.id = 'sessions-edit-view';
+
+  SessionsEditView.prototype.template = require('./templates/sessions-edit');
+
+  SessionsEditView.prototype.initialize = function(options) {
+    return this.resources = options != null ? options.resources : void 0;
+  };
+
+  return SessionsEditView;
+
+})(Backbone.Marionette.ItemView);
+});
+
+;require.register("modules/admin/views/templates/events-edit", function(exports, require, module) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  
+
+
+  return "<div class=\"container\">\r\n  EVENTS EDIT\r\n</div>";
+  });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("modules/admin/views/templates/sessions-edit", function(exports, require, module) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  
+
+
+  return "<div class=\"container\">\r\n  SESSIONS EDIT\r\n</div>";
+  });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("modules/admin/views/templates/users-edit", function(exports, require, module) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  
+
+
+  return "<div class=\"container\">\r\n  USERS EDIT\r\n</div>";
+  });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("modules/admin/views/users-edit-view", function(exports, require, module) {
+var UsersEditView, application, vent, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+vent = require('vent');
+
+module.exports = UsersEditView = (function(_super) {
+  __extends(UsersEditView, _super);
+
+  function UsersEditView() {
+    _ref = UsersEditView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  UsersEditView.prototype.id = 'users-edit-view';
+
+  UsersEditView.prototype.template = require('./templates/users-edit');
+
+  UsersEditView.prototype.initialize = function(options) {
+    return this.resources = options != null ? options.resources : void 0;
+  };
+
+  return UsersEditView;
+
+})(Backbone.Marionette.ItemView);
 });
 
 ;require.register("modules/common/controller", function(exports, require, module) {
@@ -2151,7 +2548,7 @@ module.exports.HeaderItem = ItemView = (function(_super) {
     return {
       title: (_ref1 = (_ref2 = this.resources.find((function(resource) {
         return resource.get('key') === _this.model.get('resource');
-      }))) != null ? _ref2.get('value') : void 0) != null ? _ref1 : '-',
+      }))) != null ? _ref2.get('value') : void 0) != null ? _ref1 : this.model.get('title'),
       href: this.model.get('href'),
       icon: (_ref3 = this.model.get('glyphicon')) != null ? _ref3 : config.sidebarglyphicon
     };

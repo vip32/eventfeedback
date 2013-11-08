@@ -20,7 +20,7 @@ module.exports.HeaderItem = class ItemView extends Backbone.Marionette.ItemView
 
   serializeData: ->
     title: (@resources.find ((resource) =>
-      resource.get('key') is @model.get('resource')))?.get('value') ? '-'
+      resource.get('key') is @model.get('resource')))?.get('value') ? @model.get('title')
     href: @model.get('href')
     icon: @model.get('glyphicon') ? config.sidebarglyphicon
 

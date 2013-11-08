@@ -54,6 +54,7 @@
     <Compile Include="App_Start\Startup.WebApi.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Controllers\Admin\AccountsController.cs" />
     <Compile Include="Controllers\Admin\UsersController.cs" />
     <Compile Include="Controllers\Admin\EventReportsController.cs" />
     <Compile Include="Controllers\FeedbackDefinitionsController.cs">

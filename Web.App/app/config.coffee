@@ -12,5 +12,6 @@ class Config
     'header': 'modules/header/router'
     'common': 'modules/common/router'
     'event': 'modules/event/router'
+    'admin': 'modules/admin/router'
 
 module.exports = new Config()
