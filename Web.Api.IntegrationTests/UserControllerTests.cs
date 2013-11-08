@@ -12,7 +12,7 @@ namespace Web.IntegrationTests
         private const string BaseUrl = "https://localhost:44300/api/v1";
 
         public UserControllerTests()
-        {
+        { 
             ServicePointManager
                 .ServerCertificateValidationCallback +=
                 (sender, cert, chain, sslPolicyErrors) => true;
