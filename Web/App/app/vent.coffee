@@ -1,1 +1,0 @@
-module.exports = class Vent extends Backbone.Events

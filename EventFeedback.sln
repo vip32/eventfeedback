@@ -1,13 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{35B7497D-EF2C-4329-8FE8-440CF8833FD3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{10F692CF-164F-48F6-A6A0-147DE9E917B6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{5A88D19A-2B86-4884-B881-D7639A5EA6A6}"
 	ProjectSection(SolutionItems) = preProject
@@ -16,10 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{5A88D1
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.IntegrationTests", "Web.IntegrationTests\Web.IntegrationTests.csproj", "{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.Api.IntegrationTests", "Web.Api.IntegrationTests\Web.Api.IntegrationTests.csproj", "{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}"
 EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Web.App", "http://localhost:54911", "{549FB728-3ABD-4562-A57F-5CFB86F45D92}"
 	ProjectSection(WebsiteProperties) = preProject
+		Frontpage = "false"
 		UseIISExpress = "true"
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5.1"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_54911"
@@ -40,32 +37,45 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Web.App", "http://localhost
 		DefaultWebSiteLanguage = "Visual C#"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.Api", "Web.Api\Web.Api.csproj", "{10F692CF-164F-48F6-A6A0-147DE9E917B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Azure|Any CPU = Azure|Any CPU
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{35B7497D-EF2C-4329-8FE8-440CF8833FD3}.Azure|Any CPU.ActiveCfg = Azure|Any CPU
+		{35B7497D-EF2C-4329-8FE8-440CF8833FD3}.Azure|Any CPU.Build.0 = Azure|Any CPU
 		{35B7497D-EF2C-4329-8FE8-440CF8833FD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{35B7497D-EF2C-4329-8FE8-440CF8833FD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35B7497D-EF2C-4329-8FE8-440CF8833FD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35B7497D-EF2C-4329-8FE8-440CF8833FD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Azure|Any CPU.ActiveCfg = Azure|Any CPU
+		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Azure|Any CPU.Build.0 = Azure|Any CPU
 		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}.Azure|Any CPU.ActiveCfg = Release|Any CPU
+		{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}.Azure|Any CPU.Build.0 = Release|Any CPU
 		{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.Azure|Any CPU.ActiveCfg = Debug|Any CPU
+		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.Azure|Any CPU.Build.0 = Debug|Any CPU
 		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Azure|Any CPU.ActiveCfg = Azure|Any CPU
+		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Azure|Any CPU.Build.0 = Azure|Any CPU
+		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
