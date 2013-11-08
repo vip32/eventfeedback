@@ -12,4 +12,4 @@ module.exports.Collection = class UsersCollection extends Collection
   credentials: ->
     token: settings.get('api_token')
   model: module.exports.Model
-  comparator: 'username'
+  comparator: 'name'

@@ -21,8 +21,8 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
     application.trigger 'event:details', @model.get('eventId')
 
   onShow: ->
-     $('input.rating[type=number]').rating()
-     $('textarea').autosize()
+    $('input.rating[type=number]').rating()
+    $('textarea').autosize()
 
   onSubmit: (e) ->
     e.preventDefault()

@@ -901,7 +901,7 @@ module.exports.Collection = UsersCollection = (function(_super) {
 
   UsersCollection.prototype.model = module.exports.Model;
 
-  UsersCollection.prototype.comparator = 'username';
+  UsersCollection.prototype.comparator = 'name';
 
   return UsersCollection;
 
@@ -1146,6 +1146,31 @@ module.exports = EventsEditView = (function(_super) {
     return this.resources = options != null ? options.resources : void 0;
   };
 
+  EventsEditView.prototype.onShow = function() {
+    var columns, grid;
+    columns = [
+      {
+        name: "id",
+        label: "ID",
+        editable: false,
+        cell: 'string'
+      }, {
+        name: "title",
+        label: "Title",
+        cell: "string"
+      }, {
+        name: "description",
+        label: "Description",
+        cell: "string"
+      }
+    ];
+    grid = new Backgrid.Grid({
+      columns: columns,
+      collection: this.collection
+    });
+    return $("#js-table").append(grid.render().$el);
+  };
+
   return EventsEditView;
 
 })(Backbone.Marionette.ItemView);
@@ -1176,6 +1201,31 @@ module.exports = SessionsEditView = (function(_super) {
     return this.resources = options != null ? options.resources : void 0;
   };
 
+  SessionsEditView.prototype.onShow = function() {
+    var columns, grid;
+    columns = [
+      {
+        name: "id",
+        label: "ID",
+        editable: false,
+        cell: 'string'
+      }, {
+        name: "title",
+        label: "Title",
+        cell: "string"
+      }, {
+        name: "description",
+        label: "Description",
+        cell: "string"
+      }
+    ];
+    grid = new Backgrid.Grid({
+      columns: columns,
+      collection: this.collection
+    });
+    return $("#js-table").append(grid.render().$el);
+  };
+
   return SessionsEditView;
 
 })(Backbone.Marionette.ItemView);
@@ -1188,7 +1238,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  EVENTS EDIT\r\n</div>";
+  return "<div class=\"container\" id=\"js-table\">\r\n  EVENTS EDIT\r\n</div>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -1208,7 +1258,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  SESSIONS EDIT\r\n</div>";
+  return "<div class=\"container\" id=\"js-table\">\r\n  SESSIONS EDIT\r\n</div>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -1228,7 +1278,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  USERS EDIT\r\n</div>";
+  return "<div class=\"container\" id=\"js-table\">\r\n  USERS EDIT\r\n</div>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -1264,6 +1314,36 @@ module.exports = UsersEditView = (function(_super) {
 
   UsersEditView.prototype.initialize = function(options) {
     return this.resources = options != null ? options.resources : void 0;
+  };
+
+  UsersEditView.prototype.onShow = function() {
+    var columns, grid;
+    columns = [
+      {
+        name: "id",
+        label: "ID",
+        editable: false,
+        cell: 'string'
+      }, {
+        name: "userName",
+        label: "Name",
+        editable: false,
+        cell: "string"
+      }, {
+        name: "organization",
+        label: "Organization",
+        cell: "string"
+      }, {
+        name: "email",
+        label: "Email",
+        cell: "string"
+      }
+    ];
+    grid = new Backgrid.Grid({
+      columns: columns,
+      collection: this.collection
+    });
+    return $("#js-table").append(grid.render().$el);
   };
 
   return UsersEditView;

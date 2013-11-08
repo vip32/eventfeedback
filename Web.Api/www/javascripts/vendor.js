@@ -90,1284 +90,7 @@
   globals.require.list = list;
   globals.require.brunch = true;
 })();
-//     Underscore.js 1.5.2
-//     http://underscorejs.org
-//     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-//     Underscore may be freely distributed under the MIT license.
-
-(function() {
-
-  // Baseline setup
-  // --------------
-
-  // Establish the root object, `window` in the browser, or `exports` on the server.
-  var root = this;
-
-  // Save the previous value of the `_` variable.
-  var previousUnderscore = root._;
-
-  // Establish the object that gets returned to break out of a loop iteration.
-  var breaker = {};
-
-  // Save bytes in the minified (but not gzipped) version:
-  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
-
-  // Create quick reference variables for speed access to core prototypes.
-  var
-    push             = ArrayProto.push,
-    slice            = ArrayProto.slice,
-    concat           = ArrayProto.concat,
-    toString         = ObjProto.toString,
-    hasOwnProperty   = ObjProto.hasOwnProperty;
-
-  // All **ECMAScript 5** native function implementations that we hope to use
-  // are declared here.
-  var
-    nativeForEach      = ArrayProto.forEach,
-    nativeMap          = ArrayProto.map,
-    nativeReduce       = ArrayProto.reduce,
-    nativeReduceRight  = ArrayProto.reduceRight,
-    nativeFilter       = ArrayProto.filter,
-    nativeEvery        = ArrayProto.every,
-    nativeSome         = ArrayProto.some,
-    nativeIndexOf      = ArrayProto.indexOf,
-    nativeLastIndexOf  = ArrayProto.lastIndexOf,
-    nativeIsArray      = Array.isArray,
-    nativeKeys         = Object.keys,
-    nativeBind         = FuncProto.bind;
-
-  // Create a safe reference to the Underscore object for use below.
-  var _ = function(obj) {
-    if (obj instanceof _) return obj;
-    if (!(this instanceof _)) return new _(obj);
-    this._wrapped = obj;
-  };
-
-  // Export the Underscore object for **Node.js**, with
-  // backwards-compatibility for the old `require()` API. If we're in
-  // the browser, add `_` as a global object via a string identifier,
-  // for Closure Compiler "advanced" mode.
-  if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = _;
-    }
-    exports._ = _;
-  } else {
-    root._ = _;
-  }
-
-  // Current version.
-  _.VERSION = '1.5.2';
-
-  // Collection Functions
-  // --------------------
-
-  // The cornerstone, an `each` implementation, aka `forEach`.
-  // Handles objects with the built-in `forEach`, arrays, and raw objects.
-  // Delegates to **ECMAScript 5**'s native `forEach` if available.
-  var each = _.each = _.forEach = function(obj, iterator, context) {
-    if (obj == null) return;
-    if (nativeForEach && obj.forEach === nativeForEach) {
-      obj.forEach(iterator, context);
-    } else if (obj.length === +obj.length) {
-      for (var i = 0, length = obj.length; i < length; i++) {
-        if (iterator.call(context, obj[i], i, obj) === breaker) return;
-      }
-    } else {
-      var keys = _.keys(obj);
-      for (var i = 0, length = keys.length; i < length; i++) {
-        if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
-      }
-    }
-  };
-
-  // Return the results of applying the iterator to each element.
-  // Delegates to **ECMAScript 5**'s native `map` if available.
-  _.map = _.collect = function(obj, iterator, context) {
-    var results = [];
-    if (obj == null) return results;
-    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
-    each(obj, function(value, index, list) {
-      results.push(iterator.call(context, value, index, list));
-    });
-    return results;
-  };
-
-  var reduceError = 'Reduce of empty array with no initial value';
-
-  // **Reduce** builds up a single result from a list of values, aka `inject`,
-  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
-  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
-    var initial = arguments.length > 2;
-    if (obj == null) obj = [];
-    if (nativeReduce && obj.reduce === nativeReduce) {
-      if (context) iterator = _.bind(iterator, context);
-      return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
-    }
-    each(obj, function(value, index, list) {
-      if (!initial) {
-        memo = value;
-        initial = true;
-      } else {
-        memo = iterator.call(context, memo, value, index, list);
-      }
-    });
-    if (!initial) throw new TypeError(reduceError);
-    return memo;
-  };
-
-  // The right-associative version of reduce, also known as `foldr`.
-  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
-  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
-    var initial = arguments.length > 2;
-    if (obj == null) obj = [];
-    if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
-      if (context) iterator = _.bind(iterator, context);
-      return initial ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
-    }
-    var length = obj.length;
-    if (length !== +length) {
-      var keys = _.keys(obj);
-      length = keys.length;
-    }
-    each(obj, function(value, index, list) {
-      index = keys ? keys[--length] : --length;
-      if (!initial) {
-        memo = obj[index];
-        initial = true;
-      } else {
-        memo = iterator.call(context, memo, obj[index], index, list);
-      }
-    });
-    if (!initial) throw new TypeError(reduceError);
-    return memo;
-  };
-
-  // Return the first value which passes a truth test. Aliased as `detect`.
-  _.find = _.detect = function(obj, iterator, context) {
-    var result;
-    any(obj, function(value, index, list) {
-      if (iterator.call(context, value, index, list)) {
-        result = value;
-        return true;
-      }
-    });
-    return result;
-  };
-
-  // Return all the elements that pass a truth test.
-  // Delegates to **ECMAScript 5**'s native `filter` if available.
-  // Aliased as `select`.
-  _.filter = _.select = function(obj, iterator, context) {
-    var results = [];
-    if (obj == null) return results;
-    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
-    each(obj, function(value, index, list) {
-      if (iterator.call(context, value, index, list)) results.push(value);
-    });
-    return results;
-  };
-
-  // Return all the elements for which a truth test fails.
-  _.reject = function(obj, iterator, context) {
-    return _.filter(obj, function(value, index, list) {
-      return !iterator.call(context, value, index, list);
-    }, context);
-  };
-
-  // Determine whether all of the elements match a truth test.
-  // Delegates to **ECMAScript 5**'s native `every` if available.
-  // Aliased as `all`.
-  _.every = _.all = function(obj, iterator, context) {
-    iterator || (iterator = _.identity);
-    var result = true;
-    if (obj == null) return result;
-    if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
-    each(obj, function(value, index, list) {
-      if (!(result = result && iterator.call(context, value, index, list))) return breaker;
-    });
-    return !!result;
-  };
-
-  // Determine if at least one element in the object matches a truth test.
-  // Delegates to **ECMAScript 5**'s native `some` if available.
-  // Aliased as `any`.
-  var any = _.some = _.any = function(obj, iterator, context) {
-    iterator || (iterator = _.identity);
-    var result = false;
-    if (obj == null) return result;
-    if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
-    each(obj, function(value, index, list) {
-      if (result || (result = iterator.call(context, value, index, list))) return breaker;
-    });
-    return !!result;
-  };
-
-  // Determine if the array or object contains a given value (using `===`).
-  // Aliased as `include`.
-  _.contains = _.include = function(obj, target) {
-    if (obj == null) return false;
-    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
-    return any(obj, function(value) {
-      return value === target;
-    });
-  };
-
-  // Invoke a method (with arguments) on every item in a collection.
-  _.invoke = function(obj, method) {
-    var args = slice.call(arguments, 2);
-    var isFunc = _.isFunction(method);
-    return _.map(obj, function(value) {
-      return (isFunc ? method : value[method]).apply(value, args);
-    });
-  };
-
-  // Convenience version of a common use case of `map`: fetching a property.
-  _.pluck = function(obj, key) {
-    return _.map(obj, function(value){ return value[key]; });
-  };
-
-  // Convenience version of a common use case of `filter`: selecting only objects
-  // containing specific `key:value` pairs.
-  _.where = function(obj, attrs, first) {
-    if (_.isEmpty(attrs)) return first ? void 0 : [];
-    return _[first ? 'find' : 'filter'](obj, function(value) {
-      for (var key in attrs) {
-        if (attrs[key] !== value[key]) return false;
-      }
-      return true;
-    });
-  };
-
-  // Convenience version of a common use case of `find`: getting the first object
-  // containing specific `key:value` pairs.
-  _.findWhere = function(obj, attrs) {
-    return _.where(obj, attrs, true);
-  };
-
-  // Return the maximum element or (element-based computation).
-  // Can't optimize arrays of integers longer than 65,535 elements.
-  // See [WebKit Bug 80797](https://bugs.webkit.org/show_bug.cgi?id=80797)
-  _.max = function(obj, iterator, context) {
-    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-      return Math.max.apply(Math, obj);
-    }
-    if (!iterator && _.isEmpty(obj)) return -Infinity;
-    var result = {computed : -Infinity, value: -Infinity};
-    each(obj, function(value, index, list) {
-      var computed = iterator ? iterator.call(context, value, index, list) : value;
-      computed > result.computed && (result = {value : value, computed : computed});
-    });
-    return result.value;
-  };
-
-  // Return the minimum element (or element-based computation).
-  _.min = function(obj, iterator, context) {
-    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-      return Math.min.apply(Math, obj);
-    }
-    if (!iterator && _.isEmpty(obj)) return Infinity;
-    var result = {computed : Infinity, value: Infinity};
-    each(obj, function(value, index, list) {
-      var computed = iterator ? iterator.call(context, value, index, list) : value;
-      computed < result.computed && (result = {value : value, computed : computed});
-    });
-    return result.value;
-  };
-
-  // Shuffle an array, using the modern version of the 
-  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
-  _.shuffle = function(obj) {
-    var rand;
-    var index = 0;
-    var shuffled = [];
-    each(obj, function(value) {
-      rand = _.random(index++);
-      shuffled[index - 1] = shuffled[rand];
-      shuffled[rand] = value;
-    });
-    return shuffled;
-  };
-
-  // Sample **n** random values from an array.
-  // If **n** is not specified, returns a single random element from the array.
-  // The internal `guard` argument allows it to work with `map`.
-  _.sample = function(obj, n, guard) {
-    if (arguments.length < 2 || guard) {
-      return obj[_.random(obj.length - 1)];
-    }
-    return _.shuffle(obj).slice(0, Math.max(0, n));
-  };
-
-  // An internal function to generate lookup iterators.
-  var lookupIterator = function(value) {
-    return _.isFunction(value) ? value : function(obj){ return obj[value]; };
-  };
-
-  // Sort the object's values by a criterion produced by an iterator.
-  _.sortBy = function(obj, value, context) {
-    var iterator = lookupIterator(value);
-    return _.pluck(_.map(obj, function(value, index, list) {
-      return {
-        value: value,
-        index: index,
-        criteria: iterator.call(context, value, index, list)
-      };
-    }).sort(function(left, right) {
-      var a = left.criteria;
-      var b = right.criteria;
-      if (a !== b) {
-        if (a > b || a === void 0) return 1;
-        if (a < b || b === void 0) return -1;
-      }
-      return left.index - right.index;
-    }), 'value');
-  };
-
-  // An internal function used for aggregate "group by" operations.
-  var group = function(behavior) {
-    return function(obj, value, context) {
-      var result = {};
-      var iterator = value == null ? _.identity : lookupIterator(value);
-      each(obj, function(value, index) {
-        var key = iterator.call(context, value, index, obj);
-        behavior(result, key, value);
-      });
-      return result;
-    };
-  };
-
-  // Groups the object's values by a criterion. Pass either a string attribute
-  // to group by, or a function that returns the criterion.
-  _.groupBy = group(function(result, key, value) {
-    (_.has(result, key) ? result[key] : (result[key] = [])).push(value);
-  });
-
-  // Indexes the object's values by a criterion, similar to `groupBy`, but for
-  // when you know that your index values will be unique.
-  _.indexBy = group(function(result, key, value) {
-    result[key] = value;
-  });
-
-  // Counts instances of an object that group by a certain criterion. Pass
-  // either a string attribute to count by, or a function that returns the
-  // criterion.
-  _.countBy = group(function(result, key) {
-    _.has(result, key) ? result[key]++ : result[key] = 1;
-  });
-
-  // Use a comparator function to figure out the smallest index at which
-  // an object should be inserted so as to maintain order. Uses binary search.
-  _.sortedIndex = function(array, obj, iterator, context) {
-    iterator = iterator == null ? _.identity : lookupIterator(iterator);
-    var value = iterator.call(context, obj);
-    var low = 0, high = array.length;
-    while (low < high) {
-      var mid = (low + high) >>> 1;
-      iterator.call(context, array[mid]) < value ? low = mid + 1 : high = mid;
-    }
-    return low;
-  };
-
-  // Safely create a real, live array from anything iterable.
-  _.toArray = function(obj) {
-    if (!obj) return [];
-    if (_.isArray(obj)) return slice.call(obj);
-    if (obj.length === +obj.length) return _.map(obj, _.identity);
-    return _.values(obj);
-  };
-
-  // Return the number of elements in an object.
-  _.size = function(obj) {
-    if (obj == null) return 0;
-    return (obj.length === +obj.length) ? obj.length : _.keys(obj).length;
-  };
-
-  // Array Functions
-  // ---------------
-
-  // Get the first element of an array. Passing **n** will return the first N
-  // values in the array. Aliased as `head` and `take`. The **guard** check
-  // allows it to work with `_.map`.
-  _.first = _.head = _.take = function(array, n, guard) {
-    if (array == null) return void 0;
-    return (n == null) || guard ? array[0] : slice.call(array, 0, n);
-  };
-
-  // Returns everything but the last entry of the array. Especially useful on
-  // the arguments object. Passing **n** will return all the values in
-  // the array, excluding the last N. The **guard** check allows it to work with
-  // `_.map`.
-  _.initial = function(array, n, guard) {
-    return slice.call(array, 0, array.length - ((n == null) || guard ? 1 : n));
-  };
-
-  // Get the last element of an array. Passing **n** will return the last N
-  // values in the array. The **guard** check allows it to work with `_.map`.
-  _.last = function(array, n, guard) {
-    if (array == null) return void 0;
-    if ((n == null) || guard) {
-      return array[array.length - 1];
-    } else {
-      return slice.call(array, Math.max(array.length - n, 0));
-    }
-  };
-
-  // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
-  // Especially useful on the arguments object. Passing an **n** will return
-  // the rest N values in the array. The **guard**
-  // check allows it to work with `_.map`.
-  _.rest = _.tail = _.drop = function(array, n, guard) {
-    return slice.call(array, (n == null) || guard ? 1 : n);
-  };
-
-  // Trim out all falsy values from an array.
-  _.compact = function(array) {
-    return _.filter(array, _.identity);
-  };
-
-  // Internal implementation of a recursive `flatten` function.
-  var flatten = function(input, shallow, output) {
-    if (shallow && _.every(input, _.isArray)) {
-      return concat.apply(output, input);
-    }
-    each(input, function(value) {
-      if (_.isArray(value) || _.isArguments(value)) {
-        shallow ? push.apply(output, value) : flatten(value, shallow, output);
-      } else {
-        output.push(value);
-      }
-    });
-    return output;
-  };
-
-  // Flatten out an array, either recursively (by default), or just one level.
-  _.flatten = function(array, shallow) {
-    return flatten(array, shallow, []);
-  };
-
-  // Return a version of the array that does not contain the specified value(s).
-  _.without = function(array) {
-    return _.difference(array, slice.call(arguments, 1));
-  };
-
-  // Produce a duplicate-free version of the array. If the array has already
-  // been sorted, you have the option of using a faster algorithm.
-  // Aliased as `unique`.
-  _.uniq = _.unique = function(array, isSorted, iterator, context) {
-    if (_.isFunction(isSorted)) {
-      context = iterator;
-      iterator = isSorted;
-      isSorted = false;
-    }
-    var initial = iterator ? _.map(array, iterator, context) : array;
-    var results = [];
-    var seen = [];
-    each(initial, function(value, index) {
-      if (isSorted ? (!index || seen[seen.length - 1] !== value) : !_.contains(seen, value)) {
-        seen.push(value);
-        results.push(array[index]);
-      }
-    });
-    return results;
-  };
-
-  // Produce an array that contains the union: each distinct element from all of
-  // the passed-in arrays.
-  _.union = function() {
-    return _.uniq(_.flatten(arguments, true));
-  };
-
-  // Produce an array that contains every item shared between all the
-  // passed-in arrays.
-  _.intersection = function(array) {
-    var rest = slice.call(arguments, 1);
-    return _.filter(_.uniq(array), function(item) {
-      return _.every(rest, function(other) {
-        return _.indexOf(other, item) >= 0;
-      });
-    });
-  };
-
-  // Take the difference between one array and a number of other arrays.
-  // Only the elements present in just the first array will remain.
-  _.difference = function(array) {
-    var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
-    return _.filter(array, function(value){ return !_.contains(rest, value); });
-  };
-
-  // Zip together multiple lists into a single array -- elements that share
-  // an index go together.
-  _.zip = function() {
-    var length = _.max(_.pluck(arguments, "length").concat(0));
-    var results = new Array(length);
-    for (var i = 0; i < length; i++) {
-      results[i] = _.pluck(arguments, '' + i);
-    }
-    return results;
-  };
-
-  // Converts lists into objects. Pass either a single array of `[key, value]`
-  // pairs, or two parallel arrays of the same length -- one of keys, and one of
-  // the corresponding values.
-  _.object = function(list, values) {
-    if (list == null) return {};
-    var result = {};
-    for (var i = 0, length = list.length; i < length; i++) {
-      if (values) {
-        result[list[i]] = values[i];
-      } else {
-        result[list[i][0]] = list[i][1];
-      }
-    }
-    return result;
-  };
-
-  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
-  // we need this function. Return the position of the first occurrence of an
-  // item in an array, or -1 if the item is not included in the array.
-  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
-  // If the array is large and already in sort order, pass `true`
-  // for **isSorted** to use binary search.
-  _.indexOf = function(array, item, isSorted) {
-    if (array == null) return -1;
-    var i = 0, length = array.length;
-    if (isSorted) {
-      if (typeof isSorted == 'number') {
-        i = (isSorted < 0 ? Math.max(0, length + isSorted) : isSorted);
-      } else {
-        i = _.sortedIndex(array, item);
-        return array[i] === item ? i : -1;
-      }
-    }
-    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
-    for (; i < length; i++) if (array[i] === item) return i;
-    return -1;
-  };
-
-  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
-  _.lastIndexOf = function(array, item, from) {
-    if (array == null) return -1;
-    var hasIndex = from != null;
-    if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) {
-      return hasIndex ? array.lastIndexOf(item, from) : array.lastIndexOf(item);
-    }
-    var i = (hasIndex ? from : array.length);
-    while (i--) if (array[i] === item) return i;
-    return -1;
-  };
-
-  // Generate an integer Array containing an arithmetic progression. A port of
-  // the native Python `range()` function. See
-  // [the Python documentation](http://docs.python.org/library/functions.html#range).
-  _.range = function(start, stop, step) {
-    if (arguments.length <= 1) {
-      stop = start || 0;
-      start = 0;
-    }
-    step = arguments[2] || 1;
-
-    var length = Math.max(Math.ceil((stop - start) / step), 0);
-    var idx = 0;
-    var range = new Array(length);
-
-    while(idx < length) {
-      range[idx++] = start;
-      start += step;
-    }
-
-    return range;
-  };
-
-  // Function (ahem) Functions
-  // ------------------
-
-  // Reusable constructor function for prototype setting.
-  var ctor = function(){};
-
-  // Create a function bound to a given object (assigning `this`, and arguments,
-  // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
-  // available.
-  _.bind = function(func, context) {
-    var args, bound;
-    if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
-    if (!_.isFunction(func)) throw new TypeError;
-    args = slice.call(arguments, 2);
-    return bound = function() {
-      if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
-      ctor.prototype = func.prototype;
-      var self = new ctor;
-      ctor.prototype = null;
-      var result = func.apply(self, args.concat(slice.call(arguments)));
-      if (Object(result) === result) return result;
-      return self;
-    };
-  };
-
-  // Partially apply a function by creating a version that has had some of its
-  // arguments pre-filled, without changing its dynamic `this` context.
-  _.partial = function(func) {
-    var args = slice.call(arguments, 1);
-    return function() {
-      return func.apply(this, args.concat(slice.call(arguments)));
-    };
-  };
-
-  // Bind all of an object's methods to that object. Useful for ensuring that
-  // all callbacks defined on an object belong to it.
-  _.bindAll = function(obj) {
-    var funcs = slice.call(arguments, 1);
-    if (funcs.length === 0) throw new Error("bindAll must be passed function names");
-    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
-    return obj;
-  };
-
-  // Memoize an expensive function by storing its results.
-  _.memoize = function(func, hasher) {
-    var memo = {};
-    hasher || (hasher = _.identity);
-    return function() {
-      var key = hasher.apply(this, arguments);
-      return _.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
-    };
-  };
-
-  // Delays a function for the given number of milliseconds, and then calls
-  // it with the arguments supplied.
-  _.delay = function(func, wait) {
-    var args = slice.call(arguments, 2);
-    return setTimeout(function(){ return func.apply(null, args); }, wait);
-  };
-
-  // Defers a function, scheduling it to run after the current call stack has
-  // cleared.
-  _.defer = function(func) {
-    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
-  };
-
-  // Returns a function, that, when invoked, will only be triggered at most once
-  // during a given window of time. Normally, the throttled function will run
-  // as much as it can, without ever going more than once per `wait` duration;
-  // but if you'd like to disable the execution on the leading edge, pass
-  // `{leading: false}`. To disable execution on the trailing edge, ditto.
-  _.throttle = function(func, wait, options) {
-    var context, args, result;
-    var timeout = null;
-    var previous = 0;
-    options || (options = {});
-    var later = function() {
-      previous = options.leading === false ? 0 : new Date;
-      timeout = null;
-      result = func.apply(context, args);
-    };
-    return function() {
-      var now = new Date;
-      if (!previous && options.leading === false) previous = now;
-      var remaining = wait - (now - previous);
-      context = this;
-      args = arguments;
-      if (remaining <= 0) {
-        clearTimeout(timeout);
-        timeout = null;
-        previous = now;
-        result = func.apply(context, args);
-      } else if (!timeout && options.trailing !== false) {
-        timeout = setTimeout(later, remaining);
-      }
-      return result;
-    };
-  };
-
-  // Returns a function, that, as long as it continues to be invoked, will not
-  // be triggered. The function will be called after it stops being called for
-  // N milliseconds. If `immediate` is passed, trigger the function on the
-  // leading edge, instead of the trailing.
-  _.debounce = function(func, wait, immediate) {
-    var timeout, args, context, timestamp, result;
-    return function() {
-      context = this;
-      args = arguments;
-      timestamp = new Date();
-      var later = function() {
-        var last = (new Date()) - timestamp;
-        if (last < wait) {
-          timeout = setTimeout(later, wait - last);
-        } else {
-          timeout = null;
-          if (!immediate) result = func.apply(context, args);
-        }
-      };
-      var callNow = immediate && !timeout;
-      if (!timeout) {
-        timeout = setTimeout(later, wait);
-      }
-      if (callNow) result = func.apply(context, args);
-      return result;
-    };
-  };
-
-  // Returns a function that will be executed at most one time, no matter how
-  // often you call it. Useful for lazy initialization.
-  _.once = function(func) {
-    var ran = false, memo;
-    return function() {
-      if (ran) return memo;
-      ran = true;
-      memo = func.apply(this, arguments);
-      func = null;
-      return memo;
-    };
-  };
-
-  // Returns the first function passed as an argument to the second,
-  // allowing you to adjust arguments, run code before and after, and
-  // conditionally execute the original function.
-  _.wrap = function(func, wrapper) {
-    return function() {
-      var args = [func];
-      push.apply(args, arguments);
-      return wrapper.apply(this, args);
-    };
-  };
-
-  // Returns a function that is the composition of a list of functions, each
-  // consuming the return value of the function that follows.
-  _.compose = function() {
-    var funcs = arguments;
-    return function() {
-      var args = arguments;
-      for (var i = funcs.length - 1; i >= 0; i--) {
-        args = [funcs[i].apply(this, args)];
-      }
-      return args[0];
-    };
-  };
-
-  // Returns a function that will only be executed after being called N times.
-  _.after = function(times, func) {
-    return function() {
-      if (--times < 1) {
-        return func.apply(this, arguments);
-      }
-    };
-  };
-
-  // Object Functions
-  // ----------------
-
-  // Retrieve the names of an object's properties.
-  // Delegates to **ECMAScript 5**'s native `Object.keys`
-  _.keys = nativeKeys || function(obj) {
-    if (obj !== Object(obj)) throw new TypeError('Invalid object');
-    var keys = [];
-    for (var key in obj) if (_.has(obj, key)) keys.push(key);
-    return keys;
-  };
-
-  // Retrieve the values of an object's properties.
-  _.values = function(obj) {
-    var keys = _.keys(obj);
-    var length = keys.length;
-    var values = new Array(length);
-    for (var i = 0; i < length; i++) {
-      values[i] = obj[keys[i]];
-    }
-    return values;
-  };
-
-  // Convert an object into a list of `[key, value]` pairs.
-  _.pairs = function(obj) {
-    var keys = _.keys(obj);
-    var length = keys.length;
-    var pairs = new Array(length);
-    for (var i = 0; i < length; i++) {
-      pairs[i] = [keys[i], obj[keys[i]]];
-    }
-    return pairs;
-  };
-
-  // Invert the keys and values of an object. The values must be serializable.
-  _.invert = function(obj) {
-    var result = {};
-    var keys = _.keys(obj);
-    for (var i = 0, length = keys.length; i < length; i++) {
-      result[obj[keys[i]]] = keys[i];
-    }
-    return result;
-  };
-
-  // Return a sorted list of the function names available on the object.
-  // Aliased as `methods`
-  _.functions = _.methods = function(obj) {
-    var names = [];
-    for (var key in obj) {
-      if (_.isFunction(obj[key])) names.push(key);
-    }
-    return names.sort();
-  };
-
-  // Extend a given object with all the properties in passed-in object(s).
-  _.extend = function(obj) {
-    each(slice.call(arguments, 1), function(source) {
-      if (source) {
-        for (var prop in source) {
-          obj[prop] = source[prop];
-        }
-      }
-    });
-    return obj;
-  };
-
-  // Return a copy of the object only containing the whitelisted properties.
-  _.pick = function(obj) {
-    var copy = {};
-    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
-    each(keys, function(key) {
-      if (key in obj) copy[key] = obj[key];
-    });
-    return copy;
-  };
-
-   // Return a copy of the object without the blacklisted properties.
-  _.omit = function(obj) {
-    var copy = {};
-    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
-    for (var key in obj) {
-      if (!_.contains(keys, key)) copy[key] = obj[key];
-    }
-    return copy;
-  };
-
-  // Fill in a given object with default properties.
-  _.defaults = function(obj) {
-    each(slice.call(arguments, 1), function(source) {
-      if (source) {
-        for (var prop in source) {
-          if (obj[prop] === void 0) obj[prop] = source[prop];
-        }
-      }
-    });
-    return obj;
-  };
-
-  // Create a (shallow-cloned) duplicate of an object.
-  _.clone = function(obj) {
-    if (!_.isObject(obj)) return obj;
-    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
-  };
-
-  // Invokes interceptor with the obj, and then returns obj.
-  // The primary purpose of this method is to "tap into" a method chain, in
-  // order to perform operations on intermediate results within the chain.
-  _.tap = function(obj, interceptor) {
-    interceptor(obj);
-    return obj;
-  };
-
-  // Internal recursive comparison function for `isEqual`.
-  var eq = function(a, b, aStack, bStack) {
-    // Identical objects are equal. `0 === -0`, but they aren't identical.
-    // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
-    if (a === b) return a !== 0 || 1 / a == 1 / b;
-    // A strict comparison is necessary because `null == undefined`.
-    if (a == null || b == null) return a === b;
-    // Unwrap any wrapped objects.
-    if (a instanceof _) a = a._wrapped;
-    if (b instanceof _) b = b._wrapped;
-    // Compare `[[Class]]` names.
-    var className = toString.call(a);
-    if (className != toString.call(b)) return false;
-    switch (className) {
-      // Strings, numbers, dates, and booleans are compared by value.
-      case '[object String]':
-        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
-        // equivalent to `new String("5")`.
-        return a == String(b);
-      case '[object Number]':
-        // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
-        // other numeric values.
-        return a != +a ? b != +b : (a == 0 ? 1 / a == 1 / b : a == +b);
-      case '[object Date]':
-      case '[object Boolean]':
-        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
-        // millisecond representations. Note that invalid dates with millisecond representations
-        // of `NaN` are not equivalent.
-        return +a == +b;
-      // RegExps are compared by their source patterns and flags.
-      case '[object RegExp]':
-        return a.source == b.source &&
-               a.global == b.global &&
-               a.multiline == b.multiline &&
-               a.ignoreCase == b.ignoreCase;
-    }
-    if (typeof a != 'object' || typeof b != 'object') return false;
-    // Assume equality for cyclic structures. The algorithm for detecting cyclic
-    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
-    var length = aStack.length;
-    while (length--) {
-      // Linear search. Performance is inversely proportional to the number of
-      // unique nested structures.
-      if (aStack[length] == a) return bStack[length] == b;
-    }
-    // Objects with different constructors are not equivalent, but `Object`s
-    // from different frames are.
-    var aCtor = a.constructor, bCtor = b.constructor;
-    if (aCtor !== bCtor && !(_.isFunction(aCtor) && (aCtor instanceof aCtor) &&
-                             _.isFunction(bCtor) && (bCtor instanceof bCtor))) {
-      return false;
-    }
-    // Add the first object to the stack of traversed objects.
-    aStack.push(a);
-    bStack.push(b);
-    var size = 0, result = true;
-    // Recursively compare objects and arrays.
-    if (className == '[object Array]') {
-      // Compare array lengths to determine if a deep comparison is necessary.
-      size = a.length;
-      result = size == b.length;
-      if (result) {
-        // Deep compare the contents, ignoring non-numeric properties.
-        while (size--) {
-          if (!(result = eq(a[size], b[size], aStack, bStack))) break;
-        }
-      }
-    } else {
-      // Deep compare objects.
-      for (var key in a) {
-        if (_.has(a, key)) {
-          // Count the expected number of properties.
-          size++;
-          // Deep compare each member.
-          if (!(result = _.has(b, key) && eq(a[key], b[key], aStack, bStack))) break;
-        }
-      }
-      // Ensure that both objects contain the same number of properties.
-      if (result) {
-        for (key in b) {
-          if (_.has(b, key) && !(size--)) break;
-        }
-        result = !size;
-      }
-    }
-    // Remove the first object from the stack of traversed objects.
-    aStack.pop();
-    bStack.pop();
-    return result;
-  };
-
-  // Perform a deep comparison to check if two objects are equal.
-  _.isEqual = function(a, b) {
-    return eq(a, b, [], []);
-  };
-
-  // Is a given array, string, or object empty?
-  // An "empty" object has no enumerable own-properties.
-  _.isEmpty = function(obj) {
-    if (obj == null) return true;
-    if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
-    for (var key in obj) if (_.has(obj, key)) return false;
-    return true;
-  };
-
-  // Is a given value a DOM element?
-  _.isElement = function(obj) {
-    return !!(obj && obj.nodeType === 1);
-  };
-
-  // Is a given value an array?
-  // Delegates to ECMA5's native Array.isArray
-  _.isArray = nativeIsArray || function(obj) {
-    return toString.call(obj) == '[object Array]';
-  };
-
-  // Is a given variable an object?
-  _.isObject = function(obj) {
-    return obj === Object(obj);
-  };
-
-  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp.
-  each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function(name) {
-    _['is' + name] = function(obj) {
-      return toString.call(obj) == '[object ' + name + ']';
-    };
-  });
-
-  // Define a fallback version of the method in browsers (ahem, IE), where
-  // there isn't any inspectable "Arguments" type.
-  if (!_.isArguments(arguments)) {
-    _.isArguments = function(obj) {
-      return !!(obj && _.has(obj, 'callee'));
-    };
-  }
-
-  // Optimize `isFunction` if appropriate.
-  if (typeof (/./) !== 'function') {
-    _.isFunction = function(obj) {
-      return typeof obj === 'function';
-    };
-  }
-
-  // Is a given object a finite number?
-  _.isFinite = function(obj) {
-    return isFinite(obj) && !isNaN(parseFloat(obj));
-  };
-
-  // Is the given value `NaN`? (NaN is the only number which does not equal itself).
-  _.isNaN = function(obj) {
-    return _.isNumber(obj) && obj != +obj;
-  };
-
-  // Is a given value a boolean?
-  _.isBoolean = function(obj) {
-    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
-  };
-
-  // Is a given value equal to null?
-  _.isNull = function(obj) {
-    return obj === null;
-  };
-
-  // Is a given variable undefined?
-  _.isUndefined = function(obj) {
-    return obj === void 0;
-  };
-
-  // Shortcut function for checking if an object has a given property directly
-  // on itself (in other words, not on a prototype).
-  _.has = function(obj, key) {
-    return hasOwnProperty.call(obj, key);
-  };
-
-  // Utility Functions
-  // -----------------
-
-  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
-  // previous owner. Returns a reference to the Underscore object.
-  _.noConflict = function() {
-    root._ = previousUnderscore;
-    return this;
-  };
-
-  // Keep the identity function around for default iterators.
-  _.identity = function(value) {
-    return value;
-  };
-
-  // Run a function **n** times.
-  _.times = function(n, iterator, context) {
-    var accum = Array(Math.max(0, n));
-    for (var i = 0; i < n; i++) accum[i] = iterator.call(context, i);
-    return accum;
-  };
-
-  // Return a random integer between min and max (inclusive).
-  _.random = function(min, max) {
-    if (max == null) {
-      max = min;
-      min = 0;
-    }
-    return min + Math.floor(Math.random() * (max - min + 1));
-  };
-
-  // List of HTML entities for escaping.
-  var entityMap = {
-    escape: {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;'
-    }
-  };
-  entityMap.unescape = _.invert(entityMap.escape);
-
-  // Regexes containing the keys and values listed immediately above.
-  var entityRegexes = {
-    escape:   new RegExp('[' + _.keys(entityMap.escape).join('') + ']', 'g'),
-    unescape: new RegExp('(' + _.keys(entityMap.unescape).join('|') + ')', 'g')
-  };
-
-  // Functions for escaping and unescaping strings to/from HTML interpolation.
-  _.each(['escape', 'unescape'], function(method) {
-    _[method] = function(string) {
-      if (string == null) return '';
-      return ('' + string).replace(entityRegexes[method], function(match) {
-        return entityMap[method][match];
-      });
-    };
-  });
-
-  // If the value of the named `property` is a function then invoke it with the
-  // `object` as context; otherwise, return it.
-  _.result = function(object, property) {
-    if (object == null) return void 0;
-    var value = object[property];
-    return _.isFunction(value) ? value.call(object) : value;
-  };
-
-  // Add your own custom functions to the Underscore object.
-  _.mixin = function(obj) {
-    each(_.functions(obj), function(name) {
-      var func = _[name] = obj[name];
-      _.prototype[name] = function() {
-        var args = [this._wrapped];
-        push.apply(args, arguments);
-        return result.call(this, func.apply(_, args));
-      };
-    });
-  };
-
-  // Generate a unique integer id (unique within the entire client session).
-  // Useful for temporary DOM ids.
-  var idCounter = 0;
-  _.uniqueId = function(prefix) {
-    var id = ++idCounter + '';
-    return prefix ? prefix + id : id;
-  };
-
-  // By default, Underscore uses ERB-style template delimiters, change the
-  // following template settings to use alternative delimiters.
-  _.templateSettings = {
-    evaluate    : /<%([\s\S]+?)%>/g,
-    interpolate : /<%=([\s\S]+?)%>/g,
-    escape      : /<%-([\s\S]+?)%>/g
-  };
-
-  // When customizing `templateSettings`, if you don't want to define an
-  // interpolation, evaluation or escaping regex, we need one that is
-  // guaranteed not to match.
-  var noMatch = /(.)^/;
-
-  // Certain characters need to be escaped so that they can be put into a
-  // string literal.
-  var escapes = {
-    "'":      "'",
-    '\\':     '\\',
-    '\r':     'r',
-    '\n':     'n',
-    '\t':     't',
-    '\u2028': 'u2028',
-    '\u2029': 'u2029'
-  };
-
-  var escaper = /\\|'|\r|\n|\t|\u2028|\u2029/g;
-
-  // JavaScript micro-templating, similar to John Resig's implementation.
-  // Underscore templating handles arbitrary delimiters, preserves whitespace,
-  // and correctly escapes quotes within interpolated code.
-  _.template = function(text, data, settings) {
-    var render;
-    settings = _.defaults({}, settings, _.templateSettings);
-
-    // Combine delimiters into one regular expression via alternation.
-    var matcher = new RegExp([
-      (settings.escape || noMatch).source,
-      (settings.interpolate || noMatch).source,
-      (settings.evaluate || noMatch).source
-    ].join('|') + '|$', 'g');
-
-    // Compile the template source, escaping string literals appropriately.
-    var index = 0;
-    var source = "__p+='";
-    text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
-      source += text.slice(index, offset)
-        .replace(escaper, function(match) { return '\\' + escapes[match]; });
-
-      if (escape) {
-        source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
-      }
-      if (interpolate) {
-        source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
-      }
-      if (evaluate) {
-        source += "';\n" + evaluate + "\n__p+='";
-      }
-      index = offset + match.length;
-      return match;
-    });
-    source += "';\n";
-
-    // If a variable is not specified, place data values in local scope.
-    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
-
-    source = "var __t,__p='',__j=Array.prototype.join," +
-      "print=function(){__p+=__j.call(arguments,'');};\n" +
-      source + "return __p;\n";
-
-    try {
-      render = new Function(settings.variable || 'obj', '_', source);
-    } catch (e) {
-      e.source = source;
-      throw e;
-    }
-
-    if (data) return render(data, _);
-    var template = function(data) {
-      return render.call(this, data, _);
-    };
-
-    // Provide the compiled function source as a convenience for precompilation.
-    template.source = 'function(' + (settings.variable || 'obj') + '){\n' + source + '}';
-
-    return template;
-  };
-
-  // Add a "chain" function, which will delegate to the wrapper.
-  _.chain = function(obj) {
-    return _(obj).chain();
-  };
-
-  // OOP
-  // ---------------
-  // If Underscore is called as a function, it returns a wrapped object that
-  // can be used OO-style. This wrapper holds altered versions of all the
-  // underscore functions. Wrapped objects may be chained.
-
-  // Helper function to continue chaining intermediate results.
-  var result = function(obj) {
-    return this._chain ? _(obj).chain() : obj;
-  };
-
-  // Add all of the Underscore functions to the wrapper object.
-  _.mixin(_);
-
-  // Add all mutator Array functions to the wrapper.
-  each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
-    var method = ArrayProto[name];
-    _.prototype[name] = function() {
-      var obj = this._wrapped;
-      method.apply(obj, arguments);
-      if ((name == 'shift' || name == 'splice') && obj.length === 0) delete obj[0];
-      return result.call(this, obj);
-    };
-  });
-
-  // Add all accessor Array functions to the wrapper.
-  each(['concat', 'join', 'slice'], function(name) {
-    var method = ArrayProto[name];
-    _.prototype[name] = function() {
-      return result.call(this, method.apply(this._wrapped, arguments));
-    };
-  });
-
-  _.extend(_.prototype, {
-
-    // Start chaining a wrapped Underscore object.
-    chain: function() {
-      this._chain = true;
-      return this;
-    },
-
-    // Extracts the result from a wrapped and chained object.
-    value: function() {
-      return this._wrapped;
-    }
-
-  });
-
-}).call(this);
-
-;/*!
+/*!
  * jQuery JavaScript Library v2.0.3
  * http://jquery.com/
  *
@@ -10197,6 +8920,1283 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
 })( window );
 
+;//     Underscore.js 1.5.2
+//     http://underscorejs.org
+//     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+//     Underscore may be freely distributed under the MIT license.
+
+(function() {
+
+  // Baseline setup
+  // --------------
+
+  // Establish the root object, `window` in the browser, or `exports` on the server.
+  var root = this;
+
+  // Save the previous value of the `_` variable.
+  var previousUnderscore = root._;
+
+  // Establish the object that gets returned to break out of a loop iteration.
+  var breaker = {};
+
+  // Save bytes in the minified (but not gzipped) version:
+  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
+
+  // Create quick reference variables for speed access to core prototypes.
+  var
+    push             = ArrayProto.push,
+    slice            = ArrayProto.slice,
+    concat           = ArrayProto.concat,
+    toString         = ObjProto.toString,
+    hasOwnProperty   = ObjProto.hasOwnProperty;
+
+  // All **ECMAScript 5** native function implementations that we hope to use
+  // are declared here.
+  var
+    nativeForEach      = ArrayProto.forEach,
+    nativeMap          = ArrayProto.map,
+    nativeReduce       = ArrayProto.reduce,
+    nativeReduceRight  = ArrayProto.reduceRight,
+    nativeFilter       = ArrayProto.filter,
+    nativeEvery        = ArrayProto.every,
+    nativeSome         = ArrayProto.some,
+    nativeIndexOf      = ArrayProto.indexOf,
+    nativeLastIndexOf  = ArrayProto.lastIndexOf,
+    nativeIsArray      = Array.isArray,
+    nativeKeys         = Object.keys,
+    nativeBind         = FuncProto.bind;
+
+  // Create a safe reference to the Underscore object for use below.
+  var _ = function(obj) {
+    if (obj instanceof _) return obj;
+    if (!(this instanceof _)) return new _(obj);
+    this._wrapped = obj;
+  };
+
+  // Export the Underscore object for **Node.js**, with
+  // backwards-compatibility for the old `require()` API. If we're in
+  // the browser, add `_` as a global object via a string identifier,
+  // for Closure Compiler "advanced" mode.
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = _;
+    }
+    exports._ = _;
+  } else {
+    root._ = _;
+  }
+
+  // Current version.
+  _.VERSION = '1.5.2';
+
+  // Collection Functions
+  // --------------------
+
+  // The cornerstone, an `each` implementation, aka `forEach`.
+  // Handles objects with the built-in `forEach`, arrays, and raw objects.
+  // Delegates to **ECMAScript 5**'s native `forEach` if available.
+  var each = _.each = _.forEach = function(obj, iterator, context) {
+    if (obj == null) return;
+    if (nativeForEach && obj.forEach === nativeForEach) {
+      obj.forEach(iterator, context);
+    } else if (obj.length === +obj.length) {
+      for (var i = 0, length = obj.length; i < length; i++) {
+        if (iterator.call(context, obj[i], i, obj) === breaker) return;
+      }
+    } else {
+      var keys = _.keys(obj);
+      for (var i = 0, length = keys.length; i < length; i++) {
+        if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
+      }
+    }
+  };
+
+  // Return the results of applying the iterator to each element.
+  // Delegates to **ECMAScript 5**'s native `map` if available.
+  _.map = _.collect = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
+    each(obj, function(value, index, list) {
+      results.push(iterator.call(context, value, index, list));
+    });
+    return results;
+  };
+
+  var reduceError = 'Reduce of empty array with no initial value';
+
+  // **Reduce** builds up a single result from a list of values, aka `inject`,
+  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
+  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
+    var initial = arguments.length > 2;
+    if (obj == null) obj = [];
+    if (nativeReduce && obj.reduce === nativeReduce) {
+      if (context) iterator = _.bind(iterator, context);
+      return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
+    }
+    each(obj, function(value, index, list) {
+      if (!initial) {
+        memo = value;
+        initial = true;
+      } else {
+        memo = iterator.call(context, memo, value, index, list);
+      }
+    });
+    if (!initial) throw new TypeError(reduceError);
+    return memo;
+  };
+
+  // The right-associative version of reduce, also known as `foldr`.
+  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
+  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
+    var initial = arguments.length > 2;
+    if (obj == null) obj = [];
+    if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
+      if (context) iterator = _.bind(iterator, context);
+      return initial ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
+    }
+    var length = obj.length;
+    if (length !== +length) {
+      var keys = _.keys(obj);
+      length = keys.length;
+    }
+    each(obj, function(value, index, list) {
+      index = keys ? keys[--length] : --length;
+      if (!initial) {
+        memo = obj[index];
+        initial = true;
+      } else {
+        memo = iterator.call(context, memo, obj[index], index, list);
+      }
+    });
+    if (!initial) throw new TypeError(reduceError);
+    return memo;
+  };
+
+  // Return the first value which passes a truth test. Aliased as `detect`.
+  _.find = _.detect = function(obj, iterator, context) {
+    var result;
+    any(obj, function(value, index, list) {
+      if (iterator.call(context, value, index, list)) {
+        result = value;
+        return true;
+      }
+    });
+    return result;
+  };
+
+  // Return all the elements that pass a truth test.
+  // Delegates to **ECMAScript 5**'s native `filter` if available.
+  // Aliased as `select`.
+  _.filter = _.select = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
+    each(obj, function(value, index, list) {
+      if (iterator.call(context, value, index, list)) results.push(value);
+    });
+    return results;
+  };
+
+  // Return all the elements for which a truth test fails.
+  _.reject = function(obj, iterator, context) {
+    return _.filter(obj, function(value, index, list) {
+      return !iterator.call(context, value, index, list);
+    }, context);
+  };
+
+  // Determine whether all of the elements match a truth test.
+  // Delegates to **ECMAScript 5**'s native `every` if available.
+  // Aliased as `all`.
+  _.every = _.all = function(obj, iterator, context) {
+    iterator || (iterator = _.identity);
+    var result = true;
+    if (obj == null) return result;
+    if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
+    each(obj, function(value, index, list) {
+      if (!(result = result && iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
+  };
+
+  // Determine if at least one element in the object matches a truth test.
+  // Delegates to **ECMAScript 5**'s native `some` if available.
+  // Aliased as `any`.
+  var any = _.some = _.any = function(obj, iterator, context) {
+    iterator || (iterator = _.identity);
+    var result = false;
+    if (obj == null) return result;
+    if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
+    each(obj, function(value, index, list) {
+      if (result || (result = iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
+  };
+
+  // Determine if the array or object contains a given value (using `===`).
+  // Aliased as `include`.
+  _.contains = _.include = function(obj, target) {
+    if (obj == null) return false;
+    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
+    return any(obj, function(value) {
+      return value === target;
+    });
+  };
+
+  // Invoke a method (with arguments) on every item in a collection.
+  _.invoke = function(obj, method) {
+    var args = slice.call(arguments, 2);
+    var isFunc = _.isFunction(method);
+    return _.map(obj, function(value) {
+      return (isFunc ? method : value[method]).apply(value, args);
+    });
+  };
+
+  // Convenience version of a common use case of `map`: fetching a property.
+  _.pluck = function(obj, key) {
+    return _.map(obj, function(value){ return value[key]; });
+  };
+
+  // Convenience version of a common use case of `filter`: selecting only objects
+  // containing specific `key:value` pairs.
+  _.where = function(obj, attrs, first) {
+    if (_.isEmpty(attrs)) return first ? void 0 : [];
+    return _[first ? 'find' : 'filter'](obj, function(value) {
+      for (var key in attrs) {
+        if (attrs[key] !== value[key]) return false;
+      }
+      return true;
+    });
+  };
+
+  // Convenience version of a common use case of `find`: getting the first object
+  // containing specific `key:value` pairs.
+  _.findWhere = function(obj, attrs) {
+    return _.where(obj, attrs, true);
+  };
+
+  // Return the maximum element or (element-based computation).
+  // Can't optimize arrays of integers longer than 65,535 elements.
+  // See [WebKit Bug 80797](https://bugs.webkit.org/show_bug.cgi?id=80797)
+  _.max = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+      return Math.max.apply(Math, obj);
+    }
+    if (!iterator && _.isEmpty(obj)) return -Infinity;
+    var result = {computed : -Infinity, value: -Infinity};
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      computed > result.computed && (result = {value : value, computed : computed});
+    });
+    return result.value;
+  };
+
+  // Return the minimum element (or element-based computation).
+  _.min = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+      return Math.min.apply(Math, obj);
+    }
+    if (!iterator && _.isEmpty(obj)) return Infinity;
+    var result = {computed : Infinity, value: Infinity};
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      computed < result.computed && (result = {value : value, computed : computed});
+    });
+    return result.value;
+  };
+
+  // Shuffle an array, using the modern version of the 
+  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
+  _.shuffle = function(obj) {
+    var rand;
+    var index = 0;
+    var shuffled = [];
+    each(obj, function(value) {
+      rand = _.random(index++);
+      shuffled[index - 1] = shuffled[rand];
+      shuffled[rand] = value;
+    });
+    return shuffled;
+  };
+
+  // Sample **n** random values from an array.
+  // If **n** is not specified, returns a single random element from the array.
+  // The internal `guard` argument allows it to work with `map`.
+  _.sample = function(obj, n, guard) {
+    if (arguments.length < 2 || guard) {
+      return obj[_.random(obj.length - 1)];
+    }
+    return _.shuffle(obj).slice(0, Math.max(0, n));
+  };
+
+  // An internal function to generate lookup iterators.
+  var lookupIterator = function(value) {
+    return _.isFunction(value) ? value : function(obj){ return obj[value]; };
+  };
+
+  // Sort the object's values by a criterion produced by an iterator.
+  _.sortBy = function(obj, value, context) {
+    var iterator = lookupIterator(value);
+    return _.pluck(_.map(obj, function(value, index, list) {
+      return {
+        value: value,
+        index: index,
+        criteria: iterator.call(context, value, index, list)
+      };
+    }).sort(function(left, right) {
+      var a = left.criteria;
+      var b = right.criteria;
+      if (a !== b) {
+        if (a > b || a === void 0) return 1;
+        if (a < b || b === void 0) return -1;
+      }
+      return left.index - right.index;
+    }), 'value');
+  };
+
+  // An internal function used for aggregate "group by" operations.
+  var group = function(behavior) {
+    return function(obj, value, context) {
+      var result = {};
+      var iterator = value == null ? _.identity : lookupIterator(value);
+      each(obj, function(value, index) {
+        var key = iterator.call(context, value, index, obj);
+        behavior(result, key, value);
+      });
+      return result;
+    };
+  };
+
+  // Groups the object's values by a criterion. Pass either a string attribute
+  // to group by, or a function that returns the criterion.
+  _.groupBy = group(function(result, key, value) {
+    (_.has(result, key) ? result[key] : (result[key] = [])).push(value);
+  });
+
+  // Indexes the object's values by a criterion, similar to `groupBy`, but for
+  // when you know that your index values will be unique.
+  _.indexBy = group(function(result, key, value) {
+    result[key] = value;
+  });
+
+  // Counts instances of an object that group by a certain criterion. Pass
+  // either a string attribute to count by, or a function that returns the
+  // criterion.
+  _.countBy = group(function(result, key) {
+    _.has(result, key) ? result[key]++ : result[key] = 1;
+  });
+
+  // Use a comparator function to figure out the smallest index at which
+  // an object should be inserted so as to maintain order. Uses binary search.
+  _.sortedIndex = function(array, obj, iterator, context) {
+    iterator = iterator == null ? _.identity : lookupIterator(iterator);
+    var value = iterator.call(context, obj);
+    var low = 0, high = array.length;
+    while (low < high) {
+      var mid = (low + high) >>> 1;
+      iterator.call(context, array[mid]) < value ? low = mid + 1 : high = mid;
+    }
+    return low;
+  };
+
+  // Safely create a real, live array from anything iterable.
+  _.toArray = function(obj) {
+    if (!obj) return [];
+    if (_.isArray(obj)) return slice.call(obj);
+    if (obj.length === +obj.length) return _.map(obj, _.identity);
+    return _.values(obj);
+  };
+
+  // Return the number of elements in an object.
+  _.size = function(obj) {
+    if (obj == null) return 0;
+    return (obj.length === +obj.length) ? obj.length : _.keys(obj).length;
+  };
+
+  // Array Functions
+  // ---------------
+
+  // Get the first element of an array. Passing **n** will return the first N
+  // values in the array. Aliased as `head` and `take`. The **guard** check
+  // allows it to work with `_.map`.
+  _.first = _.head = _.take = function(array, n, guard) {
+    if (array == null) return void 0;
+    return (n == null) || guard ? array[0] : slice.call(array, 0, n);
+  };
+
+  // Returns everything but the last entry of the array. Especially useful on
+  // the arguments object. Passing **n** will return all the values in
+  // the array, excluding the last N. The **guard** check allows it to work with
+  // `_.map`.
+  _.initial = function(array, n, guard) {
+    return slice.call(array, 0, array.length - ((n == null) || guard ? 1 : n));
+  };
+
+  // Get the last element of an array. Passing **n** will return the last N
+  // values in the array. The **guard** check allows it to work with `_.map`.
+  _.last = function(array, n, guard) {
+    if (array == null) return void 0;
+    if ((n == null) || guard) {
+      return array[array.length - 1];
+    } else {
+      return slice.call(array, Math.max(array.length - n, 0));
+    }
+  };
+
+  // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
+  // Especially useful on the arguments object. Passing an **n** will return
+  // the rest N values in the array. The **guard**
+  // check allows it to work with `_.map`.
+  _.rest = _.tail = _.drop = function(array, n, guard) {
+    return slice.call(array, (n == null) || guard ? 1 : n);
+  };
+
+  // Trim out all falsy values from an array.
+  _.compact = function(array) {
+    return _.filter(array, _.identity);
+  };
+
+  // Internal implementation of a recursive `flatten` function.
+  var flatten = function(input, shallow, output) {
+    if (shallow && _.every(input, _.isArray)) {
+      return concat.apply(output, input);
+    }
+    each(input, function(value) {
+      if (_.isArray(value) || _.isArguments(value)) {
+        shallow ? push.apply(output, value) : flatten(value, shallow, output);
+      } else {
+        output.push(value);
+      }
+    });
+    return output;
+  };
+
+  // Flatten out an array, either recursively (by default), or just one level.
+  _.flatten = function(array, shallow) {
+    return flatten(array, shallow, []);
+  };
+
+  // Return a version of the array that does not contain the specified value(s).
+  _.without = function(array) {
+    return _.difference(array, slice.call(arguments, 1));
+  };
+
+  // Produce a duplicate-free version of the array. If the array has already
+  // been sorted, you have the option of using a faster algorithm.
+  // Aliased as `unique`.
+  _.uniq = _.unique = function(array, isSorted, iterator, context) {
+    if (_.isFunction(isSorted)) {
+      context = iterator;
+      iterator = isSorted;
+      isSorted = false;
+    }
+    var initial = iterator ? _.map(array, iterator, context) : array;
+    var results = [];
+    var seen = [];
+    each(initial, function(value, index) {
+      if (isSorted ? (!index || seen[seen.length - 1] !== value) : !_.contains(seen, value)) {
+        seen.push(value);
+        results.push(array[index]);
+      }
+    });
+    return results;
+  };
+
+  // Produce an array that contains the union: each distinct element from all of
+  // the passed-in arrays.
+  _.union = function() {
+    return _.uniq(_.flatten(arguments, true));
+  };
+
+  // Produce an array that contains every item shared between all the
+  // passed-in arrays.
+  _.intersection = function(array) {
+    var rest = slice.call(arguments, 1);
+    return _.filter(_.uniq(array), function(item) {
+      return _.every(rest, function(other) {
+        return _.indexOf(other, item) >= 0;
+      });
+    });
+  };
+
+  // Take the difference between one array and a number of other arrays.
+  // Only the elements present in just the first array will remain.
+  _.difference = function(array) {
+    var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
+    return _.filter(array, function(value){ return !_.contains(rest, value); });
+  };
+
+  // Zip together multiple lists into a single array -- elements that share
+  // an index go together.
+  _.zip = function() {
+    var length = _.max(_.pluck(arguments, "length").concat(0));
+    var results = new Array(length);
+    for (var i = 0; i < length; i++) {
+      results[i] = _.pluck(arguments, '' + i);
+    }
+    return results;
+  };
+
+  // Converts lists into objects. Pass either a single array of `[key, value]`
+  // pairs, or two parallel arrays of the same length -- one of keys, and one of
+  // the corresponding values.
+  _.object = function(list, values) {
+    if (list == null) return {};
+    var result = {};
+    for (var i = 0, length = list.length; i < length; i++) {
+      if (values) {
+        result[list[i]] = values[i];
+      } else {
+        result[list[i][0]] = list[i][1];
+      }
+    }
+    return result;
+  };
+
+  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
+  // we need this function. Return the position of the first occurrence of an
+  // item in an array, or -1 if the item is not included in the array.
+  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
+  // If the array is large and already in sort order, pass `true`
+  // for **isSorted** to use binary search.
+  _.indexOf = function(array, item, isSorted) {
+    if (array == null) return -1;
+    var i = 0, length = array.length;
+    if (isSorted) {
+      if (typeof isSorted == 'number') {
+        i = (isSorted < 0 ? Math.max(0, length + isSorted) : isSorted);
+      } else {
+        i = _.sortedIndex(array, item);
+        return array[i] === item ? i : -1;
+      }
+    }
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
+    for (; i < length; i++) if (array[i] === item) return i;
+    return -1;
+  };
+
+  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
+  _.lastIndexOf = function(array, item, from) {
+    if (array == null) return -1;
+    var hasIndex = from != null;
+    if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) {
+      return hasIndex ? array.lastIndexOf(item, from) : array.lastIndexOf(item);
+    }
+    var i = (hasIndex ? from : array.length);
+    while (i--) if (array[i] === item) return i;
+    return -1;
+  };
+
+  // Generate an integer Array containing an arithmetic progression. A port of
+  // the native Python `range()` function. See
+  // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  _.range = function(start, stop, step) {
+    if (arguments.length <= 1) {
+      stop = start || 0;
+      start = 0;
+    }
+    step = arguments[2] || 1;
+
+    var length = Math.max(Math.ceil((stop - start) / step), 0);
+    var idx = 0;
+    var range = new Array(length);
+
+    while(idx < length) {
+      range[idx++] = start;
+      start += step;
+    }
+
+    return range;
+  };
+
+  // Function (ahem) Functions
+  // ------------------
+
+  // Reusable constructor function for prototype setting.
+  var ctor = function(){};
+
+  // Create a function bound to a given object (assigning `this`, and arguments,
+  // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
+  // available.
+  _.bind = function(func, context) {
+    var args, bound;
+    if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
+    if (!_.isFunction(func)) throw new TypeError;
+    args = slice.call(arguments, 2);
+    return bound = function() {
+      if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
+      ctor.prototype = func.prototype;
+      var self = new ctor;
+      ctor.prototype = null;
+      var result = func.apply(self, args.concat(slice.call(arguments)));
+      if (Object(result) === result) return result;
+      return self;
+    };
+  };
+
+  // Partially apply a function by creating a version that has had some of its
+  // arguments pre-filled, without changing its dynamic `this` context.
+  _.partial = function(func) {
+    var args = slice.call(arguments, 1);
+    return function() {
+      return func.apply(this, args.concat(slice.call(arguments)));
+    };
+  };
+
+  // Bind all of an object's methods to that object. Useful for ensuring that
+  // all callbacks defined on an object belong to it.
+  _.bindAll = function(obj) {
+    var funcs = slice.call(arguments, 1);
+    if (funcs.length === 0) throw new Error("bindAll must be passed function names");
+    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
+    return obj;
+  };
+
+  // Memoize an expensive function by storing its results.
+  _.memoize = function(func, hasher) {
+    var memo = {};
+    hasher || (hasher = _.identity);
+    return function() {
+      var key = hasher.apply(this, arguments);
+      return _.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
+    };
+  };
+
+  // Delays a function for the given number of milliseconds, and then calls
+  // it with the arguments supplied.
+  _.delay = function(func, wait) {
+    var args = slice.call(arguments, 2);
+    return setTimeout(function(){ return func.apply(null, args); }, wait);
+  };
+
+  // Defers a function, scheduling it to run after the current call stack has
+  // cleared.
+  _.defer = function(func) {
+    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
+  };
+
+  // Returns a function, that, when invoked, will only be triggered at most once
+  // during a given window of time. Normally, the throttled function will run
+  // as much as it can, without ever going more than once per `wait` duration;
+  // but if you'd like to disable the execution on the leading edge, pass
+  // `{leading: false}`. To disable execution on the trailing edge, ditto.
+  _.throttle = function(func, wait, options) {
+    var context, args, result;
+    var timeout = null;
+    var previous = 0;
+    options || (options = {});
+    var later = function() {
+      previous = options.leading === false ? 0 : new Date;
+      timeout = null;
+      result = func.apply(context, args);
+    };
+    return function() {
+      var now = new Date;
+      if (!previous && options.leading === false) previous = now;
+      var remaining = wait - (now - previous);
+      context = this;
+      args = arguments;
+      if (remaining <= 0) {
+        clearTimeout(timeout);
+        timeout = null;
+        previous = now;
+        result = func.apply(context, args);
+      } else if (!timeout && options.trailing !== false) {
+        timeout = setTimeout(later, remaining);
+      }
+      return result;
+    };
+  };
+
+  // Returns a function, that, as long as it continues to be invoked, will not
+  // be triggered. The function will be called after it stops being called for
+  // N milliseconds. If `immediate` is passed, trigger the function on the
+  // leading edge, instead of the trailing.
+  _.debounce = function(func, wait, immediate) {
+    var timeout, args, context, timestamp, result;
+    return function() {
+      context = this;
+      args = arguments;
+      timestamp = new Date();
+      var later = function() {
+        var last = (new Date()) - timestamp;
+        if (last < wait) {
+          timeout = setTimeout(later, wait - last);
+        } else {
+          timeout = null;
+          if (!immediate) result = func.apply(context, args);
+        }
+      };
+      var callNow = immediate && !timeout;
+      if (!timeout) {
+        timeout = setTimeout(later, wait);
+      }
+      if (callNow) result = func.apply(context, args);
+      return result;
+    };
+  };
+
+  // Returns a function that will be executed at most one time, no matter how
+  // often you call it. Useful for lazy initialization.
+  _.once = function(func) {
+    var ran = false, memo;
+    return function() {
+      if (ran) return memo;
+      ran = true;
+      memo = func.apply(this, arguments);
+      func = null;
+      return memo;
+    };
+  };
+
+  // Returns the first function passed as an argument to the second,
+  // allowing you to adjust arguments, run code before and after, and
+  // conditionally execute the original function.
+  _.wrap = function(func, wrapper) {
+    return function() {
+      var args = [func];
+      push.apply(args, arguments);
+      return wrapper.apply(this, args);
+    };
+  };
+
+  // Returns a function that is the composition of a list of functions, each
+  // consuming the return value of the function that follows.
+  _.compose = function() {
+    var funcs = arguments;
+    return function() {
+      var args = arguments;
+      for (var i = funcs.length - 1; i >= 0; i--) {
+        args = [funcs[i].apply(this, args)];
+      }
+      return args[0];
+    };
+  };
+
+  // Returns a function that will only be executed after being called N times.
+  _.after = function(times, func) {
+    return function() {
+      if (--times < 1) {
+        return func.apply(this, arguments);
+      }
+    };
+  };
+
+  // Object Functions
+  // ----------------
+
+  // Retrieve the names of an object's properties.
+  // Delegates to **ECMAScript 5**'s native `Object.keys`
+  _.keys = nativeKeys || function(obj) {
+    if (obj !== Object(obj)) throw new TypeError('Invalid object');
+    var keys = [];
+    for (var key in obj) if (_.has(obj, key)) keys.push(key);
+    return keys;
+  };
+
+  // Retrieve the values of an object's properties.
+  _.values = function(obj) {
+    var keys = _.keys(obj);
+    var length = keys.length;
+    var values = new Array(length);
+    for (var i = 0; i < length; i++) {
+      values[i] = obj[keys[i]];
+    }
+    return values;
+  };
+
+  // Convert an object into a list of `[key, value]` pairs.
+  _.pairs = function(obj) {
+    var keys = _.keys(obj);
+    var length = keys.length;
+    var pairs = new Array(length);
+    for (var i = 0; i < length; i++) {
+      pairs[i] = [keys[i], obj[keys[i]]];
+    }
+    return pairs;
+  };
+
+  // Invert the keys and values of an object. The values must be serializable.
+  _.invert = function(obj) {
+    var result = {};
+    var keys = _.keys(obj);
+    for (var i = 0, length = keys.length; i < length; i++) {
+      result[obj[keys[i]]] = keys[i];
+    }
+    return result;
+  };
+
+  // Return a sorted list of the function names available on the object.
+  // Aliased as `methods`
+  _.functions = _.methods = function(obj) {
+    var names = [];
+    for (var key in obj) {
+      if (_.isFunction(obj[key])) names.push(key);
+    }
+    return names.sort();
+  };
+
+  // Extend a given object with all the properties in passed-in object(s).
+  _.extend = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      if (source) {
+        for (var prop in source) {
+          obj[prop] = source[prop];
+        }
+      }
+    });
+    return obj;
+  };
+
+  // Return a copy of the object only containing the whitelisted properties.
+  _.pick = function(obj) {
+    var copy = {};
+    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
+    each(keys, function(key) {
+      if (key in obj) copy[key] = obj[key];
+    });
+    return copy;
+  };
+
+   // Return a copy of the object without the blacklisted properties.
+  _.omit = function(obj) {
+    var copy = {};
+    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
+    for (var key in obj) {
+      if (!_.contains(keys, key)) copy[key] = obj[key];
+    }
+    return copy;
+  };
+
+  // Fill in a given object with default properties.
+  _.defaults = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      if (source) {
+        for (var prop in source) {
+          if (obj[prop] === void 0) obj[prop] = source[prop];
+        }
+      }
+    });
+    return obj;
+  };
+
+  // Create a (shallow-cloned) duplicate of an object.
+  _.clone = function(obj) {
+    if (!_.isObject(obj)) return obj;
+    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
+  };
+
+  // Invokes interceptor with the obj, and then returns obj.
+  // The primary purpose of this method is to "tap into" a method chain, in
+  // order to perform operations on intermediate results within the chain.
+  _.tap = function(obj, interceptor) {
+    interceptor(obj);
+    return obj;
+  };
+
+  // Internal recursive comparison function for `isEqual`.
+  var eq = function(a, b, aStack, bStack) {
+    // Identical objects are equal. `0 === -0`, but they aren't identical.
+    // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
+    if (a === b) return a !== 0 || 1 / a == 1 / b;
+    // A strict comparison is necessary because `null == undefined`.
+    if (a == null || b == null) return a === b;
+    // Unwrap any wrapped objects.
+    if (a instanceof _) a = a._wrapped;
+    if (b instanceof _) b = b._wrapped;
+    // Compare `[[Class]]` names.
+    var className = toString.call(a);
+    if (className != toString.call(b)) return false;
+    switch (className) {
+      // Strings, numbers, dates, and booleans are compared by value.
+      case '[object String]':
+        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
+        // equivalent to `new String("5")`.
+        return a == String(b);
+      case '[object Number]':
+        // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
+        // other numeric values.
+        return a != +a ? b != +b : (a == 0 ? 1 / a == 1 / b : a == +b);
+      case '[object Date]':
+      case '[object Boolean]':
+        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
+        // millisecond representations. Note that invalid dates with millisecond representations
+        // of `NaN` are not equivalent.
+        return +a == +b;
+      // RegExps are compared by their source patterns and flags.
+      case '[object RegExp]':
+        return a.source == b.source &&
+               a.global == b.global &&
+               a.multiline == b.multiline &&
+               a.ignoreCase == b.ignoreCase;
+    }
+    if (typeof a != 'object' || typeof b != 'object') return false;
+    // Assume equality for cyclic structures. The algorithm for detecting cyclic
+    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+    var length = aStack.length;
+    while (length--) {
+      // Linear search. Performance is inversely proportional to the number of
+      // unique nested structures.
+      if (aStack[length] == a) return bStack[length] == b;
+    }
+    // Objects with different constructors are not equivalent, but `Object`s
+    // from different frames are.
+    var aCtor = a.constructor, bCtor = b.constructor;
+    if (aCtor !== bCtor && !(_.isFunction(aCtor) && (aCtor instanceof aCtor) &&
+                             _.isFunction(bCtor) && (bCtor instanceof bCtor))) {
+      return false;
+    }
+    // Add the first object to the stack of traversed objects.
+    aStack.push(a);
+    bStack.push(b);
+    var size = 0, result = true;
+    // Recursively compare objects and arrays.
+    if (className == '[object Array]') {
+      // Compare array lengths to determine if a deep comparison is necessary.
+      size = a.length;
+      result = size == b.length;
+      if (result) {
+        // Deep compare the contents, ignoring non-numeric properties.
+        while (size--) {
+          if (!(result = eq(a[size], b[size], aStack, bStack))) break;
+        }
+      }
+    } else {
+      // Deep compare objects.
+      for (var key in a) {
+        if (_.has(a, key)) {
+          // Count the expected number of properties.
+          size++;
+          // Deep compare each member.
+          if (!(result = _.has(b, key) && eq(a[key], b[key], aStack, bStack))) break;
+        }
+      }
+      // Ensure that both objects contain the same number of properties.
+      if (result) {
+        for (key in b) {
+          if (_.has(b, key) && !(size--)) break;
+        }
+        result = !size;
+      }
+    }
+    // Remove the first object from the stack of traversed objects.
+    aStack.pop();
+    bStack.pop();
+    return result;
+  };
+
+  // Perform a deep comparison to check if two objects are equal.
+  _.isEqual = function(a, b) {
+    return eq(a, b, [], []);
+  };
+
+  // Is a given array, string, or object empty?
+  // An "empty" object has no enumerable own-properties.
+  _.isEmpty = function(obj) {
+    if (obj == null) return true;
+    if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
+    for (var key in obj) if (_.has(obj, key)) return false;
+    return true;
+  };
+
+  // Is a given value a DOM element?
+  _.isElement = function(obj) {
+    return !!(obj && obj.nodeType === 1);
+  };
+
+  // Is a given value an array?
+  // Delegates to ECMA5's native Array.isArray
+  _.isArray = nativeIsArray || function(obj) {
+    return toString.call(obj) == '[object Array]';
+  };
+
+  // Is a given variable an object?
+  _.isObject = function(obj) {
+    return obj === Object(obj);
+  };
+
+  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp.
+  each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function(name) {
+    _['is' + name] = function(obj) {
+      return toString.call(obj) == '[object ' + name + ']';
+    };
+  });
+
+  // Define a fallback version of the method in browsers (ahem, IE), where
+  // there isn't any inspectable "Arguments" type.
+  if (!_.isArguments(arguments)) {
+    _.isArguments = function(obj) {
+      return !!(obj && _.has(obj, 'callee'));
+    };
+  }
+
+  // Optimize `isFunction` if appropriate.
+  if (typeof (/./) !== 'function') {
+    _.isFunction = function(obj) {
+      return typeof obj === 'function';
+    };
+  }
+
+  // Is a given object a finite number?
+  _.isFinite = function(obj) {
+    return isFinite(obj) && !isNaN(parseFloat(obj));
+  };
+
+  // Is the given value `NaN`? (NaN is the only number which does not equal itself).
+  _.isNaN = function(obj) {
+    return _.isNumber(obj) && obj != +obj;
+  };
+
+  // Is a given value a boolean?
+  _.isBoolean = function(obj) {
+    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
+  };
+
+  // Is a given value equal to null?
+  _.isNull = function(obj) {
+    return obj === null;
+  };
+
+  // Is a given variable undefined?
+  _.isUndefined = function(obj) {
+    return obj === void 0;
+  };
+
+  // Shortcut function for checking if an object has a given property directly
+  // on itself (in other words, not on a prototype).
+  _.has = function(obj, key) {
+    return hasOwnProperty.call(obj, key);
+  };
+
+  // Utility Functions
+  // -----------------
+
+  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
+  // previous owner. Returns a reference to the Underscore object.
+  _.noConflict = function() {
+    root._ = previousUnderscore;
+    return this;
+  };
+
+  // Keep the identity function around for default iterators.
+  _.identity = function(value) {
+    return value;
+  };
+
+  // Run a function **n** times.
+  _.times = function(n, iterator, context) {
+    var accum = Array(Math.max(0, n));
+    for (var i = 0; i < n; i++) accum[i] = iterator.call(context, i);
+    return accum;
+  };
+
+  // Return a random integer between min and max (inclusive).
+  _.random = function(min, max) {
+    if (max == null) {
+      max = min;
+      min = 0;
+    }
+    return min + Math.floor(Math.random() * (max - min + 1));
+  };
+
+  // List of HTML entities for escaping.
+  var entityMap = {
+    escape: {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;'
+    }
+  };
+  entityMap.unescape = _.invert(entityMap.escape);
+
+  // Regexes containing the keys and values listed immediately above.
+  var entityRegexes = {
+    escape:   new RegExp('[' + _.keys(entityMap.escape).join('') + ']', 'g'),
+    unescape: new RegExp('(' + _.keys(entityMap.unescape).join('|') + ')', 'g')
+  };
+
+  // Functions for escaping and unescaping strings to/from HTML interpolation.
+  _.each(['escape', 'unescape'], function(method) {
+    _[method] = function(string) {
+      if (string == null) return '';
+      return ('' + string).replace(entityRegexes[method], function(match) {
+        return entityMap[method][match];
+      });
+    };
+  });
+
+  // If the value of the named `property` is a function then invoke it with the
+  // `object` as context; otherwise, return it.
+  _.result = function(object, property) {
+    if (object == null) return void 0;
+    var value = object[property];
+    return _.isFunction(value) ? value.call(object) : value;
+  };
+
+  // Add your own custom functions to the Underscore object.
+  _.mixin = function(obj) {
+    each(_.functions(obj), function(name) {
+      var func = _[name] = obj[name];
+      _.prototype[name] = function() {
+        var args = [this._wrapped];
+        push.apply(args, arguments);
+        return result.call(this, func.apply(_, args));
+      };
+    });
+  };
+
+  // Generate a unique integer id (unique within the entire client session).
+  // Useful for temporary DOM ids.
+  var idCounter = 0;
+  _.uniqueId = function(prefix) {
+    var id = ++idCounter + '';
+    return prefix ? prefix + id : id;
+  };
+
+  // By default, Underscore uses ERB-style template delimiters, change the
+  // following template settings to use alternative delimiters.
+  _.templateSettings = {
+    evaluate    : /<%([\s\S]+?)%>/g,
+    interpolate : /<%=([\s\S]+?)%>/g,
+    escape      : /<%-([\s\S]+?)%>/g
+  };
+
+  // When customizing `templateSettings`, if you don't want to define an
+  // interpolation, evaluation or escaping regex, we need one that is
+  // guaranteed not to match.
+  var noMatch = /(.)^/;
+
+  // Certain characters need to be escaped so that they can be put into a
+  // string literal.
+  var escapes = {
+    "'":      "'",
+    '\\':     '\\',
+    '\r':     'r',
+    '\n':     'n',
+    '\t':     't',
+    '\u2028': 'u2028',
+    '\u2029': 'u2029'
+  };
+
+  var escaper = /\\|'|\r|\n|\t|\u2028|\u2029/g;
+
+  // JavaScript micro-templating, similar to John Resig's implementation.
+  // Underscore templating handles arbitrary delimiters, preserves whitespace,
+  // and correctly escapes quotes within interpolated code.
+  _.template = function(text, data, settings) {
+    var render;
+    settings = _.defaults({}, settings, _.templateSettings);
+
+    // Combine delimiters into one regular expression via alternation.
+    var matcher = new RegExp([
+      (settings.escape || noMatch).source,
+      (settings.interpolate || noMatch).source,
+      (settings.evaluate || noMatch).source
+    ].join('|') + '|$', 'g');
+
+    // Compile the template source, escaping string literals appropriately.
+    var index = 0;
+    var source = "__p+='";
+    text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
+      source += text.slice(index, offset)
+        .replace(escaper, function(match) { return '\\' + escapes[match]; });
+
+      if (escape) {
+        source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
+      }
+      if (interpolate) {
+        source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
+      }
+      if (evaluate) {
+        source += "';\n" + evaluate + "\n__p+='";
+      }
+      index = offset + match.length;
+      return match;
+    });
+    source += "';\n";
+
+    // If a variable is not specified, place data values in local scope.
+    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
+
+    source = "var __t,__p='',__j=Array.prototype.join," +
+      "print=function(){__p+=__j.call(arguments,'');};\n" +
+      source + "return __p;\n";
+
+    try {
+      render = new Function(settings.variable || 'obj', '_', source);
+    } catch (e) {
+      e.source = source;
+      throw e;
+    }
+
+    if (data) return render(data, _);
+    var template = function(data) {
+      return render.call(this, data, _);
+    };
+
+    // Provide the compiled function source as a convenience for precompilation.
+    template.source = 'function(' + (settings.variable || 'obj') + '){\n' + source + '}';
+
+    return template;
+  };
+
+  // Add a "chain" function, which will delegate to the wrapper.
+  _.chain = function(obj) {
+    return _(obj).chain();
+  };
+
+  // OOP
+  // ---------------
+  // If Underscore is called as a function, it returns a wrapped object that
+  // can be used OO-style. This wrapper holds altered versions of all the
+  // underscore functions. Wrapped objects may be chained.
+
+  // Helper function to continue chaining intermediate results.
+  var result = function(obj) {
+    return this._chain ? _(obj).chain() : obj;
+  };
+
+  // Add all of the Underscore functions to the wrapper object.
+  _.mixin(_);
+
+  // Add all mutator Array functions to the wrapper.
+  each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
+    var method = ArrayProto[name];
+    _.prototype[name] = function() {
+      var obj = this._wrapped;
+      method.apply(obj, arguments);
+      if ((name == 'shift' || name == 'splice') && obj.length === 0) delete obj[0];
+      return result.call(this, obj);
+    };
+  });
+
+  // Add all accessor Array functions to the wrapper.
+  each(['concat', 'join', 'slice'], function(name) {
+    var method = ArrayProto[name];
+    _.prototype[name] = function() {
+      return result.call(this, method.apply(this._wrapped, arguments));
+    };
+  });
+
+  _.extend(_.prototype, {
+
+    // Start chaining a wrapped Underscore object.
+    chain: function() {
+      this._chain = true;
+      return this;
+    },
+
+    // Extracts the result from a wrapped and chained object.
+    value: function() {
+      return this._wrapped;
+    }
+
+  });
+
+}).call(this);
+
 ;//     Backbone.js 1.1.0
 
 //     (c) 2010-2011 Jeremy Ashkenas, DocumentCloud Inc.
@@ -13782,6 +13782,362 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
 
 }(jQuery);
 
+;//fgnass.github.com/spin.js#v1.3.2
+
+/**
+ * Copyright (c) 2011-2013 Felix Gnass
+ * Licensed under the MIT license
+ */
+(function(root, factory) {
+
+  /* CommonJS */
+  if (typeof exports == 'object')  module.exports = factory()
+
+  /* AMD module */
+  else if (typeof define == 'function' && define.amd) define(factory)
+
+  /* Browser global */
+  else root.Spinner = factory()
+}
+(this, function() {
+  "use strict";
+
+  var prefixes = ['webkit', 'Moz', 'ms', 'O'] /* Vendor prefixes */
+    , animations = {} /* Animation rules keyed by their name */
+    , useCssAnimations /* Whether to use CSS animations or setTimeout */
+
+  /**
+   * Utility function to create elements. If no tag name is given,
+   * a DIV is created. Optionally properties can be passed.
+   */
+  function createEl(tag, prop) {
+    var el = document.createElement(tag || 'div')
+      , n
+
+    for(n in prop) el[n] = prop[n]
+    return el
+  }
+
+  /**
+   * Appends children and returns the parent.
+   */
+  function ins(parent /* child1, child2, ...*/) {
+    for (var i=1, n=arguments.length; i<n; i++)
+      parent.appendChild(arguments[i])
+
+    return parent
+  }
+
+  /**
+   * Insert a new stylesheet to hold the @keyframe or VML rules.
+   */
+  var sheet = (function() {
+    var el = createEl('style', {type : 'text/css'})
+    ins(document.getElementsByTagName('head')[0], el)
+    return el.sheet || el.styleSheet
+  }())
+
+  /**
+   * Creates an opacity keyframe animation rule and returns its name.
+   * Since most mobile Webkits have timing issues with animation-delay,
+   * we create separate rules for each line/segment.
+   */
+  function addAnimation(alpha, trail, i, lines) {
+    var name = ['opacity', trail, ~~(alpha*100), i, lines].join('-')
+      , start = 0.01 + i/lines * 100
+      , z = Math.max(1 - (1-alpha) / trail * (100-start), alpha)
+      , prefix = useCssAnimations.substring(0, useCssAnimations.indexOf('Animation')).toLowerCase()
+      , pre = prefix && '-' + prefix + '-' || ''
+
+    if (!animations[name]) {
+      sheet.insertRule(
+        '@' + pre + 'keyframes ' + name + '{' +
+        '0%{opacity:' + z + '}' +
+        start + '%{opacity:' + alpha + '}' +
+        (start+0.01) + '%{opacity:1}' +
+        (start+trail) % 100 + '%{opacity:' + alpha + '}' +
+        '100%{opacity:' + z + '}' +
+        '}', sheet.cssRules.length)
+
+      animations[name] = 1
+    }
+
+    return name
+  }
+
+  /**
+   * Tries various vendor prefixes and returns the first supported property.
+   */
+  function vendor(el, prop) {
+    var s = el.style
+      , pp
+      , i
+
+    prop = prop.charAt(0).toUpperCase() + prop.slice(1)
+    for(i=0; i<prefixes.length; i++) {
+      pp = prefixes[i]+prop
+      if(s[pp] !== undefined) return pp
+    }
+    if(s[prop] !== undefined) return prop
+  }
+
+  /**
+   * Sets multiple style properties at once.
+   */
+  function css(el, prop) {
+    for (var n in prop)
+      el.style[vendor(el, n)||n] = prop[n]
+
+    return el
+  }
+
+  /**
+   * Fills in default values.
+   */
+  function merge(obj) {
+    for (var i=1; i < arguments.length; i++) {
+      var def = arguments[i]
+      for (var n in def)
+        if (obj[n] === undefined) obj[n] = def[n]
+    }
+    return obj
+  }
+
+  /**
+   * Returns the absolute page-offset of the given element.
+   */
+  function pos(el) {
+    var o = { x:el.offsetLeft, y:el.offsetTop }
+    while((el = el.offsetParent))
+      o.x+=el.offsetLeft, o.y+=el.offsetTop
+
+    return o
+  }
+
+  /**
+   * Returns the line color from the given string or array.
+   */
+  function getColor(color, idx) {
+    return typeof color == 'string' ? color : color[idx % color.length]
+  }
+
+  // Built-in defaults
+
+  var defaults = {
+    lines: 12,            // The number of lines to draw
+    length: 7,            // The length of each line
+    width: 5,             // The line thickness
+    radius: 10,           // The radius of the inner circle
+    rotate: 0,            // Rotation offset
+    corners: 1,           // Roundness (0..1)
+    color: '#000',        // #rgb or #rrggbb
+    direction: 1,         // 1: clockwise, -1: counterclockwise
+    speed: 1,             // Rounds per second
+    trail: 100,           // Afterglow percentage
+    opacity: 1/4,         // Opacity of the lines
+    fps: 20,              // Frames per second when using setTimeout()
+    zIndex: 2e9,          // Use a high z-index by default
+    className: 'spinner', // CSS class to assign to the element
+    top: 'auto',          // center vertically
+    left: 'auto',         // center horizontally
+    position: 'relative'  // element position
+  }
+
+  /** The constructor */
+  function Spinner(o) {
+    if (typeof this == 'undefined') return new Spinner(o)
+    this.opts = merge(o || {}, Spinner.defaults, defaults)
+  }
+
+  // Global defaults that override the built-ins:
+  Spinner.defaults = {}
+
+  merge(Spinner.prototype, {
+
+    /**
+     * Adds the spinner to the given target element. If this instance is already
+     * spinning, it is automatically removed from its previous target b calling
+     * stop() internally.
+     */
+    spin: function(target) {
+      this.stop()
+
+      var self = this
+        , o = self.opts
+        , el = self.el = css(createEl(0, {className: o.className}), {position: o.position, width: 0, zIndex: o.zIndex})
+        , mid = o.radius+o.length+o.width
+        , ep // element position
+        , tp // target position
+
+      if (target) {
+        target.insertBefore(el, target.firstChild||null)
+        tp = pos(target)
+        ep = pos(el)
+        css(el, {
+          left: (o.left == 'auto' ? tp.x-ep.x + (target.offsetWidth >> 1) : parseInt(o.left, 10) + mid) + 'px',
+          top: (o.top == 'auto' ? tp.y-ep.y + (target.offsetHeight >> 1) : parseInt(o.top, 10) + mid)  + 'px'
+        })
+      }
+
+      el.setAttribute('role', 'progressbar')
+      self.lines(el, self.opts)
+
+      if (!useCssAnimations) {
+        // No CSS animation support, use setTimeout() instead
+        var i = 0
+          , start = (o.lines - 1) * (1 - o.direction) / 2
+          , alpha
+          , fps = o.fps
+          , f = fps/o.speed
+          , ostep = (1-o.opacity) / (f*o.trail / 100)
+          , astep = f/o.lines
+
+        ;(function anim() {
+          i++;
+          for (var j = 0; j < o.lines; j++) {
+            alpha = Math.max(1 - (i + (o.lines - j) * astep) % f * ostep, o.opacity)
+
+            self.opacity(el, j * o.direction + start, alpha, o)
+          }
+          self.timeout = self.el && setTimeout(anim, ~~(1000/fps))
+        })()
+      }
+      return self
+    },
+
+    /**
+     * Stops and removes the Spinner.
+     */
+    stop: function() {
+      var el = this.el
+      if (el) {
+        clearTimeout(this.timeout)
+        if (el.parentNode) el.parentNode.removeChild(el)
+        this.el = undefined
+      }
+      return this
+    },
+
+    /**
+     * Internal method that draws the individual lines. Will be overwritten
+     * in VML fallback mode below.
+     */
+    lines: function(el, o) {
+      var i = 0
+        , start = (o.lines - 1) * (1 - o.direction) / 2
+        , seg
+
+      function fill(color, shadow) {
+        return css(createEl(), {
+          position: 'absolute',
+          width: (o.length+o.width) + 'px',
+          height: o.width + 'px',
+          background: color,
+          boxShadow: shadow,
+          transformOrigin: 'left',
+          transform: 'rotate(' + ~~(360/o.lines*i+o.rotate) + 'deg) translate(' + o.radius+'px' +',0)',
+          borderRadius: (o.corners * o.width>>1) + 'px'
+        })
+      }
+
+      for (; i < o.lines; i++) {
+        seg = css(createEl(), {
+          position: 'absolute',
+          top: 1+~(o.width/2) + 'px',
+          transform: o.hwaccel ? 'translate3d(0,0,0)' : '',
+          opacity: o.opacity,
+          animation: useCssAnimations && addAnimation(o.opacity, o.trail, start + i * o.direction, o.lines) + ' ' + 1/o.speed + 's linear infinite'
+        })
+
+        if (o.shadow) ins(seg, css(fill('#000', '0 0 4px ' + '#000'), {top: 2+'px'}))
+        ins(el, ins(seg, fill(getColor(o.color, i), '0 0 1px rgba(0,0,0,.1)')))
+      }
+      return el
+    },
+
+    /**
+     * Internal method that adjusts the opacity of a single line.
+     * Will be overwritten in VML fallback mode below.
+     */
+    opacity: function(el, i, val) {
+      if (i < el.childNodes.length) el.childNodes[i].style.opacity = val
+    }
+
+  })
+
+
+  function initVML() {
+
+    /* Utility function to create a VML tag */
+    function vml(tag, attr) {
+      return createEl('<' + tag + ' xmlns="urn:schemas-microsoft.com:vml" class="spin-vml">', attr)
+    }
+
+    // No CSS transforms but VML support, add a CSS rule for VML elements:
+    sheet.addRule('.spin-vml', 'behavior:url(#default#VML)')
+
+    Spinner.prototype.lines = function(el, o) {
+      var r = o.length+o.width
+        , s = 2*r
+
+      function grp() {
+        return css(
+          vml('group', {
+            coordsize: s + ' ' + s,
+            coordorigin: -r + ' ' + -r
+          }),
+          { width: s, height: s }
+        )
+      }
+
+      var margin = -(o.width+o.length)*2 + 'px'
+        , g = css(grp(), {position: 'absolute', top: margin, left: margin})
+        , i
+
+      function seg(i, dx, filter) {
+        ins(g,
+          ins(css(grp(), {rotation: 360 / o.lines * i + 'deg', left: ~~dx}),
+            ins(css(vml('roundrect', {arcsize: o.corners}), {
+                width: r,
+                height: o.width,
+                left: o.radius,
+                top: -o.width>>1,
+                filter: filter
+              }),
+              vml('fill', {color: getColor(o.color, i), opacity: o.opacity}),
+              vml('stroke', {opacity: 0}) // transparent stroke to fix color bleeding upon opacity change
+            )
+          )
+        )
+      }
+
+      if (o.shadow)
+        for (i = 1; i <= o.lines; i++)
+          seg(i, -2, 'progid:DXImageTransform.Microsoft.Blur(pixelradius=2,makeshadow=1,shadowopacity=.3)')
+
+      for (i = 1; i <= o.lines; i++) seg(i)
+      return ins(el, g)
+    }
+
+    Spinner.prototype.opacity = function(el, i, val, o) {
+      var c = el.firstChild
+      o = o.shadow && o.lines || 0
+      if (c && i+o < c.childNodes.length) {
+        c = c.childNodes[i+o]; c = c && c.firstChild; c = c && c.firstChild
+        if (c) c.opacity = val
+      }
+    }
+  }
+
+  var probe = css(createEl('group'), {behavior: 'url(#default#VML)'})
+
+  if (!vendor(probe, 'transform') && probe.adj) initVML()
+  else useCssAnimations = vendor(probe, 'animation')
+
+  return Spinner
+
+}));
+
 ;/*! ============================================================
  * bootstrapSwitch v1.8 by Larentis Mattia @SpiritualGuru
  * http://www.larentis.eu/
@@ -14165,681 +14521,4571 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
   });
 })(jQuery);
 
-;//fgnass.github.com/spin.js#v1.3.2
+;/*
+  backgrid
+  http://github.com/wyuenho/backgrid
 
-/**
- * Copyright (c) 2011-2013 Felix Gnass
- * Licensed under the MIT license
- */
-(function(root, factory) {
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+(function (root, $, _, Backbone) {
 
-  /* CommonJS */
-  if (typeof exports == 'object')  module.exports = factory()
-
-  /* AMD module */
-  else if (typeof define == 'function' && define.amd) define(factory)
-
-  /* Browser global */
-  else root.Spinner = factory()
-}
-(this, function() {
   "use strict";
-
-  var prefixes = ['webkit', 'Moz', 'ms', 'O'] /* Vendor prefixes */
-    , animations = {} /* Animation rules keyed by their name */
-    , useCssAnimations /* Whether to use CSS animations or setTimeout */
-
-  /**
-   * Utility function to create elements. If no tag name is given,
-   * a DIV is created. Optionally properties can be passed.
-   */
-  function createEl(tag, prop) {
-    var el = document.createElement(tag || 'div')
-      , n
-
-    for(n in prop) el[n] = prop[n]
-    return el
-  }
-
-  /**
-   * Appends children and returns the parent.
-   */
-  function ins(parent /* child1, child2, ...*/) {
-    for (var i=1, n=arguments.length; i<n; i++)
-      parent.appendChild(arguments[i])
-
-    return parent
-  }
-
-  /**
-   * Insert a new stylesheet to hold the @keyframe or VML rules.
-   */
-  var sheet = (function() {
-    var el = createEl('style', {type : 'text/css'})
-    ins(document.getElementsByTagName('head')[0], el)
-    return el.sheet || el.styleSheet
-  }())
-
-  /**
-   * Creates an opacity keyframe animation rule and returns its name.
-   * Since most mobile Webkits have timing issues with animation-delay,
-   * we create separate rules for each line/segment.
-   */
-  function addAnimation(alpha, trail, i, lines) {
-    var name = ['opacity', trail, ~~(alpha*100), i, lines].join('-')
-      , start = 0.01 + i/lines * 100
-      , z = Math.max(1 - (1-alpha) / trail * (100-start), alpha)
-      , prefix = useCssAnimations.substring(0, useCssAnimations.indexOf('Animation')).toLowerCase()
-      , pre = prefix && '-' + prefix + '-' || ''
-
-    if (!animations[name]) {
-      sheet.insertRule(
-        '@' + pre + 'keyframes ' + name + '{' +
-        '0%{opacity:' + z + '}' +
-        start + '%{opacity:' + alpha + '}' +
-        (start+0.01) + '%{opacity:1}' +
-        (start+trail) % 100 + '%{opacity:' + alpha + '}' +
-        '100%{opacity:' + z + '}' +
-        '}', sheet.cssRules.length)
-
-      animations[name] = 1
-    }
-
-    return name
-  }
-
-  /**
-   * Tries various vendor prefixes and returns the first supported property.
-   */
-  function vendor(el, prop) {
-    var s = el.style
-      , pp
-      , i
-
-    prop = prop.charAt(0).toUpperCase() + prop.slice(1)
-    for(i=0; i<prefixes.length; i++) {
-      pp = prefixes[i]+prop
-      if(s[pp] !== undefined) return pp
-    }
-    if(s[prop] !== undefined) return prop
-  }
-
-  /**
-   * Sets multiple style properties at once.
-   */
-  function css(el, prop) {
-    for (var n in prop)
-      el.style[vendor(el, n)||n] = prop[n]
-
-    return el
-  }
-
-  /**
-   * Fills in default values.
-   */
-  function merge(obj) {
-    for (var i=1; i < arguments.length; i++) {
-      var def = arguments[i]
-      for (var n in def)
-        if (obj[n] === undefined) obj[n] = def[n]
-    }
-    return obj
-  }
-
-  /**
-   * Returns the absolute page-offset of the given element.
-   */
-  function pos(el) {
-    var o = { x:el.offsetLeft, y:el.offsetTop }
-    while((el = el.offsetParent))
-      o.x+=el.offsetLeft, o.y+=el.offsetTop
-
-    return o
-  }
-
-  /**
-   * Returns the line color from the given string or array.
-   */
-  function getColor(color, idx) {
-    return typeof color == 'string' ? color : color[idx % color.length]
-  }
-
-  // Built-in defaults
-
-  var defaults = {
-    lines: 12,            // The number of lines to draw
-    length: 7,            // The length of each line
-    width: 5,             // The line thickness
-    radius: 10,           // The radius of the inner circle
-    rotate: 0,            // Rotation offset
-    corners: 1,           // Roundness (0..1)
-    color: '#000',        // #rgb or #rrggbb
-    direction: 1,         // 1: clockwise, -1: counterclockwise
-    speed: 1,             // Rounds per second
-    trail: 100,           // Afterglow percentage
-    opacity: 1/4,         // Opacity of the lines
-    fps: 20,              // Frames per second when using setTimeout()
-    zIndex: 2e9,          // Use a high z-index by default
-    className: 'spinner', // CSS class to assign to the element
-    top: 'auto',          // center vertically
-    left: 'auto',         // center horizontally
-    position: 'relative'  // element position
-  }
-
-  /** The constructor */
-  function Spinner(o) {
-    if (typeof this == 'undefined') return new Spinner(o)
-    this.opts = merge(o || {}, Spinner.defaults, defaults)
-  }
-
-  // Global defaults that override the built-ins:
-  Spinner.defaults = {}
-
-  merge(Spinner.prototype, {
-
-    /**
-     * Adds the spinner to the given target element. If this instance is already
-     * spinning, it is automatically removed from its previous target b calling
-     * stop() internally.
-     */
-    spin: function(target) {
-      this.stop()
-
-      var self = this
-        , o = self.opts
-        , el = self.el = css(createEl(0, {className: o.className}), {position: o.position, width: 0, zIndex: o.zIndex})
-        , mid = o.radius+o.length+o.width
-        , ep // element position
-        , tp // target position
-
-      if (target) {
-        target.insertBefore(el, target.firstChild||null)
-        tp = pos(target)
-        ep = pos(el)
-        css(el, {
-          left: (o.left == 'auto' ? tp.x-ep.x + (target.offsetWidth >> 1) : parseInt(o.left, 10) + mid) + 'px',
-          top: (o.top == 'auto' ? tp.y-ep.y + (target.offsetHeight >> 1) : parseInt(o.top, 10) + mid)  + 'px'
-        })
-      }
-
-      el.setAttribute('role', 'progressbar')
-      self.lines(el, self.opts)
-
-      if (!useCssAnimations) {
-        // No CSS animation support, use setTimeout() instead
-        var i = 0
-          , start = (o.lines - 1) * (1 - o.direction) / 2
-          , alpha
-          , fps = o.fps
-          , f = fps/o.speed
-          , ostep = (1-o.opacity) / (f*o.trail / 100)
-          , astep = f/o.lines
-
-        ;(function anim() {
-          i++;
-          for (var j = 0; j < o.lines; j++) {
-            alpha = Math.max(1 - (i + (o.lines - j) * astep) % f * ostep, o.opacity)
-
-            self.opacity(el, j * o.direction + start, alpha, o)
-          }
-          self.timeout = self.el && setTimeout(anim, ~~(1000/fps))
-        })()
-      }
-      return self
-    },
-
-    /**
-     * Stops and removes the Spinner.
-     */
-    stop: function() {
-      var el = this.el
-      if (el) {
-        clearTimeout(this.timeout)
-        if (el.parentNode) el.parentNode.removeChild(el)
-        this.el = undefined
-      }
-      return this
-    },
-
-    /**
-     * Internal method that draws the individual lines. Will be overwritten
-     * in VML fallback mode below.
-     */
-    lines: function(el, o) {
-      var i = 0
-        , start = (o.lines - 1) * (1 - o.direction) / 2
-        , seg
-
-      function fill(color, shadow) {
-        return css(createEl(), {
-          position: 'absolute',
-          width: (o.length+o.width) + 'px',
-          height: o.width + 'px',
-          background: color,
-          boxShadow: shadow,
-          transformOrigin: 'left',
-          transform: 'rotate(' + ~~(360/o.lines*i+o.rotate) + 'deg) translate(' + o.radius+'px' +',0)',
-          borderRadius: (o.corners * o.width>>1) + 'px'
-        })
-      }
-
-      for (; i < o.lines; i++) {
-        seg = css(createEl(), {
-          position: 'absolute',
-          top: 1+~(o.width/2) + 'px',
-          transform: o.hwaccel ? 'translate3d(0,0,0)' : '',
-          opacity: o.opacity,
-          animation: useCssAnimations && addAnimation(o.opacity, o.trail, start + i * o.direction, o.lines) + ' ' + 1/o.speed + 's linear infinite'
-        })
-
-        if (o.shadow) ins(seg, css(fill('#000', '0 0 4px ' + '#000'), {top: 2+'px'}))
-        ins(el, ins(seg, fill(getColor(o.color, i), '0 0 1px rgba(0,0,0,.1)')))
-      }
-      return el
-    },
-
-    /**
-     * Internal method that adjusts the opacity of a single line.
-     * Will be overwritten in VML fallback mode below.
-     */
-    opacity: function(el, i, val) {
-      if (i < el.childNodes.length) el.childNodes[i].style.opacity = val
-    }
-
-  })
-
-
-  function initVML() {
-
-    /* Utility function to create a VML tag */
-    function vml(tag, attr) {
-      return createEl('<' + tag + ' xmlns="urn:schemas-microsoft.com:vml" class="spin-vml">', attr)
-    }
-
-    // No CSS transforms but VML support, add a CSS rule for VML elements:
-    sheet.addRule('.spin-vml', 'behavior:url(#default#VML)')
-
-    Spinner.prototype.lines = function(el, o) {
-      var r = o.length+o.width
-        , s = 2*r
-
-      function grp() {
-        return css(
-          vml('group', {
-            coordsize: s + ' ' + s,
-            coordorigin: -r + ' ' + -r
-          }),
-          { width: s, height: s }
-        )
-      }
-
-      var margin = -(o.width+o.length)*2 + 'px'
-        , g = css(grp(), {position: 'absolute', top: margin, left: margin})
-        , i
-
-      function seg(i, dx, filter) {
-        ins(g,
-          ins(css(grp(), {rotation: 360 / o.lines * i + 'deg', left: ~~dx}),
-            ins(css(vml('roundrect', {arcsize: o.corners}), {
-                width: r,
-                height: o.width,
-                left: o.radius,
-                top: -o.width>>1,
-                filter: filter
-              }),
-              vml('fill', {color: getColor(o.color, i), opacity: o.opacity}),
-              vml('stroke', {opacity: 0}) // transparent stroke to fix color bleeding upon opacity change
-            )
-          )
-        )
-      }
-
-      if (o.shadow)
-        for (i = 1; i <= o.lines; i++)
-          seg(i, -2, 'progid:DXImageTransform.Microsoft.Blur(pixelradius=2,makeshadow=1,shadowopacity=.3)')
-
-      for (i = 1; i <= o.lines; i++) seg(i)
-      return ins(el, g)
-    }
-
-    Spinner.prototype.opacity = function(el, i, val, o) {
-      var c = el.firstChild
-      o = o.shadow && o.lines || 0
-      if (c && i+o < c.childNodes.length) {
-        c = c.childNodes[i+o]; c = c && c.firstChild; c = c && c.firstChild
-        if (c) c.opacity = val
-      }
-    }
-  }
-
-  var probe = css(createEl('group'), {behavior: 'url(#default#VML)'})
-
-  if (!vendor(probe, 'transform') && probe.adj) initVML()
-  else useCssAnimations = vendor(probe, 'animation')
-
-  return Spinner
-
-}));
-
-;/**
- * Copyright (c) 2011-2013 Felix Gnass
- * Licensed under the MIT license
- */
-
 /*
+  backgrid
+  http://github.com/wyuenho/backgrid
 
-Basic Usage:
-============
-
-$('#el').spin(); // Creates a default Spinner using the text color of #el.
-$('#el').spin({ ... }); // Creates a Spinner using the provided options.
-
-$('#el').spin(false); // Stops and removes the spinner.
-
-Using Presets:
-==============
-
-$('#el').spin('small'); // Creates a 'small' Spinner using the text color of #el.
-$('#el').spin('large', '#fff'); // Creates a 'large' white Spinner.
-
-Adding a custom preset:
-=======================
-
-$.fn.spin.presets.flower = {
-  lines: 9
-  length: 10
-  width: 20
-  radius: 0
-}
-
-$('#el').spin('flower', 'red');
-
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
 */
 
-(function(factory) {
+var window = root;
 
-  if (typeof exports == 'object') {
-    // CommonJS
-    factory(require('jquery'), require('spin'))
-  }
-  else if (typeof define == 'function' && define.amd) {
-    // AMD, register as anonymous module
-    define(['jquery', 'spin'], factory)
-  }
-  else {
-    // Browser globals
-    if (!window.Spinner) throw new Error('Spin.js not present')
-    factory(window.jQuery, window.Spinner)
-  }
-
-}(function($, Spinner) {
-
-  $.fn.spin = function(opts, color) {
-
-    return this.each(function() {
-      var $this = $(this),
-        data = $this.data();
-
-      if (data.spinner) {
-        data.spinner.stop();
-        delete data.spinner;
-      }
-      if (opts !== false) {
-        opts = $.extend(
-          { color: color || $this.css('color') },
-          $.fn.spin.presets[opts] || opts
-        )
-        data.spinner = new Spinner(opts).spin(this)
-      }
-    })
-  }
-
-  $.fn.spin.presets = {
-    tiny: { lines: 8, length: 2, width: 2, radius: 3 },
-    small: { lines: 8, length: 4, width: 3, radius: 5 },
-    large: { lines: 10, length: 8, width: 4, radius: 8 }
-  }
-
-}));
-
-;/**
- * Backbone localStorage Adapter
- * Version 1.1.7
- *
- * https://github.com/jeromegn/Backbone.localStorage
- */
-(function (root, factory) {
-   if (typeof exports === 'object' && typeof require === 'function') {
-     module.exports = factory(require("underscore"), require("backbone"));
-   } else if (typeof define === "function" && define.amd) {
-      // AMD. Register as an anonymous module.
-      define(["underscore","backbone"], function(_, Backbone) {
-        // Use global variables if the locals are undefined.
-        return factory(_ || root._, Backbone || root.Backbone);
-      });
-   } else {
-      // RequireJS isn't being used. Assume underscore and backbone are loaded in <script> tags
-      factory(_, Backbone);
-   }
-}(this, function(_, Backbone) {
-// A simple module to replace `Backbone.sync` with *localStorage*-based
-// persistence. Models are given GUIDS, and saved into a JSON object. Simple
-// as that.
-
-// Hold reference to Underscore.js and Backbone.js in the closure in order
-// to make things work even if they are removed from the global namespace
-
-// Generate four random hex digits.
-function S4() {
-   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-};
-
-// Generate a pseudo-GUID by concatenating random hexadecimal.
-function guid() {
-   return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
-};
-
-// Our Store is represented by a single JS object in *localStorage*. Create it
-// with a meaningful name, like the name you'd give a table.
-// window.Store is deprectated, use Backbone.LocalStorage instead
-Backbone.LocalStorage = window.Store = function(name) {
-  if( !this.localStorage ) {
-    throw "Backbone.localStorage: Environment does not support localStorage."
-  }
-  this.name = name;
-  var store = this.localStorage().getItem(this.name);
-  this.records = (store && store.split(",")) || [];
-};
-
-_.extend(Backbone.LocalStorage.prototype, {
-
-  // Save the current state of the **Store** to *localStorage*.
-  save: function() {
-    this.localStorage().setItem(this.name, this.records.join(","));
-  },
-
-  // Add a model, giving it a (hopefully)-unique GUID, if it doesn't already
-  // have an id of it's own.
-  create: function(model) {
-    if (!model.id) {
-      model.id = guid();
-      model.set(model.idAttribute, model.id);
+// Copyright 2009, 2010 Kristopher Michael Kowal
+// https://github.com/kriskowal/es5-shim
+// ES5 15.5.4.20
+// http://es5.github.com/#x15.5.4.20
+var ws = "\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003" +
+  "\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028" +
+  "\u2029\uFEFF";
+if (!String.prototype.trim || ws.trim()) {
+  // http://blog.stevenlevithan.com/archives/faster-trim-javascript
+  // http://perfectionkills.com/whitespace-deviations/
+  ws = "[" + ws + "]";
+  var trimBeginRegexp = new RegExp("^" + ws + ws + "*"),
+  trimEndRegexp = new RegExp(ws + ws + "*$");
+  String.prototype.trim = function trim() {
+    if (this === undefined || this === null) {
+      throw new TypeError("can't convert " + this + " to object");
     }
-    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
-    this.records.push(model.id.toString());
-    this.save();
-    return this.find(model);
+    return String(this)
+      .replace(trimBeginRegexp, "")
+      .replace(trimEndRegexp, "");
+  };
+}
+
+function capitalize(s) {
+  return String.fromCharCode(s.charCodeAt(0) - 32) + s.slice(1);
+}
+
+function lpad(str, length, padstr) {
+  var paddingLen = length - (str + '').length;
+  paddingLen =  paddingLen < 0 ? 0 : paddingLen;
+  var padding = '';
+  for (var i = 0; i < paddingLen; i++) {
+    padding = padding + padstr;
+  }
+  return padding + str;
+}
+
+var Backgrid = root.Backgrid = {
+
+  VERSION: "0.2.6",
+
+  Extension: {},
+
+  requireOptions: function (options, requireOptionKeys) {
+    for (var i = 0; i < requireOptionKeys.length; i++) {
+      var key = requireOptionKeys[i];
+      if (_.isUndefined(options[key])) {
+        throw new TypeError("'" + key  + "' is required");
+      }
+    }
   },
 
-  // Update a model by replacing its copy in `this.data`.
-  update: function(model) {
-    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
-    if (!_.include(this.records, model.id.toString()))
-      this.records.push(model.id.toString()); this.save();
-    return this.find(model);
+  resolveNameToClass: function (name, suffix) {
+    if (_.isString(name)) {
+      var key = _.map(name.split('-'), function (e) { return capitalize(e); }).join('') + suffix;
+      var klass = Backgrid[key] || Backgrid.Extension[key];
+      if (_.isUndefined(klass)) {
+        throw new ReferenceError("Class '" + key + "' not found");
+      }
+      return klass;
+    }
+
+    return name;
+  }
+};
+_.extend(Backgrid, Backbone.Events);
+
+/**
+   Command translates a DOM Event into commands that Backgrid
+   recognizes. Interested parties can listen on selected Backgrid events that
+   come with an instance of this class and act on the commands.
+
+   It is also possible to globally rebind the keyboard shortcuts by replacing
+   the methods in this class' prototype.
+
+   @class Backgrid.Command
+   @constructor
+ */
+var Command = Backgrid.Command = function (evt) {
+  _.extend(this, {
+    altKey: !!evt.altKey,
+    char: evt.char,
+    charCode: evt.charCode,
+    ctrlKey: !!evt.ctrlKey,
+    key: evt.key,
+    keyCode: evt.keyCode,
+    locale: evt.locale,
+    location: evt.location,
+    metaKey: !!evt.metaKey,
+    repeat: !!evt.repeat,
+    shiftKey: !!evt.shiftKey,
+    which: evt.which
+  });
+};
+_.extend(Command.prototype, {
+  /**
+     Up Arrow
+
+     @member Backgrid.Command
+   */
+  moveUp: function () { return this.keyCode == 38; },
+  /**
+     Down Arrow
+
+     @member Backgrid.Command
+   */
+  moveDown: function () { return this.keyCode === 40; },
+  /**
+     Shift Tab
+
+     @member Backgrid.Command
+   */
+  moveLeft: function () { return this.shiftKey && this.keyCode === 9; },
+  /**
+     Tab
+
+     @member Backgrid.Command
+   */
+  moveRight: function () { return !this.shiftKey && this.keyCode === 9; },
+  /**
+     Enter
+
+     @member Backgrid.Command
+   */
+  save: function () { return this.keyCode === 13; },
+  /**
+     Esc
+
+     @member Backgrid.Command
+   */
+  cancel: function () { return this.keyCode === 27; },
+  /**
+     None of the above.
+
+     @member Backgrid.Command
+   */
+  passThru: function () {
+    return !(this.moveUp() || this.moveDown() || this.moveLeft() ||
+             this.moveRight() || this.save() || this.cancel());
+  }
+});
+
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   Just a convenient class for interested parties to subclass.
+
+   The default Cell classes don't require the formatter to be a subclass of
+   Formatter as long as the fromRaw(rawData) and toRaw(formattedData) methods
+   are defined.
+
+   @abstract
+   @class Backgrid.CellFormatter
+   @constructor
+*/
+var CellFormatter = Backgrid.CellFormatter = function () {};
+_.extend(CellFormatter.prototype, {
+
+  /**
+     Takes a raw value from a model and returns an optionally formatted string
+     for display. The default implementation simply returns the supplied value
+     as is without any type conversion.
+
+     @member Backgrid.CellFormatter
+     @param {*} rawData
+     @return {*}
+  */
+  fromRaw: function (rawData) {
+    return rawData;
   },
 
-  // Retrieve a model from `this.data` by id.
-  find: function(model) {
-    return this.jsonData(this.localStorage().getItem(this.name+"-"+model.id));
-  },
+  /**
+     Takes a formatted string, usually from user input, and returns a
+     appropriately typed value for persistence in the model.
 
-  // Return the array of all models currently in storage.
-  findAll: function() {
-    // Lodash removed _#chain in v1.0.0-rc.1
-    return (_.chain || _)(this.records)
-      .map(function(id){
-        return this.jsonData(this.localStorage().getItem(this.name+"-"+id));
-      }, this)
-      .compact()
-      .value();
-  },
+     If the user input is invalid or unable to be converted to a raw value
+     suitable for persistence in the model, toRaw must return `undefined`.
 
-  // Delete a model from `this.data`, returning it.
-  destroy: function(model) {
-    if (model.isNew())
-      return false
-    this.localStorage().removeItem(this.name+"-"+model.id);
-    this.records = _.reject(this.records, function(id){
-      return id === model.id.toString();
-    });
-    this.save();
-    return model;
-  },
-
-  localStorage: function() {
-    return localStorage;
-  },
-
-  // fix for "illegal access" error on Android when JSON.parse is passed null
-  jsonData: function (data) {
-      return data && JSON.parse(data);
-  },
-
-  // Clear localStorage for specific collection.
-  _clear: function() {
-    var local = this.localStorage(),
-      itemRe = new RegExp("^" + this.name + "-");
-
-    // Remove id-tracking item (e.g., "foo").
-    local.removeItem(this.name);
-
-    // Lodash removed _#chain in v1.0.0-rc.1
-    // Match all data items (e.g., "foo-ID") and remove.
-    (_.chain || _)(local).keys()
-      .filter(function (k) { return itemRe.test(k); })
-      .each(function (k) { local.removeItem(k); });
-
-    this.records.length = 0;
-  },
-
-  // Size of localStorage.
-  _storageSize: function() {
-    return this.localStorage().length;
+     @member Backgrid.CellFormatter
+     @param {string} formattedData
+     @return {*|undefined}
+  */
+  toRaw: function (formattedData) {
+    return formattedData;
   }
 
 });
 
-// localSync delegate to the model or collection's
-// *localStorage* property, which should be an instance of `Store`.
-// window.Store.sync and Backbone.localSync is deprecated, use Backbone.LocalStorage.sync instead
-Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function(method, model, options) {
-  var store = model.localStorage || model.collection.localStorage;
+/**
+   A floating point number formatter. Doesn't understand notation at the moment.
 
-  var resp, errorMessage, syncDfd = Backbone.$.Deferred && Backbone.$.Deferred(); //If $ is having Deferred - use it.
+   @class Backgrid.NumberFormatter
+   @extends Backgrid.CellFormatter
+   @constructor
+   @throws {RangeError} If decimals < 0 or > 20.
+*/
+var NumberFormatter = Backgrid.NumberFormatter = function (options) {
+  options = options ? _.clone(options) : {};
+  _.extend(this, this.defaults, options);
 
-  try {
+  if (this.decimals < 0 || this.decimals > 20) {
+    throw new RangeError("decimals must be between 0 and 20");
+  }
+};
+NumberFormatter.prototype = new CellFormatter();
+_.extend(NumberFormatter.prototype, {
 
-    switch (method) {
-      case "read":
-        resp = model.id != undefined ? store.find(model) : store.findAll();
-        break;
-      case "create":
-        resp = store.create(model);
-        break;
-      case "update":
-        resp = store.update(model);
-        break;
-      case "delete":
-        resp = store.destroy(model);
-        break;
+  /**
+     @member Backgrid.NumberFormatter
+     @cfg {Object} options
+
+     @cfg {number} [options.decimals=2] Number of decimals to display. Must be an integer.
+
+     @cfg {string} [options.decimalSeparator='.'] The separator to use when
+     displaying decimals.
+
+     @cfg {string} [options.orderSeparator=','] The separator to use to
+     separator thousands. May be an empty string.
+   */
+  defaults: {
+    decimals: 2,
+    decimalSeparator: '.',
+    orderSeparator: ','
+  },
+
+  HUMANIZED_NUM_RE: /(\d)(?=(?:\d{3})+$)/g,
+
+  /**
+     Takes a floating point number and convert it to a formatted string where
+     every thousand is separated by `orderSeparator`, with a `decimal` number of
+     decimals separated by `decimalSeparator`. The number returned is rounded
+     the usual way.
+
+     @member Backgrid.NumberFormatter
+     @param {number} number
+     @return {string}
+  */
+  fromRaw: function (number) {
+    if (_.isNull(number) || _.isUndefined(number)) return '';
+
+    number = number.toFixed(~~this.decimals);
+
+    var parts = number.split('.');
+    var integerPart = parts[0];
+    var decimalPart = parts[1] ? (this.decimalSeparator || '.') + parts[1] : '';
+
+    return integerPart.replace(this.HUMANIZED_NUM_RE, '$1' + this.orderSeparator) + decimalPart;
+  },
+
+  /**
+     Takes a string, possibly formatted with `orderSeparator` and/or
+     `decimalSeparator`, and convert it back to a number.
+
+     @member Backgrid.NumberFormatter
+     @param {string} formattedData
+     @return {number|undefined} Undefined if the string cannot be converted to
+     a number.
+  */
+  toRaw: function (formattedData) {
+    var rawData = '';
+
+    var thousands = formattedData.trim().split(this.orderSeparator);
+    for (var i = 0; i < thousands.length; i++) {
+      rawData += thousands[i];
     }
 
-  } catch(error) {
-    if (error.code === 22 && store._storageSize() === 0)
-      errorMessage = "Private browsing is unsupported";
-    else
-      errorMessage = error.message;
+    var decimalParts = rawData.split(this.decimalSeparator);
+    rawData = '';
+    for (var i = 0; i < decimalParts.length; i++) {
+      rawData = rawData + decimalParts[i] + '.';
+    }
+
+    if (rawData[rawData.length - 1] === '.') {
+      rawData = rawData.slice(0, rawData.length - 1);
+    }
+
+    var result = (rawData * 1).toFixed(~~this.decimals) * 1;
+    if (_.isNumber(result) && !_.isNaN(result)) return result;
   }
 
-  if (resp) {
-    if (options && options.success) {
-      if (Backbone.VERSION === "0.9.10") {
-        options.success(model, resp, options);
-      } else {
-        options.success(resp);
+});
+
+/**
+   Formatter to converts between various datetime formats.
+
+   This class only understands ISO-8601 formatted datetime strings and UNIX
+   offset (number of milliseconds since UNIX Epoch). See
+   Backgrid.Extension.MomentFormatter if you need a much more flexible datetime
+   formatter.
+
+   @class Backgrid.DatetimeFormatter
+   @extends Backgrid.CellFormatter
+   @constructor
+   @throws {Error} If both `includeDate` and `includeTime` are false.
+*/
+var DatetimeFormatter = Backgrid.DatetimeFormatter = function (options) {
+  options = options ? _.clone(options) : {};
+  _.extend(this, this.defaults, options);
+
+  if (!this.includeDate && !this.includeTime) {
+    throw new Error("Either includeDate or includeTime must be true");
+  }
+};
+DatetimeFormatter.prototype = new CellFormatter();
+_.extend(DatetimeFormatter.prototype, {
+
+  /**
+     @member Backgrid.DatetimeFormatter
+
+     @cfg {Object} options
+
+     @cfg {boolean} [options.includeDate=true] Whether the values include the
+     date part.
+
+     @cfg {boolean} [options.includeTime=true] Whether the values include the
+     time part.
+
+     @cfg {boolean} [options.includeMilli=false] If `includeTime` is true,
+     whether to include the millisecond part, if it exists.
+   */
+  defaults: {
+    includeDate: true,
+    includeTime: true,
+    includeMilli: false
+  },
+
+  DATE_RE: /^([+\-]?\d{4})-(\d{2})-(\d{2})$/,
+  TIME_RE: /^(\d{2}):(\d{2}):(\d{2})(\.(\d{3}))?$/,
+  ISO_SPLITTER_RE: /T|Z| +/,
+
+  _convert: function (data, validate) {
+    var date, time = null;
+    if (_.isNumber(data)) {
+      var jsDate = new Date(data);
+      date = lpad(jsDate.getUTCFullYear(), 4, 0) + '-' + lpad(jsDate.getUTCMonth() + 1, 2, 0) + '-' + lpad(jsDate.getUTCDate(), 2, 0);
+      time = lpad(jsDate.getUTCHours(), 2, 0) + ':' + lpad(jsDate.getUTCMinutes(), 2, 0) + ':' + lpad(jsDate.getUTCSeconds(), 2, 0);
+    }
+    else {
+      data = data.trim();
+      var parts = data.split(this.ISO_SPLITTER_RE) || [];
+      date = this.DATE_RE.test(parts[0]) ? parts[0] : '';
+      time = date && parts[1] ? parts[1] : this.TIME_RE.test(parts[0]) ? parts[0] : '';
+    }
+
+    var YYYYMMDD = this.DATE_RE.exec(date) || [];
+    var HHmmssSSS = this.TIME_RE.exec(time) || [];
+
+    if (validate) {
+      if (this.includeDate && _.isUndefined(YYYYMMDD[0])) return;
+      if (this.includeTime && _.isUndefined(HHmmssSSS[0])) return;
+      if (!this.includeDate && date) return;
+      if (!this.includeTime && time) return;
+    }
+
+    var jsDate = new Date(Date.UTC(YYYYMMDD[1] * 1 || 0,
+                                   YYYYMMDD[2] * 1 - 1 || 0,
+                                   YYYYMMDD[3] * 1 || 0,
+                                   HHmmssSSS[1] * 1 || null,
+                                   HHmmssSSS[2] * 1 || null,
+                                   HHmmssSSS[3] * 1 || null,
+                                   HHmmssSSS[5] * 1 || null));
+
+    var result = '';
+
+    if (this.includeDate) {
+      result = lpad(jsDate.getUTCFullYear(), 4, 0) + '-' + lpad(jsDate.getUTCMonth() + 1, 2, 0) + '-' + lpad(jsDate.getUTCDate(), 2, 0);
+    }
+
+    if (this.includeTime) {
+      result = result + (this.includeDate ? 'T' : '') + lpad(jsDate.getUTCHours(), 2, 0) + ':' + lpad(jsDate.getUTCMinutes(), 2, 0) + ':' + lpad(jsDate.getUTCSeconds(), 2, 0);
+
+      if (this.includeMilli) {
+        result = result + '.' + lpad(jsDate.getUTCMilliseconds(), 3, 0);
       }
     }
-    if (syncDfd) {
-      syncDfd.resolve(resp);
+
+    if (this.includeDate && this.includeTime) {
+      result += "Z";
     }
 
-  } else {
-    errorMessage = errorMessage ? errorMessage
-                                : "Record Not Found";
+    return result;
+  },
 
-    if (options && options.error)
-      if (Backbone.VERSION === "0.9.10") {
-        options.error(model, errorMessage, options);
-      } else {
-        options.error(errorMessage);
+  /**
+     Converts an ISO-8601 formatted datetime string to a datetime string, date
+     string or a time string. The timezone is ignored if supplied.
+
+     @member Backgrid.DatetimeFormatter
+     @param {string} rawData
+     @return {string|null|undefined} ISO-8601 string in UTC. Null and undefined
+     values are returned as is.
+  */
+  fromRaw: function (rawData) {
+    if (_.isNull(rawData) || _.isUndefined(rawData)) return '';
+    return this._convert(rawData);
+  },
+
+  /**
+     Converts an ISO-8601 formatted datetime string to a datetime string, date
+     string or a time string. The timezone is ignored if supplied. This method
+     parses the input values exactly the same way as
+     Backgrid.Extension.MomentFormatter#fromRaw(), in addition to doing some
+     sanity checks.
+
+     @member Backgrid.DatetimeFormatter
+     @param {string} formattedData
+     @return {string|undefined} ISO-8601 string in UTC. Undefined if a date is
+     found when `includeDate` is false, or a time is found when `includeTime` is
+     false, or if `includeDate` is true and a date is not found, or if
+     `includeTime` is true and a time is not found.
+  */
+  toRaw: function (formattedData) {
+    return this._convert(formattedData, true);
+  }
+
+});
+
+/**
+   Formatter to convert any value to string.
+
+   @class Backgrid.StringFormatter
+   @extends Backgrid.CellFormatter
+   @constructor
+ */
+var StringFormatter = Backgrid.StringFormatter = function () {};
+StringFormatter.prototype = new CellFormatter();
+_.extend(StringFormatter.prototype, {
+  /**
+     Converts any value to a string using Ecmascript's implicit type
+     conversion. If the given value is `null` or `undefined`, an empty string is
+     returned instead.
+
+     @member Backgrid.StringFormatter
+     @param {*} rawValue
+     @return {string}
+   */
+  fromRaw: function (rawValue) {
+    if (_.isUndefined(rawValue) || _.isNull(rawValue)) return '';
+    return rawValue + '';
+  }
+});
+
+/**
+   Simple email validation formatter.
+
+   @class Backgrid.EmailFormatter
+   @extends Backgrid.CellFormatter
+   @constructor
+ */
+var EmailFormatter = Backgrid.EmailFormatter = function () {};
+EmailFormatter.prototype = new CellFormatter();
+_.extend(EmailFormatter.prototype, {
+  /**
+     Return the input if it is a string that contains an '@' character and if
+     the strings before and after '@' are non-empty. If the input does not
+     validate, `undefined` is returned.
+
+     @member Backgrid.EmailFormatter
+     @param {*} formattedData
+     @return {string|undefined}
+   */
+  toRaw: function (formattedData) {
+    var parts = formattedData.trim().split("@");
+    if (parts.length === 2 && _.all(parts)) {
+      return formattedData;
+    }
+  }
+});
+
+/**
+   Formatter for SelectCell.
+
+   @class Backgrid.SelectFormatter
+   @extends Backgrid.CellFormatter
+   @constructor
+*/
+var SelectFormatter = Backgrid.SelectFormatter = function () {};
+SelectFormatter.prototype = new CellFormatter();
+_.extend(SelectFormatter.prototype, {
+
+  /**
+     Normalizes raw scalar or array values to an array.
+
+     @member Backgrid.SelectFormatter
+     @param {*} rawValue
+     @return {Array.<*>}
+  */
+  fromRaw: function (rawValue) {
+    return _.isArray(rawValue) ? rawValue : rawValue != null ? [rawValue] : [];
+  }
+});
+
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   Generic cell editor base class. Only defines an initializer for a number of
+   required parameters.
+
+   @abstract
+   @class Backgrid.CellEditor
+   @extends Backbone.View
+*/
+var CellEditor = Backgrid.CellEditor = Backbone.View.extend({
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {Backgrid.CellFormatter} options.formatter
+     @param {Backgrid.Column} options.column
+     @param {Backbone.Model} options.model
+
+     @throws {TypeError} If `formatter` is not a formatter instance, or when
+     `model` or `column` are undefined.
+  */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["formatter", "column", "model"]);
+    this.formatter = options.formatter;
+    this.column = options.column;
+    if (!(this.column instanceof Column)) {
+      this.column = new Column(this.column);
+    }
+
+    this.listenTo(this.model, "backgrid:editing", this.postRender);
+  },
+
+  /**
+     Post-rendering setup and initialization. Focuses the cell editor's `el` in
+     this default implementation. **Should** be called by Cell classes after
+     calling Backgrid.CellEditor#render.
+  */
+  postRender: function (model, column) {
+    if (column == null || column.get("name") == this.column.get("name")) {
+      this.$el.focus();
+    }
+    return this;
+  }
+
+});
+
+/**
+   InputCellEditor the cell editor type used by most core cell types. This cell
+   editor renders a text input box as its editor. The input will render a
+   placeholder if the value is empty on supported browsers.
+
+   @class Backgrid.InputCellEditor
+   @extends Backgrid.CellEditor
+*/
+var InputCellEditor = Backgrid.InputCellEditor = CellEditor.extend({
+
+  /** @property */
+  tagName: "input",
+
+  /** @property */
+  attributes: {
+    type: "text"
+  },
+
+  /** @property */
+  events: {
+    "blur": "saveOrCancel",
+    "keydown": "saveOrCancel"
+  },
+
+  /**
+     Initializer. Removes this `el` from the DOM when a `done` event is
+     triggered.
+
+     @param {Object} options
+     @param {Backgrid.CellFormatter} options.formatter
+     @param {Backgrid.Column} options.column
+     @param {Backbone.Model} options.model
+     @param {string} [options.placeholder]
+  */
+  initialize: function (options) {
+    CellEditor.prototype.initialize.apply(this, arguments);
+
+    if (options.placeholder) {
+      this.$el.attr("placeholder", options.placeholder);
+    }
+  },
+
+  /**
+     Renders a text input with the cell value formatted for display, if it
+     exists.
+  */
+  render: function () {
+    this.$el.val(this.formatter.fromRaw(this.model.get(this.column.get("name"))));
+    return this;
+  },
+
+  /**
+     If the key pressed is `enter`, `tab`, `up`, or `down`, converts the value
+     in the editor to a raw value for saving into the model using the formatter.
+
+     If the key pressed is `esc` the changes are undone.
+
+     If the editor goes out of focus (`blur`) but the value is invalid, the
+     event is intercepted and cancelled so the cell remains in focus pending for
+     further action. The changes are saved otherwise.
+
+     Triggers a Backbone `backgrid:edited` event from the model when successful,
+     and `backgrid:error` if the value cannot be converted. Classes listening to
+     the `error` event, usually the Cell classes, should respond appropriately,
+     usually by rendering some kind of error feedback.
+
+     @param {Event} e
+  */
+  saveOrCancel: function (e) {
+
+    var formatter = this.formatter;
+    var model = this.model;
+    var column = this.column;
+
+    var command = new Command(e);
+    var blurred = e.type === "blur";
+
+    if (command.moveUp() || command.moveDown() || command.moveLeft() || command.moveRight() ||
+        command.save() || blurred) {
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      var val = this.$el.val();
+      var newValue = formatter.toRaw(val);
+      if (_.isUndefined(newValue)) {
+        model.trigger("backgrid:error", model, column, val);
+      }
+      else {
+        model.set(column.get("name"), newValue);
+        model.trigger("backgrid:edited", model, column, command);
+      }
+    }
+    // esc
+    else if (command.cancel()) {
+      // undo
+      e.stopPropagation();
+      model.trigger("backgrid:edited", model, column, command);
+    }
+  },
+
+  postRender: function (model, column) {
+    if (column == null || column.get("name") == this.column.get("name")) {
+      // move the cursor to the end on firefox if text is right aligned
+      if (this.$el.css("text-align") === "right") {
+        var val = this.$el.val();
+        this.$el.focus().val(null).val(val);
+      }
+      else this.$el.focus();
+    }
+    return this;
+  }
+
+});
+
+/**
+   The super-class for all Cell types. By default, this class renders a plain
+   table cell with the model value converted to a string using the
+   formatter. The table cell is clickable, upon which the cell will go into
+   editor mode, which is rendered by a Backgrid.InputCellEditor instance by
+   default. Upon encountering any formatting errors, this class will add an
+   `error` CSS class to the table cell.
+
+   @abstract
+   @class Backgrid.Cell
+   @extends Backbone.View
+*/
+var Cell = Backgrid.Cell = Backbone.View.extend({
+
+  /** @property */
+  tagName: "td",
+
+  /**
+     @property {Backgrid.CellFormatter|Object|string} [formatter=new CellFormatter()]
+  */
+  formatter: new CellFormatter(),
+
+  /**
+     @property {Backgrid.CellEditor} [editor=Backgrid.InputCellEditor] The
+     default editor for all cell instances of this class. This value must be a
+     class, it will be automatically instantiated upon entering edit mode.
+
+     See Backgrid.CellEditor
+  */
+  editor: InputCellEditor,
+
+  /** @property */
+  events: {
+    "click": "enterEditMode"
+  },
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {Backbone.Model} options.model
+     @param {Backgrid.Column} options.column
+
+     @throws {ReferenceError} If formatter is a string but a formatter class of
+     said name cannot be found in the Backgrid module.
+  */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["model", "column"]);
+    this.column = options.column;
+    if (!(this.column instanceof Column)) {
+      this.column = new Column(this.column);
+    }
+    this.formatter = Backgrid.resolveNameToClass(this.column.get("formatter") || this.formatter, "Formatter");
+    this.editor = Backgrid.resolveNameToClass(this.editor, "CellEditor");
+    this.listenTo(this.model, "change:" + this.column.get("name"), function () {
+      if (!this.$el.hasClass("editor")) this.render();
+    });
+    this.listenTo(this.model, "backgrid:error", this.renderError);
+  },
+
+  /**
+     Render a text string in a table cell. The text is converted from the
+     model's raw value for this cell's column.
+  */
+  render: function () {
+    this.$el.empty();
+    this.$el.text(this.formatter.fromRaw(this.model.get(this.column.get("name"))));
+    this.delegateEvents();
+    return this;
+  },
+
+  /**
+     If this column is editable, a new CellEditor instance is instantiated with
+     its required parameters. An `editor` CSS class is added to the cell upon
+     entering edit mode.
+
+     This method triggers a Backbone `backgrid:edit` event from the model when
+     the cell is entering edit mode and an editor instance has been constructed,
+     but before it is rendered and inserted into the DOM. The cell and the
+     constructed cell editor instance are sent as event parameters when this
+     event is triggered.
+
+     When this cell has finished switching to edit mode, a Backbone
+     `backgrid:editing` event is triggered from the model. The cell and the
+     constructed cell instance are also sent as parameters in the event.
+
+     When the model triggers a `backgrid:error` event, it means the editor is
+     unable to convert the current user input to an apprpriate value for the
+     model's column, and an `error` CSS class is added to the cell accordingly.
+  */
+  enterEditMode: function () {
+    var model = this.model;
+    var column = this.column;
+
+    if (column.get("editable")) {
+
+      this.currentEditor = new this.editor({
+        column: this.column,
+        model: this.model,
+        formatter: this.formatter
+      });
+
+      model.trigger("backgrid:edit", model, column, this, this.currentEditor);
+
+      // Need to redundantly undelegate events for Firefox
+      this.undelegateEvents();
+      this.$el.empty();
+      this.$el.append(this.currentEditor.$el);
+      this.currentEditor.render();
+      this.$el.addClass("editor");
+
+      model.trigger("backgrid:editing", model, column, this, this.currentEditor);
+    }
+  },
+
+  /**
+     Put an `error` CSS class on the table cell.
+  */
+  renderError: function (model, column) {
+    if (column == null || column.get("name") == this.column.get("name")) {
+      this.$el.addClass("error");
+    }
+  },
+
+  /**
+     Removes the editor and re-render in display mode.
+  */
+  exitEditMode: function () {
+    this.$el.removeClass("error");
+    this.currentEditor.remove();
+    this.stopListening(this.currentEditor);
+    delete this.currentEditor;
+    this.$el.removeClass("editor");
+    this.render();
+  },
+
+  /**
+     Clean up this cell.
+
+     @chainable
+  */
+  remove: function () {
+    if (this.currentEditor) {
+      this.currentEditor.remove.apply(this, arguments);
+      delete this.currentEditor;
+    }
+    return Backbone.View.prototype.remove.apply(this, arguments);
+  }
+
+});
+
+/**
+   StringCell displays HTML escaped strings and accepts anything typed in.
+
+   @class Backgrid.StringCell
+   @extends Backgrid.Cell
+*/
+var StringCell = Backgrid.StringCell = Cell.extend({
+
+  /** @property */
+  className: "string-cell",
+
+  formatter: new StringFormatter()
+
+});
+
+/**
+   UriCell renders an HTML `<a>` anchor for the value and accepts URIs as user
+   input values. No type conversion or URL validation is done by the formatter
+   of this cell. Users who need URL validation are encourage to subclass UriCell
+   to take advantage of the parsing capabilities of the HTMLAnchorElement
+   available on HTML5-capable browsers or using a third-party library like
+   [URI.js](https://github.com/medialize/URI.js).
+
+   @class Backgrid.UriCell
+   @extends Backgrid.Cell
+*/
+var UriCell = Backgrid.UriCell = Cell.extend({
+
+  /** @property */
+  className: "uri-cell",
+
+  render: function () {
+    this.$el.empty();
+    var formattedValue = this.formatter.fromRaw(this.model.get(this.column.get("name")));
+    this.$el.append($("<a>", {
+      tabIndex: -1,
+      href: formattedValue,
+      title: formattedValue,
+      target: "_blank"
+    }).text(formattedValue));
+    this.delegateEvents();
+    return this;
+  }
+
+});
+
+/**
+   Like Backgrid.UriCell, EmailCell renders an HTML `<a>` anchor for the
+   value. The `href` in the anchor is prefixed with `mailto:`. EmailCell will
+   complain if the user enters a string that doesn't contain the `@` sign.
+
+   @class Backgrid.EmailCell
+   @extends Backgrid.StringCell
+*/
+var EmailCell = Backgrid.EmailCell = StringCell.extend({
+
+  /** @property */
+  className: "email-cell",
+
+  formatter: new EmailFormatter(),
+
+  render: function () {
+    this.$el.empty();
+    var formattedValue = this.formatter.fromRaw(this.model.get(this.column.get("name")));
+    this.$el.append($("<a>", {
+      tabIndex: -1,
+      href: "mailto:" + formattedValue,
+      title: formattedValue
+    }).text(formattedValue));
+    this.delegateEvents();
+    return this;
+  }
+
+});
+
+/**
+   NumberCell is a generic cell that renders all numbers. Numbers are formatted
+   using a Backgrid.NumberFormatter.
+
+   @class Backgrid.NumberCell
+   @extends Backgrid.Cell
+*/
+var NumberCell = Backgrid.NumberCell = Cell.extend({
+
+  /** @property */
+  className: "number-cell",
+
+  /**
+     @property {number} [decimals=2] Must be an integer.
+  */
+  decimals: NumberFormatter.prototype.defaults.decimals,
+
+  /** @property {string} [decimalSeparator='.'] */
+  decimalSeparator: NumberFormatter.prototype.defaults.decimalSeparator,
+
+  /** @property {string} [orderSeparator=','] */
+  orderSeparator: NumberFormatter.prototype.defaults.orderSeparator,
+
+  /** @property {Backgrid.CellFormatter} [formatter=Backgrid.NumberFormatter] */
+  formatter: NumberFormatter,
+
+  /**
+     Initializes this cell and the number formatter.
+
+     @param {Object} options
+     @param {Backbone.Model} options.model
+     @param {Backgrid.Column} options.column
+  */
+  initialize: function (options) {
+    Cell.prototype.initialize.apply(this, arguments);
+    this.formatter = new this.formatter({
+      decimals: this.decimals,
+      decimalSeparator: this.decimalSeparator,
+      orderSeparator: this.orderSeparator
+    });
+  }
+
+});
+
+/**
+   An IntegerCell is just a Backgrid.NumberCell with 0 decimals. If a floating
+   point number is supplied, the number is simply rounded the usual way when
+   displayed.
+
+   @class Backgrid.IntegerCell
+   @extends Backgrid.NumberCell
+*/
+var IntegerCell = Backgrid.IntegerCell = NumberCell.extend({
+
+  /** @property */
+  className: "integer-cell",
+
+  /**
+     @property {number} decimals Must be an integer.
+  */
+  decimals: 0
+});
+
+/**
+   DatetimeCell is a basic cell that accepts datetime string values in RFC-2822
+   or W3C's subset of ISO-8601 and displays them in ISO-8601 format. For a much
+   more sophisticated date time cell with better datetime formatting, take a
+   look at the Backgrid.Extension.MomentCell extension.
+
+   @class Backgrid.DatetimeCell
+   @extends Backgrid.Cell
+
+   See:
+
+   - Backgrid.Extension.MomentCell
+   - Backgrid.DatetimeFormatter
+*/
+var DatetimeCell = Backgrid.DatetimeCell = Cell.extend({
+
+  /** @property */
+  className: "datetime-cell",
+
+  /**
+     @property {boolean} [includeDate=true]
+  */
+  includeDate: DatetimeFormatter.prototype.defaults.includeDate,
+
+  /**
+     @property {boolean} [includeTime=true]
+  */
+  includeTime: DatetimeFormatter.prototype.defaults.includeTime,
+
+  /**
+     @property {boolean} [includeMilli=false]
+  */
+  includeMilli: DatetimeFormatter.prototype.defaults.includeMilli,
+
+  /** @property {Backgrid.CellFormatter} [formatter=Backgrid.DatetimeFormatter] */
+  formatter: DatetimeFormatter,
+
+  /**
+     Initializes this cell and the datetime formatter.
+
+     @param {Object} options
+     @param {Backbone.Model} options.model
+     @param {Backgrid.Column} options.column
+  */
+  initialize: function (options) {
+    Cell.prototype.initialize.apply(this, arguments);
+    this.formatter = new this.formatter({
+      includeDate: this.includeDate,
+      includeTime: this.includeTime,
+      includeMilli: this.includeMilli
+    });
+
+    var placeholder = this.includeDate ? "YYYY-MM-DD" : "";
+    placeholder += (this.includeDate && this.includeTime) ? "T" : "";
+    placeholder += this.includeTime ? "HH:mm:ss" : "";
+    placeholder += (this.includeTime && this.includeMilli) ? ".SSS" : "";
+
+    this.editor = this.editor.extend({
+      attributes: _.extend({}, this.editor.prototype.attributes, this.editor.attributes, {
+        placeholder: placeholder
+      })
+    });
+  }
+
+});
+
+/**
+   DateCell is a Backgrid.DatetimeCell without the time part.
+
+   @class Backgrid.DateCell
+   @extends Backgrid.DatetimeCell
+*/
+var DateCell = Backgrid.DateCell = DatetimeCell.extend({
+
+  /** @property */
+  className: "date-cell",
+
+  /** @property */
+  includeTime: false
+
+});
+
+/**
+   TimeCell is a Backgrid.DatetimeCell without the date part.
+
+   @class Backgrid.TimeCell
+   @extends Backgrid.DatetimeCell
+*/
+var TimeCell = Backgrid.TimeCell = DatetimeCell.extend({
+
+  /** @property */
+  className: "time-cell",
+
+  /** @property */
+  includeDate: false
+
+});
+
+/**
+   BooleanCellEditor renders a checkbox as its editor.
+
+   @class Backgrid.BooleanCellEditor
+   @extends Backgrid.CellEditor
+*/
+var BooleanCellEditor = Backgrid.BooleanCellEditor = CellEditor.extend({
+
+  /** @property */
+  tagName: "input",
+
+  /** @property */
+  attributes: {
+    tabIndex: -1,
+    type: "checkbox"
+  },
+
+  /** @property */
+  events: {
+    "mousedown": function () {
+      this.mouseDown = true;
+    },
+    "blur": "enterOrExitEditMode",
+    "mouseup": function () {
+      this.mouseDown = false;
+    },
+    "change": "saveOrCancel",
+    "keydown": "saveOrCancel"
+  },
+
+  /**
+     Renders a checkbox and check it if the model value of this column is true,
+     uncheck otherwise.
+  */
+  render: function () {
+    var val = this.formatter.fromRaw(this.model.get(this.column.get("name")));
+    this.$el.prop("checked", val);
+    return this;
+  },
+
+  /**
+     Event handler. Hack to deal with the case where `blur` is fired before
+     `change` and `click` on a checkbox.
+  */
+  enterOrExitEditMode: function (e) {
+    if (!this.mouseDown) {
+      var model = this.model;
+      model.trigger("backgrid:edited", model, this.column, new Command(e));
+    }
+  },
+
+  /**
+     Event handler. Save the value into the model if the event is `change` or
+     one of the keyboard navigation key presses. Exit edit mode without saving
+     if `escape` was pressed.
+  */
+  saveOrCancel: function (e) {
+    var model = this.model;
+    var column = this.column;
+    var formatter = this.formatter;
+    var command = new Command(e);
+    // skip ahead to `change` when space is pressed
+    if (command.passThru() && e.type != "change") return true;
+    if (command.cancel()) {
+      e.stopPropagation();
+      model.trigger("backgrid:edited", model, column, command);
+    }
+
+    var $el = this.$el;
+    if (command.save() || command.moveLeft() || command.moveRight() || command.moveUp() ||
+        command.moveDown()) {
+      e.preventDefault();
+      e.stopPropagation();
+      var val = formatter.toRaw($el.prop("checked"));
+      model.set(column.get("name"), val);
+      model.trigger("backgrid:edited", model, column, command);
+    }
+    else if (e.type == "change") {
+      var val = formatter.toRaw($el.prop("checked"));
+      model.set(column.get("name"), val);
+      $el.focus();
+    }
+  }
+
+});
+
+/**
+   BooleanCell renders a checkbox both during display mode and edit mode. The
+   checkbox is checked if the model value is true, unchecked otherwise.
+
+   @class Backgrid.BooleanCell
+   @extends Backgrid.Cell
+*/
+var BooleanCell = Backgrid.BooleanCell = Cell.extend({
+
+  /** @property */
+  className: "boolean-cell",
+
+  /** @property */
+  editor: BooleanCellEditor,
+
+  /** @property */
+  events: {
+    "click": "enterEditMode"
+  },
+
+  /**
+     Renders a checkbox and check it if the model value of this column is true,
+     uncheck otherwise.
+  */
+  render: function () {
+    this.$el.empty();
+    this.$el.append($("<input>", {
+      tabIndex: -1,
+      type: "checkbox",
+      checked: this.formatter.fromRaw(this.model.get(this.column.get("name")))
+    }));
+    this.delegateEvents();
+    return this;
+  }
+
+});
+
+/**
+   SelectCellEditor renders an HTML `<select>` fragment as the editor.
+
+   @class Backgrid.SelectCellEditor
+   @extends Backgrid.CellEditor
+*/
+var SelectCellEditor = Backgrid.SelectCellEditor = CellEditor.extend({
+
+  /** @property */
+  tagName: "select",
+
+  /** @property */
+  events: {
+    "change": "save",
+    "blur": "close",
+    "keydown": "close"
+  },
+
+  /** @property {function(Object, ?Object=): string} template */
+  template: _.template('<option value="<%- value %>" <%= selected ? \'selected="selected"\' : "" %>><%- text %></option>'),
+
+  setOptionValues: function (optionValues) {
+    this.optionValues = optionValues;
+  },
+
+  setMultiple: function (multiple) {
+    this.multiple = multiple;
+    this.$el.prop("multiple", multiple);
+  },
+
+  _renderOptions: function (nvps, selectedValues) {
+    var options = '';
+    for (var i = 0; i < nvps.length; i++) {
+      options = options + this.template({
+        text: nvps[i][0],
+        value: nvps[i][1],
+        selected: selectedValues.indexOf(nvps[i][1]) > -1
+      });
+    }
+    return options;
+  },
+
+  /**
+     Renders the options if `optionValues` is a list of name-value pairs. The
+     options are contained inside option groups if `optionValues` is a list of
+     object hashes. The name is rendered at the option text and the value is the
+     option value. If `optionValues` is a function, it is called without a
+     parameter.
+  */
+  render: function () {
+    this.$el.empty();
+
+    var optionValues = _.result(this, "optionValues");
+    var selectedValues = this.formatter.fromRaw(this.model.get(this.column.get("name")));
+
+    if (!_.isArray(optionValues)) throw TypeError("optionValues must be an array");
+
+    var optionValue = null;
+    var optionText = null;
+    var optionValue = null;
+    var optgroupName = null;
+    var optgroup = null;
+
+    for (var i = 0; i < optionValues.length; i++) {
+      var optionValue = optionValues[i];
+
+      if (_.isArray(optionValue)) {
+        optionText  = optionValue[0];
+        optionValue = optionValue[1];
+
+        this.$el.append(this.template({
+          text: optionText,
+          value: optionValue,
+          selected: selectedValues.indexOf(optionValue) > -1
+        }));
+      }
+      else if (_.isObject(optionValue)) {
+        optgroupName = optionValue.name;
+        optgroup = $("<optgroup></optgroup>", { label: optgroupName });
+        optgroup.append(this._renderOptions(optionValue.values, selectedValues));
+        this.$el.append(optgroup);
+      }
+      else {
+        throw TypeError("optionValues elements must be a name-value pair or an object hash of { name: 'optgroup label', value: [option name-value pairs] }");
+      }
+    }
+
+    this.delegateEvents();
+
+    return this;
+  },
+
+  /**
+     Saves the value of the selected option to the model attribute. Triggers a
+     `backgrid:edited` Backbone event from the model.
+  */
+  save: function (e) {
+    var model = this.model;
+    var column = this.column;
+    model.set(column.get("name"), this.formatter.toRaw(this.$el.val()));
+    model.trigger("backgrid:edited", model, column, new Command(e));
+  },
+
+  /**
+     Triggers a `backgrid:edited` event from the model so the body can close
+     this editor.
+  */
+  close: function (e) {
+    var model = this.model;
+    var column = this.column;
+    var command = new Command(e);
+    if (command.cancel()) {
+      e.stopPropagation();
+      model.trigger("backgrid:edited", model, column, new Command(e));
+    }
+    else if (command.save() || command.moveLeft() || command.moveRight() ||
+             command.moveUp() || command.moveDown() || e.type == "blur") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.type == "blur" && this.$el.find("option").length === 1) {
+        model.set(column.get("name"), this.formatter.toRaw(this.$el.val()));
+      }
+      model.trigger("backgrid:edited", model, column, new Command(e));
+    }
+  }
+
+});
+
+/**
+   SelectCell is also a different kind of cell in that upon going into edit mode
+   the cell renders a list of options to pick from, as opposed to an input box.
+
+   SelectCell cannot be referenced by its string name when used in a column
+   definition because it requires an `optionValues` class attribute to be
+   defined. `optionValues` can either be a list of name-value pairs, to be
+   rendered as options, or a list of object hashes which consist of a key *name*
+   which is the option group name, and a key *values* which is a list of
+   name-value pairs to be rendered as options under that option group.
+
+   In addition, `optionValues` can also be a parameter-less function that
+   returns one of the above. If the options are static, it is recommended the
+   returned values to be memoized. `_.memoize()` is a good function to help with
+   that.
+
+   During display mode, the default formatter will normalize the raw model value
+   to an array of values whether the raw model value is a scalar or an
+   array. Each value is compared with the `optionValues` values using
+   Ecmascript's implicit type conversion rules. When exiting edit mode, no type
+   conversion is performed when saving into the model. This behavior is not
+   always desirable when the value type is anything other than string. To
+   control type conversion on the client-side, you should subclass SelectCell to
+   provide a custom formatter or provide the formatter to your column
+   definition.
+
+   See:
+     [$.fn.val()](http://api.jquery.com/val/)
+
+   @class Backgrid.SelectCell
+   @extends Backgrid.Cell
+*/
+var SelectCell = Backgrid.SelectCell = Cell.extend({
+
+  /** @property */
+  className: "select-cell",
+
+  /** @property */
+  editor: SelectCellEditor,
+
+  /** @property */
+  multiple: false,
+
+  /** @property */
+  formatter: new SelectFormatter(),
+
+  /**
+     @property {Array.<Array>|Array.<{name: string, values: Array.<Array>}>} optionValues
+  */
+  optionValues: undefined,
+
+  /** @property */
+  delimiter: ', ',
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {Backbone.Model} options.model
+     @param {Backgrid.Column} options.column
+
+     @throws {TypeError} If `optionsValues` is undefined.
+  */
+  initialize: function (options) {
+    Cell.prototype.initialize.apply(this, arguments);
+    Backgrid.requireOptions(this, ["optionValues"]);
+    this.listenTo(this.model, "backgrid:edit", function (model, column, cell, editor) {
+      if (column.get("name") == this.column.get("name")) {
+        editor.setOptionValues(this.optionValues);
+        editor.setMultiple(this.multiple);
+      }
+    });
+  },
+
+  /**
+     Renders the label using the raw value as key to look up from `optionValues`.
+
+     @throws {TypeError} If `optionValues` is malformed.
+  */
+  render: function () {
+    this.$el.empty();
+
+    var optionValues = this.optionValues;
+    var rawData = this.formatter.fromRaw(this.model.get(this.column.get("name")));
+
+    var selectedText = [];
+
+    try {
+      if (!_.isArray(optionValues) || _.isEmpty(optionValues)) throw new TypeError;
+
+      for (var k = 0; k < rawData.length; k++) {
+        var rawDatum = rawData[k];
+
+        for (var i = 0; i < optionValues.length; i++) {
+          var optionValue = optionValues[i];
+
+          if (_.isArray(optionValue)) {
+            var optionText  = optionValue[0];
+            var optionValue = optionValue[1];
+
+            if (optionValue == rawDatum) selectedText.push(optionText);
+          }
+          else if (_.isObject(optionValue)) {
+            var optionGroupValues = optionValue.values;
+
+            for (var j = 0; j < optionGroupValues.length; j++) {
+              var optionGroupValue = optionGroupValues[j];
+              if (optionGroupValue[1] == rawDatum) {
+                selectedText.push(optionGroupValue[0]);
+              }
+            }
+          }
+          else {
+            throw new TypeError;
+          }
+        }
       }
 
-    if (syncDfd)
-      syncDfd.reject(errorMessage);
+      this.$el.append(selectedText.join(this.delimiter));
+    }
+    catch (ex) {
+      if (ex instanceof TypeError) {
+        throw TypeError("'optionValues' must be of type {Array.<Array>|Array.<{name: string, values: Array.<Array>}>}");
+      }
+      throw ex;
+    }
+
+    this.delegateEvents();
+
+    return this;
   }
 
-  // add compatibility with $.ajax
-  // always execute callback for success and error
-  if (options && options.complete) options.complete(resp);
+});
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
 
-  return syncDfd && syncDfd.promise();
-};
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
 
-Backbone.ajaxSync = Backbone.sync;
+/**
+   A Column is a placeholder for column metadata.
 
-Backbone.getSyncMethod = function(model) {
-  if(model.localStorage || (model.collection && model.collection.localStorage)) {
-    return Backbone.localSync;
+   You usually don't need to create an instance of this class yourself as a
+   collection of column instances will be created for you from a list of column
+   attributes in the Backgrid.js view class constructors.
+
+   @class Backgrid.Column
+   @extends Backbone.Model
+ */
+var Column = Backgrid.Column = Backbone.Model.extend({
+
+  defaults: {
+    name: undefined,
+    label: undefined,
+    sortable: true,
+    editable: true,
+    renderable: true,
+    formatter: undefined,
+    cell: undefined,
+    headerCell: undefined
+  },
+
+  /**
+     Initializes this Column instance.
+
+     @param {Object} attrs Column attributes.
+     @param {string} attrs.name The name of the model attribute.
+     @param {string|Backgrid.Cell} attrs.cell The cell type.
+     If this is a string, the capitalized form will be used to look up a
+     cell class in Backbone, i.e.: string => StringCell. If a Cell subclass
+     is supplied, it is initialized with a hash of parameters. If a Cell
+     instance is supplied, it is used directly.
+     @param {string|Backgrid.HeaderCell} [attrs.headerCell] The header cell type.
+     @param {string} [attrs.label] The label to show in the header.
+     @param {boolean} [attrs.sortable=true]
+     @param {boolean} [attrs.editable=true]
+     @param {boolean} [attrs.renderable=true]
+     @param {Backgrid.CellFormatter|Object|string} [attrs.formatter] The
+     formatter to use to convert between raw model values and user input.
+
+     @throws {TypeError} If attrs.cell or attrs.options are not supplied.
+     @throws {ReferenceError} If attrs.cell is a string but a cell class of
+     said name cannot be found in the Backgrid module.
+
+     See:
+
+     - Backgrid.Cell
+     - Backgrid.CellFormatter
+   */
+  initialize: function (attrs) {
+    Backgrid.requireOptions(attrs, ["cell", "name"]);
+
+    if (!this.has("label")) {
+      this.set({ label: this.get("name") }, { silent: true });
+    }
+
+    var headerCell = Backgrid.resolveNameToClass(this.get("headerCell"), "HeaderCell");
+    var cell = Backgrid.resolveNameToClass(this.get("cell"), "Cell");
+    this.set({ cell: cell, headerCell: headerCell }, { silent: true });
   }
 
-  return Backbone.ajaxSync;
-};
+});
 
-// Override 'Backbone.sync' to default to localSync,
-// the original 'Backbone.sync' is still available in 'Backbone.ajaxSync'
-Backbone.sync = function(method, model, options) {
-  return Backbone.getSyncMethod(model).apply(this, [method, model, options]);
-};
+/**
+   A Backbone collection of Column instances.
 
-return Backbone.LocalStorage;
+   @class Backgrid.Columns
+   @extends Backbone.Collection
+ */
+var Columns = Backgrid.Columns = Backbone.Collection.extend({
+
+  /**
+     @property {Backgrid.Column} model
+   */
+  model: Column
+});
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   Row is a simple container view that takes a model instance and a list of
+   column metadata describing how each of the model's attribute is to be
+   rendered, and apply the appropriate cell to each attribute.
+
+   @class Backgrid.Row
+   @extends Backbone.View
+*/
+var Row = Backgrid.Row = Backbone.View.extend({
+
+  /** @property */
+  tagName: "tr",
+
+  requiredOptions: ["columns", "model"],
+
+  /**
+     Initializes a row view instance.
+
+     @param {Object} options
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns Column metadata.
+     @param {Backbone.Model} options.model The model instance to render.
+
+     @throws {TypeError} If options.columns or options.model is undefined.
+  */
+  initialize: function (options) {
+
+    Backgrid.requireOptions(options, this.requiredOptions);
+
+    var columns = this.columns = options.columns;
+    if (!(columns instanceof Backbone.Collection)) {
+      columns = this.columns = new Columns(columns);
+    }
+
+    var cells = this.cells = [];
+    for (var i = 0; i < columns.length; i++) {
+      cells.push(this.makeCell(columns.at(i), options));
+    }
+
+    this.listenTo(columns, "change:renderable", function (column, renderable) {
+      for (var i = 0; i < cells.length; i++) {
+        var cell = cells[i];
+        if (cell.column.get("name") == column.get("name")) {
+          if (renderable) cell.$el.show(); else cell.$el.hide();
+        }
+      }
+    });
+
+    this.listenTo(columns, "add", function (column, columns) {
+      var i = columns.indexOf(column);
+      var cell = this.makeCell(column, options);
+      cells.splice(i, 0, cell);
+
+      if (!cell.column.get("renderable")) cell.$el.hide();
+
+      var $el = this.$el;
+      if (i === 0) {
+        $el.prepend(cell.render().$el);
+      }
+      else if (i === columns.length - 1) {
+        $el.append(cell.render().$el);
+      }
+      else {
+        $el.children().eq(i).before(cell.render().$el);
+      }
+    });
+
+    this.listenTo(columns, "remove", function (column, columns, opts) {
+      cells[opts.index].remove();
+      cells.splice(opts.index, 1);
+    });
+  },
+
+  /**
+     Factory method for making a cell. Used by #initialize internally. Override
+     this to provide an appropriate cell instance for a custom Row subclass.
+
+     @protected
+
+     @param {Backgrid.Column} column
+     @param {Object} options The options passed to #initialize.
+
+     @return {Backgrid.Cell}
+  */
+  makeCell: function (column) {
+    return new (column.get("cell"))({
+      column: column,
+      model: this.model
+    });
+  },
+
+  /**
+     Renders a row of cells for this row's model.
+  */
+  render: function () {
+    this.$el.empty();
+
+    var fragment = document.createDocumentFragment();
+
+    for (var i = 0; i < this.cells.length; i++) {
+      var cell = this.cells[i];
+      fragment.appendChild(cell.render().el);
+      if (!cell.column.get("renderable")) cell.$el.hide();
+    }
+
+    this.el.appendChild(fragment);
+
+    this.delegateEvents();
+
+    return this;
+  },
+
+  /**
+     Clean up this row and its cells.
+
+     @chainable
+  */
+  remove: function () {
+    for (var i = 0; i < this.cells.length; i++) {
+      var cell = this.cells[i];
+      cell.remove.apply(cell, arguments);
+    }
+    return Backbone.View.prototype.remove.apply(this, arguments);
+  }
+
+});
+
+/**
+   EmptyRow is a simple container view that takes a list of column and render a
+   row with a single column.
+
+   @class Backgrid.EmptyRow
+   @extends Backbone.View
+*/
+var EmptyRow = Backgrid.EmptyRow = Backbone.View.extend({
+
+  /** @property */
+  tagName: "tr",
+
+  /** @property */
+  emptyText: null,
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {string} options.emptyText
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns Column metadata.
+   */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["emptyText", "columns"]);
+
+    this.emptyText = options.emptyText;
+    this.columns =  options.columns;
+  },
+
+  /**
+     Renders an empty row.
+  */
+  render: function () {
+    this.$el.empty();
+
+    var td = document.createElement("td");
+    td.setAttribute("colspan", this.columns.length);
+    td.textContent = this.emptyText;
+
+    this.el.setAttribute("class", "empty");
+    this.el.appendChild(td);
+
+    return this;
+  }
+});
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   HeaderCell is a special cell class that renders a column header cell. If the
+   column is sortable, a sorter is also rendered and will trigger a table
+   refresh after sorting.
+
+   @class Backgrid.HeaderCell
+   @extends Backbone.View
+ */
+var HeaderCell = Backgrid.HeaderCell = Backbone.View.extend({
+
+  /** @property */
+  tagName: "th",
+
+  /** @property */
+  events: {
+    "click a": "onClick"
+  },
+
+  /**
+    @property {null|"ascending"|"descending"} _direction The current sorting
+    direction of this column.
+  */
+  _direction: null,
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {Backgrid.Column|Object} options.column
+
+     @throws {TypeError} If options.column or options.collection is undefined.
+   */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["column", "collection"]);
+    this.column = options.column;
+    if (!(this.column instanceof Column)) {
+      this.column = new Column(this.column);
+    }
+    this.listenTo(this.collection, "backgrid:sort", this._resetCellDirection);
+  },
+
+  /**
+     Gets or sets the direction of this cell. If called directly without
+     parameters, returns the current direction of this cell, otherwise sets
+     it. If a `null` is given, sets this cell back to the default order.
+
+     @param {null|"ascending"|"descending"} dir
+     @return {null|string} The current direction or the changed direction.
+   */
+  direction: function (dir) {
+    if (arguments.length) {
+      if (this._direction) this.$el.removeClass(this._direction);
+      if (dir) this.$el.addClass(dir);
+      this._direction = dir;
+    }
+
+    return this._direction;
+  },
+
+  /**
+     Event handler for the Backbone `backgrid:sort` event. Resets this cell's
+     direction to default if sorting is being done on another column.
+
+     @private
+   */
+  _resetCellDirection: function (sortByColName, direction, comparator, collection) {
+    if (collection == this.collection) {
+      if (sortByColName !== this.column.get("name")) this.direction(null);
+      else this.direction(direction);
+    }
+  },
+
+  /**
+     Event handler for the `click` event on the cell's anchor. If the column is
+     sortable, clicking on the anchor will cycle through 3 sorting orderings -
+     `ascending`, `descending`, and default.
+   */
+  onClick: function (e) {
+    e.preventDefault();
+
+    var columnName = this.column.get("name");
+
+    if (this.column.get("sortable")) {
+      if (this.direction() === "ascending") {
+        this.sort(columnName, "descending", function (left, right) {
+          var leftVal = left.get(columnName);
+          var rightVal = right.get(columnName);
+          if (leftVal === rightVal) {
+            return 0;
+          }
+          else if (leftVal > rightVal) { return -1; }
+          return 1;
+        });
+      }
+      else if (this.direction() === "descending") {
+        this.sort(columnName, null);
+      }
+      else {
+        this.sort(columnName, "ascending", function (left, right) {
+          var leftVal = left.get(columnName);
+          var rightVal = right.get(columnName);
+          if (leftVal === rightVal) {
+            return 0;
+          }
+          else if (leftVal < rightVal) { return -1; }
+          return 1;
+        });
+      }
+    }
+  },
+
+  /**
+     If the underlying collection is a Backbone.PageableCollection in
+     server-mode or infinite-mode, a page of models is fetched after sorting is
+     done on the server.
+
+     If the underlying collection is a Backbone.PageableCollection in
+     client-mode, or any
+     [Backbone.Collection](http://backbonejs.org/#Collection) instance, sorting
+     is done on the client side. If the collection is an instance of a
+     Backbone.PageableCollection, sorting will be done globally on all the pages
+     and the current page will then be returned.
+
+     Triggers a Backbone `backgrid:sort` event from the collection when done
+     with the column name, direction, comparator and a reference to the
+     collection.
+
+     @param {string} columnName
+     @param {null|"ascending"|"descending"} direction
+     @param {function(*, *): number} [comparator]
+
+     See [Backbone.Collection#comparator](http://backbonejs.org/#Collection-comparator)
+  */
+  sort: function (columnName, direction, comparator) {
+
+    comparator = comparator || this._cidComparator;
+
+    var collection = this.collection;
+
+    if (Backbone.PageableCollection && collection instanceof Backbone.PageableCollection) {
+      var order;
+      if (direction === "ascending") order = -1;
+      else if (direction === "descending") order = 1;
+      else order = null;
+
+      collection.setSorting(order ? columnName : null, order);
+
+      if (collection.mode == "client") {
+        if (!collection.fullCollection.comparator) {
+          collection.fullCollection.comparator = comparator;
+        }
+        collection.fullCollection.sort();
+      }
+      else collection.fetch({reset: true});
+    }
+    else {
+      collection.comparator = comparator;
+      collection.sort();
+    }
+
+    this.collection.trigger("backgrid:sort", columnName, direction, comparator, this.collection);
+  },
+
+  /**
+     Default comparator for Backbone.Collections. Sorts cids in ascending
+     order. The cids of the models are assumed to be in insertion order.
+
+     @private
+     @param {*} left
+     @param {*} right
+  */
+  _cidComparator: function (left, right) {
+    var lcid = left.cid, rcid = right.cid;
+    if (!_.isUndefined(lcid) && !_.isUndefined(rcid)) {
+      lcid = lcid.slice(1) * 1, rcid = rcid.slice(1) * 1;
+      if (lcid < rcid) return -1;
+      else if (lcid > rcid) return 1;
+    }
+
+    return 0;
+  },
+
+  /**
+     Renders a header cell with a sorter and a label.
+   */
+  render: function () {
+    this.$el.empty();
+    var $label = $("<a>").text(this.column.get("label")).append("<b class='sort-caret'></b>");
+    this.$el.append($label);
+    this.delegateEvents();
+    return this;
+  }
+
+});
+
+/**
+   HeaderRow is a controller for a row of header cells.
+
+   @class Backgrid.HeaderRow
+   @extends Backgrid.Row
+ */
+var HeaderRow = Backgrid.HeaderRow = Backgrid.Row.extend({
+
+  requiredOptions: ["columns", "collection"],
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns
+     @param {Backgrid.HeaderCell} [options.headerCell] Customized default
+     HeaderCell for all the columns. Supply a HeaderCell class or instance to a
+     the `headerCell` key in a column definition for column-specific header
+     rendering.
+
+     @throws {TypeError} If options.columns or options.collection is undefined.
+   */
+  initialize: function () {
+    Backgrid.Row.prototype.initialize.apply(this, arguments);
+  },
+
+  makeCell: function (column, options) {
+    var headerCell = column.get("headerCell") || options.headerCell || HeaderCell;
+    headerCell = new headerCell({
+      column: column,
+      collection: this.collection
+    });
+    return headerCell;
+  }
+
+});
+
+/**
+   Header is a special structural view class that renders a table head with a
+   single row of header cells.
+
+   @class Backgrid.Header
+   @extends Backbone.View
+ */
+var Header = Backgrid.Header = Backbone.View.extend({
+
+  /** @property */
+  tagName: "thead",
+
+  /**
+     Initializer. Initializes this table head view to contain a single header
+     row view.
+
+     @param {Object} options
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns Column metadata.
+     @param {Backbone.Model} options.model The model instance to render.
+
+     @throws {TypeError} If options.columns or options.model is undefined.
+   */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["columns", "collection"]);
+
+    this.columns = options.columns;
+    if (!(this.columns instanceof Backbone.Collection)) {
+      this.columns = new Columns(this.columns);
+    }
+
+    this.row = new Backgrid.HeaderRow({
+      columns: this.columns,
+      collection: this.collection
+    });
+  },
+
+  /**
+     Renders this table head with a single row of header cells.
+   */
+  render: function () {
+    this.$el.append(this.row.render().$el);
+    this.delegateEvents();
+    return this;
+  },
+
+  /**
+     Clean up this header and its row.
+
+     @chainable
+   */
+  remove: function () {
+    this.row.remove.apply(this.row, arguments);
+    return Backbone.View.prototype.remove.apply(this, arguments);
+  }
+
+});
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   Body is the table body which contains the rows inside a table. Body is
+   responsible for refreshing the rows after sorting, insertion and removal.
+
+   @class Backgrid.Body
+   @extends Backbone.View
+*/
+var Body = Backgrid.Body = Backbone.View.extend({
+
+  /** @property */
+  tagName: "tbody",
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {Backbone.Collection} options.collection
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns
+     Column metadata.
+     @param {Backgrid.Row} [options.row=Backgrid.Row] The Row class to use.
+     @param {string} [options.emptyText] The text to display in the empty row.
+
+     @throws {TypeError} If options.columns or options.collection is undefined.
+
+     See Backgrid.Row.
+  */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["columns", "collection"]);
+
+    this.columns = options.columns;
+    if (!(this.columns instanceof Backbone.Collection)) {
+      this.columns = new Columns(this.columns);
+    }
+
+    this.row = options.row || Row;
+    this.rows = this.collection.map(function (model) {
+      var row = new this.row({
+        columns: this.columns,
+        model: model
+      });
+
+      return row;
+    }, this);
+
+    this.emptyText = options.emptyText;
+    this._unshiftEmptyRowMayBe();
+
+    var collection = this.collection;
+    this.listenTo(collection, "add", this.insertRow);
+    this.listenTo(collection, "remove", this.removeRow);
+    this.listenTo(collection, "sort", this.refresh);
+    this.listenTo(collection, "reset", this.refresh);
+    this.listenTo(collection, "backgrid:edited", this.moveToNextCell);
+  },
+
+  _unshiftEmptyRowMayBe: function () {
+    if (this.rows.length === 0 && this.emptyText != null) {
+      this.rows.unshift(new EmptyRow({
+        emptyText: this.emptyText,
+        columns: this.columns
+      }));
+    }
+  },
+
+  /**
+     This method can be called either directly or as a callback to a
+     [Backbone.Collecton#add](http://backbonejs.org/#Collection-add) event.
+
+     When called directly, it accepts a model or an array of models and an
+     option hash just like
+     [Backbone.Collection#add](http://backbonejs.org/#Collection-add) and
+     delegates to it. Once the model is added, a new row is inserted into the
+     body and automatically rendered.
+
+     When called as a callback of an `add` event, splices a new row into the
+     body and renders it.
+
+     @param {Backbone.Model} model The model to render as a row.
+     @param {Backbone.Collection} collection When called directly, this
+     parameter is actually the options to
+     [Backbone.Collection#add](http://backbonejs.org/#Collection-add).
+     @param {Object} options When called directly, this must be null.
+
+     See:
+
+     - [Backbone.Collection#add](http://backbonejs.org/#Collection-add)
+  */
+  insertRow: function (model, collection, options) {
+
+    if (this.rows[0] instanceof EmptyRow) this.rows.pop().remove();
+
+    // insertRow() is called directly
+    if (!(collection instanceof Backbone.Collection) && !options) {
+      this.collection.add(model, (options = collection));
+      return;
+    }
+
+    options = _.extend({render: true}, options || {});
+
+    var row = new this.row({
+      columns: this.columns,
+      model: model
+    });
+
+    var index = collection.indexOf(model);
+    this.rows.splice(index, 0, row);
+
+    var $el = this.$el;
+    var $children = $el.children();
+    var $rowEl = row.render().$el;
+
+    if (options.render) {
+      if (index >= $children.length) {
+        $el.append($rowEl);
+      }
+      else {
+        $children.eq(index).before($rowEl);
+      }
+    }
+  },
+
+  /**
+     The method can be called either directly or as a callback to a
+     [Backbone.Collection#remove](http://backbonejs.org/#Collection-remove)
+     event.
+
+     When called directly, it accepts a model or an array of models and an
+     option hash just like
+     [Backbone.Collection#remove](http://backbonejs.org/#Collection-remove) and
+     delegates to it. Once the model is removed, a corresponding row is removed
+     from the body.
+
+     When called as a callback of a `remove` event, splices into the rows and
+     removes the row responsible for rendering the model.
+
+     @param {Backbone.Model} model The model to remove from the body.
+     @param {Backbone.Collection} collection When called directly, this
+     parameter is actually the options to
+     [Backbone.Collection#remove](http://backbonejs.org/#Collection-remove).
+     @param {Object} options When called directly, this must be null.
+
+     See:
+
+     - [Backbone.Collection#remove](http://backbonejs.org/#Collection-remove)
+  */
+  removeRow: function (model, collection, options) {
+
+    // removeRow() is called directly
+    if (!options) {
+      this.collection.remove(model, (options = collection));
+      this._unshiftEmptyRowMayBe();
+      return;
+    }
+
+    if (_.isUndefined(options.render) || options.render) {
+      this.rows[options.index].remove();
+    }
+
+    this.rows.splice(options.index, 1);
+    this._unshiftEmptyRowMayBe();
+  },
+
+  /**
+     Reinitialize all the rows inside the body and re-render them. Triggers a
+     Backbone `backgrid:refresh` event from the collection along with the body
+     instance as its sole parameter when done.
+  */
+  refresh: function () {
+    for (var i = 0; i < this.rows.length; i++) {
+      this.rows[i].remove();
+    }
+
+    this.rows = this.collection.map(function (model) {
+      var row = new this.row({
+        columns: this.columns,
+        model: model
+      });
+
+      return row;
+    }, this);
+    this._unshiftEmptyRowMayBe();
+
+    this.render();
+
+    this.collection.trigger("backgrid:refresh", this);
+
+    return this;
+  },
+
+  /**
+     Renders all the rows inside this body. If the collection is empty and
+     `options.emptyText` is defined and not null in the constructor, an empty
+     row is rendered, otherwise no row is rendered.
+  */
+  render: function () {
+    this.$el.empty();
+
+    var fragment = document.createDocumentFragment();
+    for (var i = 0; i < this.rows.length; i++) {
+      var row = this.rows[i];
+      fragment.appendChild(row.render().el);
+    }
+
+    this.el.appendChild(fragment);
+
+    this.delegateEvents();
+
+    return this;
+  },
+
+  /**
+     Clean up this body and it's rows.
+
+     @chainable
+  */
+  remove: function () {
+    for (var i = 0; i < this.rows.length; i++) {
+      var row = this.rows[i];
+      row.remove.apply(row, arguments);
+    }
+    return Backbone.View.prototype.remove.apply(this, arguments);
+  },
+
+  /**
+     Moves focus to the next renderable and editable cell and return the
+     currently editing cell to display mode.
+
+     @param {Backbone.Model} model The originating model
+     @param {Backgrid.Column} column The originating model column
+     @param {Backgrid.Command} command The Command object constructed from a DOM
+     Event
+  */
+  moveToNextCell: function (model, column, command) {
+    var i = this.collection.indexOf(model);
+    var j = this.columns.indexOf(column);
+
+    if (command.moveUp() || command.moveDown() || command.moveLeft() ||
+        command.moveRight() || command.save()) {
+      var l = this.columns.length;
+      var maxOffset = l * this.collection.length;
+
+      if (command.moveUp() || command.moveDown()) {
+        var row = this.rows[i + (command.moveUp() ? -1 : 1)];
+        if (row) row.cells[j].enterEditMode();
+      }
+      else if (command.moveLeft() || command.moveRight()) {
+        var right = command.moveRight();
+        for (var offset = i * l + j + (right ? 1 : -1);
+             offset >= 0 && offset < maxOffset;
+             right ? offset++ : offset--) {
+          var m = ~~(offset / l);
+          var n = offset - m * l;
+          var cell = this.rows[m].cells[n];
+          if (cell.column.get("renderable") && cell.column.get("editable")) {
+            cell.enterEditMode();
+            break;
+          }
+        }
+      }
+    }
+
+    this.rows[i].cells[j].exitEditMode();
+  }
+});
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   A Footer is a generic class that only defines a default tag `tfoot` and
+   number of required parameters in the initializer.
+
+   @abstract
+   @class Backgrid.Footer
+   @extends Backbone.View
+ */
+var Footer = Backgrid.Footer = Backbone.View.extend({
+
+  /** @property */
+  tagName: "tfoot",
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {*} options.parent The parent view class of this footer.
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns
+     Column metadata.
+     @param {Backbone.Collection} options.collection
+
+     @throws {TypeError} If options.columns or options.collection is undefined.
+  */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["columns", "collection"]);
+    this.columns = options.columns;
+    if (!(this.columns instanceof Backbone.Collection)) {
+      this.columns = new Backgrid.Columns(this.columns);
+    }
+  }
+
+});
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   Grid represents a data grid that has a header, body and an optional footer.
+
+   By default, a Grid treats each model in a collection as a row, and each
+   attribute in a model as a column. To render a grid you must provide a list of
+   column metadata and a collection to the Grid constructor. Just like any
+   Backbone.View class, the grid is rendered as a DOM node fragment when you
+   call render().
+
+       var grid = Backgrid.Grid({
+         columns: [{ name: "id", label: "ID", type: "string" },
+          // ...
+         ],
+         collections: books
+       });
+
+       $("#table-container").append(grid.render().el);
+
+   Optionally, if you want to customize the rendering of the grid's header and
+   footer, you may choose to extend Backgrid.Header and Backgrid.Footer, and
+   then supply that class or an instance of that class to the Grid constructor.
+   See the documentation for Header and Footer for further details.
+
+       var grid = Backgrid.Grid({
+         columns: [{ name: "id", label: "ID", type: "string" }],
+         collections: books,
+         header: Backgrid.Header.extend({
+              //...
+         }),
+         footer: Backgrid.Paginator
+       });
+
+   Finally, if you want to override how the rows are rendered in the table body,
+   you can supply a Body subclass as the `body` attribute that uses a different
+   Row class.
+
+   @class Backgrid.Grid
+   @extends Backbone.View
+
+   See:
+
+   - Backgrid.Column
+   - Backgrid.Header
+   - Backgrid.Body
+   - Backgrid.Row
+   - Backgrid.Footer
+*/
+var Grid = Backgrid.Grid = Backbone.View.extend({
+
+  /** @property */
+  tagName: "table",
+
+  /** @property */
+  className: "backgrid",
+
+  /** @property */
+  header: Header,
+
+  /** @property */
+  body: Body,
+
+  /** @property */
+  footer: null,
+
+  /**
+     Initializes a Grid instance.
+
+     @param {Object} options
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns Column metadata.
+     @param {Backbone.Collection} options.collection The collection of tabular model data to display.
+     @param {Backgrid.Header} [options.header=Backgrid.Header] An optional Header class to override the default.
+     @param {Backgrid.Body} [options.body=Backgrid.Body] An optional Body class to override the default.
+     @param {Backgrid.Row} [options.row=Backgrid.Row] An optional Row class to override the default.
+     @param {Backgrid.Footer} [options.footer=Backgrid.Footer] An optional Footer class.
+   */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["columns", "collection"]);
+
+    // Convert the list of column objects here first so the subviews don't have
+    // to.
+    if (!(options.columns instanceof Backbone.Collection)) {
+      options.columns = new Columns(options.columns);
+    }
+    this.columns = options.columns;
+
+    var passedThruOptions = _.omit(options, ["el", "id", "attributes",
+                                             "className", "tagName", "events"]);
+
+    this.header = options.header || this.header;
+    this.header = new this.header(passedThruOptions);
+
+    this.body = options.body || this.body;
+    this.body = new this.body(passedThruOptions);
+
+    this.footer = options.footer || this.footer;
+    if (this.footer) {
+      this.footer = new this.footer(passedThruOptions);
+    }
+
+    this.listenTo(this.columns, "reset", function () {
+      this.header = new (this.header.remove().constructor)(passedThruOptions);
+      this.body = new (this.body.remove().constructor)(passedThruOptions);
+      if (this.footer) {
+        this.footer = new (this.footer.remove().constructor)(passedThruOptions);
+      }
+      this.render();
+    });
+  },
+
+  /**
+     Delegates to Backgrid.Body#insertRow.
+   */
+  insertRow: function (model, collection, options) {
+    return this.body.insertRow(model, collection, options);
+  },
+
+  /**
+     Delegates to Backgrid.Body#removeRow.
+   */
+  removeRow: function (model, collection, options) {
+    return this.body.removeRow(model, collection, options);
+  },
+
+  /**
+     Delegates to Backgrid.Columns#add for adding a column. Subviews can listen
+     to the `add` event from their internal `columns` if rerendering needs to
+     happen.
+
+     @param {Object} [options] Options for `Backgrid.Columns#add`.
+     @param {boolean} [options.render=true] Whether to render the column
+     immediately after insertion.
+
+     @chainable
+   */
+  insertColumn: function (column, options) {
+    options = options || {render: true};
+    this.columns.add(column, options);
+    return this;
+  },
+
+  /**
+     Delegates to Backgrid.Columns#remove for removing a column. Subviews can
+     listen to the `remove` event from the internal `columns` if rerendering
+     needs to happen.
+
+     @param {Object} [options] Options for `Backgrid.Columns#remove`.
+
+     @chainable
+   */
+  removeColumn: function (column, options) {
+    this.columns.remove(column, options);
+    return this;
+  },
+
+  /**
+     Renders the grid's header, then footer, then finally the body. Triggers a
+     Backbone `backgrid:rendered` event along with a reference to the grid when
+     the it has successfully been rendered.
+   */
+  render: function () {
+    this.$el.empty();
+
+    this.$el.append(this.header.render().$el);
+
+    if (this.footer) {
+      this.$el.append(this.footer.render().$el);
+    }
+
+    this.$el.append(this.body.render().$el);
+
+    this.delegateEvents();
+
+    this.trigger("backgrid:rendered", this);
+
+    return this;
+  },
+
+  /**
+     Clean up this grid and its subviews.
+
+     @chainable
+   */
+  remove: function () {
+    this.header.remove.apply(this.header, arguments);
+    this.body.remove.apply(this.body, arguments);
+    this.footer && this.footer.remove.apply(this.footer, arguments);
+    return Backbone.View.prototype.remove.apply(this, arguments);
+  }
+
+});
+
+}(this, jQuery, _, Backbone));
+;/*!
+	Autosize v1.17.8 - 2013-09-07
+	Automatically adjust textarea height based on user input.
+	(c) 2013 Jack Moore - http://www.jacklmoore.com/autosize
+	license: http://www.opensource.org/licenses/mit-license.php
+*/
+(function (factory) {
+	if (typeof define === 'function' && define.amd) {
+		// AMD. Register as an anonymous module.
+		define(['jquery'], factory);
+	} else {
+		// Browser globals: jQuery or jQuery-like library, such as Zepto
+		factory(window.jQuery || window.$);
+	}
+}(function ($) {
+	var
+	defaults = {
+		className: 'autosizejs',
+		append: '',
+		callback: false,
+		resizeDelay: 10
+	},
+
+	// border:0 is unnecessary, but avoids a bug in FireFox on OSX
+	copy = '<textarea tabindex="-1" style="position:absolute; top:-999px; left:0; right:auto; bottom:auto; border:0; padding: 0; -moz-box-sizing:content-box; -webkit-box-sizing:content-box; box-sizing:content-box; word-wrap:break-word; height:0 !important; min-height:0 !important; overflow:hidden; transition:none; -webkit-transition:none; -moz-transition:none;"/>',
+
+	// line-height is conditionally included because IE7/IE8/old Opera do not return the correct value.
+	typographyStyles = [
+		'fontFamily',
+		'fontSize',
+		'fontWeight',
+		'fontStyle',
+		'letterSpacing',
+		'textTransform',
+		'wordSpacing',
+		'textIndent'
+	],
+
+	// to keep track which textarea is being mirrored when adjust() is called.
+	mirrored,
+
+	// the mirror element, which is used to calculate what size the mirrored element should be.
+	mirror = $(copy).data('autosize', true)[0];
+
+	// test that line-height can be accurately copied.
+	mirror.style.lineHeight = '99px';
+	if ($(mirror).css('lineHeight') === '99px') {
+		typographyStyles.push('lineHeight');
+	}
+	mirror.style.lineHeight = '';
+
+	$.fn.autosize = function (options) {
+		if (!this.length) {
+			return this;
+		}
+
+		options = $.extend({}, defaults, options || {});
+
+		if (mirror.parentNode !== document.body) {
+			$(document.body).append(mirror);
+		}
+
+		return this.each(function () {
+			var
+			ta = this,
+			$ta = $(ta),
+			maxHeight,
+			minHeight,
+			boxOffset = 0,
+			callback = $.isFunction(options.callback),
+			originalStyles = {
+				height: ta.style.height,
+				overflow: ta.style.overflow,
+				overflowY: ta.style.overflowY,
+				wordWrap: ta.style.wordWrap,
+				resize: ta.style.resize
+			},
+			timeout,
+			width = $ta.width();
+
+			if ($ta.data('autosize')) {
+				// exit if autosize has already been applied, or if the textarea is the mirror element.
+				return;
+			}
+			$ta.data('autosize', true);
+
+			if ($ta.css('box-sizing') === 'border-box' || $ta.css('-moz-box-sizing') === 'border-box' || $ta.css('-webkit-box-sizing') === 'border-box'){
+				boxOffset = $ta.outerHeight() - $ta.height();
+			}
+
+			// IE8 and lower return 'auto', which parses to NaN, if no min-height is set.
+			minHeight = Math.max(parseInt($ta.css('minHeight'), 10) - boxOffset || 0, $ta.height());
+
+			$ta.css({
+				overflow: 'hidden',
+				overflowY: 'hidden',
+				wordWrap: 'break-word', // horizontal overflow is hidden, so break-word is necessary for handling words longer than the textarea width
+				resize: ($ta.css('resize') === 'none' || $ta.css('resize') === 'vertical') ? 'none' : 'horizontal'
+			});
+
+			// The mirror width must exactly match the textarea width, so using getBoundingClientRect because it doesn't round the sub-pixel value.
+			function setWidth() {
+				var style, width;
+				
+				if ('getComputedStyle' in window) {
+					style = window.getComputedStyle(ta);
+					width = ta.getBoundingClientRect().width;
+
+					$.each(['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'], function(i,val){
+						width -= parseInt(style[val],10);
+					});
+
+					mirror.style.width = width + 'px';
+				}
+				else {
+					// window.getComputedStyle, getBoundingClientRect returning a width are unsupported and unneeded in IE8 and lower.
+					mirror.style.width = Math.max($ta.width(), 0) + 'px';
+				}
+			}
+
+			function initMirror() {
+				var styles = {};
+
+				mirrored = ta;
+				mirror.className = options.className;
+				maxHeight = parseInt($ta.css('maxHeight'), 10);
+
+				// mirror is a duplicate textarea located off-screen that
+				// is automatically updated to contain the same text as the
+				// original textarea.  mirror always has a height of 0.
+				// This gives a cross-browser supported way getting the actual
+				// height of the text, through the scrollTop property.
+				$.each(typographyStyles, function(i,val){
+					styles[val] = $ta.css(val);
+				});
+				$(mirror).css(styles);
+
+				setWidth();
+
+				// Chrome-specific fix:
+				// When the textarea y-overflow is hidden, Chrome doesn't reflow the text to account for the space
+				// made available by removing the scrollbar. This workaround triggers the reflow for Chrome.
+				if (window.chrome) {
+					var width = ta.style.width;
+					ta.style.width = '0px';
+					var ignore = ta.offsetWidth;
+					ta.style.width = width;
+				}
+			}
+
+			// Using mainly bare JS in this function because it is going
+			// to fire very often while typing, and needs to very efficient.
+			function adjust() {
+				var height, original;
+
+				if (mirrored !== ta) {
+					initMirror();
+				} else {
+					setWidth();
+				}
+
+				mirror.value = ta.value + options.append;
+				mirror.style.overflowY = ta.style.overflowY;
+				original = parseInt(ta.style.height,10);
+
+				// Setting scrollTop to zero is needed in IE8 and lower for the next step to be accurately applied
+				mirror.scrollTop = 0;
+
+				mirror.scrollTop = 9e4;
+
+				// Using scrollTop rather than scrollHeight because scrollHeight is non-standard and includes padding.
+				height = mirror.scrollTop;
+
+				if (maxHeight && height > maxHeight) {
+					ta.style.overflowY = 'scroll';
+					height = maxHeight;
+				} else {
+					ta.style.overflowY = 'hidden';
+					if (height < minHeight) {
+						height = minHeight;
+					}
+				}
+
+				height += boxOffset;
+
+				if (original !== height) {
+					ta.style.height = height + 'px';
+					if (callback) {
+						options.callback.call(ta,ta);
+					}
+				}
+			}
+
+			function resize () {
+				clearTimeout(timeout);
+				timeout = setTimeout(function(){
+					var newWidth = $ta.width();
+
+					if (newWidth !== width) {
+						width = newWidth;
+						adjust();
+					}
+				}, parseInt(options.resizeDelay,10));
+			}
+
+			if ('onpropertychange' in ta) {
+				if ('oninput' in ta) {
+					// Detects IE9.  IE9 does not fire onpropertychange or oninput for deletions,
+					// so binding to onkeyup to catch most of those occasions.  There is no way that I
+					// know of to detect something like 'cut' in IE9.
+					$ta.on('input.autosize keyup.autosize', adjust);
+				} else {
+					// IE7 / IE8
+					$ta.on('propertychange.autosize', function(){
+						if(event.propertyName === 'value'){
+							adjust();
+						}
+					});
+				}
+			} else {
+				// Modern Browsers
+				$ta.on('input.autosize', adjust);
+			}
+
+			// Set options.resizeDelay to false if using fixed-width textarea elements.
+			// Uses a timeout and width check to reduce the amount of times adjust needs to be called after window resize.
+
+			if (options.resizeDelay !== false) {
+				$(window).on('resize.autosize', resize);
+			}
+
+			// Event for manual triggering if needed.
+			// Should only be needed when the value of the textarea is changed through JavaScript rather than user input.
+			$ta.on('autosize.resize', adjust);
+
+			// Event for manual triggering that also forces the styles to update as well.
+			// Should only be needed if one of typography styles of the textarea change, and the textarea is already the target of the adjust method.
+			$ta.on('autosize.resizeIncludeStyle', function() {
+				mirrored = null;
+				adjust();
+			});
+
+			$ta.on('autosize.destroy', function(){
+				mirrored = null;
+				clearTimeout(timeout);
+				$(window).off('resize', resize);
+				$ta
+					.off('autosize')
+					.off('.autosize')
+					.css(originalStyles)
+					.removeData('autosize');
+			});
+
+			// Call adjust in case the textarea already contains text.
+			adjust();
+		});
+	};
 }));
 
-;// Console-polyfill. MIT license.
-// https://github.com/paulmillr/console-polyfill
-// Make it safe to do console.log() always.
-(function (con) {
-  'use strict';
-  var prop, method;
-  var empty = {};
-  var dummy = function() {};
-  var properties = 'memory'.split(',');
-  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
-     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
-     'time,timeEnd,trace,warn').split(',');
-  while (prop = properties.pop()) con[prop] = con[prop] || empty;
-  while (method = methods.pop()) con[method] = con[method] || dummy;
-})(window.console = window.console || {});
+;//! moment.js
+//! version : 2.2.1
+//! authors : Tim Wood, Iskren Chernev, Moment.js contributors
+//! license : MIT
+//! momentjs.com
+
+(function (undefined) {
+
+    /************************************
+        Constants
+    ************************************/
+
+    var moment,
+        VERSION = "2.2.1",
+        round = Math.round, i,
+        // internal storage for language config files
+        languages = {},
+
+        // check for nodeJS
+        hasModule = (typeof module !== 'undefined' && module.exports),
+
+        // ASP.NET json date format regex
+        aspNetJsonRegex = /^\/?Date\((\-?\d+)/i,
+        aspNetTimeSpanJsonRegex = /(\-)?(?:(\d*)\.)?(\d+)\:(\d+)\:(\d+)\.?(\d{3})?/,
+
+        // format tokens
+        formattingTokens = /(\[[^\[]*\])|(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|mm?|ss?|SS?S?|X|zz?|ZZ?|.)/g,
+        localFormattingTokens = /(\[[^\[]*\])|(\\)?(LT|LL?L?L?|l{1,4})/g,
+
+        // parsing token regexes
+        parseTokenOneOrTwoDigits = /\d\d?/, // 0 - 99
+        parseTokenOneToThreeDigits = /\d{1,3}/, // 0 - 999
+        parseTokenThreeDigits = /\d{3}/, // 000 - 999
+        parseTokenFourDigits = /\d{1,4}/, // 0 - 9999
+        parseTokenSixDigits = /[+\-]?\d{1,6}/, // -999,999 - 999,999
+        parseTokenWord = /[0-9]*['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+|[\u0600-\u06FF\/]+(\s*?[\u0600-\u06FF]+){1,2}/i, // any word (or two) characters or numbers including two/three word month in arabic.
+        parseTokenTimezone = /Z|[\+\-]\d\d:?\d\d/i, // +00:00 -00:00 +0000 -0000 or Z
+        parseTokenT = /T/i, // T (ISO seperator)
+        parseTokenTimestampMs = /[\+\-]?\d+(\.\d{1,3})?/, // 123456789 123456789.123
+
+        // preliminary iso regex
+        // 0000-00-00 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000
+        isoRegex = /^\s*\d{4}-\d\d-\d\d((T| )(\d\d(:\d\d(:\d\d(\.\d\d?\d?)?)?)?)?([\+\-]\d\d:?\d\d)?)?/,
+        isoFormat = 'YYYY-MM-DDTHH:mm:ssZ',
+
+        // iso time formats and regexes
+        isoTimes = [
+            ['HH:mm:ss.S', /(T| )\d\d:\d\d:\d\d\.\d{1,3}/],
+            ['HH:mm:ss', /(T| )\d\d:\d\d:\d\d/],
+            ['HH:mm', /(T| )\d\d:\d\d/],
+            ['HH', /(T| )\d\d/]
+        ],
+
+        // timezone chunker "+10:00" > ["10", "00"] or "-1530" > ["-15", "30"]
+        parseTimezoneChunker = /([\+\-]|\d\d)/gi,
+
+        // getter and setter names
+        proxyGettersAndSetters = 'Date|Hours|Minutes|Seconds|Milliseconds'.split('|'),
+        unitMillisecondFactors = {
+            'Milliseconds' : 1,
+            'Seconds' : 1e3,
+            'Minutes' : 6e4,
+            'Hours' : 36e5,
+            'Days' : 864e5,
+            'Months' : 2592e6,
+            'Years' : 31536e6
+        },
+
+        unitAliases = {
+            ms : 'millisecond',
+            s : 'second',
+            m : 'minute',
+            h : 'hour',
+            d : 'day',
+            w : 'week',
+            W : 'isoweek',
+            M : 'month',
+            y : 'year'
+        },
+
+        // format function strings
+        formatFunctions = {},
+
+        // tokens to ordinalize and pad
+        ordinalizeTokens = 'DDD w W M D d'.split(' '),
+        paddedTokens = 'M D H h m s w W'.split(' '),
+
+        formatTokenFunctions = {
+            M    : function () {
+                return this.month() + 1;
+            },
+            MMM  : function (format) {
+                return this.lang().monthsShort(this, format);
+            },
+            MMMM : function (format) {
+                return this.lang().months(this, format);
+            },
+            D    : function () {
+                return this.date();
+            },
+            DDD  : function () {
+                return this.dayOfYear();
+            },
+            d    : function () {
+                return this.day();
+            },
+            dd   : function (format) {
+                return this.lang().weekdaysMin(this, format);
+            },
+            ddd  : function (format) {
+                return this.lang().weekdaysShort(this, format);
+            },
+            dddd : function (format) {
+                return this.lang().weekdays(this, format);
+            },
+            w    : function () {
+                return this.week();
+            },
+            W    : function () {
+                return this.isoWeek();
+            },
+            YY   : function () {
+                return leftZeroFill(this.year() % 100, 2);
+            },
+            YYYY : function () {
+                return leftZeroFill(this.year(), 4);
+            },
+            YYYYY : function () {
+                return leftZeroFill(this.year(), 5);
+            },
+            gg   : function () {
+                return leftZeroFill(this.weekYear() % 100, 2);
+            },
+            gggg : function () {
+                return this.weekYear();
+            },
+            ggggg : function () {
+                return leftZeroFill(this.weekYear(), 5);
+            },
+            GG   : function () {
+                return leftZeroFill(this.isoWeekYear() % 100, 2);
+            },
+            GGGG : function () {
+                return this.isoWeekYear();
+            },
+            GGGGG : function () {
+                return leftZeroFill(this.isoWeekYear(), 5);
+            },
+            e : function () {
+                return this.weekday();
+            },
+            E : function () {
+                return this.isoWeekday();
+            },
+            a    : function () {
+                return this.lang().meridiem(this.hours(), this.minutes(), true);
+            },
+            A    : function () {
+                return this.lang().meridiem(this.hours(), this.minutes(), false);
+            },
+            H    : function () {
+                return this.hours();
+            },
+            h    : function () {
+                return this.hours() % 12 || 12;
+            },
+            m    : function () {
+                return this.minutes();
+            },
+            s    : function () {
+                return this.seconds();
+            },
+            S    : function () {
+                return ~~(this.milliseconds() / 100);
+            },
+            SS   : function () {
+                return leftZeroFill(~~(this.milliseconds() / 10), 2);
+            },
+            SSS  : function () {
+                return leftZeroFill(this.milliseconds(), 3);
+            },
+            Z    : function () {
+                var a = -this.zone(),
+                    b = "+";
+                if (a < 0) {
+                    a = -a;
+                    b = "-";
+                }
+                return b + leftZeroFill(~~(a / 60), 2) + ":" + leftZeroFill(~~a % 60, 2);
+            },
+            ZZ   : function () {
+                var a = -this.zone(),
+                    b = "+";
+                if (a < 0) {
+                    a = -a;
+                    b = "-";
+                }
+                return b + leftZeroFill(~~(10 * a / 6), 4);
+            },
+            z : function () {
+                return this.zoneAbbr();
+            },
+            zz : function () {
+                return this.zoneName();
+            },
+            X    : function () {
+                return this.unix();
+            }
+        };
+
+    function padToken(func, count) {
+        return function (a) {
+            return leftZeroFill(func.call(this, a), count);
+        };
+    }
+    function ordinalizeToken(func, period) {
+        return function (a) {
+            return this.lang().ordinal(func.call(this, a), period);
+        };
+    }
+
+    while (ordinalizeTokens.length) {
+        i = ordinalizeTokens.pop();
+        formatTokenFunctions[i + 'o'] = ordinalizeToken(formatTokenFunctions[i], i);
+    }
+    while (paddedTokens.length) {
+        i = paddedTokens.pop();
+        formatTokenFunctions[i + i] = padToken(formatTokenFunctions[i], 2);
+    }
+    formatTokenFunctions.DDDD = padToken(formatTokenFunctions.DDD, 3);
+
+
+    /************************************
+        Constructors
+    ************************************/
+
+    function Language() {
+
+    }
+
+    // Moment prototype object
+    function Moment(config) {
+        extend(this, config);
+    }
+
+    // Duration Constructor
+    function Duration(duration) {
+        var years = duration.years || duration.year || duration.y || 0,
+            months = duration.months || duration.month || duration.M || 0,
+            weeks = duration.weeks || duration.week || duration.w || 0,
+            days = duration.days || duration.day || duration.d || 0,
+            hours = duration.hours || duration.hour || duration.h || 0,
+            minutes = duration.minutes || duration.minute || duration.m || 0,
+            seconds = duration.seconds || duration.second || duration.s || 0,
+            milliseconds = duration.milliseconds || duration.millisecond || duration.ms || 0;
+
+        // store reference to input for deterministic cloning
+        this._input = duration;
+
+        // representation for dateAddRemove
+        this._milliseconds = +milliseconds +
+            seconds * 1e3 + // 1000
+            minutes * 6e4 + // 1000 * 60
+            hours * 36e5; // 1000 * 60 * 60
+        // Because of dateAddRemove treats 24 hours as different from a
+        // day when working around DST, we need to store them separately
+        this._days = +days +
+            weeks * 7;
+        // It is impossible translate months into days without knowing
+        // which months you are are talking about, so we have to store
+        // it separately.
+        this._months = +months +
+            years * 12;
+
+        this._data = {};
+
+        this._bubble();
+    }
+
+
+    /************************************
+        Helpers
+    ************************************/
+
+
+    function extend(a, b) {
+        for (var i in b) {
+            if (b.hasOwnProperty(i)) {
+                a[i] = b[i];
+            }
+        }
+        return a;
+    }
+
+    function absRound(number) {
+        if (number < 0) {
+            return Math.ceil(number);
+        } else {
+            return Math.floor(number);
+        }
+    }
+
+    // left zero fill a number
+    // see http://jsperf.com/left-zero-filling for performance comparison
+    function leftZeroFill(number, targetLength) {
+        var output = number + '';
+        while (output.length < targetLength) {
+            output = '0' + output;
+        }
+        return output;
+    }
+
+    // helper function for _.addTime and _.subtractTime
+    function addOrSubtractDurationFromMoment(mom, duration, isAdding, ignoreUpdateOffset) {
+        var milliseconds = duration._milliseconds,
+            days = duration._days,
+            months = duration._months,
+            minutes,
+            hours;
+
+        if (milliseconds) {
+            mom._d.setTime(+mom._d + milliseconds * isAdding);
+        }
+        // store the minutes and hours so we can restore them
+        if (days || months) {
+            minutes = mom.minute();
+            hours = mom.hour();
+        }
+        if (days) {
+            mom.date(mom.date() + days * isAdding);
+        }
+        if (months) {
+            mom.month(mom.month() + months * isAdding);
+        }
+        if (milliseconds && !ignoreUpdateOffset) {
+            moment.updateOffset(mom);
+        }
+        // restore the minutes and hours after possibly changing dst
+        if (days || months) {
+            mom.minute(minutes);
+            mom.hour(hours);
+        }
+    }
+
+    // check if is an array
+    function isArray(input) {
+        return Object.prototype.toString.call(input) === '[object Array]';
+    }
+
+    // compare two arrays, return the number of differences
+    function compareArrays(array1, array2) {
+        var len = Math.min(array1.length, array2.length),
+            lengthDiff = Math.abs(array1.length - array2.length),
+            diffs = 0,
+            i;
+        for (i = 0; i < len; i++) {
+            if (~~array1[i] !== ~~array2[i]) {
+                diffs++;
+            }
+        }
+        return diffs + lengthDiff;
+    }
+
+    function normalizeUnits(units) {
+        return units ? unitAliases[units] || units.toLowerCase().replace(/(.)s$/, '$1') : units;
+    }
+
+
+    /************************************
+        Languages
+    ************************************/
+
+
+    extend(Language.prototype, {
+
+        set : function (config) {
+            var prop, i;
+            for (i in config) {
+                prop = config[i];
+                if (typeof prop === 'function') {
+                    this[i] = prop;
+                } else {
+                    this['_' + i] = prop;
+                }
+            }
+        },
+
+        _months : "January_February_March_April_May_June_July_August_September_October_November_December".split("_"),
+        months : function (m) {
+            return this._months[m.month()];
+        },
+
+        _monthsShort : "Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec".split("_"),
+        monthsShort : function (m) {
+            return this._monthsShort[m.month()];
+        },
+
+        monthsParse : function (monthName) {
+            var i, mom, regex;
+
+            if (!this._monthsParse) {
+                this._monthsParse = [];
+            }
+
+            for (i = 0; i < 12; i++) {
+                // make the regex if we don't have it already
+                if (!this._monthsParse[i]) {
+                    mom = moment.utc([2000, i]);
+                    regex = '^' + this.months(mom, '') + '|^' + this.monthsShort(mom, '');
+                    this._monthsParse[i] = new RegExp(regex.replace('.', ''), 'i');
+                }
+                // test the regex
+                if (this._monthsParse[i].test(monthName)) {
+                    return i;
+                }
+            }
+        },
+
+        _weekdays : "Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),
+        weekdays : function (m) {
+            return this._weekdays[m.day()];
+        },
+
+        _weekdaysShort : "Sun_Mon_Tue_Wed_Thu_Fri_Sat".split("_"),
+        weekdaysShort : function (m) {
+            return this._weekdaysShort[m.day()];
+        },
+
+        _weekdaysMin : "Su_Mo_Tu_We_Th_Fr_Sa".split("_"),
+        weekdaysMin : function (m) {
+            return this._weekdaysMin[m.day()];
+        },
+
+        weekdaysParse : function (weekdayName) {
+            var i, mom, regex;
+
+            if (!this._weekdaysParse) {
+                this._weekdaysParse = [];
+            }
+
+            for (i = 0; i < 7; i++) {
+                // make the regex if we don't have it already
+                if (!this._weekdaysParse[i]) {
+                    mom = moment([2000, 1]).day(i);
+                    regex = '^' + this.weekdays(mom, '') + '|^' + this.weekdaysShort(mom, '') + '|^' + this.weekdaysMin(mom, '');
+                    this._weekdaysParse[i] = new RegExp(regex.replace('.', ''), 'i');
+                }
+                // test the regex
+                if (this._weekdaysParse[i].test(weekdayName)) {
+                    return i;
+                }
+            }
+        },
+
+        _longDateFormat : {
+            LT : "h:mm A",
+            L : "MM/DD/YYYY",
+            LL : "MMMM D YYYY",
+            LLL : "MMMM D YYYY LT",
+            LLLL : "dddd, MMMM D YYYY LT"
+        },
+        longDateFormat : function (key) {
+            var output = this._longDateFormat[key];
+            if (!output && this._longDateFormat[key.toUpperCase()]) {
+                output = this._longDateFormat[key.toUpperCase()].replace(/MMMM|MM|DD|dddd/g, function (val) {
+                    return val.slice(1);
+                });
+                this._longDateFormat[key] = output;
+            }
+            return output;
+        },
+
+        isPM : function (input) {
+            // IE8 Quirks Mode & IE7 Standards Mode do not allow accessing strings like arrays
+            // Using charAt should be more compatible.
+            return ((input + '').toLowerCase().charAt(0) === 'p');
+        },
+
+        _meridiemParse : /[ap]\.?m?\.?/i,
+        meridiem : function (hours, minutes, isLower) {
+            if (hours > 11) {
+                return isLower ? 'pm' : 'PM';
+            } else {
+                return isLower ? 'am' : 'AM';
+            }
+        },
+
+        _calendar : {
+            sameDay : '[Today at] LT',
+            nextDay : '[Tomorrow at] LT',
+            nextWeek : 'dddd [at] LT',
+            lastDay : '[Yesterday at] LT',
+            lastWeek : '[Last] dddd [at] LT',
+            sameElse : 'L'
+        },
+        calendar : function (key, mom) {
+            var output = this._calendar[key];
+            return typeof output === 'function' ? output.apply(mom) : output;
+        },
+
+        _relativeTime : {
+            future : "in %s",
+            past : "%s ago",
+            s : "a few seconds",
+            m : "a minute",
+            mm : "%d minutes",
+            h : "an hour",
+            hh : "%d hours",
+            d : "a day",
+            dd : "%d days",
+            M : "a month",
+            MM : "%d months",
+            y : "a year",
+            yy : "%d years"
+        },
+        relativeTime : function (number, withoutSuffix, string, isFuture) {
+            var output = this._relativeTime[string];
+            return (typeof output === 'function') ?
+                output(number, withoutSuffix, string, isFuture) :
+                output.replace(/%d/i, number);
+        },
+        pastFuture : function (diff, output) {
+            var format = this._relativeTime[diff > 0 ? 'future' : 'past'];
+            return typeof format === 'function' ? format(output) : format.replace(/%s/i, output);
+        },
+
+        ordinal : function (number) {
+            return this._ordinal.replace("%d", number);
+        },
+        _ordinal : "%d",
+
+        preparse : function (string) {
+            return string;
+        },
+
+        postformat : function (string) {
+            return string;
+        },
+
+        week : function (mom) {
+            return weekOfYear(mom, this._week.dow, this._week.doy).week;
+        },
+        _week : {
+            dow : 0, // Sunday is the first day of the week.
+            doy : 6  // The week that contains Jan 1st is the first week of the year.
+        }
+    });
+
+    // Loads a language definition into the `languages` cache.  The function
+    // takes a key and optionally values.  If not in the browser and no values
+    // are provided, it will load the language file module.  As a convenience,
+    // this function also returns the language values.
+    function loadLang(key, values) {
+        values.abbr = key;
+        if (!languages[key]) {
+            languages[key] = new Language();
+        }
+        languages[key].set(values);
+        return languages[key];
+    }
+
+    // Remove a language from the `languages` cache. Mostly useful in tests.
+    function unloadLang(key) {
+        delete languages[key];
+    }
+
+    // Determines which language definition to use and returns it.
+    //
+    // With no parameters, it will return the global language.  If you
+    // pass in a language key, such as 'en', it will return the
+    // definition for 'en', so long as 'en' has already been loaded using
+    // moment.lang.
+    function getLangDefinition(key) {
+        if (!key) {
+            return moment.fn._lang;
+        }
+        if (!languages[key] && hasModule) {
+            try {
+                require('./lang/' + key);
+            } catch (e) {
+                // call with no params to set to default
+                return moment.fn._lang;
+            }
+        }
+        return languages[key] || moment.fn._lang;
+    }
+
+
+    /************************************
+        Formatting
+    ************************************/
+
+
+    function removeFormattingTokens(input) {
+        if (input.match(/\[.*\]/)) {
+            return input.replace(/^\[|\]$/g, "");
+        }
+        return input.replace(/\\/g, "");
+    }
+
+    function makeFormatFunction(format) {
+        var array = format.match(formattingTokens), i, length;
+
+        for (i = 0, length = array.length; i < length; i++) {
+            if (formatTokenFunctions[array[i]]) {
+                array[i] = formatTokenFunctions[array[i]];
+            } else {
+                array[i] = removeFormattingTokens(array[i]);
+            }
+        }
+
+        return function (mom) {
+            var output = "";
+            for (i = 0; i < length; i++) {
+                output += array[i] instanceof Function ? array[i].call(mom, format) : array[i];
+            }
+            return output;
+        };
+    }
+
+    // format date using native date object
+    function formatMoment(m, format) {
+
+        format = expandFormat(format, m.lang());
+
+        if (!formatFunctions[format]) {
+            formatFunctions[format] = makeFormatFunction(format);
+        }
+
+        return formatFunctions[format](m);
+    }
+
+    function expandFormat(format, lang) {
+        var i = 5;
+
+        function replaceLongDateFormatTokens(input) {
+            return lang.longDateFormat(input) || input;
+        }
+
+        while (i-- && (localFormattingTokens.lastIndex = 0,
+                    localFormattingTokens.test(format))) {
+            format = format.replace(localFormattingTokens, replaceLongDateFormatTokens);
+        }
+
+        return format;
+    }
+
+
+    /************************************
+        Parsing
+    ************************************/
+
+
+    // get the regex to find the next token
+    function getParseRegexForToken(token, config) {
+        switch (token) {
+        case 'DDDD':
+            return parseTokenThreeDigits;
+        case 'YYYY':
+            return parseTokenFourDigits;
+        case 'YYYYY':
+            return parseTokenSixDigits;
+        case 'S':
+        case 'SS':
+        case 'SSS':
+        case 'DDD':
+            return parseTokenOneToThreeDigits;
+        case 'MMM':
+        case 'MMMM':
+        case 'dd':
+        case 'ddd':
+        case 'dddd':
+            return parseTokenWord;
+        case 'a':
+        case 'A':
+            return getLangDefinition(config._l)._meridiemParse;
+        case 'X':
+            return parseTokenTimestampMs;
+        case 'Z':
+        case 'ZZ':
+            return parseTokenTimezone;
+        case 'T':
+            return parseTokenT;
+        case 'MM':
+        case 'DD':
+        case 'YY':
+        case 'HH':
+        case 'hh':
+        case 'mm':
+        case 'ss':
+        case 'M':
+        case 'D':
+        case 'd':
+        case 'H':
+        case 'h':
+        case 'm':
+        case 's':
+            return parseTokenOneOrTwoDigits;
+        default :
+            return new RegExp(token.replace('\\', ''));
+        }
+    }
+
+    function timezoneMinutesFromString(string) {
+        var tzchunk = (parseTokenTimezone.exec(string) || [])[0],
+            parts = (tzchunk + '').match(parseTimezoneChunker) || ['-', 0, 0],
+            minutes = +(parts[1] * 60) + ~~parts[2];
+
+        return parts[0] === '+' ? -minutes : minutes;
+    }
+
+    // function to convert string input to date
+    function addTimeToArrayFromToken(token, input, config) {
+        var a, datePartArray = config._a;
+
+        switch (token) {
+        // MONTH
+        case 'M' : // fall through to MM
+        case 'MM' :
+            if (input != null) {
+                datePartArray[1] = ~~input - 1;
+            }
+            break;
+        case 'MMM' : // fall through to MMMM
+        case 'MMMM' :
+            a = getLangDefinition(config._l).monthsParse(input);
+            // if we didn't find a month name, mark the date as invalid.
+            if (a != null) {
+                datePartArray[1] = a;
+            } else {
+                config._isValid = false;
+            }
+            break;
+        // DAY OF MONTH
+        case 'D' : // fall through to DD
+        case 'DD' :
+            if (input != null) {
+                datePartArray[2] = ~~input;
+            }
+            break;
+        // DAY OF YEAR
+        case 'DDD' : // fall through to DDDD
+        case 'DDDD' :
+            if (input != null) {
+                datePartArray[1] = 0;
+                datePartArray[2] = ~~input;
+            }
+            break;
+        // YEAR
+        case 'YY' :
+            datePartArray[0] = ~~input + (~~input > 68 ? 1900 : 2000);
+            break;
+        case 'YYYY' :
+        case 'YYYYY' :
+            datePartArray[0] = ~~input;
+            break;
+        // AM / PM
+        case 'a' : // fall through to A
+        case 'A' :
+            config._isPm = getLangDefinition(config._l).isPM(input);
+            break;
+        // 24 HOUR
+        case 'H' : // fall through to hh
+        case 'HH' : // fall through to hh
+        case 'h' : // fall through to hh
+        case 'hh' :
+            datePartArray[3] = ~~input;
+            break;
+        // MINUTE
+        case 'm' : // fall through to mm
+        case 'mm' :
+            datePartArray[4] = ~~input;
+            break;
+        // SECOND
+        case 's' : // fall through to ss
+        case 'ss' :
+            datePartArray[5] = ~~input;
+            break;
+        // MILLISECOND
+        case 'S' :
+        case 'SS' :
+        case 'SSS' :
+            datePartArray[6] = ~~ (('0.' + input) * 1000);
+            break;
+        // UNIX TIMESTAMP WITH MS
+        case 'X':
+            config._d = new Date(parseFloat(input) * 1000);
+            break;
+        // TIMEZONE
+        case 'Z' : // fall through to ZZ
+        case 'ZZ' :
+            config._useUTC = true;
+            config._tzm = timezoneMinutesFromString(input);
+            break;
+        }
+
+        // if the input is null, the date is not valid
+        if (input == null) {
+            config._isValid = false;
+        }
+    }
+
+    // convert an array to a date.
+    // the array should mirror the parameters below
+    // note: all values past the year are optional and will default to the lowest possible value.
+    // [year, month, day , hour, minute, second, millisecond]
+    function dateFromArray(config) {
+        var i, date, input = [], currentDate;
+
+        if (config._d) {
+            return;
+        }
+
+        // Default to current date.
+        // * if no year, month, day of month are given, default to today
+        // * if day of month is given, default month and year
+        // * if month is given, default only year
+        // * if year is given, don't default anything
+        currentDate = currentDateArray(config);
+        for (i = 0; i < 3 && config._a[i] == null; ++i) {
+            config._a[i] = input[i] = currentDate[i];
+        }
+
+        // Zero out whatever was not defaulted, including time
+        for (; i < 7; i++) {
+            config._a[i] = input[i] = (config._a[i] == null) ? (i === 2 ? 1 : 0) : config._a[i];
+        }
+
+        // add the offsets to the time to be parsed so that we can have a clean array for checking isValid
+        input[3] += ~~((config._tzm || 0) / 60);
+        input[4] += ~~((config._tzm || 0) % 60);
+
+        date = new Date(0);
+
+        if (config._useUTC) {
+            date.setUTCFullYear(input[0], input[1], input[2]);
+            date.setUTCHours(input[3], input[4], input[5], input[6]);
+        } else {
+            date.setFullYear(input[0], input[1], input[2]);
+            date.setHours(input[3], input[4], input[5], input[6]);
+        }
+
+        config._d = date;
+    }
+
+    function dateFromObject(config) {
+        var o = config._i;
+
+        if (config._d) {
+            return;
+        }
+
+        config._a = [
+            o.years || o.year || o.y,
+            o.months || o.month || o.M,
+            o.days || o.day || o.d,
+            o.hours || o.hour || o.h,
+            o.minutes || o.minute || o.m,
+            o.seconds || o.second || o.s,
+            o.milliseconds || o.millisecond || o.ms
+        ];
+
+        dateFromArray(config);
+    }
+
+    function currentDateArray(config) {
+        var now = new Date();
+        if (config._useUTC) {
+            return [
+                now.getUTCFullYear(),
+                now.getUTCMonth(),
+                now.getUTCDate()
+            ];
+        } else {
+            return [now.getFullYear(), now.getMonth(), now.getDate()];
+        }
+    }
+
+    // date from string and format string
+    function makeDateFromStringAndFormat(config) {
+        // This array is used to make a Date, either with `new Date` or `Date.UTC`
+        var lang = getLangDefinition(config._l),
+            string = '' + config._i,
+            i, parsedInput, tokens;
+
+        tokens = expandFormat(config._f, lang).match(formattingTokens);
+
+        config._a = [];
+
+        for (i = 0; i < tokens.length; i++) {
+            parsedInput = (getParseRegexForToken(tokens[i], config).exec(string) || [])[0];
+            if (parsedInput) {
+                string = string.slice(string.indexOf(parsedInput) + parsedInput.length);
+            }
+            // don't parse if its not a known token
+            if (formatTokenFunctions[tokens[i]]) {
+                addTimeToArrayFromToken(tokens[i], parsedInput, config);
+            }
+        }
+
+        // add remaining unparsed input to the string
+        if (string) {
+            config._il = string;
+        }
+
+        // handle am pm
+        if (config._isPm && config._a[3] < 12) {
+            config._a[3] += 12;
+        }
+        // if is 12 am, change hours to 0
+        if (config._isPm === false && config._a[3] === 12) {
+            config._a[3] = 0;
+        }
+        // return
+        dateFromArray(config);
+    }
+
+    // date from string and array of format strings
+    function makeDateFromStringAndArray(config) {
+        var tempConfig,
+            tempMoment,
+            bestMoment,
+
+            scoreToBeat = 99,
+            i,
+            currentScore;
+
+        for (i = 0; i < config._f.length; i++) {
+            tempConfig = extend({}, config);
+            tempConfig._f = config._f[i];
+            makeDateFromStringAndFormat(tempConfig);
+            tempMoment = new Moment(tempConfig);
+
+            currentScore = compareArrays(tempConfig._a, tempMoment.toArray());
+
+            // if there is any input that was not parsed
+            // add a penalty for that format
+            if (tempMoment._il) {
+                currentScore += tempMoment._il.length;
+            }
+
+            if (currentScore < scoreToBeat) {
+                scoreToBeat = currentScore;
+                bestMoment = tempMoment;
+            }
+        }
+
+        extend(config, bestMoment);
+    }
+
+    // date from iso format
+    function makeDateFromString(config) {
+        var i,
+            string = config._i,
+            match = isoRegex.exec(string);
+
+        if (match) {
+            // match[2] should be "T" or undefined
+            config._f = 'YYYY-MM-DD' + (match[2] || " ");
+            for (i = 0; i < 4; i++) {
+                if (isoTimes[i][1].exec(string)) {
+                    config._f += isoTimes[i][0];
+                    break;
+                }
+            }
+            if (parseTokenTimezone.exec(string)) {
+                config._f += " Z";
+            }
+            makeDateFromStringAndFormat(config);
+        } else {
+            config._d = new Date(string);
+        }
+    }
+
+    function makeDateFromInput(config) {
+        var input = config._i,
+            matched = aspNetJsonRegex.exec(input);
+
+        if (input === undefined) {
+            config._d = new Date();
+        } else if (matched) {
+            config._d = new Date(+matched[1]);
+        } else if (typeof input === 'string') {
+            makeDateFromString(config);
+        } else if (isArray(input)) {
+            config._a = input.slice(0);
+            dateFromArray(config);
+        } else if (input instanceof Date) {
+            config._d = new Date(+input);
+        } else if (typeof(input) === 'object') {
+            dateFromObject(config);
+        } else {
+            config._d = new Date(input);
+        }
+    }
+
+
+    /************************************
+        Relative Time
+    ************************************/
+
+
+    // helper function for moment.fn.from, moment.fn.fromNow, and moment.duration.fn.humanize
+    function substituteTimeAgo(string, number, withoutSuffix, isFuture, lang) {
+        return lang.relativeTime(number || 1, !!withoutSuffix, string, isFuture);
+    }
+
+    function relativeTime(milliseconds, withoutSuffix, lang) {
+        var seconds = round(Math.abs(milliseconds) / 1000),
+            minutes = round(seconds / 60),
+            hours = round(minutes / 60),
+            days = round(hours / 24),
+            years = round(days / 365),
+            args = seconds < 45 && ['s', seconds] ||
+                minutes === 1 && ['m'] ||
+                minutes < 45 && ['mm', minutes] ||
+                hours === 1 && ['h'] ||
+                hours < 22 && ['hh', hours] ||
+                days === 1 && ['d'] ||
+                days <= 25 && ['dd', days] ||
+                days <= 45 && ['M'] ||
+                days < 345 && ['MM', round(days / 30)] ||
+                years === 1 && ['y'] || ['yy', years];
+        args[2] = withoutSuffix;
+        args[3] = milliseconds > 0;
+        args[4] = lang;
+        return substituteTimeAgo.apply({}, args);
+    }
+
+
+    /************************************
+        Week of Year
+    ************************************/
+
+
+    // firstDayOfWeek       0 = sun, 6 = sat
+    //                      the day of the week that starts the week
+    //                      (usually sunday or monday)
+    // firstDayOfWeekOfYear 0 = sun, 6 = sat
+    //                      the first week is the week that contains the first
+    //                      of this day of the week
+    //                      (eg. ISO weeks use thursday (4))
+    function weekOfYear(mom, firstDayOfWeek, firstDayOfWeekOfYear) {
+        var end = firstDayOfWeekOfYear - firstDayOfWeek,
+            daysToDayOfWeek = firstDayOfWeekOfYear - mom.day(),
+            adjustedMoment;
+
+
+        if (daysToDayOfWeek > end) {
+            daysToDayOfWeek -= 7;
+        }
+
+        if (daysToDayOfWeek < end - 7) {
+            daysToDayOfWeek += 7;
+        }
+
+        adjustedMoment = moment(mom).add('d', daysToDayOfWeek);
+        return {
+            week: Math.ceil(adjustedMoment.dayOfYear() / 7),
+            year: adjustedMoment.year()
+        };
+    }
+
+
+    /************************************
+        Top Level Functions
+    ************************************/
+
+    function makeMoment(config) {
+        var input = config._i,
+            format = config._f;
+
+        if (input === null || input === '') {
+            return null;
+        }
+
+        if (typeof input === 'string') {
+            config._i = input = getLangDefinition().preparse(input);
+        }
+
+        if (moment.isMoment(input)) {
+            config = extend({}, input);
+            config._d = new Date(+input._d);
+        } else if (format) {
+            if (isArray(format)) {
+                makeDateFromStringAndArray(config);
+            } else {
+                makeDateFromStringAndFormat(config);
+            }
+        } else {
+            makeDateFromInput(config);
+        }
+
+        return new Moment(config);
+    }
+
+    moment = function (input, format, lang) {
+        return makeMoment({
+            _i : input,
+            _f : format,
+            _l : lang,
+            _isUTC : false
+        });
+    };
+
+    // creating with utc
+    moment.utc = function (input, format, lang) {
+        return makeMoment({
+            _useUTC : true,
+            _isUTC : true,
+            _l : lang,
+            _i : input,
+            _f : format
+        }).utc();
+    };
+
+    // creating with unix timestamp (in seconds)
+    moment.unix = function (input) {
+        return moment(input * 1000);
+    };
+
+    // duration
+    moment.duration = function (input, key) {
+        var isDuration = moment.isDuration(input),
+            isNumber = (typeof input === 'number'),
+            duration = (isDuration ? input._input : (isNumber ? {} : input)),
+            matched = aspNetTimeSpanJsonRegex.exec(input),
+            sign,
+            ret;
+
+        if (isNumber) {
+            if (key) {
+                duration[key] = input;
+            } else {
+                duration.milliseconds = input;
+            }
+        } else if (matched) {
+            sign = (matched[1] === "-") ? -1 : 1;
+            duration = {
+                y: 0,
+                d: ~~matched[2] * sign,
+                h: ~~matched[3] * sign,
+                m: ~~matched[4] * sign,
+                s: ~~matched[5] * sign,
+                ms: ~~matched[6] * sign
+            };
+        }
+
+        ret = new Duration(duration);
+
+        if (isDuration && input.hasOwnProperty('_lang')) {
+            ret._lang = input._lang;
+        }
+
+        return ret;
+    };
+
+    // version number
+    moment.version = VERSION;
+
+    // default format
+    moment.defaultFormat = isoFormat;
+
+    // This function will be called whenever a moment is mutated.
+    // It is intended to keep the offset in sync with the timezone.
+    moment.updateOffset = function () {};
+
+    // This function will load languages and then set the global language.  If
+    // no arguments are passed in, it will simply return the current global
+    // language key.
+    moment.lang = function (key, values) {
+        if (!key) {
+            return moment.fn._lang._abbr;
+        }
+        key = key.toLowerCase();
+        key = key.replace('_', '-');
+        if (values) {
+            loadLang(key, values);
+        } else if (values === null) {
+            unloadLang(key);
+            key = 'en';
+        } else if (!languages[key]) {
+            getLangDefinition(key);
+        }
+        moment.duration.fn._lang = moment.fn._lang = getLangDefinition(key);
+    };
+
+    // returns language data
+    moment.langData = function (key) {
+        if (key && key._lang && key._lang._abbr) {
+            key = key._lang._abbr;
+        }
+        return getLangDefinition(key);
+    };
+
+    // compare moment object
+    moment.isMoment = function (obj) {
+        return obj instanceof Moment;
+    };
+
+    // for typechecking Duration objects
+    moment.isDuration = function (obj) {
+        return obj instanceof Duration;
+    };
+
+
+    /************************************
+        Moment Prototype
+    ************************************/
+
+
+    extend(moment.fn = Moment.prototype, {
+
+        clone : function () {
+            return moment(this);
+        },
+
+        valueOf : function () {
+            return +this._d + ((this._offset || 0) * 60000);
+        },
+
+        unix : function () {
+            return Math.floor(+this / 1000);
+        },
+
+        toString : function () {
+            return this.format("ddd MMM DD YYYY HH:mm:ss [GMT]ZZ");
+        },
+
+        toDate : function () {
+            return this._offset ? new Date(+this) : this._d;
+        },
+
+        toISOString : function () {
+            return formatMoment(moment(this).utc(), 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
+        },
+
+        toArray : function () {
+            var m = this;
+            return [
+                m.year(),
+                m.month(),
+                m.date(),
+                m.hours(),
+                m.minutes(),
+                m.seconds(),
+                m.milliseconds()
+            ];
+        },
+
+        isValid : function () {
+            if (this._isValid == null) {
+                if (this._a) {
+                    this._isValid = !compareArrays(this._a, (this._isUTC ? moment.utc(this._a) : moment(this._a)).toArray());
+                } else {
+                    this._isValid = !isNaN(this._d.getTime());
+                }
+            }
+            return !!this._isValid;
+        },
+
+        invalidAt: function () {
+            var i, arr1 = this._a, arr2 = (this._isUTC ? moment.utc(this._a) : moment(this._a)).toArray();
+            for (i = 6; i >= 0 && arr1[i] === arr2[i]; --i) {
+                // empty loop body
+            }
+            return i;
+        },
+
+        utc : function () {
+            return this.zone(0);
+        },
+
+        local : function () {
+            this.zone(0);
+            this._isUTC = false;
+            return this;
+        },
+
+        format : function (inputString) {
+            var output = formatMoment(this, inputString || moment.defaultFormat);
+            return this.lang().postformat(output);
+        },
+
+        add : function (input, val) {
+            var dur;
+            // switch args to support add('s', 1) and add(1, 's')
+            if (typeof input === 'string') {
+                dur = moment.duration(+val, input);
+            } else {
+                dur = moment.duration(input, val);
+            }
+            addOrSubtractDurationFromMoment(this, dur, 1);
+            return this;
+        },
+
+        subtract : function (input, val) {
+            var dur;
+            // switch args to support subtract('s', 1) and subtract(1, 's')
+            if (typeof input === 'string') {
+                dur = moment.duration(+val, input);
+            } else {
+                dur = moment.duration(input, val);
+            }
+            addOrSubtractDurationFromMoment(this, dur, -1);
+            return this;
+        },
+
+        diff : function (input, units, asFloat) {
+            var that = this._isUTC ? moment(input).zone(this._offset || 0) : moment(input).local(),
+                zoneDiff = (this.zone() - that.zone()) * 6e4,
+                diff, output;
+
+            units = normalizeUnits(units);
+
+            if (units === 'year' || units === 'month') {
+                // average number of days in the months in the given dates
+                diff = (this.daysInMonth() + that.daysInMonth()) * 432e5; // 24 * 60 * 60 * 1000 / 2
+                // difference in months
+                output = ((this.year() - that.year()) * 12) + (this.month() - that.month());
+                // adjust by taking difference in days, average number of days
+                // and dst in the given months.
+                output += ((this - moment(this).startOf('month')) -
+                        (that - moment(that).startOf('month'))) / diff;
+                // same as above but with zones, to negate all dst
+                output -= ((this.zone() - moment(this).startOf('month').zone()) -
+                        (that.zone() - moment(that).startOf('month').zone())) * 6e4 / diff;
+                if (units === 'year') {
+                    output = output / 12;
+                }
+            } else {
+                diff = (this - that);
+                output = units === 'second' ? diff / 1e3 : // 1000
+                    units === 'minute' ? diff / 6e4 : // 1000 * 60
+                    units === 'hour' ? diff / 36e5 : // 1000 * 60 * 60
+                    units === 'day' ? (diff - zoneDiff) / 864e5 : // 1000 * 60 * 60 * 24, negate dst
+                    units === 'week' ? (diff - zoneDiff) / 6048e5 : // 1000 * 60 * 60 * 24 * 7, negate dst
+                    diff;
+            }
+            return asFloat ? output : absRound(output);
+        },
+
+        from : function (time, withoutSuffix) {
+            return moment.duration(this.diff(time)).lang(this.lang()._abbr).humanize(!withoutSuffix);
+        },
+
+        fromNow : function (withoutSuffix) {
+            return this.from(moment(), withoutSuffix);
+        },
+
+        calendar : function () {
+            var diff = this.diff(moment().zone(this.zone()).startOf('day'), 'days', true),
+                format = diff < -6 ? 'sameElse' :
+                diff < -1 ? 'lastWeek' :
+                diff < 0 ? 'lastDay' :
+                diff < 1 ? 'sameDay' :
+                diff < 2 ? 'nextDay' :
+                diff < 7 ? 'nextWeek' : 'sameElse';
+            return this.format(this.lang().calendar(format, this));
+        },
+
+        isLeapYear : function () {
+            var year = this.year();
+            return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+        },
+
+        isDST : function () {
+            return (this.zone() < this.clone().month(0).zone() ||
+                this.zone() < this.clone().month(5).zone());
+        },
+
+        day : function (input) {
+            var day = this._isUTC ? this._d.getUTCDay() : this._d.getDay();
+            if (input != null) {
+                if (typeof input === 'string') {
+                    input = this.lang().weekdaysParse(input);
+                    if (typeof input !== 'number') {
+                        return this;
+                    }
+                }
+                return this.add({ d : input - day });
+            } else {
+                return day;
+            }
+        },
+
+        month : function (input) {
+            var utc = this._isUTC ? 'UTC' : '',
+                dayOfMonth;
+
+            if (input != null) {
+                if (typeof input === 'string') {
+                    input = this.lang().monthsParse(input);
+                    if (typeof input !== 'number') {
+                        return this;
+                    }
+                }
+
+                dayOfMonth = this.date();
+                this.date(1);
+                this._d['set' + utc + 'Month'](input);
+                this.date(Math.min(dayOfMonth, this.daysInMonth()));
+
+                moment.updateOffset(this);
+                return this;
+            } else {
+                return this._d['get' + utc + 'Month']();
+            }
+        },
+
+        startOf: function (units) {
+            units = normalizeUnits(units);
+            // the following switch intentionally omits break keywords
+            // to utilize falling through the cases.
+            switch (units) {
+            case 'year':
+                this.month(0);
+                /* falls through */
+            case 'month':
+                this.date(1);
+                /* falls through */
+            case 'week':
+            case 'isoweek':
+            case 'day':
+                this.hours(0);
+                /* falls through */
+            case 'hour':
+                this.minutes(0);
+                /* falls through */
+            case 'minute':
+                this.seconds(0);
+                /* falls through */
+            case 'second':
+                this.milliseconds(0);
+                /* falls through */
+            }
+
+            // weeks are a special case
+            if (units === 'week') {
+                this.weekday(0);
+            } else if (units === 'isoweek') {
+                this.isoWeekday(1);
+            }
+
+            return this;
+        },
+
+        endOf: function (units) {
+            units = normalizeUnits(units);
+            return this.startOf(units).add((units === 'isoweek' ? 'week' : units), 1).subtract('ms', 1);
+        },
+
+        isAfter: function (input, units) {
+            units = typeof units !== 'undefined' ? units : 'millisecond';
+            return +this.clone().startOf(units) > +moment(input).startOf(units);
+        },
+
+        isBefore: function (input, units) {
+            units = typeof units !== 'undefined' ? units : 'millisecond';
+            return +this.clone().startOf(units) < +moment(input).startOf(units);
+        },
+
+        isSame: function (input, units) {
+            units = typeof units !== 'undefined' ? units : 'millisecond';
+            return +this.clone().startOf(units) === +moment(input).startOf(units);
+        },
+
+        min: function (other) {
+            other = moment.apply(null, arguments);
+            return other < this ? this : other;
+        },
+
+        max: function (other) {
+            other = moment.apply(null, arguments);
+            return other > this ? this : other;
+        },
+
+        zone : function (input) {
+            var offset = this._offset || 0;
+            if (input != null) {
+                if (typeof input === "string") {
+                    input = timezoneMinutesFromString(input);
+                }
+                if (Math.abs(input) < 16) {
+                    input = input * 60;
+                }
+                this._offset = input;
+                this._isUTC = true;
+                if (offset !== input) {
+                    addOrSubtractDurationFromMoment(this, moment.duration(offset - input, 'm'), 1, true);
+                }
+            } else {
+                return this._isUTC ? offset : this._d.getTimezoneOffset();
+            }
+            return this;
+        },
+
+        zoneAbbr : function () {
+            return this._isUTC ? "UTC" : "";
+        },
+
+        zoneName : function () {
+            return this._isUTC ? "Coordinated Universal Time" : "";
+        },
+
+        hasAlignedHourOffset : function (input) {
+            if (!input) {
+                input = 0;
+            }
+            else {
+                input = moment(input).zone();
+            }
+
+            return (this.zone() - input) % 60 === 0;
+        },
+
+        daysInMonth : function () {
+            return moment.utc([this.year(), this.month() + 1, 0]).date();
+        },
+
+        dayOfYear : function (input) {
+            var dayOfYear = round((moment(this).startOf('day') - moment(this).startOf('year')) / 864e5) + 1;
+            return input == null ? dayOfYear : this.add("d", (input - dayOfYear));
+        },
+
+        weekYear : function (input) {
+            var year = weekOfYear(this, this.lang()._week.dow, this.lang()._week.doy).year;
+            return input == null ? year : this.add("y", (input - year));
+        },
+
+        isoWeekYear : function (input) {
+            var year = weekOfYear(this, 1, 4).year;
+            return input == null ? year : this.add("y", (input - year));
+        },
+
+        week : function (input) {
+            var week = this.lang().week(this);
+            return input == null ? week : this.add("d", (input - week) * 7);
+        },
+
+        isoWeek : function (input) {
+            var week = weekOfYear(this, 1, 4).week;
+            return input == null ? week : this.add("d", (input - week) * 7);
+        },
+
+        weekday : function (input) {
+            var weekday = (this._d.getDay() + 7 - this.lang()._week.dow) % 7;
+            return input == null ? weekday : this.add("d", input - weekday);
+        },
+
+        isoWeekday : function (input) {
+            // behaves the same as moment#day except
+            // as a getter, returns 7 instead of 0 (1-7 range instead of 0-6)
+            // as a setter, sunday should belong to the previous week.
+            return input == null ? this.day() || 7 : this.day(this.day() % 7 ? input : input - 7);
+        },
+
+        get : function (units) {
+            units = normalizeUnits(units);
+            return this[units.toLowerCase()]();
+        },
+
+        set : function (units, value) {
+            units = normalizeUnits(units);
+            this[units.toLowerCase()](value);
+        },
+
+        // If passed a language key, it will set the language for this
+        // instance.  Otherwise, it will return the language configuration
+        // variables for this instance.
+        lang : function (key) {
+            if (key === undefined) {
+                return this._lang;
+            } else {
+                this._lang = getLangDefinition(key);
+                return this;
+            }
+        }
+    });
+
+    // helper for adding shortcuts
+    function makeGetterAndSetter(name, key) {
+        moment.fn[name] = moment.fn[name + 's'] = function (input) {
+            var utc = this._isUTC ? 'UTC' : '';
+            if (input != null) {
+                this._d['set' + utc + key](input);
+                moment.updateOffset(this);
+                return this;
+            } else {
+                return this._d['get' + utc + key]();
+            }
+        };
+    }
+
+    // loop through and add shortcuts (Month, Date, Hours, Minutes, Seconds, Milliseconds)
+    for (i = 0; i < proxyGettersAndSetters.length; i ++) {
+        makeGetterAndSetter(proxyGettersAndSetters[i].toLowerCase().replace(/s$/, ''), proxyGettersAndSetters[i]);
+    }
+
+    // add shortcut for year (uses different syntax than the getter/setter 'year' == 'FullYear')
+    makeGetterAndSetter('year', 'FullYear');
+
+    // add plural methods
+    moment.fn.days = moment.fn.day;
+    moment.fn.months = moment.fn.month;
+    moment.fn.weeks = moment.fn.week;
+    moment.fn.isoWeeks = moment.fn.isoWeek;
+
+    // add aliased format methods
+    moment.fn.toJSON = moment.fn.toISOString;
+
+    /************************************
+        Duration Prototype
+    ************************************/
+
+
+    extend(moment.duration.fn = Duration.prototype, {
+
+        _bubble : function () {
+            var milliseconds = this._milliseconds,
+                days = this._days,
+                months = this._months,
+                data = this._data,
+                seconds, minutes, hours, years;
+
+            // The following code bubbles up values, see the tests for
+            // examples of what that means.
+            data.milliseconds = milliseconds % 1000;
+
+            seconds = absRound(milliseconds / 1000);
+            data.seconds = seconds % 60;
+
+            minutes = absRound(seconds / 60);
+            data.minutes = minutes % 60;
+
+            hours = absRound(minutes / 60);
+            data.hours = hours % 24;
+
+            days += absRound(hours / 24);
+            data.days = days % 30;
+
+            months += absRound(days / 30);
+            data.months = months % 12;
+
+            years = absRound(months / 12);
+            data.years = years;
+        },
+
+        weeks : function () {
+            return absRound(this.days() / 7);
+        },
+
+        valueOf : function () {
+            return this._milliseconds +
+              this._days * 864e5 +
+              (this._months % 12) * 2592e6 +
+              ~~(this._months / 12) * 31536e6;
+        },
+
+        humanize : function (withSuffix) {
+            var difference = +this,
+                output = relativeTime(difference, !withSuffix, this.lang());
+
+            if (withSuffix) {
+                output = this.lang().pastFuture(difference, output);
+            }
+
+            return this.lang().postformat(output);
+        },
+
+        add : function (input, val) {
+            // supports only 2.0-style add(1, 's') or add(moment)
+            var dur = moment.duration(input, val);
+
+            this._milliseconds += dur._milliseconds;
+            this._days += dur._days;
+            this._months += dur._months;
+
+            this._bubble();
+
+            return this;
+        },
+
+        subtract : function (input, val) {
+            var dur = moment.duration(input, val);
+
+            this._milliseconds -= dur._milliseconds;
+            this._days -= dur._days;
+            this._months -= dur._months;
+
+            this._bubble();
+
+            return this;
+        },
+
+        get : function (units) {
+            units = normalizeUnits(units);
+            return this[units.toLowerCase() + 's']();
+        },
+
+        as : function (units) {
+            units = normalizeUnits(units);
+            return this['as' + units.charAt(0).toUpperCase() + units.slice(1) + 's']();
+        },
+
+        lang : moment.fn.lang
+    });
+
+    function makeDurationGetter(name) {
+        moment.duration.fn[name] = function () {
+            return this._data[name];
+        };
+    }
+
+    function makeDurationAsGetter(name, factor) {
+        moment.duration.fn['as' + name] = function () {
+            return +this / factor;
+        };
+    }
+
+    for (i in unitMillisecondFactors) {
+        if (unitMillisecondFactors.hasOwnProperty(i)) {
+            makeDurationAsGetter(i, unitMillisecondFactors[i]);
+            makeDurationGetter(i.toLowerCase());
+        }
+    }
+
+    makeDurationAsGetter('Weeks', 6048e5);
+    moment.duration.fn.asMonths = function () {
+        return (+this - this.years() * 31536e6) / 2592e6 + this.years() * 12;
+    };
+
+
+    /************************************
+        Default Lang
+    ************************************/
+
+
+    // Set default language, other languages will inherit from English.
+    moment.lang('en', {
+        ordinal : function (number) {
+            var b = number % 10,
+                output = (~~ (number % 100 / 10) === 1) ? 'th' :
+                (b === 1) ? 'st' :
+                (b === 2) ? 'nd' :
+                (b === 3) ? 'rd' : 'th';
+            return number + output;
+        }
+    });
+
+    /* EMBED_LANGUAGES */
+
+    /************************************
+        Exposing Moment
+    ************************************/
+
+
+    // CommonJS module is defined
+    if (hasModule) {
+        module.exports = moment;
+    }
+    /*global ender:false */
+    if (typeof ender === 'undefined') {
+        // here, `this` means `window` in the browser, or `global` on the server
+        // add `moment` as a global object via a string identifier,
+        // for Closure Compiler "advanced" mode
+        this['moment'] = moment;
+    }
+    /*global define:false */
+    if (typeof define === "function" && define.amd) {
+        define("moment", [], function () {
+            return moment;
+        });
+    }
+}).call(this);
 
 ;// MarionetteJS (Backbone.Marionette)
 // ----------------------------------
@@ -17989,2039 +22235,324 @@ if (typeof define !== 'undefined' && define.amd) {
 	window.FastClick = FastClick;
 }
 
-;//! moment.js
-//! version : 2.2.1
-//! authors : Tim Wood, Iskren Chernev, Moment.js contributors
-//! license : MIT
-//! momentjs.com
+;// Console-polyfill. MIT license.
+// https://github.com/paulmillr/console-polyfill
+// Make it safe to do console.log() always.
+(function (con) {
+  'use strict';
+  var prop, method;
+  var empty = {};
+  var dummy = function() {};
+  var properties = 'memory'.split(',');
+  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
+     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
+     'time,timeEnd,trace,warn').split(',');
+  while (prop = properties.pop()) con[prop] = con[prop] || empty;
+  while (method = methods.pop()) con[method] = con[method] || dummy;
+})(window.console = window.console || {});
 
-(function (undefined) {
+;/**
+ * Backbone localStorage Adapter
+ * Version 1.1.7
+ *
+ * https://github.com/jeromegn/Backbone.localStorage
+ */
+(function (root, factory) {
+   if (typeof exports === 'object' && typeof require === 'function') {
+     module.exports = factory(require("underscore"), require("backbone"));
+   } else if (typeof define === "function" && define.amd) {
+      // AMD. Register as an anonymous module.
+      define(["underscore","backbone"], function(_, Backbone) {
+        // Use global variables if the locals are undefined.
+        return factory(_ || root._, Backbone || root.Backbone);
+      });
+   } else {
+      // RequireJS isn't being used. Assume underscore and backbone are loaded in <script> tags
+      factory(_, Backbone);
+   }
+}(this, function(_, Backbone) {
+// A simple module to replace `Backbone.sync` with *localStorage*-based
+// persistence. Models are given GUIDS, and saved into a JSON object. Simple
+// as that.
 
-    /************************************
-        Constants
-    ************************************/
+// Hold reference to Underscore.js and Backbone.js in the closure in order
+// to make things work even if they are removed from the global namespace
 
-    var moment,
-        VERSION = "2.2.1",
-        round = Math.round, i,
-        // internal storage for language config files
-        languages = {},
+// Generate four random hex digits.
+function S4() {
+   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+};
 
-        // check for nodeJS
-        hasModule = (typeof module !== 'undefined' && module.exports),
+// Generate a pseudo-GUID by concatenating random hexadecimal.
+function guid() {
+   return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+};
 
-        // ASP.NET json date format regex
-        aspNetJsonRegex = /^\/?Date\((\-?\d+)/i,
-        aspNetTimeSpanJsonRegex = /(\-)?(?:(\d*)\.)?(\d+)\:(\d+)\:(\d+)\.?(\d{3})?/,
+// Our Store is represented by a single JS object in *localStorage*. Create it
+// with a meaningful name, like the name you'd give a table.
+// window.Store is deprectated, use Backbone.LocalStorage instead
+Backbone.LocalStorage = window.Store = function(name) {
+  if( !this.localStorage ) {
+    throw "Backbone.localStorage: Environment does not support localStorage."
+  }
+  this.name = name;
+  var store = this.localStorage().getItem(this.name);
+  this.records = (store && store.split(",")) || [];
+};
 
-        // format tokens
-        formattingTokens = /(\[[^\[]*\])|(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|mm?|ss?|SS?S?|X|zz?|ZZ?|.)/g,
-        localFormattingTokens = /(\[[^\[]*\])|(\\)?(LT|LL?L?L?|l{1,4})/g,
+_.extend(Backbone.LocalStorage.prototype, {
 
-        // parsing token regexes
-        parseTokenOneOrTwoDigits = /\d\d?/, // 0 - 99
-        parseTokenOneToThreeDigits = /\d{1,3}/, // 0 - 999
-        parseTokenThreeDigits = /\d{3}/, // 000 - 999
-        parseTokenFourDigits = /\d{1,4}/, // 0 - 9999
-        parseTokenSixDigits = /[+\-]?\d{1,6}/, // -999,999 - 999,999
-        parseTokenWord = /[0-9]*['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+|[\u0600-\u06FF\/]+(\s*?[\u0600-\u06FF]+){1,2}/i, // any word (or two) characters or numbers including two/three word month in arabic.
-        parseTokenTimezone = /Z|[\+\-]\d\d:?\d\d/i, // +00:00 -00:00 +0000 -0000 or Z
-        parseTokenT = /T/i, // T (ISO seperator)
-        parseTokenTimestampMs = /[\+\-]?\d+(\.\d{1,3})?/, // 123456789 123456789.123
+  // Save the current state of the **Store** to *localStorage*.
+  save: function() {
+    this.localStorage().setItem(this.name, this.records.join(","));
+  },
 
-        // preliminary iso regex
-        // 0000-00-00 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000
-        isoRegex = /^\s*\d{4}-\d\d-\d\d((T| )(\d\d(:\d\d(:\d\d(\.\d\d?\d?)?)?)?)?([\+\-]\d\d:?\d\d)?)?/,
-        isoFormat = 'YYYY-MM-DDTHH:mm:ssZ',
-
-        // iso time formats and regexes
-        isoTimes = [
-            ['HH:mm:ss.S', /(T| )\d\d:\d\d:\d\d\.\d{1,3}/],
-            ['HH:mm:ss', /(T| )\d\d:\d\d:\d\d/],
-            ['HH:mm', /(T| )\d\d:\d\d/],
-            ['HH', /(T| )\d\d/]
-        ],
-
-        // timezone chunker "+10:00" > ["10", "00"] or "-1530" > ["-15", "30"]
-        parseTimezoneChunker = /([\+\-]|\d\d)/gi,
-
-        // getter and setter names
-        proxyGettersAndSetters = 'Date|Hours|Minutes|Seconds|Milliseconds'.split('|'),
-        unitMillisecondFactors = {
-            'Milliseconds' : 1,
-            'Seconds' : 1e3,
-            'Minutes' : 6e4,
-            'Hours' : 36e5,
-            'Days' : 864e5,
-            'Months' : 2592e6,
-            'Years' : 31536e6
-        },
-
-        unitAliases = {
-            ms : 'millisecond',
-            s : 'second',
-            m : 'minute',
-            h : 'hour',
-            d : 'day',
-            w : 'week',
-            W : 'isoweek',
-            M : 'month',
-            y : 'year'
-        },
-
-        // format function strings
-        formatFunctions = {},
-
-        // tokens to ordinalize and pad
-        ordinalizeTokens = 'DDD w W M D d'.split(' '),
-        paddedTokens = 'M D H h m s w W'.split(' '),
-
-        formatTokenFunctions = {
-            M    : function () {
-                return this.month() + 1;
-            },
-            MMM  : function (format) {
-                return this.lang().monthsShort(this, format);
-            },
-            MMMM : function (format) {
-                return this.lang().months(this, format);
-            },
-            D    : function () {
-                return this.date();
-            },
-            DDD  : function () {
-                return this.dayOfYear();
-            },
-            d    : function () {
-                return this.day();
-            },
-            dd   : function (format) {
-                return this.lang().weekdaysMin(this, format);
-            },
-            ddd  : function (format) {
-                return this.lang().weekdaysShort(this, format);
-            },
-            dddd : function (format) {
-                return this.lang().weekdays(this, format);
-            },
-            w    : function () {
-                return this.week();
-            },
-            W    : function () {
-                return this.isoWeek();
-            },
-            YY   : function () {
-                return leftZeroFill(this.year() % 100, 2);
-            },
-            YYYY : function () {
-                return leftZeroFill(this.year(), 4);
-            },
-            YYYYY : function () {
-                return leftZeroFill(this.year(), 5);
-            },
-            gg   : function () {
-                return leftZeroFill(this.weekYear() % 100, 2);
-            },
-            gggg : function () {
-                return this.weekYear();
-            },
-            ggggg : function () {
-                return leftZeroFill(this.weekYear(), 5);
-            },
-            GG   : function () {
-                return leftZeroFill(this.isoWeekYear() % 100, 2);
-            },
-            GGGG : function () {
-                return this.isoWeekYear();
-            },
-            GGGGG : function () {
-                return leftZeroFill(this.isoWeekYear(), 5);
-            },
-            e : function () {
-                return this.weekday();
-            },
-            E : function () {
-                return this.isoWeekday();
-            },
-            a    : function () {
-                return this.lang().meridiem(this.hours(), this.minutes(), true);
-            },
-            A    : function () {
-                return this.lang().meridiem(this.hours(), this.minutes(), false);
-            },
-            H    : function () {
-                return this.hours();
-            },
-            h    : function () {
-                return this.hours() % 12 || 12;
-            },
-            m    : function () {
-                return this.minutes();
-            },
-            s    : function () {
-                return this.seconds();
-            },
-            S    : function () {
-                return ~~(this.milliseconds() / 100);
-            },
-            SS   : function () {
-                return leftZeroFill(~~(this.milliseconds() / 10), 2);
-            },
-            SSS  : function () {
-                return leftZeroFill(this.milliseconds(), 3);
-            },
-            Z    : function () {
-                var a = -this.zone(),
-                    b = "+";
-                if (a < 0) {
-                    a = -a;
-                    b = "-";
-                }
-                return b + leftZeroFill(~~(a / 60), 2) + ":" + leftZeroFill(~~a % 60, 2);
-            },
-            ZZ   : function () {
-                var a = -this.zone(),
-                    b = "+";
-                if (a < 0) {
-                    a = -a;
-                    b = "-";
-                }
-                return b + leftZeroFill(~~(10 * a / 6), 4);
-            },
-            z : function () {
-                return this.zoneAbbr();
-            },
-            zz : function () {
-                return this.zoneName();
-            },
-            X    : function () {
-                return this.unix();
-            }
-        };
-
-    function padToken(func, count) {
-        return function (a) {
-            return leftZeroFill(func.call(this, a), count);
-        };
+  // Add a model, giving it a (hopefully)-unique GUID, if it doesn't already
+  // have an id of it's own.
+  create: function(model) {
+    if (!model.id) {
+      model.id = guid();
+      model.set(model.idAttribute, model.id);
     }
-    function ordinalizeToken(func, period) {
-        return function (a) {
-            return this.lang().ordinal(func.call(this, a), period);
-        };
-    }
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    this.records.push(model.id.toString());
+    this.save();
+    return this.find(model);
+  },
 
-    while (ordinalizeTokens.length) {
-        i = ordinalizeTokens.pop();
-        formatTokenFunctions[i + 'o'] = ordinalizeToken(formatTokenFunctions[i], i);
-    }
-    while (paddedTokens.length) {
-        i = paddedTokens.pop();
-        formatTokenFunctions[i + i] = padToken(formatTokenFunctions[i], 2);
-    }
-    formatTokenFunctions.DDDD = padToken(formatTokenFunctions.DDD, 3);
+  // Update a model by replacing its copy in `this.data`.
+  update: function(model) {
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    if (!_.include(this.records, model.id.toString()))
+      this.records.push(model.id.toString()); this.save();
+    return this.find(model);
+  },
 
+  // Retrieve a model from `this.data` by id.
+  find: function(model) {
+    return this.jsonData(this.localStorage().getItem(this.name+"-"+model.id));
+  },
 
-    /************************************
-        Constructors
-    ************************************/
+  // Return the array of all models currently in storage.
+  findAll: function() {
+    // Lodash removed _#chain in v1.0.0-rc.1
+    return (_.chain || _)(this.records)
+      .map(function(id){
+        return this.jsonData(this.localStorage().getItem(this.name+"-"+id));
+      }, this)
+      .compact()
+      .value();
+  },
 
-    function Language() {
-
-    }
-
-    // Moment prototype object
-    function Moment(config) {
-        extend(this, config);
-    }
-
-    // Duration Constructor
-    function Duration(duration) {
-        var years = duration.years || duration.year || duration.y || 0,
-            months = duration.months || duration.month || duration.M || 0,
-            weeks = duration.weeks || duration.week || duration.w || 0,
-            days = duration.days || duration.day || duration.d || 0,
-            hours = duration.hours || duration.hour || duration.h || 0,
-            minutes = duration.minutes || duration.minute || duration.m || 0,
-            seconds = duration.seconds || duration.second || duration.s || 0,
-            milliseconds = duration.milliseconds || duration.millisecond || duration.ms || 0;
-
-        // store reference to input for deterministic cloning
-        this._input = duration;
-
-        // representation for dateAddRemove
-        this._milliseconds = +milliseconds +
-            seconds * 1e3 + // 1000
-            minutes * 6e4 + // 1000 * 60
-            hours * 36e5; // 1000 * 60 * 60
-        // Because of dateAddRemove treats 24 hours as different from a
-        // day when working around DST, we need to store them separately
-        this._days = +days +
-            weeks * 7;
-        // It is impossible translate months into days without knowing
-        // which months you are are talking about, so we have to store
-        // it separately.
-        this._months = +months +
-            years * 12;
-
-        this._data = {};
-
-        this._bubble();
-    }
-
-
-    /************************************
-        Helpers
-    ************************************/
-
-
-    function extend(a, b) {
-        for (var i in b) {
-            if (b.hasOwnProperty(i)) {
-                a[i] = b[i];
-            }
-        }
-        return a;
-    }
-
-    function absRound(number) {
-        if (number < 0) {
-            return Math.ceil(number);
-        } else {
-            return Math.floor(number);
-        }
-    }
-
-    // left zero fill a number
-    // see http://jsperf.com/left-zero-filling for performance comparison
-    function leftZeroFill(number, targetLength) {
-        var output = number + '';
-        while (output.length < targetLength) {
-            output = '0' + output;
-        }
-        return output;
-    }
-
-    // helper function for _.addTime and _.subtractTime
-    function addOrSubtractDurationFromMoment(mom, duration, isAdding, ignoreUpdateOffset) {
-        var milliseconds = duration._milliseconds,
-            days = duration._days,
-            months = duration._months,
-            minutes,
-            hours;
-
-        if (milliseconds) {
-            mom._d.setTime(+mom._d + milliseconds * isAdding);
-        }
-        // store the minutes and hours so we can restore them
-        if (days || months) {
-            minutes = mom.minute();
-            hours = mom.hour();
-        }
-        if (days) {
-            mom.date(mom.date() + days * isAdding);
-        }
-        if (months) {
-            mom.month(mom.month() + months * isAdding);
-        }
-        if (milliseconds && !ignoreUpdateOffset) {
-            moment.updateOffset(mom);
-        }
-        // restore the minutes and hours after possibly changing dst
-        if (days || months) {
-            mom.minute(minutes);
-            mom.hour(hours);
-        }
-    }
-
-    // check if is an array
-    function isArray(input) {
-        return Object.prototype.toString.call(input) === '[object Array]';
-    }
-
-    // compare two arrays, return the number of differences
-    function compareArrays(array1, array2) {
-        var len = Math.min(array1.length, array2.length),
-            lengthDiff = Math.abs(array1.length - array2.length),
-            diffs = 0,
-            i;
-        for (i = 0; i < len; i++) {
-            if (~~array1[i] !== ~~array2[i]) {
-                diffs++;
-            }
-        }
-        return diffs + lengthDiff;
-    }
-
-    function normalizeUnits(units) {
-        return units ? unitAliases[units] || units.toLowerCase().replace(/(.)s$/, '$1') : units;
-    }
-
-
-    /************************************
-        Languages
-    ************************************/
-
-
-    extend(Language.prototype, {
-
-        set : function (config) {
-            var prop, i;
-            for (i in config) {
-                prop = config[i];
-                if (typeof prop === 'function') {
-                    this[i] = prop;
-                } else {
-                    this['_' + i] = prop;
-                }
-            }
-        },
-
-        _months : "January_February_March_April_May_June_July_August_September_October_November_December".split("_"),
-        months : function (m) {
-            return this._months[m.month()];
-        },
-
-        _monthsShort : "Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec".split("_"),
-        monthsShort : function (m) {
-            return this._monthsShort[m.month()];
-        },
-
-        monthsParse : function (monthName) {
-            var i, mom, regex;
-
-            if (!this._monthsParse) {
-                this._monthsParse = [];
-            }
-
-            for (i = 0; i < 12; i++) {
-                // make the regex if we don't have it already
-                if (!this._monthsParse[i]) {
-                    mom = moment.utc([2000, i]);
-                    regex = '^' + this.months(mom, '') + '|^' + this.monthsShort(mom, '');
-                    this._monthsParse[i] = new RegExp(regex.replace('.', ''), 'i');
-                }
-                // test the regex
-                if (this._monthsParse[i].test(monthName)) {
-                    return i;
-                }
-            }
-        },
-
-        _weekdays : "Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),
-        weekdays : function (m) {
-            return this._weekdays[m.day()];
-        },
-
-        _weekdaysShort : "Sun_Mon_Tue_Wed_Thu_Fri_Sat".split("_"),
-        weekdaysShort : function (m) {
-            return this._weekdaysShort[m.day()];
-        },
-
-        _weekdaysMin : "Su_Mo_Tu_We_Th_Fr_Sa".split("_"),
-        weekdaysMin : function (m) {
-            return this._weekdaysMin[m.day()];
-        },
-
-        weekdaysParse : function (weekdayName) {
-            var i, mom, regex;
-
-            if (!this._weekdaysParse) {
-                this._weekdaysParse = [];
-            }
-
-            for (i = 0; i < 7; i++) {
-                // make the regex if we don't have it already
-                if (!this._weekdaysParse[i]) {
-                    mom = moment([2000, 1]).day(i);
-                    regex = '^' + this.weekdays(mom, '') + '|^' + this.weekdaysShort(mom, '') + '|^' + this.weekdaysMin(mom, '');
-                    this._weekdaysParse[i] = new RegExp(regex.replace('.', ''), 'i');
-                }
-                // test the regex
-                if (this._weekdaysParse[i].test(weekdayName)) {
-                    return i;
-                }
-            }
-        },
-
-        _longDateFormat : {
-            LT : "h:mm A",
-            L : "MM/DD/YYYY",
-            LL : "MMMM D YYYY",
-            LLL : "MMMM D YYYY LT",
-            LLLL : "dddd, MMMM D YYYY LT"
-        },
-        longDateFormat : function (key) {
-            var output = this._longDateFormat[key];
-            if (!output && this._longDateFormat[key.toUpperCase()]) {
-                output = this._longDateFormat[key.toUpperCase()].replace(/MMMM|MM|DD|dddd/g, function (val) {
-                    return val.slice(1);
-                });
-                this._longDateFormat[key] = output;
-            }
-            return output;
-        },
-
-        isPM : function (input) {
-            // IE8 Quirks Mode & IE7 Standards Mode do not allow accessing strings like arrays
-            // Using charAt should be more compatible.
-            return ((input + '').toLowerCase().charAt(0) === 'p');
-        },
-
-        _meridiemParse : /[ap]\.?m?\.?/i,
-        meridiem : function (hours, minutes, isLower) {
-            if (hours > 11) {
-                return isLower ? 'pm' : 'PM';
-            } else {
-                return isLower ? 'am' : 'AM';
-            }
-        },
-
-        _calendar : {
-            sameDay : '[Today at] LT',
-            nextDay : '[Tomorrow at] LT',
-            nextWeek : 'dddd [at] LT',
-            lastDay : '[Yesterday at] LT',
-            lastWeek : '[Last] dddd [at] LT',
-            sameElse : 'L'
-        },
-        calendar : function (key, mom) {
-            var output = this._calendar[key];
-            return typeof output === 'function' ? output.apply(mom) : output;
-        },
-
-        _relativeTime : {
-            future : "in %s",
-            past : "%s ago",
-            s : "a few seconds",
-            m : "a minute",
-            mm : "%d minutes",
-            h : "an hour",
-            hh : "%d hours",
-            d : "a day",
-            dd : "%d days",
-            M : "a month",
-            MM : "%d months",
-            y : "a year",
-            yy : "%d years"
-        },
-        relativeTime : function (number, withoutSuffix, string, isFuture) {
-            var output = this._relativeTime[string];
-            return (typeof output === 'function') ?
-                output(number, withoutSuffix, string, isFuture) :
-                output.replace(/%d/i, number);
-        },
-        pastFuture : function (diff, output) {
-            var format = this._relativeTime[diff > 0 ? 'future' : 'past'];
-            return typeof format === 'function' ? format(output) : format.replace(/%s/i, output);
-        },
-
-        ordinal : function (number) {
-            return this._ordinal.replace("%d", number);
-        },
-        _ordinal : "%d",
-
-        preparse : function (string) {
-            return string;
-        },
-
-        postformat : function (string) {
-            return string;
-        },
-
-        week : function (mom) {
-            return weekOfYear(mom, this._week.dow, this._week.doy).week;
-        },
-        _week : {
-            dow : 0, // Sunday is the first day of the week.
-            doy : 6  // The week that contains Jan 1st is the first week of the year.
-        }
+  // Delete a model from `this.data`, returning it.
+  destroy: function(model) {
+    if (model.isNew())
+      return false
+    this.localStorage().removeItem(this.name+"-"+model.id);
+    this.records = _.reject(this.records, function(id){
+      return id === model.id.toString();
     });
+    this.save();
+    return model;
+  },
 
-    // Loads a language definition into the `languages` cache.  The function
-    // takes a key and optionally values.  If not in the browser and no values
-    // are provided, it will load the language file module.  As a convenience,
-    // this function also returns the language values.
-    function loadLang(key, values) {
-        values.abbr = key;
-        if (!languages[key]) {
-            languages[key] = new Language();
-        }
-        languages[key].set(values);
-        return languages[key];
+  localStorage: function() {
+    return localStorage;
+  },
+
+  // fix for "illegal access" error on Android when JSON.parse is passed null
+  jsonData: function (data) {
+      return data && JSON.parse(data);
+  },
+
+  // Clear localStorage for specific collection.
+  _clear: function() {
+    var local = this.localStorage(),
+      itemRe = new RegExp("^" + this.name + "-");
+
+    // Remove id-tracking item (e.g., "foo").
+    local.removeItem(this.name);
+
+    // Lodash removed _#chain in v1.0.0-rc.1
+    // Match all data items (e.g., "foo-ID") and remove.
+    (_.chain || _)(local).keys()
+      .filter(function (k) { return itemRe.test(k); })
+      .each(function (k) { local.removeItem(k); });
+
+    this.records.length = 0;
+  },
+
+  // Size of localStorage.
+  _storageSize: function() {
+    return this.localStorage().length;
+  }
+
+});
+
+// localSync delegate to the model or collection's
+// *localStorage* property, which should be an instance of `Store`.
+// window.Store.sync and Backbone.localSync is deprecated, use Backbone.LocalStorage.sync instead
+Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function(method, model, options) {
+  var store = model.localStorage || model.collection.localStorage;
+
+  var resp, errorMessage, syncDfd = Backbone.$.Deferred && Backbone.$.Deferred(); //If $ is having Deferred - use it.
+
+  try {
+
+    switch (method) {
+      case "read":
+        resp = model.id != undefined ? store.find(model) : store.findAll();
+        break;
+      case "create":
+        resp = store.create(model);
+        break;
+      case "update":
+        resp = store.update(model);
+        break;
+      case "delete":
+        resp = store.destroy(model);
+        break;
     }
 
-    // Remove a language from the `languages` cache. Mostly useful in tests.
-    function unloadLang(key) {
-        delete languages[key];
+  } catch(error) {
+    if (error.code === 22 && store._storageSize() === 0)
+      errorMessage = "Private browsing is unsupported";
+    else
+      errorMessage = error.message;
+  }
+
+  if (resp) {
+    if (options && options.success) {
+      if (Backbone.VERSION === "0.9.10") {
+        options.success(model, resp, options);
+      } else {
+        options.success(resp);
+      }
+    }
+    if (syncDfd) {
+      syncDfd.resolve(resp);
     }
 
-    // Determines which language definition to use and returns it.
-    //
-    // With no parameters, it will return the global language.  If you
-    // pass in a language key, such as 'en', it will return the
-    // definition for 'en', so long as 'en' has already been loaded using
-    // moment.lang.
-    function getLangDefinition(key) {
-        if (!key) {
-            return moment.fn._lang;
-        }
-        if (!languages[key] && hasModule) {
-            try {
-                require('./lang/' + key);
-            } catch (e) {
-                // call with no params to set to default
-                return moment.fn._lang;
-            }
-        }
-        return languages[key] || moment.fn._lang;
-    }
+  } else {
+    errorMessage = errorMessage ? errorMessage
+                                : "Record Not Found";
 
+    if (options && options.error)
+      if (Backbone.VERSION === "0.9.10") {
+        options.error(model, errorMessage, options);
+      } else {
+        options.error(errorMessage);
+      }
 
-    /************************************
-        Formatting
-    ************************************/
+    if (syncDfd)
+      syncDfd.reject(errorMessage);
+  }
 
+  // add compatibility with $.ajax
+  // always execute callback for success and error
+  if (options && options.complete) options.complete(resp);
 
-    function removeFormattingTokens(input) {
-        if (input.match(/\[.*\]/)) {
-            return input.replace(/^\[|\]$/g, "");
-        }
-        return input.replace(/\\/g, "");
-    }
+  return syncDfd && syncDfd.promise();
+};
 
-    function makeFormatFunction(format) {
-        var array = format.match(formattingTokens), i, length;
+Backbone.ajaxSync = Backbone.sync;
 
-        for (i = 0, length = array.length; i < length; i++) {
-            if (formatTokenFunctions[array[i]]) {
-                array[i] = formatTokenFunctions[array[i]];
-            } else {
-                array[i] = removeFormattingTokens(array[i]);
-            }
-        }
+Backbone.getSyncMethod = function(model) {
+  if(model.localStorage || (model.collection && model.collection.localStorage)) {
+    return Backbone.localSync;
+  }
 
-        return function (mom) {
-            var output = "";
-            for (i = 0; i < length; i++) {
-                output += array[i] instanceof Function ? array[i].call(mom, format) : array[i];
-            }
-            return output;
-        };
-    }
+  return Backbone.ajaxSync;
+};
 
-    // format date using native date object
-    function formatMoment(m, format) {
+// Override 'Backbone.sync' to default to localSync,
+// the original 'Backbone.sync' is still available in 'Backbone.ajaxSync'
+Backbone.sync = function(method, model, options) {
+  return Backbone.getSyncMethod(model).apply(this, [method, model, options]);
+};
 
-        format = expandFormat(format, m.lang());
+return Backbone.LocalStorage;
+}));
 
-        if (!formatFunctions[format]) {
-            formatFunctions[format] = makeFormatFunction(format);
-        }
+;/**
+ * Copyright (c) 2011-2013 Felix Gnass
+ * Licensed under the MIT license
+ */
 
-        return formatFunctions[format](m);
-    }
+/*
 
-    function expandFormat(format, lang) {
-        var i = 5;
+Basic Usage:
+============
 
-        function replaceLongDateFormatTokens(input) {
-            return lang.longDateFormat(input) || input;
-        }
+$('#el').spin(); // Creates a default Spinner using the text color of #el.
+$('#el').spin({ ... }); // Creates a Spinner using the provided options.
 
-        while (i-- && (localFormattingTokens.lastIndex = 0,
-                    localFormattingTokens.test(format))) {
-            format = format.replace(localFormattingTokens, replaceLongDateFormatTokens);
-        }
+$('#el').spin(false); // Stops and removes the spinner.
 
-        return format;
-    }
+Using Presets:
+==============
 
+$('#el').spin('small'); // Creates a 'small' Spinner using the text color of #el.
+$('#el').spin('large', '#fff'); // Creates a 'large' white Spinner.
 
-    /************************************
-        Parsing
-    ************************************/
+Adding a custom preset:
+=======================
 
+$.fn.spin.presets.flower = {
+  lines: 9
+  length: 10
+  width: 20
+  radius: 0
+}
 
-    // get the regex to find the next token
-    function getParseRegexForToken(token, config) {
-        switch (token) {
-        case 'DDDD':
-            return parseTokenThreeDigits;
-        case 'YYYY':
-            return parseTokenFourDigits;
-        case 'YYYYY':
-            return parseTokenSixDigits;
-        case 'S':
-        case 'SS':
-        case 'SSS':
-        case 'DDD':
-            return parseTokenOneToThreeDigits;
-        case 'MMM':
-        case 'MMMM':
-        case 'dd':
-        case 'ddd':
-        case 'dddd':
-            return parseTokenWord;
-        case 'a':
-        case 'A':
-            return getLangDefinition(config._l)._meridiemParse;
-        case 'X':
-            return parseTokenTimestampMs;
-        case 'Z':
-        case 'ZZ':
-            return parseTokenTimezone;
-        case 'T':
-            return parseTokenT;
-        case 'MM':
-        case 'DD':
-        case 'YY':
-        case 'HH':
-        case 'hh':
-        case 'mm':
-        case 'ss':
-        case 'M':
-        case 'D':
-        case 'd':
-        case 'H':
-        case 'h':
-        case 'm':
-        case 's':
-            return parseTokenOneOrTwoDigits;
-        default :
-            return new RegExp(token.replace('\\', ''));
-        }
-    }
+$('#el').spin('flower', 'red');
 
-    function timezoneMinutesFromString(string) {
-        var tzchunk = (parseTokenTimezone.exec(string) || [])[0],
-            parts = (tzchunk + '').match(parseTimezoneChunker) || ['-', 0, 0],
-            minutes = +(parts[1] * 60) + ~~parts[2];
-
-        return parts[0] === '+' ? -minutes : minutes;
-    }
-
-    // function to convert string input to date
-    function addTimeToArrayFromToken(token, input, config) {
-        var a, datePartArray = config._a;
-
-        switch (token) {
-        // MONTH
-        case 'M' : // fall through to MM
-        case 'MM' :
-            if (input != null) {
-                datePartArray[1] = ~~input - 1;
-            }
-            break;
-        case 'MMM' : // fall through to MMMM
-        case 'MMMM' :
-            a = getLangDefinition(config._l).monthsParse(input);
-            // if we didn't find a month name, mark the date as invalid.
-            if (a != null) {
-                datePartArray[1] = a;
-            } else {
-                config._isValid = false;
-            }
-            break;
-        // DAY OF MONTH
-        case 'D' : // fall through to DD
-        case 'DD' :
-            if (input != null) {
-                datePartArray[2] = ~~input;
-            }
-            break;
-        // DAY OF YEAR
-        case 'DDD' : // fall through to DDDD
-        case 'DDDD' :
-            if (input != null) {
-                datePartArray[1] = 0;
-                datePartArray[2] = ~~input;
-            }
-            break;
-        // YEAR
-        case 'YY' :
-            datePartArray[0] = ~~input + (~~input > 68 ? 1900 : 2000);
-            break;
-        case 'YYYY' :
-        case 'YYYYY' :
-            datePartArray[0] = ~~input;
-            break;
-        // AM / PM
-        case 'a' : // fall through to A
-        case 'A' :
-            config._isPm = getLangDefinition(config._l).isPM(input);
-            break;
-        // 24 HOUR
-        case 'H' : // fall through to hh
-        case 'HH' : // fall through to hh
-        case 'h' : // fall through to hh
-        case 'hh' :
-            datePartArray[3] = ~~input;
-            break;
-        // MINUTE
-        case 'm' : // fall through to mm
-        case 'mm' :
-            datePartArray[4] = ~~input;
-            break;
-        // SECOND
-        case 's' : // fall through to ss
-        case 'ss' :
-            datePartArray[5] = ~~input;
-            break;
-        // MILLISECOND
-        case 'S' :
-        case 'SS' :
-        case 'SSS' :
-            datePartArray[6] = ~~ (('0.' + input) * 1000);
-            break;
-        // UNIX TIMESTAMP WITH MS
-        case 'X':
-            config._d = new Date(parseFloat(input) * 1000);
-            break;
-        // TIMEZONE
-        case 'Z' : // fall through to ZZ
-        case 'ZZ' :
-            config._useUTC = true;
-            config._tzm = timezoneMinutesFromString(input);
-            break;
-        }
-
-        // if the input is null, the date is not valid
-        if (input == null) {
-            config._isValid = false;
-        }
-    }
-
-    // convert an array to a date.
-    // the array should mirror the parameters below
-    // note: all values past the year are optional and will default to the lowest possible value.
-    // [year, month, day , hour, minute, second, millisecond]
-    function dateFromArray(config) {
-        var i, date, input = [], currentDate;
-
-        if (config._d) {
-            return;
-        }
-
-        // Default to current date.
-        // * if no year, month, day of month are given, default to today
-        // * if day of month is given, default month and year
-        // * if month is given, default only year
-        // * if year is given, don't default anything
-        currentDate = currentDateArray(config);
-        for (i = 0; i < 3 && config._a[i] == null; ++i) {
-            config._a[i] = input[i] = currentDate[i];
-        }
-
-        // Zero out whatever was not defaulted, including time
-        for (; i < 7; i++) {
-            config._a[i] = input[i] = (config._a[i] == null) ? (i === 2 ? 1 : 0) : config._a[i];
-        }
-
-        // add the offsets to the time to be parsed so that we can have a clean array for checking isValid
-        input[3] += ~~((config._tzm || 0) / 60);
-        input[4] += ~~((config._tzm || 0) % 60);
-
-        date = new Date(0);
-
-        if (config._useUTC) {
-            date.setUTCFullYear(input[0], input[1], input[2]);
-            date.setUTCHours(input[3], input[4], input[5], input[6]);
-        } else {
-            date.setFullYear(input[0], input[1], input[2]);
-            date.setHours(input[3], input[4], input[5], input[6]);
-        }
-
-        config._d = date;
-    }
-
-    function dateFromObject(config) {
-        var o = config._i;
-
-        if (config._d) {
-            return;
-        }
-
-        config._a = [
-            o.years || o.year || o.y,
-            o.months || o.month || o.M,
-            o.days || o.day || o.d,
-            o.hours || o.hour || o.h,
-            o.minutes || o.minute || o.m,
-            o.seconds || o.second || o.s,
-            o.milliseconds || o.millisecond || o.ms
-        ];
-
-        dateFromArray(config);
-    }
-
-    function currentDateArray(config) {
-        var now = new Date();
-        if (config._useUTC) {
-            return [
-                now.getUTCFullYear(),
-                now.getUTCMonth(),
-                now.getUTCDate()
-            ];
-        } else {
-            return [now.getFullYear(), now.getMonth(), now.getDate()];
-        }
-    }
-
-    // date from string and format string
-    function makeDateFromStringAndFormat(config) {
-        // This array is used to make a Date, either with `new Date` or `Date.UTC`
-        var lang = getLangDefinition(config._l),
-            string = '' + config._i,
-            i, parsedInput, tokens;
-
-        tokens = expandFormat(config._f, lang).match(formattingTokens);
-
-        config._a = [];
-
-        for (i = 0; i < tokens.length; i++) {
-            parsedInput = (getParseRegexForToken(tokens[i], config).exec(string) || [])[0];
-            if (parsedInput) {
-                string = string.slice(string.indexOf(parsedInput) + parsedInput.length);
-            }
-            // don't parse if its not a known token
-            if (formatTokenFunctions[tokens[i]]) {
-                addTimeToArrayFromToken(tokens[i], parsedInput, config);
-            }
-        }
-
-        // add remaining unparsed input to the string
-        if (string) {
-            config._il = string;
-        }
-
-        // handle am pm
-        if (config._isPm && config._a[3] < 12) {
-            config._a[3] += 12;
-        }
-        // if is 12 am, change hours to 0
-        if (config._isPm === false && config._a[3] === 12) {
-            config._a[3] = 0;
-        }
-        // return
-        dateFromArray(config);
-    }
-
-    // date from string and array of format strings
-    function makeDateFromStringAndArray(config) {
-        var tempConfig,
-            tempMoment,
-            bestMoment,
-
-            scoreToBeat = 99,
-            i,
-            currentScore;
-
-        for (i = 0; i < config._f.length; i++) {
-            tempConfig = extend({}, config);
-            tempConfig._f = config._f[i];
-            makeDateFromStringAndFormat(tempConfig);
-            tempMoment = new Moment(tempConfig);
-
-            currentScore = compareArrays(tempConfig._a, tempMoment.toArray());
-
-            // if there is any input that was not parsed
-            // add a penalty for that format
-            if (tempMoment._il) {
-                currentScore += tempMoment._il.length;
-            }
-
-            if (currentScore < scoreToBeat) {
-                scoreToBeat = currentScore;
-                bestMoment = tempMoment;
-            }
-        }
-
-        extend(config, bestMoment);
-    }
-
-    // date from iso format
-    function makeDateFromString(config) {
-        var i,
-            string = config._i,
-            match = isoRegex.exec(string);
-
-        if (match) {
-            // match[2] should be "T" or undefined
-            config._f = 'YYYY-MM-DD' + (match[2] || " ");
-            for (i = 0; i < 4; i++) {
-                if (isoTimes[i][1].exec(string)) {
-                    config._f += isoTimes[i][0];
-                    break;
-                }
-            }
-            if (parseTokenTimezone.exec(string)) {
-                config._f += " Z";
-            }
-            makeDateFromStringAndFormat(config);
-        } else {
-            config._d = new Date(string);
-        }
-    }
-
-    function makeDateFromInput(config) {
-        var input = config._i,
-            matched = aspNetJsonRegex.exec(input);
-
-        if (input === undefined) {
-            config._d = new Date();
-        } else if (matched) {
-            config._d = new Date(+matched[1]);
-        } else if (typeof input === 'string') {
-            makeDateFromString(config);
-        } else if (isArray(input)) {
-            config._a = input.slice(0);
-            dateFromArray(config);
-        } else if (input instanceof Date) {
-            config._d = new Date(+input);
-        } else if (typeof(input) === 'object') {
-            dateFromObject(config);
-        } else {
-            config._d = new Date(input);
-        }
-    }
-
-
-    /************************************
-        Relative Time
-    ************************************/
-
-
-    // helper function for moment.fn.from, moment.fn.fromNow, and moment.duration.fn.humanize
-    function substituteTimeAgo(string, number, withoutSuffix, isFuture, lang) {
-        return lang.relativeTime(number || 1, !!withoutSuffix, string, isFuture);
-    }
-
-    function relativeTime(milliseconds, withoutSuffix, lang) {
-        var seconds = round(Math.abs(milliseconds) / 1000),
-            minutes = round(seconds / 60),
-            hours = round(minutes / 60),
-            days = round(hours / 24),
-            years = round(days / 365),
-            args = seconds < 45 && ['s', seconds] ||
-                minutes === 1 && ['m'] ||
-                minutes < 45 && ['mm', minutes] ||
-                hours === 1 && ['h'] ||
-                hours < 22 && ['hh', hours] ||
-                days === 1 && ['d'] ||
-                days <= 25 && ['dd', days] ||
-                days <= 45 && ['M'] ||
-                days < 345 && ['MM', round(days / 30)] ||
-                years === 1 && ['y'] || ['yy', years];
-        args[2] = withoutSuffix;
-        args[3] = milliseconds > 0;
-        args[4] = lang;
-        return substituteTimeAgo.apply({}, args);
-    }
-
-
-    /************************************
-        Week of Year
-    ************************************/
-
-
-    // firstDayOfWeek       0 = sun, 6 = sat
-    //                      the day of the week that starts the week
-    //                      (usually sunday or monday)
-    // firstDayOfWeekOfYear 0 = sun, 6 = sat
-    //                      the first week is the week that contains the first
-    //                      of this day of the week
-    //                      (eg. ISO weeks use thursday (4))
-    function weekOfYear(mom, firstDayOfWeek, firstDayOfWeekOfYear) {
-        var end = firstDayOfWeekOfYear - firstDayOfWeek,
-            daysToDayOfWeek = firstDayOfWeekOfYear - mom.day(),
-            adjustedMoment;
-
-
-        if (daysToDayOfWeek > end) {
-            daysToDayOfWeek -= 7;
-        }
-
-        if (daysToDayOfWeek < end - 7) {
-            daysToDayOfWeek += 7;
-        }
-
-        adjustedMoment = moment(mom).add('d', daysToDayOfWeek);
-        return {
-            week: Math.ceil(adjustedMoment.dayOfYear() / 7),
-            year: adjustedMoment.year()
-        };
-    }
-
-
-    /************************************
-        Top Level Functions
-    ************************************/
-
-    function makeMoment(config) {
-        var input = config._i,
-            format = config._f;
-
-        if (input === null || input === '') {
-            return null;
-        }
-
-        if (typeof input === 'string') {
-            config._i = input = getLangDefinition().preparse(input);
-        }
-
-        if (moment.isMoment(input)) {
-            config = extend({}, input);
-            config._d = new Date(+input._d);
-        } else if (format) {
-            if (isArray(format)) {
-                makeDateFromStringAndArray(config);
-            } else {
-                makeDateFromStringAndFormat(config);
-            }
-        } else {
-            makeDateFromInput(config);
-        }
-
-        return new Moment(config);
-    }
-
-    moment = function (input, format, lang) {
-        return makeMoment({
-            _i : input,
-            _f : format,
-            _l : lang,
-            _isUTC : false
-        });
-    };
-
-    // creating with utc
-    moment.utc = function (input, format, lang) {
-        return makeMoment({
-            _useUTC : true,
-            _isUTC : true,
-            _l : lang,
-            _i : input,
-            _f : format
-        }).utc();
-    };
-
-    // creating with unix timestamp (in seconds)
-    moment.unix = function (input) {
-        return moment(input * 1000);
-    };
-
-    // duration
-    moment.duration = function (input, key) {
-        var isDuration = moment.isDuration(input),
-            isNumber = (typeof input === 'number'),
-            duration = (isDuration ? input._input : (isNumber ? {} : input)),
-            matched = aspNetTimeSpanJsonRegex.exec(input),
-            sign,
-            ret;
-
-        if (isNumber) {
-            if (key) {
-                duration[key] = input;
-            } else {
-                duration.milliseconds = input;
-            }
-        } else if (matched) {
-            sign = (matched[1] === "-") ? -1 : 1;
-            duration = {
-                y: 0,
-                d: ~~matched[2] * sign,
-                h: ~~matched[3] * sign,
-                m: ~~matched[4] * sign,
-                s: ~~matched[5] * sign,
-                ms: ~~matched[6] * sign
-            };
-        }
-
-        ret = new Duration(duration);
-
-        if (isDuration && input.hasOwnProperty('_lang')) {
-            ret._lang = input._lang;
-        }
-
-        return ret;
-    };
-
-    // version number
-    moment.version = VERSION;
-
-    // default format
-    moment.defaultFormat = isoFormat;
-
-    // This function will be called whenever a moment is mutated.
-    // It is intended to keep the offset in sync with the timezone.
-    moment.updateOffset = function () {};
-
-    // This function will load languages and then set the global language.  If
-    // no arguments are passed in, it will simply return the current global
-    // language key.
-    moment.lang = function (key, values) {
-        if (!key) {
-            return moment.fn._lang._abbr;
-        }
-        key = key.toLowerCase();
-        key = key.replace('_', '-');
-        if (values) {
-            loadLang(key, values);
-        } else if (values === null) {
-            unloadLang(key);
-            key = 'en';
-        } else if (!languages[key]) {
-            getLangDefinition(key);
-        }
-        moment.duration.fn._lang = moment.fn._lang = getLangDefinition(key);
-    };
-
-    // returns language data
-    moment.langData = function (key) {
-        if (key && key._lang && key._lang._abbr) {
-            key = key._lang._abbr;
-        }
-        return getLangDefinition(key);
-    };
-
-    // compare moment object
-    moment.isMoment = function (obj) {
-        return obj instanceof Moment;
-    };
-
-    // for typechecking Duration objects
-    moment.isDuration = function (obj) {
-        return obj instanceof Duration;
-    };
-
-
-    /************************************
-        Moment Prototype
-    ************************************/
-
-
-    extend(moment.fn = Moment.prototype, {
-
-        clone : function () {
-            return moment(this);
-        },
-
-        valueOf : function () {
-            return +this._d + ((this._offset || 0) * 60000);
-        },
-
-        unix : function () {
-            return Math.floor(+this / 1000);
-        },
-
-        toString : function () {
-            return this.format("ddd MMM DD YYYY HH:mm:ss [GMT]ZZ");
-        },
-
-        toDate : function () {
-            return this._offset ? new Date(+this) : this._d;
-        },
-
-        toISOString : function () {
-            return formatMoment(moment(this).utc(), 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
-        },
-
-        toArray : function () {
-            var m = this;
-            return [
-                m.year(),
-                m.month(),
-                m.date(),
-                m.hours(),
-                m.minutes(),
-                m.seconds(),
-                m.milliseconds()
-            ];
-        },
-
-        isValid : function () {
-            if (this._isValid == null) {
-                if (this._a) {
-                    this._isValid = !compareArrays(this._a, (this._isUTC ? moment.utc(this._a) : moment(this._a)).toArray());
-                } else {
-                    this._isValid = !isNaN(this._d.getTime());
-                }
-            }
-            return !!this._isValid;
-        },
-
-        invalidAt: function () {
-            var i, arr1 = this._a, arr2 = (this._isUTC ? moment.utc(this._a) : moment(this._a)).toArray();
-            for (i = 6; i >= 0 && arr1[i] === arr2[i]; --i) {
-                // empty loop body
-            }
-            return i;
-        },
-
-        utc : function () {
-            return this.zone(0);
-        },
-
-        local : function () {
-            this.zone(0);
-            this._isUTC = false;
-            return this;
-        },
-
-        format : function (inputString) {
-            var output = formatMoment(this, inputString || moment.defaultFormat);
-            return this.lang().postformat(output);
-        },
-
-        add : function (input, val) {
-            var dur;
-            // switch args to support add('s', 1) and add(1, 's')
-            if (typeof input === 'string') {
-                dur = moment.duration(+val, input);
-            } else {
-                dur = moment.duration(input, val);
-            }
-            addOrSubtractDurationFromMoment(this, dur, 1);
-            return this;
-        },
-
-        subtract : function (input, val) {
-            var dur;
-            // switch args to support subtract('s', 1) and subtract(1, 's')
-            if (typeof input === 'string') {
-                dur = moment.duration(+val, input);
-            } else {
-                dur = moment.duration(input, val);
-            }
-            addOrSubtractDurationFromMoment(this, dur, -1);
-            return this;
-        },
-
-        diff : function (input, units, asFloat) {
-            var that = this._isUTC ? moment(input).zone(this._offset || 0) : moment(input).local(),
-                zoneDiff = (this.zone() - that.zone()) * 6e4,
-                diff, output;
-
-            units = normalizeUnits(units);
-
-            if (units === 'year' || units === 'month') {
-                // average number of days in the months in the given dates
-                diff = (this.daysInMonth() + that.daysInMonth()) * 432e5; // 24 * 60 * 60 * 1000 / 2
-                // difference in months
-                output = ((this.year() - that.year()) * 12) + (this.month() - that.month());
-                // adjust by taking difference in days, average number of days
-                // and dst in the given months.
-                output += ((this - moment(this).startOf('month')) -
-                        (that - moment(that).startOf('month'))) / diff;
-                // same as above but with zones, to negate all dst
-                output -= ((this.zone() - moment(this).startOf('month').zone()) -
-                        (that.zone() - moment(that).startOf('month').zone())) * 6e4 / diff;
-                if (units === 'year') {
-                    output = output / 12;
-                }
-            } else {
-                diff = (this - that);
-                output = units === 'second' ? diff / 1e3 : // 1000
-                    units === 'minute' ? diff / 6e4 : // 1000 * 60
-                    units === 'hour' ? diff / 36e5 : // 1000 * 60 * 60
-                    units === 'day' ? (diff - zoneDiff) / 864e5 : // 1000 * 60 * 60 * 24, negate dst
-                    units === 'week' ? (diff - zoneDiff) / 6048e5 : // 1000 * 60 * 60 * 24 * 7, negate dst
-                    diff;
-            }
-            return asFloat ? output : absRound(output);
-        },
-
-        from : function (time, withoutSuffix) {
-            return moment.duration(this.diff(time)).lang(this.lang()._abbr).humanize(!withoutSuffix);
-        },
-
-        fromNow : function (withoutSuffix) {
-            return this.from(moment(), withoutSuffix);
-        },
-
-        calendar : function () {
-            var diff = this.diff(moment().zone(this.zone()).startOf('day'), 'days', true),
-                format = diff < -6 ? 'sameElse' :
-                diff < -1 ? 'lastWeek' :
-                diff < 0 ? 'lastDay' :
-                diff < 1 ? 'sameDay' :
-                diff < 2 ? 'nextDay' :
-                diff < 7 ? 'nextWeek' : 'sameElse';
-            return this.format(this.lang().calendar(format, this));
-        },
-
-        isLeapYear : function () {
-            var year = this.year();
-            return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-        },
-
-        isDST : function () {
-            return (this.zone() < this.clone().month(0).zone() ||
-                this.zone() < this.clone().month(5).zone());
-        },
-
-        day : function (input) {
-            var day = this._isUTC ? this._d.getUTCDay() : this._d.getDay();
-            if (input != null) {
-                if (typeof input === 'string') {
-                    input = this.lang().weekdaysParse(input);
-                    if (typeof input !== 'number') {
-                        return this;
-                    }
-                }
-                return this.add({ d : input - day });
-            } else {
-                return day;
-            }
-        },
-
-        month : function (input) {
-            var utc = this._isUTC ? 'UTC' : '',
-                dayOfMonth;
-
-            if (input != null) {
-                if (typeof input === 'string') {
-                    input = this.lang().monthsParse(input);
-                    if (typeof input !== 'number') {
-                        return this;
-                    }
-                }
-
-                dayOfMonth = this.date();
-                this.date(1);
-                this._d['set' + utc + 'Month'](input);
-                this.date(Math.min(dayOfMonth, this.daysInMonth()));
-
-                moment.updateOffset(this);
-                return this;
-            } else {
-                return this._d['get' + utc + 'Month']();
-            }
-        },
-
-        startOf: function (units) {
-            units = normalizeUnits(units);
-            // the following switch intentionally omits break keywords
-            // to utilize falling through the cases.
-            switch (units) {
-            case 'year':
-                this.month(0);
-                /* falls through */
-            case 'month':
-                this.date(1);
-                /* falls through */
-            case 'week':
-            case 'isoweek':
-            case 'day':
-                this.hours(0);
-                /* falls through */
-            case 'hour':
-                this.minutes(0);
-                /* falls through */
-            case 'minute':
-                this.seconds(0);
-                /* falls through */
-            case 'second':
-                this.milliseconds(0);
-                /* falls through */
-            }
-
-            // weeks are a special case
-            if (units === 'week') {
-                this.weekday(0);
-            } else if (units === 'isoweek') {
-                this.isoWeekday(1);
-            }
-
-            return this;
-        },
-
-        endOf: function (units) {
-            units = normalizeUnits(units);
-            return this.startOf(units).add((units === 'isoweek' ? 'week' : units), 1).subtract('ms', 1);
-        },
-
-        isAfter: function (input, units) {
-            units = typeof units !== 'undefined' ? units : 'millisecond';
-            return +this.clone().startOf(units) > +moment(input).startOf(units);
-        },
-
-        isBefore: function (input, units) {
-            units = typeof units !== 'undefined' ? units : 'millisecond';
-            return +this.clone().startOf(units) < +moment(input).startOf(units);
-        },
-
-        isSame: function (input, units) {
-            units = typeof units !== 'undefined' ? units : 'millisecond';
-            return +this.clone().startOf(units) === +moment(input).startOf(units);
-        },
-
-        min: function (other) {
-            other = moment.apply(null, arguments);
-            return other < this ? this : other;
-        },
-
-        max: function (other) {
-            other = moment.apply(null, arguments);
-            return other > this ? this : other;
-        },
-
-        zone : function (input) {
-            var offset = this._offset || 0;
-            if (input != null) {
-                if (typeof input === "string") {
-                    input = timezoneMinutesFromString(input);
-                }
-                if (Math.abs(input) < 16) {
-                    input = input * 60;
-                }
-                this._offset = input;
-                this._isUTC = true;
-                if (offset !== input) {
-                    addOrSubtractDurationFromMoment(this, moment.duration(offset - input, 'm'), 1, true);
-                }
-            } else {
-                return this._isUTC ? offset : this._d.getTimezoneOffset();
-            }
-            return this;
-        },
-
-        zoneAbbr : function () {
-            return this._isUTC ? "UTC" : "";
-        },
-
-        zoneName : function () {
-            return this._isUTC ? "Coordinated Universal Time" : "";
-        },
-
-        hasAlignedHourOffset : function (input) {
-            if (!input) {
-                input = 0;
-            }
-            else {
-                input = moment(input).zone();
-            }
-
-            return (this.zone() - input) % 60 === 0;
-        },
-
-        daysInMonth : function () {
-            return moment.utc([this.year(), this.month() + 1, 0]).date();
-        },
-
-        dayOfYear : function (input) {
-            var dayOfYear = round((moment(this).startOf('day') - moment(this).startOf('year')) / 864e5) + 1;
-            return input == null ? dayOfYear : this.add("d", (input - dayOfYear));
-        },
-
-        weekYear : function (input) {
-            var year = weekOfYear(this, this.lang()._week.dow, this.lang()._week.doy).year;
-            return input == null ? year : this.add("y", (input - year));
-        },
-
-        isoWeekYear : function (input) {
-            var year = weekOfYear(this, 1, 4).year;
-            return input == null ? year : this.add("y", (input - year));
-        },
-
-        week : function (input) {
-            var week = this.lang().week(this);
-            return input == null ? week : this.add("d", (input - week) * 7);
-        },
-
-        isoWeek : function (input) {
-            var week = weekOfYear(this, 1, 4).week;
-            return input == null ? week : this.add("d", (input - week) * 7);
-        },
-
-        weekday : function (input) {
-            var weekday = (this._d.getDay() + 7 - this.lang()._week.dow) % 7;
-            return input == null ? weekday : this.add("d", input - weekday);
-        },
-
-        isoWeekday : function (input) {
-            // behaves the same as moment#day except
-            // as a getter, returns 7 instead of 0 (1-7 range instead of 0-6)
-            // as a setter, sunday should belong to the previous week.
-            return input == null ? this.day() || 7 : this.day(this.day() % 7 ? input : input - 7);
-        },
-
-        get : function (units) {
-            units = normalizeUnits(units);
-            return this[units.toLowerCase()]();
-        },
-
-        set : function (units, value) {
-            units = normalizeUnits(units);
-            this[units.toLowerCase()](value);
-        },
-
-        // If passed a language key, it will set the language for this
-        // instance.  Otherwise, it will return the language configuration
-        // variables for this instance.
-        lang : function (key) {
-            if (key === undefined) {
-                return this._lang;
-            } else {
-                this._lang = getLangDefinition(key);
-                return this;
-            }
-        }
-    });
-
-    // helper for adding shortcuts
-    function makeGetterAndSetter(name, key) {
-        moment.fn[name] = moment.fn[name + 's'] = function (input) {
-            var utc = this._isUTC ? 'UTC' : '';
-            if (input != null) {
-                this._d['set' + utc + key](input);
-                moment.updateOffset(this);
-                return this;
-            } else {
-                return this._d['get' + utc + key]();
-            }
-        };
-    }
-
-    // loop through and add shortcuts (Month, Date, Hours, Minutes, Seconds, Milliseconds)
-    for (i = 0; i < proxyGettersAndSetters.length; i ++) {
-        makeGetterAndSetter(proxyGettersAndSetters[i].toLowerCase().replace(/s$/, ''), proxyGettersAndSetters[i]);
-    }
-
-    // add shortcut for year (uses different syntax than the getter/setter 'year' == 'FullYear')
-    makeGetterAndSetter('year', 'FullYear');
-
-    // add plural methods
-    moment.fn.days = moment.fn.day;
-    moment.fn.months = moment.fn.month;
-    moment.fn.weeks = moment.fn.week;
-    moment.fn.isoWeeks = moment.fn.isoWeek;
-
-    // add aliased format methods
-    moment.fn.toJSON = moment.fn.toISOString;
-
-    /************************************
-        Duration Prototype
-    ************************************/
-
-
-    extend(moment.duration.fn = Duration.prototype, {
-
-        _bubble : function () {
-            var milliseconds = this._milliseconds,
-                days = this._days,
-                months = this._months,
-                data = this._data,
-                seconds, minutes, hours, years;
-
-            // The following code bubbles up values, see the tests for
-            // examples of what that means.
-            data.milliseconds = milliseconds % 1000;
-
-            seconds = absRound(milliseconds / 1000);
-            data.seconds = seconds % 60;
-
-            minutes = absRound(seconds / 60);
-            data.minutes = minutes % 60;
-
-            hours = absRound(minutes / 60);
-            data.hours = hours % 24;
-
-            days += absRound(hours / 24);
-            data.days = days % 30;
-
-            months += absRound(days / 30);
-            data.months = months % 12;
-
-            years = absRound(months / 12);
-            data.years = years;
-        },
-
-        weeks : function () {
-            return absRound(this.days() / 7);
-        },
-
-        valueOf : function () {
-            return this._milliseconds +
-              this._days * 864e5 +
-              (this._months % 12) * 2592e6 +
-              ~~(this._months / 12) * 31536e6;
-        },
-
-        humanize : function (withSuffix) {
-            var difference = +this,
-                output = relativeTime(difference, !withSuffix, this.lang());
-
-            if (withSuffix) {
-                output = this.lang().pastFuture(difference, output);
-            }
-
-            return this.lang().postformat(output);
-        },
-
-        add : function (input, val) {
-            // supports only 2.0-style add(1, 's') or add(moment)
-            var dur = moment.duration(input, val);
-
-            this._milliseconds += dur._milliseconds;
-            this._days += dur._days;
-            this._months += dur._months;
-
-            this._bubble();
-
-            return this;
-        },
-
-        subtract : function (input, val) {
-            var dur = moment.duration(input, val);
-
-            this._milliseconds -= dur._milliseconds;
-            this._days -= dur._days;
-            this._months -= dur._months;
-
-            this._bubble();
-
-            return this;
-        },
-
-        get : function (units) {
-            units = normalizeUnits(units);
-            return this[units.toLowerCase() + 's']();
-        },
-
-        as : function (units) {
-            units = normalizeUnits(units);
-            return this['as' + units.charAt(0).toUpperCase() + units.slice(1) + 's']();
-        },
-
-        lang : moment.fn.lang
-    });
-
-    function makeDurationGetter(name) {
-        moment.duration.fn[name] = function () {
-            return this._data[name];
-        };
-    }
-
-    function makeDurationAsGetter(name, factor) {
-        moment.duration.fn['as' + name] = function () {
-            return +this / factor;
-        };
-    }
-
-    for (i in unitMillisecondFactors) {
-        if (unitMillisecondFactors.hasOwnProperty(i)) {
-            makeDurationAsGetter(i, unitMillisecondFactors[i]);
-            makeDurationGetter(i.toLowerCase());
-        }
-    }
-
-    makeDurationAsGetter('Weeks', 6048e5);
-    moment.duration.fn.asMonths = function () {
-        return (+this - this.years() * 31536e6) / 2592e6 + this.years() * 12;
-    };
-
-
-    /************************************
-        Default Lang
-    ************************************/
-
-
-    // Set default language, other languages will inherit from English.
-    moment.lang('en', {
-        ordinal : function (number) {
-            var b = number % 10,
-                output = (~~ (number % 100 / 10) === 1) ? 'th' :
-                (b === 1) ? 'st' :
-                (b === 2) ? 'nd' :
-                (b === 3) ? 'rd' : 'th';
-            return number + output;
-        }
-    });
-
-    /* EMBED_LANGUAGES */
-
-    /************************************
-        Exposing Moment
-    ************************************/
-
-
-    // CommonJS module is defined
-    if (hasModule) {
-        module.exports = moment;
-    }
-    /*global ender:false */
-    if (typeof ender === 'undefined') {
-        // here, `this` means `window` in the browser, or `global` on the server
-        // add `moment` as a global object via a string identifier,
-        // for Closure Compiler "advanced" mode
-        this['moment'] = moment;
-    }
-    /*global define:false */
-    if (typeof define === "function" && define.amd) {
-        define("moment", [], function () {
-            return moment;
-        });
-    }
-}).call(this);
-
-;/*!
-	Autosize v1.17.8 - 2013-09-07
-	Automatically adjust textarea height based on user input.
-	(c) 2013 Jack Moore - http://www.jacklmoore.com/autosize
-	license: http://www.opensource.org/licenses/mit-license.php
 */
-(function (factory) {
-	if (typeof define === 'function' && define.amd) {
-		// AMD. Register as an anonymous module.
-		define(['jquery'], factory);
-	} else {
-		// Browser globals: jQuery or jQuery-like library, such as Zepto
-		factory(window.jQuery || window.$);
-	}
-}(function ($) {
-	var
-	defaults = {
-		className: 'autosizejs',
-		append: '',
-		callback: false,
-		resizeDelay: 10
-	},
 
-	// border:0 is unnecessary, but avoids a bug in FireFox on OSX
-	copy = '<textarea tabindex="-1" style="position:absolute; top:-999px; left:0; right:auto; bottom:auto; border:0; padding: 0; -moz-box-sizing:content-box; -webkit-box-sizing:content-box; box-sizing:content-box; word-wrap:break-word; height:0 !important; min-height:0 !important; overflow:hidden; transition:none; -webkit-transition:none; -moz-transition:none;"/>',
+(function(factory) {
 
-	// line-height is conditionally included because IE7/IE8/old Opera do not return the correct value.
-	typographyStyles = [
-		'fontFamily',
-		'fontSize',
-		'fontWeight',
-		'fontStyle',
-		'letterSpacing',
-		'textTransform',
-		'wordSpacing',
-		'textIndent'
-	],
+  if (typeof exports == 'object') {
+    // CommonJS
+    factory(require('jquery'), require('spin'))
+  }
+  else if (typeof define == 'function' && define.amd) {
+    // AMD, register as anonymous module
+    define(['jquery', 'spin'], factory)
+  }
+  else {
+    // Browser globals
+    if (!window.Spinner) throw new Error('Spin.js not present')
+    factory(window.jQuery, window.Spinner)
+  }
 
-	// to keep track which textarea is being mirrored when adjust() is called.
-	mirrored,
+}(function($, Spinner) {
 
-	// the mirror element, which is used to calculate what size the mirrored element should be.
-	mirror = $(copy).data('autosize', true)[0];
+  $.fn.spin = function(opts, color) {
 
-	// test that line-height can be accurately copied.
-	mirror.style.lineHeight = '99px';
-	if ($(mirror).css('lineHeight') === '99px') {
-		typographyStyles.push('lineHeight');
-	}
-	mirror.style.lineHeight = '';
+    return this.each(function() {
+      var $this = $(this),
+        data = $this.data();
 
-	$.fn.autosize = function (options) {
-		if (!this.length) {
-			return this;
-		}
+      if (data.spinner) {
+        data.spinner.stop();
+        delete data.spinner;
+      }
+      if (opts !== false) {
+        opts = $.extend(
+          { color: color || $this.css('color') },
+          $.fn.spin.presets[opts] || opts
+        )
+        data.spinner = new Spinner(opts).spin(this)
+      }
+    })
+  }
 
-		options = $.extend({}, defaults, options || {});
+  $.fn.spin.presets = {
+    tiny: { lines: 8, length: 2, width: 2, radius: 3 },
+    small: { lines: 8, length: 4, width: 3, radius: 5 },
+    large: { lines: 10, length: 8, width: 4, radius: 8 }
+  }
 
-		if (mirror.parentNode !== document.body) {
-			$(document.body).append(mirror);
-		}
-
-		return this.each(function () {
-			var
-			ta = this,
-			$ta = $(ta),
-			maxHeight,
-			minHeight,
-			boxOffset = 0,
-			callback = $.isFunction(options.callback),
-			originalStyles = {
-				height: ta.style.height,
-				overflow: ta.style.overflow,
-				overflowY: ta.style.overflowY,
-				wordWrap: ta.style.wordWrap,
-				resize: ta.style.resize
-			},
-			timeout,
-			width = $ta.width();
-
-			if ($ta.data('autosize')) {
-				// exit if autosize has already been applied, or if the textarea is the mirror element.
-				return;
-			}
-			$ta.data('autosize', true);
-
-			if ($ta.css('box-sizing') === 'border-box' || $ta.css('-moz-box-sizing') === 'border-box' || $ta.css('-webkit-box-sizing') === 'border-box'){
-				boxOffset = $ta.outerHeight() - $ta.height();
-			}
-
-			// IE8 and lower return 'auto', which parses to NaN, if no min-height is set.
-			minHeight = Math.max(parseInt($ta.css('minHeight'), 10) - boxOffset || 0, $ta.height());
-
-			$ta.css({
-				overflow: 'hidden',
-				overflowY: 'hidden',
-				wordWrap: 'break-word', // horizontal overflow is hidden, so break-word is necessary for handling words longer than the textarea width
-				resize: ($ta.css('resize') === 'none' || $ta.css('resize') === 'vertical') ? 'none' : 'horizontal'
-			});
-
-			// The mirror width must exactly match the textarea width, so using getBoundingClientRect because it doesn't round the sub-pixel value.
-			function setWidth() {
-				var style, width;
-				
-				if ('getComputedStyle' in window) {
-					style = window.getComputedStyle(ta);
-					width = ta.getBoundingClientRect().width;
-
-					$.each(['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'], function(i,val){
-						width -= parseInt(style[val],10);
-					});
-
-					mirror.style.width = width + 'px';
-				}
-				else {
-					// window.getComputedStyle, getBoundingClientRect returning a width are unsupported and unneeded in IE8 and lower.
-					mirror.style.width = Math.max($ta.width(), 0) + 'px';
-				}
-			}
-
-			function initMirror() {
-				var styles = {};
-
-				mirrored = ta;
-				mirror.className = options.className;
-				maxHeight = parseInt($ta.css('maxHeight'), 10);
-
-				// mirror is a duplicate textarea located off-screen that
-				// is automatically updated to contain the same text as the
-				// original textarea.  mirror always has a height of 0.
-				// This gives a cross-browser supported way getting the actual
-				// height of the text, through the scrollTop property.
-				$.each(typographyStyles, function(i,val){
-					styles[val] = $ta.css(val);
-				});
-				$(mirror).css(styles);
-
-				setWidth();
-
-				// Chrome-specific fix:
-				// When the textarea y-overflow is hidden, Chrome doesn't reflow the text to account for the space
-				// made available by removing the scrollbar. This workaround triggers the reflow for Chrome.
-				if (window.chrome) {
-					var width = ta.style.width;
-					ta.style.width = '0px';
-					var ignore = ta.offsetWidth;
-					ta.style.width = width;
-				}
-			}
-
-			// Using mainly bare JS in this function because it is going
-			// to fire very often while typing, and needs to very efficient.
-			function adjust() {
-				var height, original;
-
-				if (mirrored !== ta) {
-					initMirror();
-				} else {
-					setWidth();
-				}
-
-				mirror.value = ta.value + options.append;
-				mirror.style.overflowY = ta.style.overflowY;
-				original = parseInt(ta.style.height,10);
-
-				// Setting scrollTop to zero is needed in IE8 and lower for the next step to be accurately applied
-				mirror.scrollTop = 0;
-
-				mirror.scrollTop = 9e4;
-
-				// Using scrollTop rather than scrollHeight because scrollHeight is non-standard and includes padding.
-				height = mirror.scrollTop;
-
-				if (maxHeight && height > maxHeight) {
-					ta.style.overflowY = 'scroll';
-					height = maxHeight;
-				} else {
-					ta.style.overflowY = 'hidden';
-					if (height < minHeight) {
-						height = minHeight;
-					}
-				}
-
-				height += boxOffset;
-
-				if (original !== height) {
-					ta.style.height = height + 'px';
-					if (callback) {
-						options.callback.call(ta,ta);
-					}
-				}
-			}
-
-			function resize () {
-				clearTimeout(timeout);
-				timeout = setTimeout(function(){
-					var newWidth = $ta.width();
-
-					if (newWidth !== width) {
-						width = newWidth;
-						adjust();
-					}
-				}, parseInt(options.resizeDelay,10));
-			}
-
-			if ('onpropertychange' in ta) {
-				if ('oninput' in ta) {
-					// Detects IE9.  IE9 does not fire onpropertychange or oninput for deletions,
-					// so binding to onkeyup to catch most of those occasions.  There is no way that I
-					// know of to detect something like 'cut' in IE9.
-					$ta.on('input.autosize keyup.autosize', adjust);
-				} else {
-					// IE7 / IE8
-					$ta.on('propertychange.autosize', function(){
-						if(event.propertyName === 'value'){
-							adjust();
-						}
-					});
-				}
-			} else {
-				// Modern Browsers
-				$ta.on('input.autosize', adjust);
-			}
-
-			// Set options.resizeDelay to false if using fixed-width textarea elements.
-			// Uses a timeout and width check to reduce the amount of times adjust needs to be called after window resize.
-
-			if (options.resizeDelay !== false) {
-				$(window).on('resize.autosize', resize);
-			}
-
-			// Event for manual triggering if needed.
-			// Should only be needed when the value of the textarea is changed through JavaScript rather than user input.
-			$ta.on('autosize.resize', adjust);
-
-			// Event for manual triggering that also forces the styles to update as well.
-			// Should only be needed if one of typography styles of the textarea change, and the textarea is already the target of the adjust method.
-			$ta.on('autosize.resizeIncludeStyle', function() {
-				mirrored = null;
-				adjust();
-			});
-
-			$ta.on('autosize.destroy', function(){
-				mirrored = null;
-				clearTimeout(timeout);
-				$(window).off('resize', resize);
-				$ta
-					.off('autosize')
-					.off('.autosize')
-					.css(originalStyles)
-					.removeData('autosize');
-			});
-
-			// Call adjust in case the textarea already contains text.
-			adjust();
-		});
-	};
 }));
 
 ;/*
