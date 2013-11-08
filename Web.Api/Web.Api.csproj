@@ -81,6 +81,7 @@
       <DependentUpon>Web.config</DependentUpon>
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="www\config.xml" />
     <Content Include="www\favicon.ico" />
     <Content Include="www\fonts\glyphicons-halflings-regular.svg" />
     <Content Include="www\icon-114x114.png" />
