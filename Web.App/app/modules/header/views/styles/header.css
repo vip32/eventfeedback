@@ -114,6 +114,10 @@
     color: #DBDBDB;
 }
 
+.content-header-subtitle #js-subtitle {
+    font-family: sans-serif;
+}
+
 #menu-toggle {
   display: none;
 }

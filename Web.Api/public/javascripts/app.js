@@ -333,13 +333,13 @@ module.exports = Collection = (function(_super) {
     console.log('fetch:start', this.constructor.name);
     this.trigger('fetch:start');
     vent.trigger('fetch:start');
-    return Collection.__super__.fetch.call(this, options).done(function(models) {
+    return Collection.__super__.fetch.call(this, options).done(function(collection, response, options) {
       this.trigger('fetch:done');
       vent.trigger('fetch:done');
-      return console.log('fetch:off', this.constructor.name);
-    }).fail(function(models) {
+      return console.log('fetch:off', this.constructor.name, collection, response, options);
+    }).fail(function(collection, response, options) {
       vent.trigger('fetch:fail');
-      return console.log('fetch:fail', this.constructor.name);
+      return console.log('fetch:fail', this.constructor.name, collection, response, options);
     });
   };
 
@@ -569,6 +569,7 @@ module.exports.TestData = TestData = (function() {
       title: "About",
       authenticated: false,
       resource: 'Title_About',
+      glyphicon: 'info-sign',
       trigger: "about:index",
       intern: true,
       order: 3
@@ -923,7 +924,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showHome = function() {
     var View, view;
-    application.trigger('set:active:header', 'Home');
+    application.trigger('set:active:header', 'Home', 'home');
     View = require('./views/home-view');
     view = new View({
       resources: application.resources
@@ -933,7 +934,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showSignin = function() {
     var View, view;
-    application.trigger('set:active:header', 'Sign-in');
+    application.trigger('set:active:header', 'Sign-in', 'user');
     View = require('./views/signin-view');
     view = new View({
       resources: application.resources
@@ -974,7 +975,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showAbout = function() {
     var View, view;
-    application.trigger('set:active:header', 'About');
+    application.trigger('set:active:header', 'About', 'info-sign');
     View = require('./views/about-view');
     view = new View({
       resources: application.resources
@@ -984,7 +985,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showDebug = function() {
     var View, view;
-    application.trigger('set:active:header', 'Debug');
+    application.trigger('set:active:header', 'Debug', 'cog');
     View = require('./views/debug-view');
     view = new View({
       resources: application.resources
@@ -1429,12 +1430,13 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showEventsIndex = function() {
     return this.events.fetch({
+      reload: true,
       data: {
         filter: 'all'
       }
     }).done(function(models) {
       var View, view;
-      application.trigger('set:active:header', application.resources.key('Title_Events'));
+      application.trigger('set:active:header', application.resources.key('Title_Events'), 'bookmark');
       View = require('./views/events-index-view');
       view = new View({
         collection: models,
@@ -1451,7 +1453,7 @@ module.exports = Controller = (function(_super) {
         filter: 'all'
       }
     }).done(function(models) {
-      application.trigger('set:active:header', models.get(id).get('title'));
+      application.trigger('set:active:header', models.get(id).get('title'), 'bookmark');
       settings.set('active-event', id);
       return _this.sessions.fetch().done(function(sessions) {
         var View, view;
@@ -1469,7 +1471,7 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.showSessionDetails = function(id) {
     return this.sessions.fetch().done(function(models) {
       var View, view;
-      application.trigger('set:active:header', models.get(id).get('title'));
+      application.trigger('set:active:header', models.get(id).get('title'), 'comment');
       settings.set('active-session', id);
       View = require('./views/session-details-view');
       view = new View({
@@ -1846,11 +1848,11 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, options, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
 
 
-  buffer += "<div><strong>";
+  buffer += "<div>\r\n  <strong>";
   if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</strong></div>\r\n<div class=\"glyphicon glyphicon-time\">\r\n  ";
+    + "</strong>\r\n</div>\r\n<div class=\"glyphicon glyphicon-time\">\r\n  ";
   options = {hash:{
     'format': ("DD.MM.YYYY")
   },data:data};
@@ -1983,9 +1985,9 @@ function program3(depth0,data) {
   return buffer;
   }
 
-  buffer += "<div><strong>"
+  buffer += "<div>\r\n  <strong>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</strong></div>\r\n";
+    + "</strong>\r\n</div>\r\n";
   stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.tags), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\r\n<div class=\"glyphicon glyphicon-time\">\r\n  ";
@@ -2197,8 +2199,8 @@ module.exports.Header = View = (function(_super) {
   View.prototype.initialize = function(options) {
     var _this = this;
     this.resources = options != null ? options.resources : void 0;
-    application.on('set:active:header', function(title) {
-      return _this.setSubHeader(title);
+    application.on('set:active:header', function(title, glyphicon) {
+      return _this.setSubHeader(title, glyphicon);
     });
     vent.on('fetch:start', function(title) {
       $('#spinner').spin({
@@ -2259,8 +2261,10 @@ module.exports.Header = View = (function(_super) {
     return application.trigger('navigation:back');
   };
 
-  View.prototype.setSubHeader = function(title) {
-    return this.$('.js-subtitle').text(title);
+  View.prototype.setSubHeader = function(title, glyphicon) {
+    this.$('#js-subtitle').text(title);
+    this.$('#js-subtitle-glyph').removeClass();
+    return this.$('#js-subtitle-glyph').addClass("glyphicon glyphicon-" + glyphicon);
   };
 
   return View;
@@ -2283,7 +2287,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   if (stack1 = helpers.icon) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.icon; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\"></span>\r\n  &nbsp;";
+    + "\"></span>\r\n  &nbsp;&nbsp;&nbsp;";
   if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -2308,7 +2312,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <!-- Sidebar -->\r\n  <div id=\"sidebar-wrapper\">\r\n    <ul class=\"sidebar-nav js-headers\">\r\n      <!-- <li class=\"sidebar-brand\">\r\n        <a id=\"menu-toggle\" href=\"#\">&nbsp;&nbsp;&nbsp;&nbsp; -->\r\n          <!-- <span class=\"glyphicon glyphicon-align-justify\"></span> -->\r\n        <!-- </a>\r\n      </li> -->\r\n      <!-- headers -->\r\n    </ul>\r\n  </div>\r\n\r\n  <!-- Page header -->\r\n  <div id=\"page-content-wrapper\">\r\n    <div class=\"content-header row\">\r\n      <div class=\"col-xs-2 col-md-1\">\r\n        <a id=\"menu-toggle\" href=\"#\" class=\"btn btn-primary pull-left\">\r\n           <span class=\"glyphicon glyphicon-align-justify\"></span>\r\n        </a>\r\n      </div>\r\n      <div class=\"col-xs-7 col-md-9\">\r\n        <div>\r\n          <div class=\"content-header-title js-apptitle\"></div>\r\n          <div class=\"content-header-subtitle js-subtitle\"></div>\r\n        </div>\r\n      </div>\r\n      <div class=\"col-xs-1 col-md-1\" style=\"margin-top:27px\">\r\n        <span id=\"spinner\"></span>\r\n      </div>\r\n      <div class=\"col-xs-2 col-md-1\">\r\n        <a id=\"menu-back\" href=\"#\" class=\"btn btn-default pull-right\">\r\n          <span class=\"glyphicon glyphicon-chevron-left\"></span>\r\n        </a>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</div>\r\n\r\n<!--\r\n  <div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav\">\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div> -->";
+  return "<div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <!-- Sidebar -->\r\n  <div id=\"sidebar-wrapper\">\r\n    <ul class=\"sidebar-nav js-headers\">\r\n      <!-- <li class=\"sidebar-brand\">\r\n        <a id=\"menu-toggle\" href=\"#\">&nbsp;&nbsp;&nbsp;&nbsp; -->\r\n          <!-- <span class=\"glyphicon glyphicon-align-justify\"></span> -->\r\n        <!-- </a>\r\n      </li> -->\r\n      <!-- headers -->\r\n    </ul>\r\n  </div>\r\n\r\n  <!-- Page header -->\r\n  <div id=\"page-content-wrapper\">\r\n    <div class=\"content-header row\">\r\n      <div class=\"col-xs-2 col-md-1\">\r\n        <a id=\"menu-toggle\" href=\"#\" class=\"btn btn-primary pull-left\">\r\n           <span class=\"glyphicon glyphicon-align-justify\"></span>\r\n        </a>\r\n      </div>\r\n      <div class=\"col-xs-7 col-md-9\">\r\n        <div>\r\n          <div class=\"content-header-title js-apptitle\"></div>\r\n          <div class=\"content-header-subtitle\">\r\n            <span class=\"\" id=\"js-subtitle-glyph\">\r\n              <span id=\"js-subtitle\"></span>\r\n            </span>\r\n          </div>\r\n        </div>\r\n      </div>\r\n      <div class=\"col-xs-1 col-md-1\" style=\"margin-top:27px\">\r\n        <span id=\"spinner\"></span>\r\n      </div>\r\n      <div class=\"col-xs-2 col-md-1\">\r\n        <a id=\"menu-back\" href=\"#\" class=\"btn btn-default pull-right\">\r\n          <span class=\"glyphicon glyphicon-chevron-left\"></span>\r\n        </a>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</div>\r\n\r\n<!--\r\n  <div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav\">\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div> -->";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {

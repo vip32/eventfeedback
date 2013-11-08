@@ -33,13 +33,13 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     , 3000
 
   showHome: ->
-    application.trigger 'set:active:header', 'Home'
+    application.trigger 'set:active:header', 'Home', 'home'
     View = require './views/home-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)
 
   showSignin: ->
-    application.trigger 'set:active:header', 'Sign-in'
+    application.trigger 'set:active:header', 'Sign-in', 'user'
     View = require './views/signin-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)
@@ -70,13 +70,13 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         vent.trigger 'navigation:signout'
 
   showAbout: ->
-    application.trigger 'set:active:header', 'About'
+    application.trigger 'set:active:header', 'About', 'info-sign'
     View = require './views/about-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)
 
   showDebug: ->
-    application.trigger 'set:active:header', 'Debug'
+    application.trigger 'set:active:header', 'Debug', 'cog'
     View = require './views/debug-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)

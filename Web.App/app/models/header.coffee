@@ -51,6 +51,7 @@ module.exports.TestData = class TestData
     title: "About"
     authenticated: false
     resource: 'Title_About'
+    glyphicon: 'info-sign'
     trigger: "about:index"
     intern: true
     order: 3
