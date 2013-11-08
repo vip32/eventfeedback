@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{35B7497D-EF2C-4329-8FE8-440CF8833FD3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}"
@@ -16,20 +18,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.Api.IntegrationTests", 
 EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Web.App", "http://localhost:54911", "{549FB728-3ABD-4562-A57F-5CFB86F45D92}"
 	ProjectSection(WebsiteProperties) = preProject
-		Frontpage = "false"
 		UseIISExpress = "true"
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5.1"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_54911"
 		Debug.AspNetCompiler.PhysicalPath = "Web.App\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_54911\"
-		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.Updateable = "false"
 		Debug.AspNetCompiler.ForceOverwrite = "true"
 		Debug.AspNetCompiler.FixedNames = "false"
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.VirtualPath = "/localhost_54911"
 		Release.AspNetCompiler.PhysicalPath = "Web.App\"
 		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_54911\"
-		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.Updateable = "false"
 		Release.AspNetCompiler.ForceOverwrite = "true"
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
