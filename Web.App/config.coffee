@@ -1,7 +1,7 @@
 exports.config =
   # See http://brunch.io/#documentation for docs.
   paths:
-    public: '../Web.Api/public'
+    public: '../Web.Api/www'
     # watched: ['src']
 
   # modules:
