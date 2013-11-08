@@ -1,12 +1,12 @@
 {
-  "author": "Simeon Bateman",
-  "name": "Brunch-With-Marionette",
-  "description": "MarionetteJS application template for Brunch.io",
+  "author": "Vincent van Proosdij",
+  "name": "EventFeedback",
+  "description": "Eventfeedback web application",
   "version": "0.0.1",
   "homepage": "",
   "repository": {
     "type": "git",
-    "url": "git@github.com/simbco/brunch-with-marionette"
+    "url": "git@github.com/vip32/eventfeedback"
   },
   "engines": {
     "node": "0.8.x",
@@ -17,17 +17,17 @@
     "test": "brunch test"
   },
   "dependencies": {
-    "javascript-brunch": ">= 1.0 < 1.7",
-    "coffee-script-brunch": ">= 1.0 < 1.7",
-    "css-brunch": ">= 1.0 < 1.7",
-    "stylus-brunch": ">= 1.0 < 1.7",
-    "handlebars-brunch": ">= 1.0 < 1.7",
-    "uglify-js-brunch": ">= 1.0 < 1.7",
-    "clean-css-brunch": ">= 1.0 < 1.7"
+    "javascript-brunch": ">= 1.0 < 1.9",
+    "coffee-script-brunch": ">= 1.0 < 1.9",
+    "css-brunch": ">= 1.0 < 1.9",
+    "stylus-brunch": ">= 1.0 < 1.9",
+    "handlebars-brunch": ">= 1.0 < 1.9",
+    "uglify-js-brunch": ">= 1.0 < 1.9",
+    "clean-css-brunch": ">= 1.0 < 1.9"
   },
   "main": "index.js",
   "directories": {
     "test": "test"
   },
-  "license": "BSD"
+  "license": "MIT"
 }

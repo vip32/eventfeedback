@@ -43,20 +43,20 @@
 
   var initModule = function(name, definition) {
     var module = {id: name, exports: {}};
+    cache[name] = module;
     definition(module.exports, localRequire(name), module);
-    var exports = cache[name] = module.exports;
-    return exports;
+    return module.exports;
   };
 
   var require = function(name, loaderPath) {
     var path = expand(name, '.');
     if (loaderPath == null) loaderPath = '/';
 
-    if (has(cache, path)) return cache[path];
+    if (has(cache, path)) return cache[path].exports;
     if (has(modules, path)) return initModule(path, modules[path]);
 
     var dirIndex = expand(path, './index');
-    if (has(cache, dirIndex)) return cache[dirIndex];
+    if (has(cache, dirIndex)) return cache[dirIndex].exports;
     if (has(modules, dirIndex)) return initModule(dirIndex, modules[dirIndex]);
 
     throw new Error('Cannot find module "' + name + '" from '+ '"' + loaderPath + '"');
@@ -185,7 +185,6 @@ Application = (function(_super) {
 })(Backbone.Marionette.Application);
 
 module.exports = new Application();
-
 });
 
 ;require.register("config", function(exports, require, module) {
@@ -221,7 +220,6 @@ Config = (function() {
 })();
 
 module.exports = new Config();
-
 });
 
 ;require.register("initialize", function(exports, require, module) {
@@ -233,7 +231,6 @@ $(function() {
   FastClick.attach(document.body);
   return app.initialize();
 });
-
 });
 
 ;require.register("layouts/app-layout", function(exports, require, module) {
@@ -284,11 +281,10 @@ module.exports = AppLayout = (function(_super) {
   return AppLayout;
 
 })(Backbone.Marionette.Layout);
-
 });
 
 ;require.register("layouts/templates/app-layout", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
@@ -296,6 +292,15 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
   return "<div id=\"wrapper\">\r\n\r\n  <div id=\"header\" class=\"container\"></div>\r\n  <div class=\"page-content inset\">\r\n    <div id=\"content\" class=\"container\"></div>\r\n  </div>\r\n  <div id=\"messagebox\"></div>\r\n  <hr/>\r\n  <div id=\"footer\" class=\"container\"></div>\r\n\r\n</div>";
   });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
 });
 
 ;require.register("lib/base/collection", function(exports, require, module) {
@@ -341,7 +346,6 @@ module.exports = Collection = (function(_super) {
   return Collection;
 
 })(Backbone.Collection);
-
 });
 
 ;require.register("lib/base/item-view", function(exports, require, module) {
@@ -373,7 +377,6 @@ module.exports = ItemView = (function(_super) {
   return ItemView;
 
 })(Backbone.Marionette.ItemView);
-
 });
 
 ;require.register("lib/base/model", function(exports, require, module) {
@@ -394,7 +397,6 @@ module.exports = Model = (function(_super) {
   return Model;
 
 })(Backbone.Model);
-
 });
 
 ;require.register("lib/marionette-renderer", function(exports, require, module) {
@@ -407,7 +409,6 @@ Backbone.Marionette.Renderer.render = function(templateName, data) {
   }
   return template(data);
 };
-
 });
 
 ;require.register("lib/view-helper", function(exports, require, module) {
@@ -424,7 +425,6 @@ Handlebars.registerHelper("dateFormat", function(context, block) {
     return context;
   }
 });
-
 });
 
 ;require.register("models/event", function(exports, require, module) {
@@ -475,7 +475,6 @@ module.exports.Collection = EventsCollection = (function(_super) {
   return EventsCollection;
 
 })(Collection);
-
 });
 
 ;require.register("models/header", function(exports, require, module) {
@@ -606,7 +605,6 @@ module.exports.TestData = TestData = (function() {
   return TestData;
 
 })();
-
 });
 
 ;require.register("models/resource", function(exports, require, module) {
@@ -670,7 +668,6 @@ module.exports.Collection = ResourceCollection = (function(_super) {
   return ResourceCollection;
 
 })(Collection);
-
 });
 
 ;require.register("models/session", function(exports, require, module) {
@@ -723,7 +720,6 @@ module.exports.Collection = SessionsCollection = (function(_super) {
   return SessionsCollection;
 
 })(Collection);
-
 });
 
 ;require.register("models/store", function(exports, require, module) {
@@ -813,7 +809,6 @@ module.exports.Collection = StoreCollection = (function(_super) {
   return StoreCollection;
 
 })(Collection);
-
 });
 
 ;require.register("models/userprofile", function(exports, require, module) {
@@ -848,7 +843,6 @@ module.exports.Model = UserProfile = (function(_super) {
   return UserProfile;
 
 })(Model);
-
 });
 
 ;require.register("models/usertoken", function(exports, require, module) {
@@ -877,7 +871,6 @@ module.exports.Model = UserToken = (function(_super) {
   return UserToken;
 
 })(Model);
-
 });
 
 ;require.register("modules/common/controller", function(exports, require, module) {
@@ -1006,7 +999,6 @@ module.exports = Controller = (function(_super) {
   return Controller;
 
 })(Backbone.Marionette.Controller);
-
 });
 
 ;require.register("modules/common/router", function(exports, require, module) {
@@ -1063,7 +1055,6 @@ module.exports = Router = (function(_super) {
   return Router;
 
 })(Backbone.Marionette.AppRouter);
-
 });
 
 ;require.register("modules/common/views/about-view", function(exports, require, module) {
@@ -1098,7 +1089,6 @@ module.exports = AboutView = (function(_super) {
   return AboutView;
 
 })(Backbone.Marionette.ItemView);
-
 });
 
 ;require.register("modules/common/views/debug-view", function(exports, require, module) {
@@ -1160,7 +1150,6 @@ module.exports = DebugView = (function(_super) {
   return DebugView;
 
 })(Backbone.Marionette.ItemView);
-
 });
 
 ;require.register("modules/common/views/footer-view", function(exports, require, module) {
@@ -1185,7 +1174,6 @@ module.exports = FooterView = (function(_super) {
   return FooterView;
 
 })(Backbone.Marionette.ItemView);
-
 });
 
 ;require.register("modules/common/views/home-view", function(exports, require, module) {
@@ -1220,7 +1208,6 @@ module.exports = HomeView = (function(_super) {
   return HomeView;
 
 })(Backbone.Marionette.ItemView);
-
 });
 
 ;require.register("modules/common/views/signin-view", function(exports, require, module) {
@@ -1282,11 +1269,10 @@ module.exports = SigninView = (function(_super) {
   return SigninView;
 
 })(Backbone.Marionette.ItemView);
-
 });
 
 ;require.register("modules/common/views/templates/about", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
@@ -1294,10 +1280,19 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
   return "<div class=\"container\">\r\n    <h3>About</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n    <p>\r\n      <a class=\"btn btn-lg btn-primary\" href=\"#\">More &raquo;</a>\r\n    </p>\r\n      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n</div>";
   });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
 });
 
 ;require.register("modules/common/views/templates/debug", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
@@ -1308,10 +1303,19 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     + "\r\n  </form>\r\n</div>";
   return buffer;
   });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
 });
 
 ;require.register("modules/common/views/templates/footer", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
@@ -1328,10 +1332,19 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     + "]</p>";
   return buffer;
   });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
 });
 
 ;require.register("modules/common/views/templates/home", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
@@ -1339,10 +1352,19 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
   return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3></h3>\r\n    <p></p>\r\n  </div>\r\n</div>";
   });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
 });
 
 ;require.register("modules/common/views/templates/signin", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
@@ -1367,6 +1389,15 @@ function program1(depth0,data) {
   buffer += ">\r\n      </div>\r\n    </div>\r\n    <button class=\"btn btn-lg btn-success btn-block js-signin\">Sign in</button>\r\n  </form>\r\n</div>";
   return buffer;
   });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
 });
 
 ;require.register("modules/event/controller", function(exports, require, module) {
@@ -1456,7 +1487,6 @@ module.exports = Controller = (function(_super) {
   return Controller;
 
 })(Backbone.Marionette.Controller);
-
 });
 
 ;require.register("modules/event/router", function(exports, require, module) {
@@ -1514,7 +1544,6 @@ module.exports = Router = (function(_super) {
   return Router;
 
 })(Backbone.Marionette.AppRouter);
-
 });
 
 ;require.register("modules/event/views/event-details-view", function(exports, require, module) {
@@ -1577,7 +1606,6 @@ module.exports = EventDetailsView = (function(_super) {
   return EventDetailsView;
 
 })(Backbone.Marionette.CompositeView);
-
 });
 
 ;require.register("modules/event/views/event-item-view", function(exports, require, module) {
@@ -1623,7 +1651,6 @@ module.exports = EventItemView = (function(_super) {
   return EventItemView;
 
 })(ItemView);
-
 });
 
 ;require.register("modules/event/views/events-index-view", function(exports, require, module) {
@@ -1664,7 +1691,6 @@ module.exports = EventIndexView = (function(_super) {
   return EventIndexView;
 
 })(Backbone.Marionette.CompositeView);
-
 });
 
 ;require.register("modules/event/views/session-details-view", function(exports, require, module) {
@@ -1731,7 +1757,6 @@ module.exports = EventDetailsView = (function(_super) {
   return EventDetailsView;
 
 })(Backbone.Marionette.ItemView);
-
 });
 
 ;require.register("modules/event/views/session-item-view", function(exports, require, module) {
@@ -1789,11 +1814,10 @@ module.exports = SessionItemView = (function(_super) {
   return SessionItemView;
 
 })(ItemView);
-
 });
 
 ;require.register("modules/event/views/templates/event-details", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
@@ -1804,10 +1828,19 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     + "</p>\r\n</div>";
   return buffer;
   });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
 });
 
 ;require.register("modules/event/views/templates/event-item", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, options, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
@@ -1825,10 +1858,19 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     + "\r\n</div>";
   return buffer;
   });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
 });
 
 ;require.register("modules/event/views/templates/events-index", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
@@ -1836,10 +1878,19 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
   return "<div class=\"container\">\r\n  <div class=\"list-group js-events\" style=\"margin-top:39px;\">\r\n    <!-- events -->\r\n  </div>\r\n</div>";
   });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
 });
 
 ;require.register("modules/event/views/templates/session-details", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, stack2, options, functionType="function", escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
@@ -1898,10 +1949,19 @@ function program3(depth0,data) {
     + "</div>\r\n        <div class=\"col-md-9\">\r\n          <textarea name=\"question6\"></textarea>\r\n        </div>\r\n    </div>\r\n\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\">&nbsp;</div>\r\n      <div class=\"col-xs-5\"><button class=\"btn btn-primary btn-lg pull-right js-submit\">Save</button>\r\n    </div>\r\n  </form>\r\n\r\n</div>";
   return buffer;
   });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
 });
 
 ;require.register("modules/event/views/templates/session-item", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, stack2, options, functionType="function", escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
@@ -1944,6 +2004,15 @@ function program3(depth0,data) {
   buffer += "\r\n</div>\r\n";
   return buffer;
   });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
 });
 
 ;require.register("modules/header/controller", function(exports, require, module) {
@@ -1989,7 +2058,6 @@ module.exports = Controller = (function(_super) {
   return Controller;
 
 })(Backbone.Marionette.Controller);
-
 });
 
 ;require.register("modules/header/router", function(exports, require, module) {
@@ -2032,7 +2100,6 @@ module.exports = Router = (function(_super) {
   return Router;
 
 })(Backbone.Marionette.AppRouter);
-
 });
 
 ;require.register("modules/header/views/header-view", function(exports, require, module) {
@@ -2199,11 +2266,10 @@ module.exports.Header = View = (function(_super) {
   return View;
 
 })(Backbone.Marionette.CompositeView);
-
 });
 
 ;require.register("modules/header/views/templates/header-item", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
@@ -2224,10 +2290,19 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     + "\r\n</a>";
   return buffer;
   });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
 });
 
 ;require.register("modules/header/views/templates/header", function(exports, require, module) {
-module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
@@ -2235,6 +2310,15 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
   return "<div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <!-- Sidebar -->\r\n  <div id=\"sidebar-wrapper\">\r\n    <ul class=\"sidebar-nav js-headers\">\r\n      <!-- <li class=\"sidebar-brand\">\r\n        <a id=\"menu-toggle\" href=\"#\">&nbsp;&nbsp;&nbsp;&nbsp; -->\r\n          <!-- <span class=\"glyphicon glyphicon-align-justify\"></span> -->\r\n        <!-- </a>\r\n      </li> -->\r\n      <!-- headers -->\r\n    </ul>\r\n  </div>\r\n\r\n  <!-- Page header -->\r\n  <div id=\"page-content-wrapper\">\r\n    <div class=\"content-header row\">\r\n      <div class=\"col-xs-2 col-md-1\">\r\n        <a id=\"menu-toggle\" href=\"#\" class=\"btn btn-primary pull-left\">\r\n           <span class=\"glyphicon glyphicon-align-justify\"></span>\r\n        </a>\r\n      </div>\r\n      <div class=\"col-xs-7 col-md-9\">\r\n        <div>\r\n          <div class=\"content-header-title js-apptitle\"></div>\r\n          <div class=\"content-header-subtitle js-subtitle\"></div>\r\n        </div>\r\n      </div>\r\n      <div class=\"col-xs-1 col-md-1\" style=\"margin-top:27px\">\r\n        <span id=\"spinner\"></span>\r\n      </div>\r\n      <div class=\"col-xs-2 col-md-1\">\r\n        <a id=\"menu-back\" href=\"#\" class=\"btn btn-default pull-right\">\r\n          <span class=\"glyphicon glyphicon-chevron-left\"></span>\r\n        </a>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</div>\r\n\r\n<!--\r\n  <div class=\"navbar navbar-inverse navbar-fixed-top\">\r\n  <div class=\"container\">\r\n    <div class=\"navbar-header\">\r\n      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n        <span class=\"icon-bar\"></span>\r\n      </button>\r\n      <a class=\"navbar-brand\" href=\"http://brunch.io\">Brunch</a>\r\n    </div>\r\n    <div class=\"navbar-collapse collapse no-transition\">\r\n      <ul class=\"nav navbar-nav\">\r\n      </ul>\r\n    </div>\r\n  </div>\r\n</div> -->";
   });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
 });
 
 ;require.register("settings", function(exports, require, module) {
@@ -2296,7 +2380,6 @@ Settings = (function() {
 })();
 
 module.exports = new Settings();
-
 });
 
 ;require.register("vent", function(exports, require, module) {
@@ -2315,8 +2398,7 @@ module.exports = Vent = (function(_super) {
   return Vent;
 
 })(Backbone.Events);
-
 });
 
 ;
-//@ sourceMappingURL=app.js.map
+//# sourceMappingURL=app.js.map
