@@ -14,7 +14,7 @@ namespace EventFeedback.Domain
             CreateDate = DateTime.Now;
             Active = true;
         }
-
+          
         public bool? Active { get; set; }
         public DateTime? CreateDate { get; set; }
         public DateTime? ModifyDate { get; set; }
