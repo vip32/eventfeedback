@@ -72,7 +72,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="favicon.ico" />
-    <Content Include="index.html" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -86,17 +85,17 @@
     <Content Include="www\config.xml" />
     <Content Include="www\favicon.ico" />
     <Content Include="www\fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="www\icon-114x114.png" />
-    <Content Include="www\icon-120x120.png" />
-    <Content Include="www\icon-128x128.png" />
-    <Content Include="www\icon-144x144.png" />
-    <Content Include="www\icon-152x152.png" />
-    <Content Include="www\icon-16x16.png" />
-    <Content Include="www\icon-196x196.png" />
-    <Content Include="www\icon-32x32.png" />
-    <Content Include="www\icon-57x57.png" />
-    <Content Include="www\icon-72x72.png" />
-    <Content Include="www\icon-76x76.png" />
+    <Content Include="www\images\icon-114x114.png" />
+    <Content Include="www\images\icon-120x120.png" />
+    <Content Include="www\images\icon-128x128.png" />
+    <Content Include="www\images\icon-144x144.png" />
+    <Content Include="www\images\icon-152x152.png" />
+    <Content Include="www\images\icon-16x16.png" />
+    <Content Include="www\images\icon-196x196.png" />
+    <Content Include="www\images\icon-32x32.png" />
+    <Content Include="www\images\icon-57x57.png" />
+    <Content Include="www\images\icon-72x72.png" />
+    <Content Include="www\images\icon-76x76.png" />
     <Content Include="www\index.html" />
     <Content Include="www\index.local.html" />
     <Content Include="www\javascripts\app.js" />
