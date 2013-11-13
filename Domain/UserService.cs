@@ -1,4 +1,6 @@
-﻿using System.IdentityModel.Tokens;
+﻿using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
@@ -9,6 +11,7 @@ namespace EventFeedback.Domain
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
+        private readonly DataContext _context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class.
@@ -16,6 +19,7 @@ namespace EventFeedback.Domain
         /// <param name="context">The context.</param>
         public UserService(DataContext context)
         {
+            _context = context;
             _userManager = new UserManager<User>(new UserStore<User>(context));
             _roleManager = new RoleManager<Role>(new RoleStore<Role>(context));
 
@@ -31,7 +35,35 @@ namespace EventFeedback.Domain
         public IdentityResult CreateUser(User user, string password)
         {
             if (user == null || string.IsNullOrEmpty(user.UserName) || string.IsNullOrEmpty(password)) return null;
-            return _userManager.Create(user, password);
+            try
+            {
+                return _userManager.Create(user, password);
+            }
+            catch(Exception ex)
+            {
+                var a = _context.GetValidationErrors();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Updates the password for the user.
+        /// </summary>
+        /// <param name="userId">The user identifier.</param>
+        /// <param name="password">The password.</param>
+        /// <returns></returns>
+        public IdentityResult UpdatePassword(string userId, string password)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password)) return null;
+            try
+            {
+                return _userManager.AddPassword(userId, password);
+            }
+            catch (Exception ex)
+            {
+                var a = _context.GetValidationErrors();
+                throw;
+            }
         }
 
         /// <summary>
@@ -89,6 +121,12 @@ namespace EventFeedback.Domain
         public IdentityResult AddUserToRole(string userId, string role)
         {
             return _userManager.AddToRole(userId, role);
+        }
+
+        public IEnumerable<IdentityResult> RemoveUserRoles(string userId)
+        {
+            foreach (var role in _userManager.GetRoles(userId))
+                yield return _userManager.RemoveFromRole(userId, role);
         }
     }
 }

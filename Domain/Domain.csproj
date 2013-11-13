@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataContext.cs" />
+    <Compile Include="DataContextExtensions.cs" />
     <Compile Include="Entities\Event.cs" />
     <Compile Include="Entities\FeedbackQuestionType.cs" />
     <Compile Include="Entities\FeedbackDefinition.cs" />

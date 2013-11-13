@@ -35,7 +35,7 @@
   /**
    * Override Backbone.sync
    *
-   * If a token is present, set the Basic Auth header before the sync is performed.
+   * If a token is present, set the Token Auth header before the sync is performed.
    *
    * @param  {string} method  Contains the backbone operation. e.g.: read, reset, set
    * @param  {object} model   A Backbone model or collection

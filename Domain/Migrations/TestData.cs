@@ -77,7 +77,7 @@ namespace EventFeedback.Domain
                 if (user1 != null)
                 {
                     userService.AddUserToRole(user1.Id, "Administrator");
-                    userService.AddUserToRole(user1.Id, "User");
+                    //userService.AddUserToRole(user1.Id, "User");
                 }
                 if (user2 != null) userService.AddUserToRole(user2.Id, "User");
                 if (user3 != null) userService.AddUserToRole(user3.Id, "User");

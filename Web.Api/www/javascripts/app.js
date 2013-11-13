@@ -972,6 +972,7 @@ module.exports.Model = UserToken = (function(_super) {
 
 ;require.register("modules/admin/controller", function(exports, require, module) {
 var Controller, Event, Session, User, application, settings, vent,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -991,12 +992,17 @@ module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
 
   function Controller(options) {
+    this.onSaveUsers = __bind(this.onSaveUsers, this);
+    this.showUsersEdit = __bind(this.showUsersEdit, this);
     var _this = this;
     console.log('admin controller init');
     application.addInitializer(function(options) {
       _this.events = new Event.Collection();
       _this.sessions = new Session.Collection();
-      return _this.users = new User.Collection();
+      _this.users = new User.Collection();
+      return vent.on('save:users', function() {
+        return _this.onSaveUsers();
+      });
     });
   }
 
@@ -1047,15 +1053,40 @@ module.exports = Controller = (function(_super) {
       data: {
         filter: 'all'
       }
-    }).done(function(models) {
-      var View, view;
+    }).done(function(collection) {
+      var View, view,
+        _this = this;
       application.trigger('set:active:header', 'Admin - Users', 'bookmark');
+      collection.on('change', function(model) {
+        console.log('user change:', model);
+        model.credentials = collection.credentials;
+        return model.set('dirty', true, {
+          silent: true
+        });
+      });
       View = require('./views/users-edit-view');
       view = new View({
-        collection: models,
+        collection: collection,
         resources: application.resources
       });
       return application.layout.content.show(view);
+    });
+  };
+
+  Controller.prototype.onSaveUsers = function() {
+    return this.users.each(function(model) {
+      if (model.get('dirty') && model.get('name') !== '') {
+        return model.save(null, {
+          success: function(model, response, options) {
+            return model.set('dirty', false, {
+              silent: true
+            });
+          },
+          error: function(model, xhr, options) {
+            return alert('save error');
+          }
+        });
+      }
     });
   };
 
@@ -1278,7 +1309,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\" id=\"js-table\">\r\n  USERS EDIT\r\n</div>";
+  return "<div class=\"container\" id=\"js-table\">\r\n  <button type=\"button\" id=\"js-add\" class=\"btn btn-default\">Add</button>\r\n  <button type=\"button\" id=\"js-save\" class=\"btn btn-success\">Save</button>\r\n</div>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -1312,23 +1343,39 @@ module.exports = UsersEditView = (function(_super) {
 
   UsersEditView.prototype.template = require('./templates/users-edit');
 
+  UsersEditView.prototype.events = {
+    'click #js-add': 'onAdd',
+    'click #js-save': 'onSave'
+  };
+
   UsersEditView.prototype.initialize = function(options) {
-    return this.resources = options != null ? options.resources : void 0;
+    this.resources = options != null ? options.resources : void 0;
+    return console.log('==========', options);
   };
 
   UsersEditView.prototype.onShow = function() {
     var columns, grid;
     columns = [
       {
-        name: "id",
-        label: "ID",
-        editable: false,
-        cell: 'string'
+        name: "active",
+        label: "Active",
+        cell: "boolean"
       }, {
-        name: "userName",
+        name: "name",
         label: "Name",
-        editable: false,
+        editable: true,
         cell: "string"
+      }, {
+        name: "password",
+        label: "Password",
+        editable: true,
+        cell: "string"
+      }, {
+        name: "roles",
+        label: "Roles",
+        cell: Backgrid.SelectCell.extend({
+          optionValues: [["", ""], ["User", "User"], ["Administrator", "Administrator"], ["Administrator User", "Administrator User"]]
+        })
       }, {
         name: "organization",
         label: "Organization",
@@ -1344,6 +1391,17 @@ module.exports = UsersEditView = (function(_super) {
       collection: this.collection
     });
     return $("#js-table").append(grid.render().$el);
+  };
+
+  UsersEditView.prototype.onAdd = function() {
+    return this.collection.add({
+      dirty: true,
+      silent: true
+    });
+  };
+
+  UsersEditView.prototype.onSave = function() {
+    return vent.trigger('save:users');
   };
 
   return UsersEditView;

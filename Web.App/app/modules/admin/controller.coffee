@@ -16,6 +16,9 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       @sessions = new Session.Collection()
       @users = new User.Collection()
 
+      vent.on 'save:users', =>
+        @onSaveUsers()
+
   showEventsEdit: ->
     @events.fetch(
       reload: true
@@ -41,16 +44,29 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         view = new View(model: models.get(id), collection: sessions, resources: application.resources)
         application.layout.content.show(view)
 
-  showUsersEdit: ->
+  showUsersEdit: =>
     @users.fetch(
       reload: true
       data:
         filter: 'all'
-    ).done (models) ->
+    ).done (collection) ->
       application.trigger 'set:active:header', 'Admin - Users', 'bookmark' # admin:accounts:edit
+      collection.on 'change', (model) =>
+        console.log 'user change:', model
+        model.credentials = collection.credentials
+        model.set('dirty', true, silent: true)
       View = require './views/users-edit-view'
-      view = new View(collection: models, resources: application.resources)
+      view = new View(collection: collection, resources: application.resources)
       application.layout.content.show(view)
+
+  onSaveUsers: =>
+    @users.each (model) ->
+      if model.get('dirty') and model.get('name') isnt ''
+        model.save null,
+          success: (model, response, options) ->
+            model.set('dirty', false, silent: true)
+          error: (model, xhr, options) ->
+            alert('save error')
 
   onClose: ->
     console.log 'admin controller close'
