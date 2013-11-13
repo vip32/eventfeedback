@@ -14,7 +14,7 @@ namespace EventFeedback.Common
         {
             try
             {
-                return Convert.ToString(obj, CultureInfo.CurrentCulture);
+                return Convert.ToString(obj, CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -34,7 +34,7 @@ namespace EventFeedback.Common
             {
                 if (obj.GetType() == typeof (int?)) return ((int?) obj).Value;
                 if (obj.GetType() == typeof (DBNull)) return 0;
-                return Convert.ToInt32(obj, CultureInfo.CurrentCulture);
+                return Convert.ToInt32(obj, CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -58,7 +58,7 @@ namespace EventFeedback.Common
                 if (obj.Equals("0")) return false;
                 if (obj.Equals("1")) return true;
 
-                return Convert.ToBoolean(obj, CultureInfo.CurrentCulture);
+                return Convert.ToBoolean(obj, CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -76,7 +76,7 @@ namespace EventFeedback.Common
             if (obj == null) return null;
             try
             {
-                return DateTime.Parse(obj.ToString(), CultureInfo.CurrentCulture);
+                return DateTime.Parse(obj.ToString(), CultureInfo.InvariantCulture);
             }
             catch
             {

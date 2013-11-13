@@ -92,10 +92,13 @@
     <Compile Include="Extensions\Convert.cs" />
     <Compile Include="Extensions\DistinctBy.cs" />
     <Compile Include="Extensions\Each.cs" />
-    <Compile Include="Extensions\EnsureItems.cs" />
     <Compile Include="Extensions\FirstOrDefaultValue.cs" />
     <Compile Include="Extensions\ForEach.cs" />
     <Compile Include="Extensions\GetEnumDescription.cs" />
+    <Compile Include="Extensions\IsNull.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Extensions\Match.cs" />
     <Compile Include="Extensions\NullToEmpty.cs" />
     <Compile Include="Extensions\RemoveSpecialCharacters.cs" />
     <Compile Include="Extensions\ToCsvString.cs" />
