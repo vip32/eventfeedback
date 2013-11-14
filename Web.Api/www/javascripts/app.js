@@ -2033,6 +2033,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showEventsIndex = function() {
     return this.events.fetch({
+      reload: true,
       data: {
         filter: 'all'
       }
