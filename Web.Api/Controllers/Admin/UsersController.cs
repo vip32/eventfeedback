@@ -4,6 +4,8 @@ using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Reflection;
 using System.Web.Http;
 using EventFeedback.Common;
@@ -52,7 +54,15 @@ namespace EventFeedback.Web.Api.Controllers.Admin
             _traceSource.TraceInformation("usersscontroller post");
             if (entity == null) throw new HttpResponseException(HttpStatusCode.BadRequest);
             if(!string.IsNullOrEmpty(entity.Id)) throw new HttpResponseException(HttpStatusCode.BadRequest);
-            if (string.IsNullOrEmpty(entity.Password)) throw new HttpResponseException(HttpStatusCode.BadRequest);
+            if(string.IsNullOrEmpty(entity.Password)) throw new HttpResponseException(HttpStatusCode.BadRequest);
+            //if (string.IsNullOrEmpty(entity.Password)) throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.BadRequest)
+            //{
+            //    Content = new ObjectContent<RequestMessage>(
+            //        new RequestMessage
+            //        {
+            //            Message = "password"
+            //        }, new JsonMediaTypeFormatter())
+            //});
             
             var user = Map(entity);
             user.Id = Guid.NewGuid().ToString();
@@ -89,7 +99,7 @@ namespace EventFeedback.Web.Api.Controllers.Admin
                 _userService.UpdatePassword(user.Id, entity.Password);
 
             // update the roles
-            _userService.RemoveUserRoles(user.Id);
+            _userService.ClearUserRoles(user.Id);
             foreach (var role in entity.Roles.NullToEmpty().Split(' '))
                 _userService.AddUserToRole(user.Id, role);
         }
@@ -125,5 +135,10 @@ namespace EventFeedback.Web.Api.Controllers.Admin
                 // todo ROLES
             };
         }
+    }
+
+    public class RequestMessage
+    {
+        public string Message { get; set; }
     }
 }

@@ -4,6 +4,7 @@ settings = require 'settings'
 Event = require '../../models/event'
 Session = require '../../models/session'
 User = require '../../models/user'
+Role = require '../../models/role'
 
 module.exports = class Controller extends Backbone.Marionette.Controller
 
@@ -15,6 +16,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       @events = new Event.Collection()
       @sessions = new Session.Collection()
       @users = new User.Collection()
+      @roles = new Role.Collection()
 
       vent.on 'save:users', =>
         @onSaveUsers()
@@ -34,30 +36,33 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     @events.fetch(
       data:
         filter: 'all'
-    ).done (models) =>
+    ).done (events) =>
       settings.set('active-event', id)
 
       @sessions.fetch(
         reload: true
       ).done (sessions) =>
         View = require './views/sessions-edit-view'
-        view = new View(model: models.get(id), collection: sessions, resources: application.resources)
+        view = new View(model: events.get(id), collection: sessions, resources: application.resources)
         application.layout.content.show(view)
 
   showUsersEdit: =>
-    @users.fetch(
+    @roles.fetch(
       reload: true
-      data:
-        filter: 'all'
-    ).done (collection) ->
-      application.trigger 'set:active:header', 'Admin - Users', 'bookmark' # admin:accounts:edit
-      collection.on 'change', (model) =>
-        console.log 'user change:', model
-        model.credentials = collection.credentials
-        model.set('dirty', true, silent: true)
-      View = require './views/users-edit-view'
-      view = new View(collection: collection, resources: application.resources)
-      application.layout.content.show(view)
+    ).done (roles) =>
+      @users.fetch(
+        reload: true
+        data:
+          filter: 'all'
+      ).done (users) =>
+        application.trigger 'set:active:header', 'Admin - Users', 'bookmark' # admin:accounts:edit
+        users.on 'change', (model) =>
+          console.log 'user change:', model
+          model.credentials = users.credentials
+          model.set('dirty', true, silent: true)
+        View = require './views/users-edit-view'
+        view = new View(collection: users, roles: roles, resources: application.resources)
+        application.layout.content.show(view)
 
   onSaveUsers: =>
     @users.each (model) ->

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens;
+using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
@@ -22,7 +22,7 @@ namespace EventFeedback.Domain
             _context = context;
             _userManager = new UserManager<User>(new UserStore<User>(context));
             _roleManager = new RoleManager<Role>(new RoleStore<Role>(context));
-
+            
             _userManager.PasswordValidator = new MinimumLengthValidator(4);
         }
 
@@ -84,6 +84,11 @@ namespace EventFeedback.Domain
             return _userManager.FindByName(userName);
         }
 
+        public IEnumerable<string> FindRoles()
+        {
+            return _context.Roles.Select(r => r.Name);
+        }
+
         public User HideSensitiveData(User user)
         {
             user.PasswordHash = null;
@@ -123,10 +128,11 @@ namespace EventFeedback.Domain
             return _userManager.AddToRole(userId, role);
         }
 
-        public IEnumerable<IdentityResult> RemoveUserRoles(string userId)
+        public void ClearUserRoles(string userId)
         {
             foreach (var role in _userManager.GetRoles(userId))
-                yield return _userManager.RemoveFromRole(userId, role);
+                _userManager.RemoveFromRole(userId, role);
+
         }
     }
 }

@@ -717,6 +717,66 @@ module.exports.Collection = ResourceCollection = (function(_super) {
 })(Collection);
 });
 
+;require.register("models/role", function(exports, require, module) {
+var Collection, Model, Role, RolesCollection, config, settings, _ref, _ref1,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+config = require('../config');
+
+Model = require('../lib/base/model');
+
+Collection = require('../lib/base/collection');
+
+settings = require('settings');
+
+module.exports.Model = Role = (function(_super) {
+  __extends(Role, _super);
+
+  function Role() {
+    _ref = Role.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  return Role;
+
+})(Model);
+
+module.exports.Collection = RolesCollection = (function(_super) {
+  __extends(RolesCollection, _super);
+
+  function RolesCollection() {
+    _ref1 = RolesCollection.__super__.constructor.apply(this, arguments);
+    return _ref1;
+  }
+
+  RolesCollection.prototype.url = "" + config.apiroot + "/admin/roles";
+
+  RolesCollection.prototype.credentials = function() {
+    return {
+      token: settings.get('api_token')
+    };
+  };
+
+  RolesCollection.prototype.model = module.exports.Model;
+
+  RolesCollection.prototype.comparator = 'name';
+
+  RolesCollection.prototype.toArray = function() {
+    var roles,
+      _this = this;
+    roles = [["", ""]];
+    this.each(function(role) {
+      return roles.push([role.get('name'), role.get('name')]);
+    });
+    return roles;
+  };
+
+  return RolesCollection;
+
+})(Collection);
+});
+
 ;require.register("models/session", function(exports, require, module) {
 var Collection, Contact, Model, SessionsCollection, config, settings, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
@@ -859,7 +919,7 @@ module.exports.Collection = StoreCollection = (function(_super) {
 });
 
 ;require.register("models/user", function(exports, require, module) {
-var Account, Collection, Model, UsersCollection, config, settings, _ref, _ref1,
+var Collection, Model, User, UsersCollection, config, settings, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -871,15 +931,15 @@ Collection = require('../lib/base/collection');
 
 settings = require('settings');
 
-module.exports.Model = Account = (function(_super) {
-  __extends(Account, _super);
+module.exports.Model = User = (function(_super) {
+  __extends(User, _super);
 
-  function Account() {
-    _ref = Account.__super__.constructor.apply(this, arguments);
+  function User() {
+    _ref = User.__super__.constructor.apply(this, arguments);
     return _ref;
   }
 
-  return Account;
+  return User;
 
 })(Model);
 
@@ -971,7 +1031,7 @@ module.exports.Model = UserToken = (function(_super) {
 });
 
 ;require.register("modules/admin/controller", function(exports, require, module) {
-var Controller, Event, Session, User, application, settings, vent,
+var Controller, Event, Role, Session, User, application, settings, vent,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -988,6 +1048,8 @@ Session = require('../../models/session');
 
 User = require('../../models/user');
 
+Role = require('../../models/role');
+
 module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
 
@@ -1000,6 +1062,7 @@ module.exports = Controller = (function(_super) {
       _this.events = new Event.Collection();
       _this.sessions = new Session.Collection();
       _this.users = new User.Collection();
+      _this.roles = new Role.Collection();
       return vent.on('save:users', function() {
         return _this.onSaveUsers();
       });
@@ -1030,7 +1093,7 @@ module.exports = Controller = (function(_super) {
       data: {
         filter: 'all'
       }
-    }).done(function(models) {
+    }).done(function(events) {
       settings.set('active-event', id);
       return _this.sessions.fetch({
         reload: true
@@ -1038,7 +1101,7 @@ module.exports = Controller = (function(_super) {
         var View, view;
         View = require('./views/sessions-edit-view');
         view = new View({
-          model: models.get(id),
+          model: events.get(id),
           collection: sessions,
           resources: application.resources
         });
@@ -1048,28 +1111,33 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showUsersEdit = function() {
-    return this.users.fetch({
-      reload: true,
-      data: {
-        filter: 'all'
-      }
-    }).done(function(collection) {
-      var View, view,
-        _this = this;
-      application.trigger('set:active:header', 'Admin - Users', 'bookmark');
-      collection.on('change', function(model) {
-        console.log('user change:', model);
-        model.credentials = collection.credentials;
-        return model.set('dirty', true, {
-          silent: true
+    var _this = this;
+    return this.roles.fetch({
+      reload: true
+    }).done(function(roles) {
+      return _this.users.fetch({
+        reload: true,
+        data: {
+          filter: 'all'
+        }
+      }).done(function(users) {
+        var View, view;
+        application.trigger('set:active:header', 'Admin - Users', 'bookmark');
+        users.on('change', function(model) {
+          console.log('user change:', model);
+          model.credentials = users.credentials;
+          return model.set('dirty', true, {
+            silent: true
+          });
         });
+        View = require('./views/users-edit-view');
+        view = new View({
+          collection: users,
+          roles: roles,
+          resources: application.resources
+        });
+        return application.layout.content.show(view);
       });
-      View = require('./views/users-edit-view');
-      view = new View({
-        collection: collection,
-        resources: application.resources
-      });
-      return application.layout.content.show(view);
     });
   };
 
@@ -1309,7 +1377,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\" id=\"js-table\">\r\n  <button type=\"button\" id=\"js-add\" class=\"btn btn-default\">Add</button>\r\n  <button type=\"button\" id=\"js-save\" class=\"btn btn-success\">Save</button>\r\n</div>";
+  return "<p>\r\n  <button type=\"button\" id=\"js-add\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-plus\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-refresh\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-refresh\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-save\" class=\"btn btn-success btn-lg\">\r\n    <span class=\"glyphicon glyphicon-save\"></span>\r\n  </button>\r\n</p>\r\n\r\n<p>\r\n  <div class=\"container\" id=\"js-table\">\r\n    <!-- table here -->\r\n  </div>\r\n</p>\r\n\r\n<p>\r\n  <button type=\"button\" id=\"js-add\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-plus\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-refresh\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-refresh\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-save\" class=\"btn btn-success btn-lg\">\r\n    <span class=\"glyphicon glyphicon-save\"></span>\r\n  </button>\r\n</p>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -1350,11 +1418,11 @@ module.exports = UsersEditView = (function(_super) {
 
   UsersEditView.prototype.initialize = function(options) {
     this.resources = options != null ? options.resources : void 0;
-    return console.log('==========', options);
+    return this.roles = options != null ? options.roles : void 0;
   };
 
   UsersEditView.prototype.onShow = function() {
-    var columns, grid;
+    var columns, grid, _ref1;
     columns = [
       {
         name: "active",
@@ -1372,9 +1440,9 @@ module.exports = UsersEditView = (function(_super) {
         cell: "string"
       }, {
         name: "roles",
-        label: "Roles",
+        label: "Role",
         cell: Backgrid.SelectCell.extend({
-          optionValues: [["", ""], ["User", "User"], ["Administrator", "Administrator"], ["Administrator User", "Administrator User"]]
+          optionValues: (_ref1 = this.roles) != null ? _ref1.toArray() : void 0
         })
       }, {
         name: "organization",
@@ -1965,7 +2033,6 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showEventsIndex = function() {
     return this.events.fetch({
-      reload: true,
       data: {
         filter: 'all'
       }

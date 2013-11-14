@@ -10,7 +10,7 @@ module.exports = class UsersEditView extends Backbone.Marionette.ItemView
 
   initialize: (options) ->
     @resources = options?.resources
-    console.log '==========', options
+    @roles = options?.roles
 
   onShow: ->
     columns = [
@@ -35,9 +35,9 @@ module.exports = class UsersEditView extends Backbone.Marionette.ItemView
       cell: "string"
     ,
       name: "roles"
-      label: "Roles"
+      label: "Role"
       cell: Backgrid.SelectCell.extend
-        optionValues: [["", ""], ["User", "User"], ["Administrator", "Administrator"], ["Administrator User", "Administrator User"]]
+        optionValues: @roles?.toArray()
     ,
       name: "organization"
       label: "Organization"
