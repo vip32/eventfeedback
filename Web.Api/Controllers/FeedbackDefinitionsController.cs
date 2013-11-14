@@ -43,6 +43,7 @@ namespace EventFeedback.Web.Api.Controllers
         public FeedbackDefinition Get(int id, [FromUri] string filter = "")
         {
             //Thread.Sleep(1500);
+            Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");
 
             _traceSource.TraceInformation("feedbackdefinitionscontroller get " + id);
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))

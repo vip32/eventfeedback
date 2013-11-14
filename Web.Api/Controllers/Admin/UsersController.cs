@@ -4,8 +4,6 @@ using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Reflection;
 using System.Web.Http;
 using EventFeedback.Common;
@@ -51,18 +49,10 @@ namespace EventFeedback.Web.Api.Controllers.Admin
         [Route("api/v1/admin/users")]
         public void Post(UserAdminBindingModel entity)
         {
-            _traceSource.TraceInformation("usersscontroller post");
-            if (entity == null) throw new HttpResponseException(HttpStatusCode.BadRequest);
-            if(!string.IsNullOrEmpty(entity.Id)) throw new HttpResponseException(HttpStatusCode.BadRequest);
-            if(string.IsNullOrEmpty(entity.Password)) throw new HttpResponseException(HttpStatusCode.BadRequest);
-            //if (string.IsNullOrEmpty(entity.Password)) throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.BadRequest)
-            //{
-            //    Content = new ObjectContent<RequestMessage>(
-            //        new RequestMessage
-            //        {
-            //            Message = "password"
-            //        }, new JsonMediaTypeFormatter())
-            //});
+            _traceSource.TraceInformation("userscontroller post");
+            Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
+            Guard.Against<ArgumentException>(!string.IsNullOrEmpty(entity.Id), "entity.id must be empty");
+            Guard.Against<ArgumentException>(string.IsNullOrEmpty(entity.Password), "entity.password cannot be empty");
             
             var user = Map(entity);
             user.Id = Guid.NewGuid().ToString();
@@ -78,8 +68,8 @@ namespace EventFeedback.Web.Api.Controllers.Admin
         public void Put(string id, UserAdminBindingModel entity)
         {
             _traceSource.TraceInformation("usersscontroller put");
-            if (entity == null) throw new HttpResponseException(HttpStatusCode.BadRequest);
-            if (string.IsNullOrEmpty(entity.Id) && string.IsNullOrEmpty(id)) throw new HttpResponseException(HttpStatusCode.BadRequest);
+            Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
+            Guard.Against<ArgumentException>(string.IsNullOrEmpty(entity.Id) && string.IsNullOrEmpty(id), "entity.id or id must be set");
 
             if (string.IsNullOrEmpty(entity.Id) && !string.IsNullOrEmpty(id)) entity.Id = id;
             if (!_context.Users.Has(entity.Id))
@@ -137,8 +127,5 @@ namespace EventFeedback.Web.Api.Controllers.Admin
         }
     }
 
-    public class RequestMessage
-    {
-        public string Message { get; set; }
-    }
+    
 }

@@ -21,7 +21,7 @@ namespace EventFeedback.Web.Api.Controllers
 
         public UserController(UserService userService)
         {
-            Guard.Against<ArgumentNullException>(userService == null, "userService cannot be null");
+            Guard.Against<ArgumentException>(userService == null, "userService cannot be null");
             _userService = userService;
         }
 
@@ -29,31 +29,30 @@ namespace EventFeedback.Web.Api.Controllers
         [Route("token")]
         public HttpResponseMessage Token(LoginBindingModel login)
         {
-            if (login != null)
+            Guard.Against<ArgumentException>(login == null, "login cannot be empty be null");
+
+            var user = _userService.FindUser(login.UserName, login.Password);
+            if (user != null && user.IsActive())
             {
-                var user = _userService.FindUser(login.UserName, login.Password);
-                if (user != null && user.IsActive())
+                _userService.HideSensitiveData(user);
+                var identity = _userService.CreateIdentity(user, Startup.OAuthBearerOptions.AuthenticationType);
+                identity.AddClaim(new Claim(ClaimTypes.Name, login.UserName));
+                var ticket = new AuthenticationTicket(identity, new AuthenticationProperties());
+                var currentUtc = new SystemClock().UtcNow;
+                ticket.Properties.IssuedUtc = currentUtc;
+                ticket.Properties.ExpiresUtc = currentUtc.Add(TimeSpan.FromMinutes(Startup.ExpireMinutes));
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    _userService.HideSensitiveData(user);
-                    var identity = _userService.CreateIdentity(user, Startup.OAuthBearerOptions.AuthenticationType);
-                    identity.AddClaim(new Claim(ClaimTypes.Name, login.UserName));
-                    var ticket = new AuthenticationTicket(identity, new AuthenticationProperties());
-                    var currentUtc = new SystemClock().UtcNow;
-                    ticket.Properties.IssuedUtc = currentUtc;
-                    ticket.Properties.ExpiresUtc = currentUtc.Add(TimeSpan.FromMinutes(Startup.ExpireMinutes));
-                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    Content = new ObjectContent<object>(new
                     {
-                        Content = new ObjectContent<object>(new
-                        {
-                            UserName = login.UserName,
-                            AccessToken = Startup.OAuthBearerOptions.AccessTokenFormat.Protect(ticket),
-                            Issued = DateTime.UtcNow,
-                            Expires = ticket.Properties.ExpiresUtc
-                        }, Configuration.Formatters.JsonFormatter)
-                    };
-                }
+                        UserName = login.UserName,
+                        AccessToken = Startup.OAuthBearerOptions.AccessTokenFormat.Protect(ticket),
+                        Issued = DateTime.UtcNow,
+                        Expires = ticket.Properties.ExpiresUtc
+                    }, Configuration.Formatters.JsonFormatter)
+                };
             }
-            return new HttpResponseMessage(HttpStatusCode.BadRequest);
+            return null;
         }
 
         [HttpGet]

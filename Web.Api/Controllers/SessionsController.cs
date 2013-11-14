@@ -28,6 +28,7 @@ namespace EventFeedback.Web.Api.Controllers
         public IEnumerable<Session> Get(int eventId, [FromUri] string filter = "")
         {
             //Thread.Sleep(1500);
+            Guard.Against<ArgumentException>(eventId == 0, "eventid cannot be empty or zero");
 
             _traceSource.TraceInformation("eventscontroller get all");
             IEnumerable<Session> result;
@@ -53,7 +54,9 @@ namespace EventFeedback.Web.Api.Controllers
 
         public Session Get(int eventId, int id, [FromUri] string filter = "")
         {
-            Thread.Sleep(1500);
+            //Thread.Sleep(1500);
+            Guard.Against<ArgumentException>(eventId == 0, "eventid cannot be empty or zero");
+            Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");
 
             _traceSource.TraceInformation("eventscontroller get " + id);
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))

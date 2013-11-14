@@ -35,6 +35,8 @@ namespace EventFeedback.Web.Api.Controllers
 
         public Feedback Get(int id)
         {
+            Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");
+
             _traceSource.TraceInformation("eventscontroller get " + id);
             var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name));
             return _context.Feedbacks.FirstOrDefault(f => f.UserId == user.Id);
