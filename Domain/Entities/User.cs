@@ -22,7 +22,9 @@ namespace EventFeedback.Domain
         public DateTime? DeleteDate { get; set; }
         [StringLength(128)]
         public string DeletedBy { get; set; }
+        [StringLength(128)]
         public string Email { get; set; }
+        [StringLength(128)]
         public string Organization { get; set; }
 
         /// <summary>

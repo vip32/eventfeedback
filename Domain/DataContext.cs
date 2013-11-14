@@ -1,7 +1,6 @@
 ﻿using System.Data.Entity;
 using System.Diagnostics;
 using System.Reflection;
-using EventFeedback.Common;
 using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace EventFeedback.Domain

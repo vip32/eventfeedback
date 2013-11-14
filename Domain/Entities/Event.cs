@@ -32,6 +32,8 @@ namespace EventFeedback.Domain
         public DateTime? EndDate { get; set; }
         [StringLength(128)]
         public string Location { get; set; }
+        [StringLength(128)]
+        public string Organization { get; set; }
         public ICollection<string> Tags { get; set; }
         [StringLength(512)]
         public string TagList

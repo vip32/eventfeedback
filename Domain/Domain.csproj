@@ -103,6 +103,10 @@
     <Compile Include="Migrations\201311071137468_FeedbackDefinition3.Designer.cs">
       <DependentUpon>201311071137468_FeedbackDefinition3.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201311142120246_EventOrganization.cs" />
+    <Compile Include="Migrations\201311142120246_EventOrganization.Designer.cs">
+      <DependentUpon>201311142120246_EventOrganization.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Migrations\TestData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -132,6 +136,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201311071137468_FeedbackDefinition3.resx">
       <DependentUpon>201311071137468_FeedbackDefinition3.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201311142120246_EventOrganization.resx">
+      <DependentUpon>201311142120246_EventOrganization.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
