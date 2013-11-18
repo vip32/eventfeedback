@@ -19,7 +19,7 @@ module.exports.Collection = class HeadersCollection extends Collection
   active: (roles) ->
     # authenticated = settings.getValueOrDefault('api_authenticated', false)
     filtered = @filter (item) =>
-      console.log '---->', item.get('title'), [roles], item.get('roles')
+      console.log '---->', item.get('title'), item.get('roles'), '>', roles
       visible = item.get('visible') ? true
       return true if visible and _.isEmpty(item.get('roles'))
       return true if visible and not _.isEmpty(roles) and _.intersection(roles, item.get('roles')).length > 0
@@ -66,7 +66,7 @@ module.exports.TestData = class TestData
     id: "1cf247f4-4c76-d453-bbec-1c40080e32e4"
     title: "Events"
     authenticated: true
-    # roles: []
+    roles: ['User']
     resource: 'Title_Events'
     glyphicon: 'bookmark'
     trigger: "events:index"

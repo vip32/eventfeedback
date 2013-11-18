@@ -574,7 +574,7 @@ module.exports.Collection = HeadersCollection = (function(_super) {
       _this = this;
     filtered = this.filter(function(item) {
       var visible, _ref2;
-      console.log('---->', item.get('title'), [roles], item.get('roles'));
+      console.log('---->', item.get('title'), item.get('roles'), '>', roles);
       visible = (_ref2 = item.get('visible')) != null ? _ref2 : true;
       if (visible && _.isEmpty(item.get('roles'))) {
         return true;
@@ -624,6 +624,7 @@ module.exports.TestData = TestData = (function() {
       id: "1cf247f4-4c76-d453-bbec-1c40080e32e4",
       title: "Events",
       authenticated: true,
+      roles: ['User'],
       resource: 'Title_Events',
       glyphicon: 'bookmark',
       trigger: "events:index",
