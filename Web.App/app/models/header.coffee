@@ -107,7 +107,7 @@ module.exports.TestData = class TestData
     roles: ['Administrator']
     resource: ''
     glyphicon: ''
-    trigger: ""
+    trigger: "-"
     intern: true
     order: 10
   ,

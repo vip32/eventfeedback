@@ -655,7 +655,7 @@ module.exports.TestData = TestData = (function() {
       roles: ['Administrator'],
       resource: '',
       glyphicon: '',
-      trigger: "",
+      trigger: "-",
       intern: true,
       order: 10
     }, {
@@ -2021,7 +2021,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  <div class=\"jumbotron\">\r\n    <h3></h3>\r\n    <p></p>\r\n  </div>\r\n</div>";
+  return "<div class=\"container\">\r\n  <h3>Home</h3>\r\n  <p></p>\r\n</div>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
