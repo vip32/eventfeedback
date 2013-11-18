@@ -14,21 +14,18 @@ namespace EventFeedback.Web.Api.Controllers
         public HttpResponseMessage ApiInfo()
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version;
-            var buildDateTime = new DateTime(2000, 1, 1).Add(new TimeSpan(
-            TimeSpan.TicksPerDay * version.Build + // days since 1 January 2000
-            TimeSpan.TicksPerSecond * 2 * version.Revision)); // seconds since midnight, (multiply by 2 to get original)
-
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new ObjectContent<object>(new
                 {
                     Version = version.ToString(),
-                    BuildDate = buildDateTime
+                    BuildDate = new DateTime(2000, 1, 1).Add(new TimeSpan(
+                        TimeSpan.TicksPerDay*version.Build + // days since 1 January 2000
+                        TimeSpan.TicksPerSecond*2*version.Revision))
+                    // seconds since midnight, (multiply by 2 to get original)
                 }, Configuration.Formatters.JsonFormatter)
             };
         }
-
-
 
         // levels
         // types
