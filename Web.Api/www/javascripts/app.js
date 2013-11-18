@@ -154,6 +154,10 @@ Application = (function(_super) {
     return this.start();
   };
 
+  Application.prototype.checkauth = function(trigger) {
+    return console.log('checkauth', trigger);
+  };
+
   Application.prototype.navigate = function(route, options) {
     console.log('navigate', route);
     options = options || {};
@@ -202,6 +206,8 @@ Config = (function() {
   Config.prototype.apiroot = '/api/v1';
 
   Config.prototype.startuptrigger = 'events:index';
+
+  Config.prototype.signintrigger = 'signin:index';
 
   Config.prototype.brandtrigger = 'events:index';
 
@@ -319,6 +325,27 @@ module.exports = Collection = (function(_super) {
     return _ref;
   }
 
+  Collection.prototype.initialize = function(attributes, options) {
+    return this.bind("error", this.errorHandler);
+  };
+
+  Collection.prototype.errorHandler = function(model, error) {
+    if (error.status === 404) {
+      console.warn('NOTFOUND', error);
+      vent.trigger('sync:fail:notfound', error);
+    }
+    if (error.status === 500) {
+      console.warn('SERVERERROR', error);
+      return vent.trigger('sync:fail:servererror', error);
+    } else if (error.status === 401 || error.status === 403) {
+      console.warn('UNAUTHORIZED', error);
+      return vent.trigger('sync:fail:unauthorized', error);
+    } else {
+      console.warn('UNKNOWN', error);
+      return vent.trigger('sync:fail:unknown', error);
+    }
+  };
+
   Collection.prototype.destroyAll = function() {
     var promises;
     promises = [];
@@ -340,7 +367,7 @@ module.exports = Collection = (function(_super) {
       return console.log('fetch:off', this.constructor.name, collection, response, options);
     }).fail(function(collection, response, options) {
       vent.trigger('fetch:fail');
-      return console.log('fetch:fail', this.constructor.name, collection, response, options);
+      return console.warn('fetch:fail', this.constructor.name, collection, response, options);
     });
   };
 
@@ -394,6 +421,27 @@ module.exports = Model = (function(_super) {
     _ref = Model.__super__.constructor.apply(this, arguments);
     return _ref;
   }
+
+  Model.prototype.initialize = function(attributes, options) {
+    return this.bind("error", this.errorHandler);
+  };
+
+  Model.prototype.errorHandler = function(model, error) {
+    if (error.status === 404) {
+      console.warn('NOTFOUND', error);
+      vent.trigger('sync:fail:notfound', error);
+    }
+    if (error.status === 500) {
+      console.warn('SERVERERROR', error);
+      return vent.trigger('sync:fail:servererror', error);
+    } else if (error.status === 401 || error.status === 403) {
+      console.warn('UNAUTHORIZED', error);
+      return vent.trigger('sync:fail:unauthorized', error);
+    } else {
+      console.warn('UNKNOWN', error);
+      return vent.trigger('sync:fail:unknown', error);
+    }
+  };
 
   return Model;
 
@@ -521,23 +569,21 @@ module.exports.Collection = HeadersCollection = (function(_super) {
 
   HeadersCollection.prototype.comparator = 'order';
 
-  HeadersCollection.prototype.visible = function() {
-    var authenticated, filtered,
+  HeadersCollection.prototype.active = function(roles) {
+    var filtered,
       _this = this;
-    authenticated = settings.getValueOrDefault('api_authenticated', false);
     filtered = this.filter(function(item) {
-      var itemAuthenticated, _ref2;
-      itemAuthenticated = (_ref2 = item.get("authenticated")) != null ? _ref2 : false;
-      if (itemAuthenticated === true && authenticated === true) {
+      var visible, _ref2;
+      console.log('---->', item.get('title'), [roles], item.get('roles'));
+      visible = (_ref2 = item.get('visible')) != null ? _ref2 : true;
+      if (visible && _.isEmpty(item.get('roles'))) {
         return true;
       }
-      if (itemAuthenticated === false && authenticated === true) {
-        return true;
-      }
-      if (itemAuthenticated === false && authenticated === false) {
+      if (visible && !_.isEmpty(roles) && _.intersection(roles, item.get('roles')).length > 0) {
         return true;
       }
     });
+    console.log('=============>', filtered);
     return new HeadersCollection(filtered);
   };
 
@@ -559,7 +605,6 @@ module.exports.TestData = TestData = (function() {
       id: "511b8984-8958-663d-4707-9378aa71776b",
       visible: true,
       authenticated: false,
-      roles: [],
       resource: 'Title_Home',
       glyphicon: 'home',
       title: "Home",
@@ -570,7 +615,6 @@ module.exports.TestData = TestData = (function() {
       id: "ce82ceb6-1104-aaa6-4fab-a4656694de17",
       title: "About",
       authenticated: false,
-      roles: [],
       resource: 'Title_About',
       glyphicon: 'info-sign',
       trigger: "about:index",
@@ -580,7 +624,7 @@ module.exports.TestData = TestData = (function() {
       id: "1cf247f4-4c76-d453-bbec-1c40080e32e4",
       title: "Events",
       authenticated: true,
-      roles: [],
+      roles: ['User'],
       resource: 'Title_Events',
       glyphicon: 'bookmark',
       trigger: "events:index",
@@ -590,7 +634,6 @@ module.exports.TestData = TestData = (function() {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f5",
       title: "Sign-in",
       authenticated: false,
-      roles: [],
       resource: 'Title_SignIn',
       glyphicon: 'user',
       trigger: "signin:index",
@@ -600,12 +643,21 @@ module.exports.TestData = TestData = (function() {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f4",
       title: "Debug",
       authenticated: false,
-      roles: [],
       resource: 'Title_Debug',
       glyphicon: 'cog',
       trigger: "debug:index",
       intern: true,
       order: 5
+    }, {
+      id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b890",
+      title: "",
+      authenticated: true,
+      roles: ['Administrator'],
+      resource: '',
+      glyphicon: '',
+      trigger: "",
+      intern: true,
+      order: 10
     }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f6",
       title: "Admin - Events",
@@ -615,7 +667,7 @@ module.exports.TestData = TestData = (function() {
       glyphicon: 'bookmark',
       trigger: "admin:events:edit",
       intern: true,
-      order: 5
+      order: 11
     }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f7",
       title: "Admin - Settings",
@@ -625,7 +677,7 @@ module.exports.TestData = TestData = (function() {
       glyphicon: 'cog',
       trigger: "admin:settings:index",
       intern: true,
-      order: 5
+      order: 12
     }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f8",
       title: "Admin - Reports",
@@ -635,7 +687,7 @@ module.exports.TestData = TestData = (function() {
       glyphicon: 'list',
       trigger: "admin:reports:index",
       intern: true,
-      order: 5
+      order: 13
     }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f9",
       title: "Admin - Users",
@@ -645,7 +697,7 @@ module.exports.TestData = TestData = (function() {
       glyphicon: 'user',
       trigger: "admin:users:edit",
       intern: true,
-      order: 5
+      order: 14
     }
   ];
 
@@ -1502,10 +1554,11 @@ module.exports = Controller = (function(_super) {
       vent.on('view:signin:do', function(data) {
         if (!_.isEmpty(data.username) && !_.isEmpty(data.password)) {
           settings.set('api_token', '');
+          settings.set('api_token_expires', '');
           settings.set('api_authenticated', false);
           settings.set('api_username', data.username);
-          settings.set('api_password', data.password);
           settings.set('api_remember', data.remember === 'on');
+          settings.set('api_userroles', []);
           return _this.doSignin(data.username, data.password);
         }
       });
@@ -1556,10 +1609,14 @@ module.exports = Controller = (function(_super) {
       success: function(model, response, options) {
         var profile;
         settings.set('api_token', userToken.get('accessToken'));
+        settings.set('api_token_expires', userToken.get('expires'));
         settings.set('api_authenticated', true);
         profile = new UserProfile.Model();
         return profile.fetch({
           success: function(model, response, options) {
+            settings.set('api_userroles', _.map(model.get('profile').roles, function(role) {
+              return role.role.name;
+            }));
             vent.trigger('message:success:show', 'signed in ' + username);
             return vent.trigger('navigation:signin');
           },
@@ -1606,7 +1663,7 @@ module.exports = Controller = (function(_super) {
 });
 
 ;require.register("modules/common/router", function(exports, require, module) {
-var Controller, Router, application, vent, _ref,
+var Controller, Router, application, config, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1615,6 +1672,8 @@ application = require('application');
 vent = require('vent');
 
 Controller = require('./controller');
+
+config = require('config');
 
 module.exports = Router = (function(_super) {
   __extends(Router, _super);
@@ -1635,6 +1694,15 @@ module.exports = Router = (function(_super) {
     var _this = this;
     console.log('about router init');
     return application.addInitializer(function(options) {
+      vent.on('sync:fail:unauthorized', function() {
+        return application.trigger(config.signintrigger);
+      });
+      vent.on('sync:fail:servererror', function() {
+        return alert('sync:server error');
+      });
+      vent.on('sync:fail:unknown', function() {
+        return alert('sync:unknown error');
+      });
       application.on('home:index', function() {
         application.navigate('home');
         return _this.controller.showHome();
@@ -1850,7 +1918,6 @@ module.exports = SigninView = (function(_super) {
     return {
       resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
       username: settings.get('api_remember') ? settings.get('api_username') : void 0,
-      password: settings.get('api_remember') ? settings.get('api_password') : void 0,
       remember: settings.get('api_remember') ? settings.get('api_remember') : void 0
     };
   };
@@ -1983,11 +2050,7 @@ function program1(depth0,data) {
   if (stack1 = helpers.username) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.username; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\">\r\n    <input type=\"password\" class=\"form-control\" placeholder=\"password\" name=\"password\" value=\"";
-  if (stack1 = helpers.password) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.password; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "\">\r\n    <div class=\"form-group\">\r\n      <label for=\"notification1\">Remember me</label>\r\n      <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n        <input type=\"radio\" id=\"notification1\" name=\"remember\" ";
+    + "\">\r\n    <input type=\"password\" class=\"form-control\" placeholder=\"password\" name=\"password\">\r\n    <div class=\"form-group\">\r\n      <label for=\"notification1\">Remember me</label>\r\n      <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n        <input type=\"radio\" id=\"notification1\" name=\"remember\" ";
   stack1 = helpers['if'].call(depth0, depth0.remember, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += ">\r\n      </div>\r\n    </div>\r\n    <button class=\"btn btn-lg btn-success btn-block js-signin\">Sign in</button>\r\n  </form>\r\n</div>";
@@ -2005,11 +2068,13 @@ if (typeof define === 'function' && define.amd) {
 });
 
 ;require.register("modules/event/controller", function(exports, require, module) {
-var Controller, Event, Session, application, settings, vent,
+var Controller, Event, Session, application, config, settings, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+config = require('config');
 
 vent = require('vent');
 
@@ -2621,7 +2686,7 @@ if (typeof define === 'function' && define.amd) {
 });
 
 ;require.register("modules/header/controller", function(exports, require, module) {
-var Controller, Header, application, vent,
+var Controller, Header, application, settings, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2630,6 +2695,8 @@ application = require('application');
 Header = require('../../models/header');
 
 vent = require('vent');
+
+settings = require('settings');
 
 module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
@@ -2650,7 +2717,7 @@ module.exports = Controller = (function(_super) {
     var View, view;
     View = require('./views/header-view');
     view = new View.Header({
-      collection: this.headers.visible(),
+      collection: this.headers.active(settings.get('api_userroles')),
       resources: application.resources
     });
     return application.layout.header.show(view);

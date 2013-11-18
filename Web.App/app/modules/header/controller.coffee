@@ -1,6 +1,7 @@
 application = require 'application'
 Header = require '../../models/header'
 vent = require 'vent'
+settings = require 'settings'
 
 module.exports = class Controller extends Backbone.Marionette.Controller
 
@@ -18,7 +19,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
   showHeader: ->
     View = require './views/header-view'
     view = new View.Header
-      collection: @headers.visible()
+      collection: @headers.active(settings.get('api_userroles'))
       resources: application.resources
     application.layout.header.show(view)
 

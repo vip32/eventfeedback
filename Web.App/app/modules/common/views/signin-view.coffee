@@ -14,7 +14,7 @@ module.exports = class SigninView extends Backbone.Marionette.ItemView
   serializeData: ->
     resources: @resources?.toJSON()
     username: if settings.get('api_remember') then settings.get('api_username')
-    password: if settings.get('api_remember') then settings.get('api_password')
+    # password: if settings.get('api_remember') then settings.get('api_password')
     remember: if settings.get('api_remember') then settings.get('api_remember')
 
   onSignin: (e) ->

@@ -20,6 +20,7 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
         @controller.showEventsIndex()
 
       application.on 'events:index', =>
+        # application.checkauth 'events:index'
         application.navigate 'events'
         @controller.showEventsIndex()
 

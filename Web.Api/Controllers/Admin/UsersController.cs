@@ -33,7 +33,6 @@ namespace EventFeedback.Web.Api.Controllers.Admin
         public IEnumerable<UserAdminBindingModel> Get([FromUri] string filter = "")
         {
             //Thread.Sleep(1500);
-            Trace.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TEST TRACE");
 
             _traceSource.TraceInformation("usersscontroller get all");
             IEnumerable<User> users;

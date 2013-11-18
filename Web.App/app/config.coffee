@@ -5,6 +5,7 @@ class Config
   approot: '/'
   apiroot: '/api/v1'
   startuptrigger: 'events:index'
+  signintrigger: 'signin:index'
   brandtrigger: 'events:index'
   layout: 'layouts/app-layout'
   sidebarglyphicon: 'minus'

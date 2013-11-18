@@ -3,6 +3,23 @@ vent = require 'vent'
 # Base class for all collections.
 module.exports = class Collection extends Backbone.Collection
 
+  initialize: (attributes, options) ->
+    @bind("error", @errorHandler)
+
+  errorHandler: (model, error) ->
+    if error.status is 404
+      console.warn 'NOTFOUND', error
+      vent.trigger 'sync:fail:notfound', error
+    if error.status is 500
+      console.warn 'SERVERERROR', error
+      vent.trigger 'sync:fail:servererror', error
+    else if error.status is 401 or error.status is 403
+      console.warn 'UNAUTHORIZED', error
+      vent.trigger 'sync:fail:unauthorized', error
+    else
+      console.warn 'UNKNOWN', error
+      vent.trigger 'sync:fail:unknown', error
+
   destroyAll: ->
     promises = []
 
@@ -24,4 +41,4 @@ module.exports = class Collection extends Backbone.Collection
         console.log 'fetch:off', @constructor.name, collection, response, options
       .fail (collection, response, options) ->
         vent.trigger 'fetch:fail'
-        console.log  'fetch:fail', @constructor.name, collection, response, options
+        console.warn  'fetch:fail', @constructor.name, collection, response, options

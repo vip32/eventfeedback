@@ -8,6 +8,7 @@ using System.Web.Http;
 using EventFeedback.Common;
 using EventFeedback.Domain;
 using EventFeedback.Web.Api.Models;
+using Microsoft.AspNet.Identity;
 using Microsoft.Owin.Infrastructure;
 using Microsoft.Owin.Security;
 
@@ -45,7 +46,7 @@ namespace EventFeedback.Web.Api.Controllers
                 {
                     Content = new ObjectContent<object>(new
                     {
-                        UserName = login.UserName,
+                        UserName = identity.GetUserName(),
                         AccessToken = Startup.OAuthBearerOptions.AccessTokenFormat.Protect(ticket),
                         Issued = DateTime.UtcNow,
                         Expires = ticket.Properties.ExpiresUtc

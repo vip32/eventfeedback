@@ -8,7 +8,7 @@ Resource = require '../../models/resource'
 class Application extends Backbone.Marionette.Application
   routers: {}
 
-  initialize: => 
+  initialize: =>
     console.log 'application init'
 
     @on "initialize:after", (options) =>
@@ -39,6 +39,10 @@ class Application extends Backbone.Marionette.Application
     settings.set('last-visit', moment())
 
     @start()
+
+  checkauth: (trigger) ->
+    console.log 'checkauth', trigger
+    # TODO possible trigger config.signintrigger + add return url
 
   navigate: (route, options) ->
     console.log 'navigate', route

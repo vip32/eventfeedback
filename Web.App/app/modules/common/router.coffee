@@ -1,6 +1,7 @@
 application = require 'application'
 vent = require 'vent'
 Controller = require './controller'
+config = require 'config'
 
 module.exports = class Router extends Backbone.Marionette.AppRouter
 
@@ -14,6 +15,15 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
     console.log 'about router init'
 
     application.addInitializer (options) =>
+
+      vent.on 'sync:fail:unauthorized', =>
+        application.trigger config.signintrigger
+
+      vent.on 'sync:fail:servererror', =>
+        alert 'sync:server error'
+
+      vent.on 'sync:fail:unknown', =>
+        alert 'sync:unknown error'
 
       application.on 'home:index', =>
         application.navigate 'home'

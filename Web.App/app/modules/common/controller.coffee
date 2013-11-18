@@ -14,10 +14,11 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       vent.on 'view:signin:do', (data) =>
         if not _.isEmpty(data.username) and not _.isEmpty(data.password)
           settings.set('api_token', '')
+          settings.set('api_token_expires', '')
           settings.set('api_authenticated', false)
           settings.set('api_username', data.username)
-          settings.set('api_password', data.password)
           settings.set('api_remember', data.remember is 'on')
+          settings.set('api_userroles', [])
           @doSignin(data.username, data.password)
 
       vent.on 'message:success:show', (data) =>
@@ -49,15 +50,17 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     userToken = new UserToken.Model
       userName: username
       password: password
-    userToken.save null,
+    userToken.save null, # POST
       success:  (model, response, options) =>
         settings.set('api_token', userToken.get('accessToken'))
+        settings.set('api_token_expires', userToken.get('expires'))
         settings.set('api_authenticated', true)
 
         # get the userprofile
         profile = new UserProfile.Model()
         profile.fetch
           success:  (model, response, options) =>
+            settings.set('api_userroles', _.map(model.get('profile').roles, (role) -> role.role.name))
             vent.trigger 'message:success:show', 'signed in ' + username
             vent.trigger 'navigation:signin'
           error: (model, xhr, options) ->

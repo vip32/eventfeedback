@@ -6,7 +6,7 @@ namespace EventFeedback.Web.Api
     public partial class Startup
     {
         public static OAuthBearerAuthenticationOptions OAuthBearerOptions { get; private set; }
-        public static int ExpireMinutes { get { return 1440; } } // 24h
+        public static int ExpireMinutes { get { return 30; } } // 1440 = 24h
 
         public void ConfigureAuth(IAppBuilder app)
         {

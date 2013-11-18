@@ -1,4 +1,5 @@
 application = require 'application'
+config = require 'config'
 vent = require 'vent'
 settings = require 'settings'
 Event = require '../../models/event'
@@ -24,6 +25,8 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       View = require './views/events-index-view'
       view = new View(collection: models, resources: application.resources)
       application.layout.content.show(view)
+    # .fail ->
+    #   application.trigger config.signintrigger
 
   showEventDetails: (id) ->
     @events.fetch(
