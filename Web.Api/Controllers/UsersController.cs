@@ -53,7 +53,7 @@ namespace EventFeedback.Web.Api.Controllers
                     }, Configuration.Formatters.JsonFormatter)
                 };
             }
-            return null;
+            return new HttpResponseMessage(HttpStatusCode.Unauthorized);
         }
 
         [HttpGet]
@@ -62,7 +62,7 @@ namespace EventFeedback.Web.Api.Controllers
         public HttpResponseMessage Profile()
         {
             var user = _userService.FindUserByName(User.Identity.Name);
-            if (user == null || !user.IsActive()) return new HttpResponseMessage(HttpStatusCode.BadRequest);
+            if (user == null || !user.IsActive()) return new HttpResponseMessage(HttpStatusCode.Unauthorized);
             _userService.HideSensitiveData(user);
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
