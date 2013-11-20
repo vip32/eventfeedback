@@ -6,10 +6,10 @@ namespace EventFeedback.Domain
 {
     public static class DataContextExtensions
     {
-        public static User Find(this IDbSet<User> source, string id)
-        {
-            return source.FirstOrDefault(u => u.Id.Equals(id));
-        }
+        //public static User Find(this IDbSet<User> source, string id)
+        //{
+        //    return source.FirstOrDefault(u => u.Id.Equals(id));
+        //}
 
         public static bool Has(this IDbSet<User> source, string id)
         {

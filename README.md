@@ -1,6 +1,6 @@
 eventfeedback
 =============
-a .NET Webapi with a coffeescript based SPA. 
+a .NET Webapi with a coffeescript based SPA.
 
 - backbone
 - marionette.js
@@ -10,3 +10,6 @@ a .NET Webapi with a coffeescript based SPA.
 - coffeescript
 - c#
 - entity framework
+
+
+http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#envelope

@@ -71,7 +71,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
           success: (model, response, options) ->
             model.set('dirty', false, silent: true)
           error: (model, xhr, options) ->
-            alert('save error')
+            console.warn 'user save error', model
 
   onClose: ->
     console.log 'admin controller close'

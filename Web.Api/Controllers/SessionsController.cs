@@ -7,13 +7,14 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Web.Http;
+using System.Web.Http.Description;
 using EventFeedback.Common;
 using EventFeedback.Domain;
 
 namespace EventFeedback.Web.Api.Controllers
 {
     [Authorize]
-    [Route("api/v1/events/{eventId}/sessions")]
+    [RoutePrefix("api/v1/events/{eventId}/sessions")] 
     public class SessionsController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
@@ -25,14 +26,15 @@ namespace EventFeedback.Web.Api.Controllers
             _context = context;
         }
 
-        public IEnumerable<Session> Get(int eventId, [FromUri] string filter = "")
+        [HttpGet]
+        [Route("")]
+        [ResponseType(typeof(IEnumerable<Session>))]
+        public IHttpActionResult Get(int eventId, [FromUri] string filter = "")
         {
             //Thread.Sleep(1500);
             Guard.Against<ArgumentException>(eventId == 0, "eventid cannot be empty or zero");
-
-            _traceSource.TraceInformation("eventscontroller get all");
+            
             IEnumerable<Session> result;
-
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
                 result = _context.Sessions
                                  .Include(s => s.FeedbackDefinition)
@@ -48,33 +50,40 @@ namespace EventFeedback.Web.Api.Controllers
 
             if (filter.Equals("current", StringComparison.CurrentCultureIgnoreCase))
                 result = result.ToList().Where(e => e.IsCurrent());
-
-            return result.NullToEmpty().Any() ? result : null;
+            return Ok(result);
         }
 
-        public Session Get(int eventId, int id, [FromUri] string filter = "")
+        [HttpGet]
+        [Route("{id:int}")]
+        [ResponseType(typeof(Session))]
+        public IHttpActionResult Get(int eventId, int id, [FromUri] string filter = "")
         {
             //Thread.Sleep(1500);
             Guard.Against<ArgumentException>(eventId == 0, "eventid cannot be empty or zero");
             Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");
 
-            _traceSource.TraceInformation("eventscontroller get " + id);
+            Session result;
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
-                return _context.Sessions
+                result = _context.Sessions
                                .Include(s => s.FeedbackDefinition)
                                .Where(s => s.EventId == eventId)
                                .FirstOrDefault(x => x.Id == id);
-
-            return _context.Sessions
+            else
+                result = _context.Sessions
                            .Include(s => s.FeedbackDefinition)
                            .Where(s => s.EventId == eventId)
                            .Where(d => !(d.Active != null && !(bool) d.Active))
                            .Where(d => !(d.Deleted != null && (bool) d.Deleted))
                            .FirstOrDefault(x => x.Id == id);
+            if (result == null) return StatusCode(HttpStatusCode.NotFound);
+            return Ok(result);
         }
 
+        [HttpPost]
+        [Route("")]
         [Authorize(Roles = "Administrator")]
-        public void Post([FromBody]Session entity)
+        [ResponseType(typeof(Session))]
+        public IHttpActionResult Post([FromBody]Session entity)
         {
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
             Guard.Against<ArgumentException>(entity.Id != 0, "entity.id must be empty");
@@ -82,10 +91,14 @@ namespace EventFeedback.Web.Api.Controllers
 
             _context.Sessions.Add(entity);
             _context.SaveChanges();
+            return Ok(entity);
         }
 
+        [HttpPut]
+        [Route("{id:int}")]
         [Authorize(Roles = "Administrator")]
-        public void Put(int id, [FromBody]Session entity)
+        [ResponseType(typeof(Session))]
+        public IHttpActionResult Put(int id, [FromBody]Session entity)
         {
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
             Guard.Against<ArgumentException>(entity.Id == 0 && id == 0, "entity.id or id must be set");
@@ -93,7 +106,7 @@ namespace EventFeedback.Web.Api.Controllers
 
             if (entity.Id == 0 && id != 0) entity.Id = id;
             if (!_context.Sessions.Any(f => f.Id == entity.Id))
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                return StatusCode(HttpStatusCode.NotFound);
 
             var entry = _context.Entry(entity);
             if (entry.State == System.Data.Entity.EntityState.Detached)
@@ -102,21 +115,23 @@ namespace EventFeedback.Web.Api.Controllers
                 entry.State = System.Data.Entity.EntityState.Modified;
             }
             _context.SaveChanges();
+            return Ok(entity);
         }
 
+        [HttpDelete]
+        [Route("{id:int}")]
         [Authorize(Roles = "Administrator")]
-        public void Delete(int id)
+        public IHttpActionResult Delete(int id)
         {
+            Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");
+
             var entity = _context.Sessions.FirstOrDefault(x => x.Id == id);
-            if (entity != null)
-            {
-                _context.Sessions.Remove(entity);
-                _context.SaveChanges();
-            }
-            else
-            {
-                    throw new HttpResponseException(HttpStatusCode.NotFound);
-            }
+            if (entity == null) return StatusCode(HttpStatusCode.NotFound);
+            entity.Deleted = true;
+            entity.DeleteDate = SystemTime.Now();
+            entity.DeletedBy = User.Identity.Name;
+            _context.SaveChanges();
+            return StatusCode(HttpStatusCode.NoContent);
         }
     }
 }

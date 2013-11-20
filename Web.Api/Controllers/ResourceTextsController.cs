@@ -6,12 +6,13 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Web.Http;
+using System.Web.Http.Description;
 using EventFeedback.Common;
 using EventFeedback.Domain;
 
 namespace EventFeedback.Web.Api.Controllers
 {
-    [Route("api/v1/resources")]
+    [RoutePrefix("api/v1/resources")]
     public class ResourceTextsController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
@@ -23,11 +24,12 @@ namespace EventFeedback.Web.Api.Controllers
             _context = context;
         }
 
-        public IEnumerable<ResourceText> Get([FromUri] string filter = "", [FromUri] string language = "en-US")
+        [HttpGet]
+        [Route("")]
+        [ResponseType(typeof(IEnumerable<ResourceText>))]
+        public IHttpActionResult Get([FromUri] string filter = "", [FromUri] string language = "en-US")
         {
             Thread.Sleep(1500);
-
-            _traceSource.TraceInformation("ResourceTextsController get all");
             IEnumerable<ResourceText> result;
 
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
@@ -37,22 +39,28 @@ namespace EventFeedback.Web.Api.Controllers
                                  .Where(d => d.Language.Equals(language, StringComparison.CurrentCultureIgnoreCase))
                                  .Where(d => !(d.Active != null && !(bool)d.Active))
                                  .Where(d => !(d.Deleted != null && (bool)d.Deleted));
-
-            return result.NullToEmpty().Any() ? result : null; // TODO: maybe return anonymous here (id/key/group/val)
+            return Ok(result);
         }
 
+        [HttpPost]
+        [Route("")]
         [Authorize(Roles = "Administrator")]
-        public void Post([FromBody]ResourceText entity)
+        [ResponseType(typeof(ResourceText))]
+        public IHttpActionResult Post([FromBody]ResourceText entity)
         {
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
             Guard.Against<ArgumentException>(entity.Id != 0, "entity.id must be empty");
 
             _context.ResourceTexts.Add(entity);
             _context.SaveChanges();
+            return Ok(entity);
         }
 
+        [HttpPut]
+        [Route("{id:int}")]
         [Authorize(Roles = "Administrator")]
-        public void Put(int id, [FromBody]ResourceText entity)
+        [ResponseType(typeof(ResourceText))]
+        public IHttpActionResult Put(int id, [FromBody]ResourceText entity)
         {
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
             Guard.Against<ArgumentException>(entity.Id == 0 && id == 0, "entity.id or id must be set");
@@ -60,7 +68,7 @@ namespace EventFeedback.Web.Api.Controllers
             
             if (entity.Id == 0 && id != 0) entity.Id = id;
             if (!_context.Events.Any(f => f.Id == entity.Id))
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                return StatusCode(HttpStatusCode.NotFound);
 
             var entry = _context.Entry(entity);
             if (entry.State == System.Data.Entity.EntityState.Detached)
@@ -69,21 +77,23 @@ namespace EventFeedback.Web.Api.Controllers
                 entry.State = System.Data.Entity.EntityState.Modified;
             }
             _context.SaveChanges();
+            return Ok(entity);
         }
 
+        [HttpDelete]
+        [Route("{id}")]
         [Authorize(Roles = "Administrator")]
-        public void Delete(int id)
+        public IHttpActionResult Delete(int id)
         {
+            Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");
+
             var entity = _context.ResourceTexts.FirstOrDefault(x => x.Id == id);
-            if (entity != null)
-            {
-                _context.ResourceTexts.Remove(entity);
-                _context.SaveChanges();
-            }
-            else
-            {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-            }
+            if (entity == null) return StatusCode(HttpStatusCode.NotFound);
+            entity.Deleted = true;
+            entity.DeleteDate = SystemTime.Now();
+            entity.DeletedBy = User.Identity.Name;
+            _context.SaveChanges();
+            return StatusCode(HttpStatusCode.NoContent);
         }
     }
 }

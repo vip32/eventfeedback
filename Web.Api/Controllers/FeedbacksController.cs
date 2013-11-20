@@ -3,71 +3,92 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Web.Http;
+using System.Web.Http.Description;
 using EventFeedback.Common;
 using EventFeedback.Domain;
 
 namespace EventFeedback.Web.Api.Controllers
 {
     [Authorize]
-    //[Route("api/v1/feedbacks")]
+    [RoutePrefix("api/v1/feedbacks")] // TODO : routes are defined in Startup.WebApi
     public class FeedbacksController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
         private readonly DataContext _context;
+        private readonly UserService _userService;
 
-        public FeedbacksController(DataContext context)
+        public FeedbacksController(DataContext context, UserService userService)
         {
             Guard.Against<ArgumentNullException>(context == null, "context cannot be null");
+            Guard.Against<ArgumentException>(userService == null, "userService cannot be null");
             _context = context;
+            _userService = userService;
         }
 
-        public IEnumerable<Feedback> Get()
+//        public IEnumerable<Feedback> GetForEvent() { throw new NotImplementedException(); }
+//
+//        public IEnumerable<Feedback> GetForSession() { throw new NotImplementedException(); }
+
+        [HttpGet]
+        [Route("")]
+        [ResponseType(typeof(IEnumerable<Feedback>))]
+        public IHttpActionResult Get()
         {
-            _traceSource.TraceInformation("feedbackscontroller get all");
-
-            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name, StringComparison.CurrentCultureIgnoreCase));
-            var result = _context.Feedbacks.Where(f => f.UserId == user.Id).AsEnumerable(); 
-            return result.Any() ? result : null;
+            var user = _userService.FindUserByName(User.Identity.Name);
+            if (user == null || !user.IsActive()) return StatusCode(HttpStatusCode.Unauthorized);
+            var result = _context.Feedbacks.Where(f => user != null && f.UserId == user.Id);
+            return Ok(result);
         }
 
-        public Feedback Get(int id)
+        [HttpGet]
+        [Route("{id:int}")]
+        [ResponseType(typeof(Feedback))]
+        public IHttpActionResult Get(int id)
         {
             Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");
 
-            _traceSource.TraceInformation("eventscontroller get " + id);
-            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name));
-            return _context.Feedbacks.FirstOrDefault(f => f.UserId == user.Id);
+            var user = _userService.FindUserByName(User.Identity.Name);
+            if (user == null || !user.IsActive()) return StatusCode(HttpStatusCode.Unauthorized);
+            var result = _context.Feedbacks.FirstOrDefault(f => user != null && f.UserId == user.Id);
+            if (result == null) return StatusCode(HttpStatusCode.NotFound);
+            return Ok(result);
         }
 
-        public void Post([FromBody] Feedback entity)
+        [HttpPost]
+        public IHttpActionResult Post([FromBody] Feedback entity)
         {
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
             Guard.Against<ArgumentException>(entity.Id != 0, "entity.id must be empty");
             Guard.Against<ArgumentException>(!entity.EventId.HasValue && !entity.SessionId.HasValue, "entity.eventid or entity.sessionid should be set");
             Guard.Against<ArgumentException>(entity.EventId.HasValue && entity.SessionId.HasValue, "entity.eventid or entity.sessionid should be set, not both");
 
-            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name, StringComparison.CurrentCultureIgnoreCase));
-            if (user == null) throw new HttpResponseException(HttpStatusCode.Unauthorized);
+            var user = _userService.FindUserByName(User.Identity.Name);
+            if (user == null || !user.IsActive()) return StatusCode(HttpStatusCode.Unauthorized);
 
             // check if feedback for this user allready present (event or session)
             if(entity.SessionId.HasValue)
                 if (_context.Feedbacks.Any(f => f.UserId == user.Id && f.SessionId == entity.SessionId))
-                    throw new HttpResponseException(HttpStatusCode.NotModified);
+                    return StatusCode(HttpStatusCode.NotModified);
             if (entity.EventId.HasValue)
                 if (_context.Feedbacks.Any(f => f.UserId == user.Id && f.EventId == entity.EventId))
-                    throw new HttpResponseException(HttpStatusCode.NotModified);
+                    return StatusCode(HttpStatusCode.NotModified);
 
             // TODO: check if the event is still active (DB!)
 
             entity.UserId = user.Id;
             _context.Feedbacks.Add(entity);
             _context.SaveChanges();
+
+            return Ok(entity);
         }
         
-        public void Put(int id, [FromBody] Feedback entity)
+        [HttpPut]
+        [Route("{id:int}")]
+        public IHttpActionResult Put(int id, [FromBody] Feedback entity)
         {
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
             Guard.Against<ArgumentException>(entity.Id == 0 && id == 0, "entity.id or id must be set");
@@ -75,12 +96,12 @@ namespace EventFeedback.Web.Api.Controllers
             //Guard.Against<ArgumentException>(entity.EventId.HasValue && entity.SessionId.HasValue, "entity.eventid or entity.sessionid should be set, not both");
 
             if (entity.Id == 0 && id != 0) entity.Id = id;
-            var user = _context.Users.FirstOrDefault(x => x.UserName.Equals(Thread.CurrentPrincipal.Identity.Name, StringComparison.CurrentCultureIgnoreCase));
-            if (user == null) throw new HttpResponseException(HttpStatusCode.Unauthorized);
+            var user = _userService.FindUserByName(User.Identity.Name);
+            if (user == null || !user.IsActive()) return StatusCode(HttpStatusCode.Unauthorized);
 
             var oldEntity = _context.Feedbacks.Find(entity.Id);
             if (oldEntity == null) throw new HttpResponseException(HttpStatusCode.NotFound);
-            if (oldEntity.UserId != user.Id) throw new HttpResponseException(HttpStatusCode.Unauthorized);
+            if (oldEntity.UserId != user.Id) return StatusCode(HttpStatusCode.Unauthorized);
 
             // TODO: check if the event is still active (DB!)
 
@@ -94,6 +115,25 @@ namespace EventFeedback.Web.Api.Controllers
                 entry.State = System.Data.Entity.EntityState.Modified;
             }
             _context.SaveChanges();
+            return Ok(entity);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        public IHttpActionResult Delete(int id)
+        {
+            Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");
+
+            var user = _userService.FindUserByName(User.Identity.Name);
+            if (user == null || !user.IsActive()) return StatusCode(HttpStatusCode.Unauthorized);
+
+            var entity = _context.Feedbacks.FirstOrDefault(f => f.Id == id && f.UserId == user.Id);
+            if (entity == null) return StatusCode(HttpStatusCode.NotFound);
+            entity.Deleted = true;
+            entity.DeleteDate = SystemTime.Now();
+            entity.DeletedBy = User.Identity.Name;
+            _context.SaveChanges();
+            return Ok(entity);
         }
     }
 }

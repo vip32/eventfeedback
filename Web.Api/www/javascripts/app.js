@@ -1203,7 +1203,7 @@ module.exports = Controller = (function(_super) {
             });
           },
           error: function(model, xhr, options) {
-            return alert('save error');
+            return console.warn('user save error', model);
           }
         });
       }
@@ -1698,10 +1698,10 @@ module.exports = Router = (function(_super) {
         return application.trigger(config.signintrigger);
       });
       vent.on('sync:fail:servererror', function() {
-        return alert('sync:server error');
+        return console.warn('sync:server error');
       });
       vent.on('sync:fail:unknown', function() {
-        return alert('sync:unknown error');
+        return console.warn('sync:unknown error');
       });
       application.on('home:index', function() {
         application.navigate('home');

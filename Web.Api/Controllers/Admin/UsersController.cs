@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Web.Http;
+using System.Web.Http.Description;
 using EventFeedback.Common;
 using EventFeedback.Domain;
 using EventFeedback.Web.Api.Models;
@@ -13,6 +14,7 @@ using EventFeedback.Web.Api.Models;
 namespace EventFeedback.Web.Api.Controllers.Admin
 {
     [Authorize(Roles = "Administrator")]
+    [RoutePrefix("api/v1/admin/users")]
     public class UsersController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
@@ -28,27 +30,28 @@ namespace EventFeedback.Web.Api.Controllers.Admin
             _userService = userService;
         }
 
-        [Route("api/v1/admin/users")]
         [HttpGet]
-        public IEnumerable<UserAdminBindingModel> Get([FromUri] string filter = "")
+        [Route("")]
+        [ResponseType(typeof(IEnumerable<User>))]
+        public IHttpActionResult Get([FromUri] string filter = "")
         {
             //Thread.Sleep(1500);
 
             _traceSource.TraceInformation("usersscontroller get all");
             IEnumerable<User> users;
-
-            if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
-                return 
-                    Map(_context.Users.OrderBy(u => u.UserName));
-            return
-                Map(_context.Users.OrderBy(u => u.UserName)
+            
+            return filter.Equals("all", StringComparison.CurrentCultureIgnoreCase)
+                ? Ok(Map(_context.Users.OrderBy(u => u.UserName)))
+                : Ok(Map(_context.Users.OrderBy(u => u.UserName)
                     .Include(u => u.Roles)
                     .Where(u => !(u.Active != null && !(bool) u.Active))
-                    .Where(u => !(u.Deleted != null && (bool) u.Deleted)));
+                    .Where(u => !(u.Deleted != null && (bool) u.Deleted))));
         }
 
-        [Route("api/v1/admin/users")]
-        public void Post(UserAdminBindingModel entity)
+        [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(User))]
+        public IHttpActionResult Post(UserAdminBindingModel entity)
         {
             _traceSource.TraceInformation("userscontroller post");
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
@@ -60,13 +63,16 @@ namespace EventFeedback.Web.Api.Controllers.Admin
             var result = _userService.CreateUser(user, entity.Password);
 
             // add the roles
-            if(result.Succeeded)
-                foreach(var role in entity.Roles.NullToEmpty().Split(' '))
+            if(result.Succeeded && !string.IsNullOrEmpty(entity.Roles))
+                foreach(var role in entity.Roles.Split(' '))
                     _userService.AddUserToRole(user.Id, role);
+            return Created("http://acme.com/users/" + user.Id, user);
         }
 
-        [Route("api/v1/admin/users/{id}")]
-        public void Put(string id, UserAdminBindingModel entity)
+        [HttpPut]
+        [ResponseType(typeof(User))]
+        [Route("{id}")]
+        public IHttpActionResult Put(string id, UserAdminBindingModel entity)
         {
             _traceSource.TraceInformation("usersscontroller put");
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
@@ -74,7 +80,7 @@ namespace EventFeedback.Web.Api.Controllers.Admin
 
             if (string.IsNullOrEmpty(entity.Id) && !string.IsNullOrEmpty(id)) entity.Id = id;
             if (!_context.Users.Has(entity.Id))
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                return StatusCode(HttpStatusCode.NotFound);
 
             var user = Map(entity);
             var entry = _context.Entry(user);
@@ -93,6 +99,23 @@ namespace EventFeedback.Web.Api.Controllers.Admin
             _userService.ClearUserRoles(user.Id);
             foreach (var role in entity.Roles.NullToEmpty().Split(' '))
                 _userService.AddUserToRole(user.Id, role);
+            return Ok(user);
+        }
+
+        [HttpDelete]
+        [Route("{id}")]
+        [Authorize(Roles = "Administrator")]
+        public IHttpActionResult Delete(string id)
+        {
+            Guard.Against<ArgumentException>(string.IsNullOrEmpty(id), "id cannot be empty or zero");
+
+            var entity = _context.Users.Find(id);
+            if (entity == null) return StatusCode(HttpStatusCode.NotFound);
+            entity.Deleted = true;
+            entity.DeleteDate = SystemTime.Now();
+            entity.DeletedBy = User.Identity.Name;
+            _context.SaveChanges();
+            return StatusCode(HttpStatusCode.NoContent);
         }
 
         private IEnumerable<UserAdminBindingModel> Map(IEnumerable<User> sources)
@@ -127,6 +150,4 @@ namespace EventFeedback.Web.Api.Controllers.Admin
             };
         }
     }
-
-    
 }

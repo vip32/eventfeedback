@@ -55,7 +55,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Controllers\Admin\RolesController.cs" />
-    <Compile Include="Controllers\Admin\TestController.cs" />
     <Compile Include="Controllers\Admin\UsersController.cs" />
     <Compile Include="Controllers\Admin\EventReportsController.cs" />
     <Compile Include="Controllers\FeedbackDefinitionsController.cs">
@@ -66,6 +65,7 @@
     <Compile Include="Controllers\FeedbacksController.cs" />
     <Compile Include="Controllers\SessionsController.cs" />
     <Compile Include="Controllers\EventsController.cs" />
+    <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Models\RoleAdminBindingModel.cs" />
     <Compile Include="Models\UserAdminBindingModel.cs" />

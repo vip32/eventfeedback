@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Web.Http;
+using System.Web.Http.Description;
 using EventFeedback.Common;
 using EventFeedback.Domain;
 using EventFeedback.Web.Api.Models;
@@ -31,13 +32,13 @@ namespace EventFeedback.Web.Api.Controllers.Admin
 
         [Route("api/v1/admin/roles")]
         [HttpGet]
-        public IEnumerable<RoleAdminBindingModel> Get()
+        [ResponseType(typeof(IEnumerable<RoleAdminBindingModel>))]
+        public IHttpActionResult Get()
         {
             //Thread.Sleep(1500);
             _traceSource.TraceInformation("usersscontroller get all");
-
             return
-                Map(_context.Roles.OrderBy(u => u.Name));
+                Ok(Map(_context.Roles.OrderBy(u => u.Name)));
         }
 
         private IEnumerable<RoleAdminBindingModel> Map(IEnumerable<IdentityRole> sources)
