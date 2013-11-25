@@ -53,6 +53,7 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
 
     vent.on 'fetch:start', (title) =>
       # blockui here https://github.com/malsup/blockui/
+      $('.page-content').block(message:null)
       $('#spinner').spin
         lines: 5, length: 8, width: 5, radius: 4
         corners: 0, rotate: 56, trail: 40, speed: 1.5,
@@ -61,9 +62,11 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
     vent.on 'fetch:done', =>
       $('#spinner').spin(false)
       $('.page-content').removeClass('loading')
+      $('.page-content').unblock()
     vent.on 'fetch:fail', =>
       $('#spinner').spin(false)
       $('.page-content').removeClass('loading')
+      $('.page-content').unblock()
 
     application.on 'navigation:back:on', ->
       $('#menu-back').show()

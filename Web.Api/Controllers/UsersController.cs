@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Security.Claims;
+using System.Threading;
 using System.Web.Http;
 using EventFeedback.Common;
 using EventFeedback.Domain;
@@ -31,6 +32,8 @@ namespace EventFeedback.Web.Api.Controllers
         public HttpResponseMessage Token(LoginBindingModel login)
         {
             Guard.Against<ArgumentException>(login == null, "login cannot be empty be null");
+
+//            Thread.Sleep(5500);
 
             var user = _userService.FindUser(login.UserName, login.Password);
             if (user != null && user.IsActive())

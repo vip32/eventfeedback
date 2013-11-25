@@ -238,6 +238,8 @@ $(function() {
   $.ajaxSetup({
     timeout: 8000
   });
+  $.blockUI.defaults.fadeOut = 50;
+  $.blockUI.defaults.fadeIn = 50;
   FastClick.attach(document.body);
   return app.initialize();
 });
@@ -2879,6 +2881,9 @@ module.exports.Header = View = (function(_super) {
       return _this.setSubHeader(title, glyphicon);
     });
     vent.on('fetch:start', function(title) {
+      $('.page-content').block({
+        message: null
+      });
       $('#spinner').spin({
         lines: 5,
         length: 8,
@@ -2895,11 +2900,13 @@ module.exports.Header = View = (function(_super) {
     });
     vent.on('fetch:done', function() {
       $('#spinner').spin(false);
-      return $('.page-content').removeClass('loading');
+      $('.page-content').removeClass('loading');
+      return $('.page-content').unblock();
     });
     vent.on('fetch:fail', function() {
       $('#spinner').spin(false);
-      return $('.page-content').removeClass('loading');
+      $('.page-content').removeClass('loading');
+      return $('.page-content').unblock();
     });
     application.on('navigation:back:on', function() {
       return $('#menu-back').show();
