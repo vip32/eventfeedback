@@ -17,7 +17,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
   showEventsIndex: ->
     @events.fetch(
-      # reload: true
+      reload: true # needed after login, otherwise FAIL on fetch
       data:
         filter: 'all'
     ).done (models) ->
