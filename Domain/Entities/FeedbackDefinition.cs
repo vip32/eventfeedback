@@ -20,6 +20,7 @@ namespace EventFeedback.Domain
         public string Description { get; set; }
 
         public bool? Active0 { get; set; }
+        public int Order0 { get; set; }
         public FeedbackQuestionType? QuestionType0 { get; set; }
         [StringLength(512)]
         public string Title0 { get; set; }
@@ -30,6 +31,7 @@ namespace EventFeedback.Domain
         public bool? Required0 { get; set; }
 
         public bool? Active1 { get; set; }
+        public int Order1 { get; set; }
         public FeedbackQuestionType? QuestionType1 { get; set; }
         [StringLength(512)]
         public string Title1 { get; set; }
@@ -40,6 +42,7 @@ namespace EventFeedback.Domain
         public bool? Required1 { get; set; }
 
         public bool? Active2 { get; set; }
+        public int Order2 { get; set; }
         public FeedbackQuestionType? QuestionType2 { get; set; }
         [StringLength(512)]
         public string Title2 { get; set; }
@@ -50,6 +53,7 @@ namespace EventFeedback.Domain
         public bool? Required2 { get; set; }
 
         public bool? Active3 { get; set; }
+        public int Order3 { get; set; }
         public FeedbackQuestionType? QuestionType3 { get; set; }
         [StringLength(512)]
         public string Title3 { get; set; }
@@ -60,6 +64,7 @@ namespace EventFeedback.Domain
         public bool? Required3 { get; set; }
 
         public bool? Active4 { get; set; }
+        public int Order4 { get; set; }
         public FeedbackQuestionType? QuestionType4 { get; set; }
         [StringLength(512)]
         public string Title4 { get; set; }
@@ -70,6 +75,7 @@ namespace EventFeedback.Domain
         public bool? Required4 { get; set; }
 
         public bool? Active5 { get; set; }
+        public int Order5 { get; set; }
         public FeedbackQuestionType? QuestionType5 { get; set; }
         [StringLength(512)]
         public string Title5 { get; set; }
@@ -80,6 +86,7 @@ namespace EventFeedback.Domain
         public bool? Required5 { get; set; }
 
         public bool? Active6 { get; set; }
+        public int Order6 { get; set; }
         public FeedbackQuestionType? QuestionType6 { get; set; }
         [StringLength(512)]
         public string Title6 { get; set; }
@@ -90,6 +97,7 @@ namespace EventFeedback.Domain
         public bool? Required6 { get; set; }
 
         public bool? Active7 { get; set; }
+        public int Order7 { get; set; }
         public FeedbackQuestionType? QuestionType7 { get; set; }
         [StringLength(512)]
         public string Title7 { get; set; }
@@ -100,6 +108,7 @@ namespace EventFeedback.Domain
         public bool? Required7 { get; set; }
 
         public bool? Active8 { get; set; }
+        public int Order8 { get; set; }
         public FeedbackQuestionType? QuestionType8 { get; set; }
         [StringLength(512)]
         public string Title8 { get; set; }
@@ -110,6 +119,7 @@ namespace EventFeedback.Domain
         public bool? Required8 { get; set; }
 
         public bool? Active9 { get; set; }
+        public int Order9 { get; set; }
         public FeedbackQuestionType? QuestionType9 { get; set; }
         [StringLength(512)]
         public string Title9 { get; set; }

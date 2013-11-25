@@ -52,6 +52,7 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
       @setSubHeader(title, glyphicon)
 
     vent.on 'fetch:start', (title) =>
+      # blockui here https://github.com/malsup/blockui/
       $('#spinner').spin
         lines: 5, length: 8, width: 5, radius: 4
         corners: 0, rotate: 56, trail: 40, speed: 1.5,

@@ -47,6 +47,8 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
   doSignin: (username, password) ->
     # get the accesstoken
+
+    vent.trigger 'fetch:start' # bacuase save() does not trigger spinner
     userToken = new UserToken.Model
       userName: username
       password: password
@@ -55,7 +57,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         settings.set('api_token', userToken.get('accessToken'))
         settings.set('api_token_expires', userToken.get('expires'))
         settings.set('api_authenticated', true)
-
+        vent.trigger 'fetch:done' # stop save() spinner
         # get the userprofile
         profile = new UserProfile.Model()
         profile.fetch
@@ -71,6 +73,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         # alert('signin failed')
         vent.trigger 'message:error:show', 'sign in failed'
         vent.trigger 'navigation:signout'
+        vent.trigger 'fetch:fail' # stop save() spinner
 
   showAbout: ->
     application.trigger 'set:active:header', 'About', 'info-sign'

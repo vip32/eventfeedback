@@ -235,6 +235,9 @@ var app;
 app = require('application');
 
 $(function() {
+  $.ajaxSetup({
+    timeout: 8000
+  });
   FastClick.attach(document.body);
   return app.initialize();
 });
@@ -1601,6 +1604,7 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.doSignin = function(username, password) {
     var userToken,
       _this = this;
+    vent.trigger('fetch:start');
     userToken = new UserToken.Model({
       userName: username,
       password: password
@@ -1611,6 +1615,7 @@ module.exports = Controller = (function(_super) {
         settings.set('api_token', userToken.get('accessToken'));
         settings.set('api_token_expires', userToken.get('expires'));
         settings.set('api_authenticated', true);
+        vent.trigger('fetch:done');
         profile = new UserProfile.Model();
         return profile.fetch({
           success: function(model, response, options) {
@@ -1628,7 +1633,8 @@ module.exports = Controller = (function(_super) {
       },
       error: function(model, xhr, options) {
         vent.trigger('message:error:show', 'sign in failed');
-        return vent.trigger('navigation:signout');
+        vent.trigger('navigation:signout');
+        return vent.trigger('fetch:fail');
       }
     });
   };
@@ -2098,7 +2104,6 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showEventsIndex = function() {
     return this.events.fetch({
-      reload: true,
       data: {
         filter: 'all'
       }
