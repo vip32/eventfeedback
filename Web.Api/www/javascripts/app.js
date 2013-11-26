@@ -236,10 +236,10 @@ app = require('application');
 
 $(function() {
   $.ajaxSetup({
-    timeout: 8000
+    timeout: 30000
   });
-  $.blockUI.defaults.fadeOut = 50;
-  $.blockUI.defaults.fadeIn = 50;
+  $.blockUI.defaults.fadeOut = 250;
+  $.blockUI.defaults.fadeIn = 250;
   FastClick.attach(document.body);
   return app.initialize();
 });
@@ -372,6 +372,7 @@ module.exports = Collection = (function(_super) {
       return console.log('fetch:off', this.constructor.name, collection, response, options);
     }).fail(function(collection, response, options) {
       vent.trigger('fetch:fail');
+      vent.trigger('message:error:show', 'fetch failed');
       return console.warn('fetch:fail', this.constructor.name, collection, response, options);
     });
   };
