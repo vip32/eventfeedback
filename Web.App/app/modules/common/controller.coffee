@@ -69,7 +69,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         settings.set('api_token', userToken.get('accessToken'))
         settings.set('api_token_expires', userToken.get('expires'))
         settings.set('api_authenticated', true)
-        vent.trigger 'message:success:show', 'token received ' + username
+        # vent.trigger 'message:success:show', 'token received ' + username
         # vent.trigger 'fetch:done' # stop save() spinner
         # get the userprofile
         profile = new UserProfile.Model()

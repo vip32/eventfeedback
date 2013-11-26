@@ -1639,7 +1639,6 @@ module.exports = Controller = (function(_super) {
         settings.set('api_token', userToken.get('accessToken'));
         settings.set('api_token_expires', userToken.get('expires'));
         settings.set('api_authenticated', true);
-        vent.trigger('message:success:show', 'token received ' + username);
         profile = new UserProfile.Model();
         return profile.fetch({
           success: function(model, response, options) {
