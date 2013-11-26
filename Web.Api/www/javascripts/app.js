@@ -372,7 +372,6 @@ module.exports = Collection = (function(_super) {
       return console.log('fetch:off', this.constructor.name, collection, response, options);
     }).fail(function(collection, response, options) {
       vent.trigger('fetch:fail');
-      vent.trigger('message:error:show', 'fetch failed');
       return console.warn('fetch:fail', this.constructor.name, collection, response, options);
     });
   };

@@ -6,6 +6,10 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>EventFeedback</title>
+    <script type="text/javascript">
+        if (window.location.protocol != "https:")
+            window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
+    </script>
     <link rel="stylesheet" href="www/stylesheets/app.css">
 
     <!-- standard shortcut icon -->
@@ -25,10 +29,6 @@
     <!-- retina iPad iOS 7 -->
     <link rel="apple-touch-icon" href="www/images/icon-152x152.png" sizes="152x152">
 
-    <script type="text/javascript">
-        if (window.location.protocol != "https:")
-            window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
-    </script>
     <script src="www/javascripts/vendor.js"></script>
     <script src="www/javascripts/app.js"></script>
     <script>require('initialize');</script>

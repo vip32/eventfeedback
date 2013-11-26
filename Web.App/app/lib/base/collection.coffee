@@ -41,5 +41,5 @@ module.exports = class Collection extends Backbone.Collection
         console.log 'fetch:off', @constructor.name, collection, response, options
       .fail (collection, response, options) ->
         vent.trigger 'fetch:fail'
-        vent.trigger 'message:error:show', 'fetch failed'
+        # vent.trigger 'message:error:show', 'fetch failed'
         console.warn  'fetch:fail', @constructor.name, collection, response, options
