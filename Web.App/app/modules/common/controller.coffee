@@ -34,14 +34,26 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     , 3000
 
   showHome: ->
-    application.trigger 'set:active:header', 'Home', 'home'
+    vent.trigger 'set:active:header', 'home:index', '', 'home'
     View = require './views/home-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)
 
   showSignin: ->
-    application.trigger 'set:active:header', 'Sign-in', 'user'
+    vent.trigger 'set:active:header', 'signin:index', application.resources.key('Title_SignIn'), 'user'
     View = require './views/signin-view'
+    view = new View(resources: application.resources)
+    application.layout.content.show(view)
+
+  showAbout: ->
+    vent.trigger 'set:active:header', 'about:index', application.resources.key('Title_About'), 'info-sign'
+    View = require './views/about-view'
+    view = new View(resources: application.resources)
+    application.layout.content.show(view)
+
+  showDebug: ->
+    vent.trigger 'set:active:header', 'debug:index', application.resources.key('Title_Debug'), 'cog'
+    View = require './views/debug-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)
 
@@ -57,7 +69,8 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         settings.set('api_token', userToken.get('accessToken'))
         settings.set('api_token_expires', userToken.get('expires'))
         settings.set('api_authenticated', true)
-        vent.trigger 'fetch:done' # stop save() spinner
+        vent.trigger 'message:success:show', 'token received ' + username
+        # vent.trigger 'fetch:done' # stop save() spinner
         # get the userprofile
         profile = new UserProfile.Model()
         profile.fetch
@@ -67,25 +80,10 @@ module.exports = class Controller extends Backbone.Marionette.Controller
             vent.trigger 'navigation:signin'
           error: (model, xhr, options) ->
             # alert('profile fetch failed')
-            vent.trigger 'message:error:show', 'profile fetch failed'
+            # vent.trigger 'message:error:show', 'profile fetch failed'
             vent.trigger 'navigation:signout'
       error: (model, xhr, options) ->
         # alert('signin failed')
         vent.trigger 'message:error:show', 'sign in failed'
         vent.trigger 'navigation:signout'
         vent.trigger 'fetch:fail' # stop save() spinner
-
-  showAbout: ->
-    application.trigger 'set:active:header', 'About', 'info-sign'
-    View = require './views/about-view'
-    view = new View(resources: application.resources)
-    application.layout.content.show(view)
-
-  showDebug: ->
-    application.trigger 'set:active:header', 'Debug', 'cog'
-    View = require './views/debug-view'
-    view = new View(resources: application.resources)
-    application.layout.content.show(view)
-
-  onClose: ->
-    console.log 'about controller close'

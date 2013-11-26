@@ -238,8 +238,8 @@ $(function() {
   $.ajaxSetup({
     timeout: 30000
   });
-  $.blockUI.defaults.fadeOut = 250;
-  $.blockUI.defaults.fadeIn = 250;
+  $.blockUI.defaults.fadeOut = 150;
+  $.blockUI.defaults.fadeIn = 50;
   FastClick.attach(document.body);
   return app.initialize();
 });
@@ -1135,7 +1135,7 @@ module.exports = Controller = (function(_super) {
       }
     }).done(function(models) {
       var View, view;
-      application.trigger('set:active:header', 'Admin - Events', 'bookmark');
+      vent.trigger('set:active:header', 'admin:events:edit', application.resources.key('Title_Events'), 'bookmark');
       View = require('./views/events-edit-view');
       view = new View({
         collection: models,
@@ -1157,6 +1157,7 @@ module.exports = Controller = (function(_super) {
         reload: true
       }).done(function(sessions) {
         var View, view;
+        vent.trigger('set:active:header', 'admin:events:edit', application.resources.key('Title_Sessions'), 'comment');
         View = require('./views/sessions-edit-view');
         view = new View({
           model: events.get(id),
@@ -1180,7 +1181,7 @@ module.exports = Controller = (function(_super) {
         }
       }).done(function(users) {
         var View, view;
-        application.trigger('set:active:header', 'Admin - Users', 'bookmark');
+        vent.trigger('set:active:header', 'admin:users:edit', application.resources.key('Title_Admin_Users'), 'user');
         users.on('change', function(model) {
           console.log('user change:', model);
           model.credentials = users.credentials;
@@ -1586,7 +1587,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showHome = function() {
     var View, view;
-    application.trigger('set:active:header', 'Home', 'home');
+    vent.trigger('set:active:header', 'home:index', '', 'home');
     View = require('./views/home-view');
     view = new View({
       resources: application.resources
@@ -1596,8 +1597,28 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showSignin = function() {
     var View, view;
-    application.trigger('set:active:header', 'Sign-in', 'user');
+    vent.trigger('set:active:header', 'signin:index', application.resources.key('Title_SignIn'), 'user');
     View = require('./views/signin-view');
+    view = new View({
+      resources: application.resources
+    });
+    return application.layout.content.show(view);
+  };
+
+  Controller.prototype.showAbout = function() {
+    var View, view;
+    vent.trigger('set:active:header', 'about:index', application.resources.key('Title_About'), 'info-sign');
+    View = require('./views/about-view');
+    view = new View({
+      resources: application.resources
+    });
+    return application.layout.content.show(view);
+  };
+
+  Controller.prototype.showDebug = function() {
+    var View, view;
+    vent.trigger('set:active:header', 'debug:index', application.resources.key('Title_Debug'), 'cog');
+    View = require('./views/debug-view');
     view = new View({
       resources: application.resources
     });
@@ -1618,7 +1639,7 @@ module.exports = Controller = (function(_super) {
         settings.set('api_token', userToken.get('accessToken'));
         settings.set('api_token_expires', userToken.get('expires'));
         settings.set('api_authenticated', true);
-        vent.trigger('fetch:done');
+        vent.trigger('message:success:show', 'token received ' + username);
         profile = new UserProfile.Model();
         return profile.fetch({
           success: function(model, response, options) {
@@ -1629,7 +1650,6 @@ module.exports = Controller = (function(_super) {
             return vent.trigger('navigation:signin');
           },
           error: function(model, xhr, options) {
-            vent.trigger('message:error:show', 'profile fetch failed');
             return vent.trigger('navigation:signout');
           }
         });
@@ -1640,30 +1660,6 @@ module.exports = Controller = (function(_super) {
         return vent.trigger('fetch:fail');
       }
     });
-  };
-
-  Controller.prototype.showAbout = function() {
-    var View, view;
-    application.trigger('set:active:header', 'About', 'info-sign');
-    View = require('./views/about-view');
-    view = new View({
-      resources: application.resources
-    });
-    return application.layout.content.show(view);
-  };
-
-  Controller.prototype.showDebug = function() {
-    var View, view;
-    application.trigger('set:active:header', 'Debug', 'cog');
-    View = require('./views/debug-view');
-    view = new View({
-      resources: application.resources
-    });
-    return application.layout.content.show(view);
-  };
-
-  Controller.prototype.onClose = function() {
-    return console.log('about controller close');
   };
 
   return Controller;
@@ -2113,7 +2109,7 @@ module.exports = Controller = (function(_super) {
       }
     }).done(function(models) {
       var View, view;
-      application.trigger('set:active:header', application.resources.key('Title_Events'), 'bookmark');
+      vent.trigger('set:active:header', 'events:index', application.resources.key('Title_Events'), 'bookmark');
       View = require('./views/events-index-view');
       view = new View({
         collection: models,
@@ -2130,7 +2126,7 @@ module.exports = Controller = (function(_super) {
         filter: 'all'
       }
     }).done(function(models) {
-      application.trigger('set:active:header', models.get(id).get('title'), 'bookmark');
+      vent.trigger('set:active:header', 'events:index', models.get(id).get('title'), 'bookmark');
       settings.set('active-event', id);
       return _this.sessions.fetch().done(function(sessions) {
         var View, view;
@@ -2148,7 +2144,7 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.showSessionDetails = function(id) {
     return this.sessions.fetch().done(function(models) {
       var View, view;
-      application.trigger('set:active:header', models.get(id).get('title'), 'comment');
+      vent.trigger('set:active:header', 'events:index', models.get(id).get('title'), 'comment');
       settings.set('active-session', id);
       View = require('./views/session-details-view');
       view = new View({
@@ -2815,8 +2811,8 @@ module.exports.HeaderItem = ItemView = (function(_super) {
   ItemView.prototype.initialize = function(options) {
     var _this = this;
     this.resources = options != null ? options.resources : void 0;
-    return application.on('set:active:header', function(title) {
-      if (title === _this.model.get('title')) {
+    return vent.on('set:active:header', function(trigger, title, glyphicon) {
+      if (trigger === _this.model.get('trigger')) {
         return _this.setActive();
       } else {
         return _this.setInactive();
@@ -2878,7 +2874,7 @@ module.exports.Header = View = (function(_super) {
   View.prototype.initialize = function(options) {
     var _this = this;
     this.resources = options != null ? options.resources : void 0;
-    application.on('set:active:header', function(title, glyphicon) {
+    vent.on('set:active:header', function(trigger, title, glyphicon) {
       return _this.setSubHeader(title, glyphicon);
     });
     vent.on('fetch:start', function(title) {

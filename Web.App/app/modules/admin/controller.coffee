@@ -27,7 +27,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       data:
         filter: 'all'
     ).done (models) ->
-      application.trigger 'set:active:header', 'Admin - Events', 'bookmark' # admin:events:edit
+      vent.trigger 'set:active:header', 'admin:events:edit', application.resources.key('Title_Events'), 'bookmark'
       View = require './views/events-edit-view'
       view = new View(collection: models, resources: application.resources)
       application.layout.content.show(view)
@@ -42,6 +42,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       @sessions.fetch(
         reload: true
       ).done (sessions) =>
+        vent.trigger 'set:active:header', 'admin:events:edit', application.resources.key('Title_Sessions'), 'comment'
         View = require './views/sessions-edit-view'
         view = new View(model: events.get(id), collection: sessions, resources: application.resources)
         application.layout.content.show(view)
@@ -55,7 +56,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         data:
           filter: 'all'
       ).done (users) =>
-        application.trigger 'set:active:header', 'Admin - Users', 'bookmark' # admin:accounts:edit
+        vent.trigger 'set:active:header', 'admin:users:edit', application.resources.key('Title_Admin_Users'), 'user' #
         users.on 'change', (model) =>
           console.log 'user change:', model
           model.credentials = users.credentials

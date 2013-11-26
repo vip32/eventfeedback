@@ -7726,7 +7726,11 @@ td.visible-print {
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
+html {
+  height: 100%;
+}
 body {
+  height: 100%;
   padding-top: 60px;
   padding-bottom: 40px;
   -webkit-user-select: none;
@@ -7838,6 +7842,9 @@ input.form-control {
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px;
 }
+.page-content {
+  height: 100%;
+}
 .page-content .container {
   padding-left: 0px;
   padding-right: 0px;
@@ -7933,6 +7940,7 @@ textarea {
 }
 
 #wrapper {
+  height: 100%;
   padding-left: 188px;
   transition: all 0.1s ease 0s;
 }

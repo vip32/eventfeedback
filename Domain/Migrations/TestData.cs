@@ -15,6 +15,10 @@ namespace EventFeedback.Domain
         private const string Lorem1 = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
         private static readonly Random Random = new Random();
 
+        /// <summary>
+        /// Seeds the specified context.
+        /// </summary>
+        /// <param name="context">The context.</param>
         public static void Seed(DataContext context)
         {
             TraceSource.TraceInformation("seeding database");
@@ -107,8 +111,10 @@ namespace EventFeedback.Domain
                     new ResourceText { Key = "Title_Home", Value = "Home", Language = "de-DE" },
                     new ResourceText { Key = "Title_About", Value = "Über", Language = "de-DE" },
                     new ResourceText { Key = "Title_Events", Value = "Veranstaltungen", Language = "de-DE" },
+                    new ResourceText { Key = "Title_Admin_Users", Value = "Benutzer", Language = "de-DE" },
                     new ResourceText { Key = "Title_Sessions", Value = "Sessions", Language = "de-DE" },
                     new ResourceText { Key = "Title_SignIn", Value = "Einloggen", Language = "de-DE" },
+                    new ResourceText { Key = "Title_SignOut", Value = "Ausloggen", Language = "de-DE" },
                     new ResourceText { Key = "Title_Debug", Value = "Debug", Language = "de-DE" },
                     new ResourceText { Key = "Question1_Title", Value = "Vortragsstil", Language = "de-DE" },
                     new ResourceText

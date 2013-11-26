@@ -12,8 +12,8 @@ module.exports.HeaderItem = class ItemView extends Backbone.Marionette.ItemView
   initialize: (options) ->
     @resources = options?.resources
 
-    application.on 'set:active:header', (title) =>
-      if title is @model.get('title')
+    vent.on 'set:active:header', (trigger, title, glyphicon) =>
+      if trigger is @model.get('trigger')
         @setActive()
       else
         @setInactive()
@@ -48,11 +48,10 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
   initialize: (options) ->
     @resources = options?.resources
 
-    application.on 'set:active:header', (title, glyphicon) =>
+    vent.on 'set:active:header', (trigger, title, glyphicon) =>
       @setSubHeader(title, glyphicon)
 
     vent.on 'fetch:start', (title) =>
-      # blockui here https://github.com/malsup/blockui/
       $('.page-content').block(message:null)
       $('#spinner').spin
         lines: 5, length: 8, width: 5, radius: 4

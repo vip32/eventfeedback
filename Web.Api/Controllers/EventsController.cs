@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Description;
 using EventFeedback.Common;
@@ -29,7 +30,7 @@ namespace EventFeedback.Web.Api.Controllers
         [ResponseType(typeof(IEnumerable<Event>))]
         public IHttpActionResult Get([FromUri] string filter = "")
         {
-            //Thread.Sleep(1500);
+            Thread.Sleep(1500);
             IEnumerable<Event> result;
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
                 result = _context.Events.OrderBy(e => e.StartDate);
