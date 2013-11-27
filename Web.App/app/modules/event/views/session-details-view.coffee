@@ -15,6 +15,7 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
   serializeData: ->
     resources: @resources?.toJSON()
     model: @model.toJSON()
+    feedbackdefinition: @model.get('feedbackDefinition')
 
   onBack: =>
     console.log 'back from session-details'
@@ -24,9 +25,13 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
     $('input.rating[type=number]').rating()
     $('textarea').autosize()
 
+
   onSubmit: (e) ->
     e.preventDefault()
-    alert('todo')
+    data = Backbone.Syphon.serialize(@)
+    # vent.trigger 'view:feedback:do', data
+    console.log 'data:', data
+    alert data.answer0
 
   onClose: ->
     application.off 'navigation:back', @onBack

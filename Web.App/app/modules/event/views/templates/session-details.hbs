@@ -16,60 +16,385 @@
   </div>
 
   <form>
-
+    {{#if feedbackdefinition.active0}}
     <div class="row">
-      <div class="col-xs-4 col-md-3">{{resources.Question1_Title}}</div>
+      {{#ifCond feedbackdefinition.questionType0 0}}
+      <div class="col-md-3">{{feedbackdefinition.title0}}</div>
+      <div class="col-md-9">
+        <textarea name="answer0"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType0 1}}
+      <div class="col-md-3">{{feedbackdefinition.title0}}</div>
+      <div class="col-md-9">
+        <input type="text" name="answer0" maxlength="2048"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType0 10}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title0}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="3" data-min="1"
+             name="answer0" id="answer0" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType0 11}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title0}}</div>
       <div class="col-xs-8 col-md-9">
         <input type="number" data-max="5" data-min="1"
-             name="rate1" id="rate1" class="rating" value="0" />
+             name="answer0" id="answer0" class="rating" value="0" />
       </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType0 12}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title0}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="10" data-min="1"
+             name="answer0" id="answer0" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
     </div>
+    {{/if}}
 
+    {{#if feedbackdefinition.active1}}
     <div class="row">
-      <div class="col-xs-4 col-md-3">{{resources.Question2_Title}}</div>
+      {{#ifCond feedbackdefinition.questionType1 0}}
+      <div class="col-md-3">{{feedbackdefinition.title1}}</div>
+      <div class="col-md-9">
+        <textarea name="answer1"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType1 1}}
+      <div class="col-md-3">{{feedbackdefinition.title1}}</div>
+      <div class="col-md-9">
+        <input type="text" name="answer1" maxlength="2048"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType1 10}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title1}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="3" data-min="1"
+             name="answer1" id="answer1" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType1 11}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title1}}</div>
       <div class="col-xs-8 col-md-9">
         <input type="number" data-max="5" data-min="1"
-             name="rate2" id="rate2" class="rating" value="0" />
+             name="answer1" id="answer1" class="rating" value="0" />
       </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType1 12}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title1}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="10" data-min="1"
+             name="answer1" id="answer1" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
     </div>
+    {{/if}}
 
-
+    {{#if feedbackdefinition.active2}}
     <div class="row">
-      <div class="col-xs-4 col-md-3">{{resources.Question3_Title}}</div>
+      {{#ifCond feedbackdefinition.questionType2 0}}
+      <div class="col-md-3">{{feedbackdefinition.title2}}</div>
+      <div class="col-md-9">
+        <textarea name="answer2"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType2 1}}
+      <div class="col-md-3">{{feedbackdefinition.title2}}</div>
+      <div class="col-md-9">
+        <input type="text" name="answer2" maxlength="2048"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType2 10}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title2}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="3" data-min="1"
+             name="answer2" id="answer2" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType2 11}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title2}}</div>
       <div class="col-xs-8 col-md-9">
         <input type="number" data-max="5" data-min="1"
-             name="rate3" id="rate3" class="rating" value="0" />
+             name="answer2" id="answer2" class="rating" value="0" />
       </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType2 12}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title2}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="10" data-min="1"
+             name="answer2" id="answer2" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
     </div>
+    {{/if}}
 
+    {{#if feedbackdefinition.active3}}
     <div class="row">
-      <div class="col-xs-4 col-md-3">{{resources.Question4_Title}}</div>
+      {{#ifCond feedbackdefinition.questionType3 0}}
+      <div class="col-md-3">{{feedbackdefinition.title3}}</div>
+      <div class="col-md-9">
+        <textarea name="answer3"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType3 1}}
+      <div class="col-md-3">{{feedbackdefinition.title3}}</div>
+      <div class="col-md-9">
+        <input type="text" name="answer3" maxlength="2048"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType3 10}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title3}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="3" data-min="1"
+             name="answer3" id="answer3" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType3 11}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title3}}</div>
       <div class="col-xs-8 col-md-9">
         <input type="number" data-max="5" data-min="1"
-             name="rate4" id="rate4" class="rating" value="0" />
+             name="answer3" id="answer3" class="rating" value="0" />
       </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType3 12}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title3}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="10" data-min="1"
+             name="answer3" id="answer3" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
     </div>
+    {{/if}}
 
+    {{#if feedbackdefinition.active4}}
     <div class="row">
-      <div class="col-md-3">{{resources.Question5_Title}}</div>
-        <div class="col-md-9">
-          <textarea name="question5"></textarea>
-        </div>
+      {{#ifCond feedbackdefinition.questionType4 0}}
+      <div class="col-md-3">{{feedbackdefinition.title4}}</div>
+      <div class="col-md-9">
+        <textarea name="answer4"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType4 1}}
+      <div class="col-md-3">{{feedbackdefinition.title4}}</div>
+      <div class="col-md-9">
+        <input type="text" name="answer4" maxlength="2048"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType4 10}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title4}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="3" data-min="1"
+             name="answer4" id="answer4" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType4 11}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title4}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="5" data-min="1"
+             name="answer4" id="answer4" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType4 12}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title4}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="10" data-min="1"
+             name="answer4" id="answer4" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
     </div>
+    {{/if}}
 
+    {{#if feedbackdefinition.active5}}
     <div class="row">
-      <div class="col-md-3">{{resources.Question6_Title}}</div>
-        <div class="col-md-9">
-          <textarea name="question6"></textarea>
-        </div>
+      {{#ifCond feedbackdefinition.questionType5 0}}
+      <div class="col-md-3">{{feedbackdefinition.title5}}</div>
+      <div class="col-md-9">
+        <textarea name="answer5"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType5 1}}
+      <div class="col-md-3">{{feedbackdefinition.title5}}</div>
+      <div class="col-md-9">
+        <input type="text" name="answer5" maxlength="2048"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType5 10}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title5}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="3" data-min="1"
+             name="answer5" id="answer5" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType5 11}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title5}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="5" data-min="1"
+             name="answer5" id="answer5" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType5 12}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title5}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="10" data-min="1"
+             name="answer5" id="answer5" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
     </div>
+    {{/if}}
 
+    {{#if feedbackdefinition.active6}}
     <div class="row">
-      <div class="col-md-3">{{resources.Question7_Title}}</div>
-        <div class="col-md-9">
-          <textarea name="question6"></textarea>
-        </div>
+      {{#ifCond feedbackdefinition.questionType6 0}}
+      <div class="col-md-3">{{feedbackdefinition.title6}}</div>
+      <div class="col-md-9">
+        <textarea name="answer6"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType6 1}}
+      <div class="col-md-3">{{feedbackdefinition.title6}}</div>
+      <div class="col-md-9">
+        <input type="text" name="answer6" maxlength="2048"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType6 10}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title6}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="3" data-min="1"
+             name="answer6" id="answer6" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType6 11}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title6}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="5" data-min="1"
+             name="answer6" id="answer6" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType6 12}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title6}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="10" data-min="1"
+             name="answer6" id="answer6" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
     </div>
+    {{/if}}
+
+    {{#if feedbackdefinition.active7}}
+    <div class="row">
+      {{#ifCond feedbackdefinition.questionType7 0}}
+      <div class="col-md-3">{{feedbackdefinition.title7}}</div>
+      <div class="col-md-9">
+        <textarea name="answer7"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType7 1}}
+      <div class="col-md-3">{{feedbackdefinition.title7}}</div>
+      <div class="col-md-9">
+        <input type="text" name="answer7" maxlength="2048"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType7 10}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title7}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="3" data-min="1"
+             name="answer7" id="answer7" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType7 11}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title7}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="5" data-min="1"
+             name="answer7" id="answer7" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType7 12}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title7}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="10" data-min="1"
+             name="answer7" id="answer7" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+    </div>
+    {{/if}}
+
+    {{#if feedbackdefinition.active8}}
+    <div class="row">
+      {{#ifCond feedbackdefinition.questionType8 0}}
+      <div class="col-md-3">{{feedbackdefinition.title8}}</div>
+      <div class="col-md-9">
+        <textarea name="answer8"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType8 1}}
+      <div class="col-md-3">{{feedbackdefinition.title8}}</div>
+      <div class="col-md-9">
+        <input type="text" name="answer8" maxlength="2048"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType8 10}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title8}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="3" data-min="1"
+             name="answer8" id="answer8" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType8 11}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title8}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="5" data-min="1"
+             name="answer8" id="answer8" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType8 12}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title8}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="10" data-min="1"
+             name="answer8" id="answer8" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+    </div>
+    {{/if}}
+
+    {{#if feedbackdefinition.active9}}
+    <div class="row">
+      {{#ifCond feedbackdefinition.questionType9 0}}
+      <div class="col-md-3">{{feedbackdefinition.title9}}</div>
+      <div class="col-md-9">
+        <textarea name="answer9"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType9 1}}
+      <div class="col-md-3">{{feedbackdefinition.title9}}</div>
+      <div class="col-md-9">
+        <input type="text" name="answer9" maxlength="2048"></textarea>
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType9 10}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title9}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="3" data-min="1"
+             name="answer9" id="answer9" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType9 11}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title9}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="5" data-min="1"
+             name="answer9" id="answer9" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+      {{#ifCond feedbackdefinition.questionType9 12}}
+      <div class="col-xs-4 col-md-3">{{feedbackdefinition.title9}}</div>
+      <div class="col-xs-8 col-md-9">
+        <input type="number" data-max="10" data-min="1"
+             name="answer9" id="answer9" class="rating" value="0" />
+      </div>
+      {{/ifCond}}
+    </div>
+    {{/if}}
 
     <div class="row">
       <div class="col-xs-7">&nbsp;</div>

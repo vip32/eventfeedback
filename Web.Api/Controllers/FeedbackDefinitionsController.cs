@@ -27,7 +27,7 @@ namespace EventFeedback.Web.Api.Controllers
         [HttpGet]
         [Route("")]
         [ResponseType(typeof(IEnumerable<FeedbackDefinition>))]
-        public IHttpActionResult  Get([FromUri] string filter = "")
+        public IHttpActionResult Get([FromUri] string filter = "")
         {
             //Thread.Sleep(1500);
 

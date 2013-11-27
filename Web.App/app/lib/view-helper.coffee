@@ -1,5 +1,3 @@
-# Put your handlebars.js helpers here.
-
 Handlebars.registerHelper 'pick', (val, options) ->
 	return options.hash[val]
 
@@ -7,9 +5,14 @@ Handlebars.registerHelper 'pick', (val, options) ->
 #  http://momentjs.com/
 #  moment syntax example: moment(Date("2011-07-18T15:50:52")).format("MMMM YYYY")
 #  usage: {{dateFormat creation_date format="MMMM YYYY"}}
-Handlebars.registerHelper "dateFormat", (context, block) ->
+Handlebars.registerHelper "dateFormat", (context, options) ->
   if window.moment
-    f = block.hash.format or "MMM DD, YYYY hh:mm:ss A"
+    f = options.hash.format or "MMM DD, YYYY hh:mm:ss A"
     return moment(context).format(f) #had to remove Date(context)
   else
     return context #  moment plugin not available. return data as is.
+
+# if conditional (compare) helper
+Handlebars.registerHelper "ifCond", (v1, v2, options) ->
+  if v1 is v2
+    options.fn(@)
