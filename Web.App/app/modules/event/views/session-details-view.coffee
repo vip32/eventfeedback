@@ -25,7 +25,6 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
     $('input.rating[type=number]').rating()
     $('textarea').autosize()
 
-
   onSubmit: (e) ->
     e.preventDefault()
     data = Backbone.Syphon.serialize(@)
@@ -36,4 +35,3 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
   onClose: ->
     application.off 'navigation:back', @onBack
     console.log 'session-details view close'
-
