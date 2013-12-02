@@ -36,7 +36,7 @@ namespace EventFeedback.Web.Api.Controllers.Admin
         [ResponseType(typeof(IEnumerable<User>))]
         public IHttpActionResult Get([FromUri] string filter = "")
         {
-            Thread.Sleep(1500);
+//            Thread.Sleep(1500);
 
             _traceSource.TraceInformation("usersscontroller get all");
             IEnumerable<User> users;

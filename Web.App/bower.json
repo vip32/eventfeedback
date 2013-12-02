@@ -83,7 +83,7 @@
     },
     "pace": {
       "main": [
-        "pace.min.js",
+        "pace.js",
         "themes/pace-theme-minimal.css"
       ]
     }

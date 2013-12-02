@@ -31,7 +31,7 @@ namespace EventFeedback.Web.Api.Controllers
         [ResponseType(typeof(IEnumerable<Session>))]
         public IHttpActionResult Get(int eventId, [FromUri] string filter = "")
         {
-            Thread.Sleep(1500);
+//            Thread.Sleep(1500);
             Guard.Against<ArgumentException>(eventId == 0, "eventid cannot be empty or zero");
             
             IEnumerable<Session> result;

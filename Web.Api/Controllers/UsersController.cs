@@ -64,7 +64,7 @@ namespace EventFeedback.Web.Api.Controllers
         [Authorize]
         public HttpResponseMessage Profile()
         {
-            Thread.Sleep(1500);
+//            Thread.Sleep(1500);
 
             var user = _userService.FindUserByName(User.Identity.Name);
             if (user == null || !user.IsActive()) return new HttpResponseMessage(HttpStatusCode.Unauthorized);
