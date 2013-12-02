@@ -13782,362 +13782,6 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
 
 }(jQuery);
 
-;//fgnass.github.com/spin.js#v1.3.2
-
-/**
- * Copyright (c) 2011-2013 Felix Gnass
- * Licensed under the MIT license
- */
-(function(root, factory) {
-
-  /* CommonJS */
-  if (typeof exports == 'object')  module.exports = factory()
-
-  /* AMD module */
-  else if (typeof define == 'function' && define.amd) define(factory)
-
-  /* Browser global */
-  else root.Spinner = factory()
-}
-(this, function() {
-  "use strict";
-
-  var prefixes = ['webkit', 'Moz', 'ms', 'O'] /* Vendor prefixes */
-    , animations = {} /* Animation rules keyed by their name */
-    , useCssAnimations /* Whether to use CSS animations or setTimeout */
-
-  /**
-   * Utility function to create elements. If no tag name is given,
-   * a DIV is created. Optionally properties can be passed.
-   */
-  function createEl(tag, prop) {
-    var el = document.createElement(tag || 'div')
-      , n
-
-    for(n in prop) el[n] = prop[n]
-    return el
-  }
-
-  /**
-   * Appends children and returns the parent.
-   */
-  function ins(parent /* child1, child2, ...*/) {
-    for (var i=1, n=arguments.length; i<n; i++)
-      parent.appendChild(arguments[i])
-
-    return parent
-  }
-
-  /**
-   * Insert a new stylesheet to hold the @keyframe or VML rules.
-   */
-  var sheet = (function() {
-    var el = createEl('style', {type : 'text/css'})
-    ins(document.getElementsByTagName('head')[0], el)
-    return el.sheet || el.styleSheet
-  }())
-
-  /**
-   * Creates an opacity keyframe animation rule and returns its name.
-   * Since most mobile Webkits have timing issues with animation-delay,
-   * we create separate rules for each line/segment.
-   */
-  function addAnimation(alpha, trail, i, lines) {
-    var name = ['opacity', trail, ~~(alpha*100), i, lines].join('-')
-      , start = 0.01 + i/lines * 100
-      , z = Math.max(1 - (1-alpha) / trail * (100-start), alpha)
-      , prefix = useCssAnimations.substring(0, useCssAnimations.indexOf('Animation')).toLowerCase()
-      , pre = prefix && '-' + prefix + '-' || ''
-
-    if (!animations[name]) {
-      sheet.insertRule(
-        '@' + pre + 'keyframes ' + name + '{' +
-        '0%{opacity:' + z + '}' +
-        start + '%{opacity:' + alpha + '}' +
-        (start+0.01) + '%{opacity:1}' +
-        (start+trail) % 100 + '%{opacity:' + alpha + '}' +
-        '100%{opacity:' + z + '}' +
-        '}', sheet.cssRules.length)
-
-      animations[name] = 1
-    }
-
-    return name
-  }
-
-  /**
-   * Tries various vendor prefixes and returns the first supported property.
-   */
-  function vendor(el, prop) {
-    var s = el.style
-      , pp
-      , i
-
-    prop = prop.charAt(0).toUpperCase() + prop.slice(1)
-    for(i=0; i<prefixes.length; i++) {
-      pp = prefixes[i]+prop
-      if(s[pp] !== undefined) return pp
-    }
-    if(s[prop] !== undefined) return prop
-  }
-
-  /**
-   * Sets multiple style properties at once.
-   */
-  function css(el, prop) {
-    for (var n in prop)
-      el.style[vendor(el, n)||n] = prop[n]
-
-    return el
-  }
-
-  /**
-   * Fills in default values.
-   */
-  function merge(obj) {
-    for (var i=1; i < arguments.length; i++) {
-      var def = arguments[i]
-      for (var n in def)
-        if (obj[n] === undefined) obj[n] = def[n]
-    }
-    return obj
-  }
-
-  /**
-   * Returns the absolute page-offset of the given element.
-   */
-  function pos(el) {
-    var o = { x:el.offsetLeft, y:el.offsetTop }
-    while((el = el.offsetParent))
-      o.x+=el.offsetLeft, o.y+=el.offsetTop
-
-    return o
-  }
-
-  /**
-   * Returns the line color from the given string or array.
-   */
-  function getColor(color, idx) {
-    return typeof color == 'string' ? color : color[idx % color.length]
-  }
-
-  // Built-in defaults
-
-  var defaults = {
-    lines: 12,            // The number of lines to draw
-    length: 7,            // The length of each line
-    width: 5,             // The line thickness
-    radius: 10,           // The radius of the inner circle
-    rotate: 0,            // Rotation offset
-    corners: 1,           // Roundness (0..1)
-    color: '#000',        // #rgb or #rrggbb
-    direction: 1,         // 1: clockwise, -1: counterclockwise
-    speed: 1,             // Rounds per second
-    trail: 100,           // Afterglow percentage
-    opacity: 1/4,         // Opacity of the lines
-    fps: 20,              // Frames per second when using setTimeout()
-    zIndex: 2e9,          // Use a high z-index by default
-    className: 'spinner', // CSS class to assign to the element
-    top: 'auto',          // center vertically
-    left: 'auto',         // center horizontally
-    position: 'relative'  // element position
-  }
-
-  /** The constructor */
-  function Spinner(o) {
-    if (typeof this == 'undefined') return new Spinner(o)
-    this.opts = merge(o || {}, Spinner.defaults, defaults)
-  }
-
-  // Global defaults that override the built-ins:
-  Spinner.defaults = {}
-
-  merge(Spinner.prototype, {
-
-    /**
-     * Adds the spinner to the given target element. If this instance is already
-     * spinning, it is automatically removed from its previous target b calling
-     * stop() internally.
-     */
-    spin: function(target) {
-      this.stop()
-
-      var self = this
-        , o = self.opts
-        , el = self.el = css(createEl(0, {className: o.className}), {position: o.position, width: 0, zIndex: o.zIndex})
-        , mid = o.radius+o.length+o.width
-        , ep // element position
-        , tp // target position
-
-      if (target) {
-        target.insertBefore(el, target.firstChild||null)
-        tp = pos(target)
-        ep = pos(el)
-        css(el, {
-          left: (o.left == 'auto' ? tp.x-ep.x + (target.offsetWidth >> 1) : parseInt(o.left, 10) + mid) + 'px',
-          top: (o.top == 'auto' ? tp.y-ep.y + (target.offsetHeight >> 1) : parseInt(o.top, 10) + mid)  + 'px'
-        })
-      }
-
-      el.setAttribute('role', 'progressbar')
-      self.lines(el, self.opts)
-
-      if (!useCssAnimations) {
-        // No CSS animation support, use setTimeout() instead
-        var i = 0
-          , start = (o.lines - 1) * (1 - o.direction) / 2
-          , alpha
-          , fps = o.fps
-          , f = fps/o.speed
-          , ostep = (1-o.opacity) / (f*o.trail / 100)
-          , astep = f/o.lines
-
-        ;(function anim() {
-          i++;
-          for (var j = 0; j < o.lines; j++) {
-            alpha = Math.max(1 - (i + (o.lines - j) * astep) % f * ostep, o.opacity)
-
-            self.opacity(el, j * o.direction + start, alpha, o)
-          }
-          self.timeout = self.el && setTimeout(anim, ~~(1000/fps))
-        })()
-      }
-      return self
-    },
-
-    /**
-     * Stops and removes the Spinner.
-     */
-    stop: function() {
-      var el = this.el
-      if (el) {
-        clearTimeout(this.timeout)
-        if (el.parentNode) el.parentNode.removeChild(el)
-        this.el = undefined
-      }
-      return this
-    },
-
-    /**
-     * Internal method that draws the individual lines. Will be overwritten
-     * in VML fallback mode below.
-     */
-    lines: function(el, o) {
-      var i = 0
-        , start = (o.lines - 1) * (1 - o.direction) / 2
-        , seg
-
-      function fill(color, shadow) {
-        return css(createEl(), {
-          position: 'absolute',
-          width: (o.length+o.width) + 'px',
-          height: o.width + 'px',
-          background: color,
-          boxShadow: shadow,
-          transformOrigin: 'left',
-          transform: 'rotate(' + ~~(360/o.lines*i+o.rotate) + 'deg) translate(' + o.radius+'px' +',0)',
-          borderRadius: (o.corners * o.width>>1) + 'px'
-        })
-      }
-
-      for (; i < o.lines; i++) {
-        seg = css(createEl(), {
-          position: 'absolute',
-          top: 1+~(o.width/2) + 'px',
-          transform: o.hwaccel ? 'translate3d(0,0,0)' : '',
-          opacity: o.opacity,
-          animation: useCssAnimations && addAnimation(o.opacity, o.trail, start + i * o.direction, o.lines) + ' ' + 1/o.speed + 's linear infinite'
-        })
-
-        if (o.shadow) ins(seg, css(fill('#000', '0 0 4px ' + '#000'), {top: 2+'px'}))
-        ins(el, ins(seg, fill(getColor(o.color, i), '0 0 1px rgba(0,0,0,.1)')))
-      }
-      return el
-    },
-
-    /**
-     * Internal method that adjusts the opacity of a single line.
-     * Will be overwritten in VML fallback mode below.
-     */
-    opacity: function(el, i, val) {
-      if (i < el.childNodes.length) el.childNodes[i].style.opacity = val
-    }
-
-  })
-
-
-  function initVML() {
-
-    /* Utility function to create a VML tag */
-    function vml(tag, attr) {
-      return createEl('<' + tag + ' xmlns="urn:schemas-microsoft.com:vml" class="spin-vml">', attr)
-    }
-
-    // No CSS transforms but VML support, add a CSS rule for VML elements:
-    sheet.addRule('.spin-vml', 'behavior:url(#default#VML)')
-
-    Spinner.prototype.lines = function(el, o) {
-      var r = o.length+o.width
-        , s = 2*r
-
-      function grp() {
-        return css(
-          vml('group', {
-            coordsize: s + ' ' + s,
-            coordorigin: -r + ' ' + -r
-          }),
-          { width: s, height: s }
-        )
-      }
-
-      var margin = -(o.width+o.length)*2 + 'px'
-        , g = css(grp(), {position: 'absolute', top: margin, left: margin})
-        , i
-
-      function seg(i, dx, filter) {
-        ins(g,
-          ins(css(grp(), {rotation: 360 / o.lines * i + 'deg', left: ~~dx}),
-            ins(css(vml('roundrect', {arcsize: o.corners}), {
-                width: r,
-                height: o.width,
-                left: o.radius,
-                top: -o.width>>1,
-                filter: filter
-              }),
-              vml('fill', {color: getColor(o.color, i), opacity: o.opacity}),
-              vml('stroke', {opacity: 0}) // transparent stroke to fix color bleeding upon opacity change
-            )
-          )
-        )
-      }
-
-      if (o.shadow)
-        for (i = 1; i <= o.lines; i++)
-          seg(i, -2, 'progid:DXImageTransform.Microsoft.Blur(pixelradius=2,makeshadow=1,shadowopacity=.3)')
-
-      for (i = 1; i <= o.lines; i++) seg(i)
-      return ins(el, g)
-    }
-
-    Spinner.prototype.opacity = function(el, i, val, o) {
-      var c = el.firstChild
-      o = o.shadow && o.lines || 0
-      if (c && i+o < c.childNodes.length) {
-        c = c.childNodes[i+o]; c = c && c.firstChild; c = c && c.firstChild
-        if (c) c.opacity = val
-      }
-    }
-  }
-
-  var probe = css(createEl('group'), {behavior: 'url(#default#VML)'})
-
-  if (!vendor(probe, 'transform') && probe.adj) initVML()
-  else useCssAnimations = vendor(probe, 'animation')
-
-  return Spinner
-
-}));
-
 ;/*! ============================================================
  * bootstrapSwitch v1.8 by Larentis Mattia @SpiritualGuru
  * http://www.larentis.eu/
@@ -14520,6 +14164,364 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
     $('.make-switch')['bootstrapSwitch']();
   });
 })(jQuery);
+
+;/*! pace 0.4.15 */
+(function(){var a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O=[].slice,P={}.hasOwnProperty,Q=function(a,b){function c(){this.constructor=a}for(var d in b)P.call(b,d)&&(a[d]=b[d]);return c.prototype=b.prototype,a.prototype=new c,a.__super__=b.prototype,a},R=[].indexOf||function(a){for(var b=0,c=this.length;c>b;b++)if(b in this&&this[b]===a)return b;return-1};s={catchupTime:500,initialRate:.03,minTime:500,ghostTime:250,maxProgressPerFrame:10,easeFactor:1.25,startOnPageLoad:!0,restartOnPushState:!0,restartOnRequestAfter:500,target:"body",elements:{checkInterval:100,selectors:["body"]},eventLag:{minSamples:10,sampleCount:3,lagThreshold:3},ajax:{trackMethods:["GET"],trackWebSockets:!1}},z=function(){var a;return null!=(a="undefined"!=typeof performance&&null!==performance?"function"==typeof performance.now?performance.now():void 0:void 0)?a:+new Date},B=window.requestAnimationFrame||window.mozRequestAnimationFrame||window.webkitRequestAnimationFrame||window.msRequestAnimationFrame,r=window.cancelAnimationFrame||window.mozCancelAnimationFrame,null==B&&(B=function(a){return setTimeout(a,50)},r=function(a){return clearTimeout(a)}),D=function(a){var b,c;return b=z(),c=function(){var d;return d=z()-b,b=z(),a(d,function(){return B(c)})},c()},C=function(){var a,b,c;return c=arguments[0],b=arguments[1],a=3<=arguments.length?O.call(arguments,2):[],"function"==typeof c[b]?c[b].apply(c,a):c[b]},t=function(){var a,b,c,d,e,f,g;for(b=arguments[0],d=2<=arguments.length?O.call(arguments,1):[],f=0,g=d.length;g>f;f++)if(c=d[f])for(a in c)P.call(c,a)&&(e=c[a],null!=b[a]&&"object"==typeof b[a]&&null!=e&&"object"==typeof e?t(b[a],e):b[a]=e);return b},o=function(a){var b,c,d,e,f;for(c=b=0,e=0,f=a.length;f>e;e++)d=a[e],c+=Math.abs(d),b++;return c/b},v=function(a,b){var c,d,e;if(null==a&&(a="options"),null==b&&(b=!0),e=document.querySelector("[data-pace-"+a+"]")){if(c=e.getAttribute("data-pace-"+a),!b)return c;try{return JSON.parse(c)}catch(f){return d=f,"undefined"!=typeof console&&null!==console?console.error("Error parsing inline pace options",d):void 0}}},null==window.Pace&&(window.Pace={}),A=Pace.options=t(s,window.paceOptions,v()),h=function(a){function b(){return M=b.__super__.constructor.apply(this,arguments)}return Q(b,a),b}(Error),b=function(){function a(){this.progress=0}return a.prototype.getElement=function(){var a;if(null==this.el){if(a=document.querySelector(A.target),!a)throw new h;this.el=document.createElement("div"),this.el.className="pace pace-active",document.body.className=document.body.className.replace("pace-done",""),document.body.className+=" pace-running",this.el.innerHTML='<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>',null!=a.firstChild?a.insertBefore(this.el,a.firstChild):a.appendChild(this.el)}return this.el},a.prototype.finish=function(){var a;return a=this.getElement(),a.className=a.className.replace("pace-active",""),a.className+=" pace-inactive",document.body.className=document.body.className.replace("pace-running",""),document.body.className+=" pace-done"},a.prototype.update=function(a){return this.progress=a,this.render()},a.prototype.destroy=function(){return this.getElement().parentNode.removeChild(this.getElement()),this.el=void 0},a.prototype.render=function(){var a,b;return null==document.querySelector(A.target)?!1:(a=this.getElement(),a.children[0].style.width=""+this.progress+"%",(!this.lastRenderedProgress||0|(this.lastRenderedProgress|0!==this.progress))&&(a.children[0].setAttribute("data-progress-text",""+(0|this.progress)+"%"),this.progress>=100?b="99":(b=this.progress<10?"0":"",b+=0|this.progress),a.children[0].setAttribute("data-progress",""+b)),this.lastRenderedProgress=this.progress)},a.prototype.done=function(){return this.progress>=100},a}(),g=function(){function a(){this.bindings={}}return a.prototype.trigger=function(a,b){var c,d,e,f,g;if(null!=this.bindings[a]){for(f=this.bindings[a],g=[],d=0,e=f.length;e>d;d++)c=f[d],g.push(c.call(this,b));return g}},a.prototype.on=function(a,b){var c;return null==(c=this.bindings)[a]&&(c[a]=[]),this.bindings[a].push(b)},a}(),J=window.XMLHttpRequest,I=window.XDomainRequest,H=window.WebSocket,u=function(a,b){var c,d,e,f;f=[];for(d in b.prototype)try{e=b.prototype[d],null==a[d]&&"function"!=typeof e?f.push(a[d]=e):f.push(void 0)}catch(g){c=g}return f},i=function(a){function b(){var a,c=this;b.__super__.constructor.apply(this,arguments),a=function(a){var b;return b=a.open,a.open=function(d,e){var f;return f=(null!=d?d:"GET").toUpperCase(),R.call(A.ajax.trackMethods,f)>=0&&c.trigger("request",{type:d,url:e,request:a}),b.apply(a,arguments)}},window.XMLHttpRequest=function(b){var c;return c=new J(b),a(c),c},u(window.XMLHttpRequest,J),null!=I&&(window.XDomainRequest=function(){var b;return b=new I,a(b),b},u(window.XDomainRequest,I)),null!=H&&A.ajax.trackWebSockets&&(window.WebSocket=function(a,b){var d;return d=new H(a,b),c.trigger("request",{type:"socket",url:a,protocols:b,request:d}),d},u(window.WebSocket,H))}return Q(b,a),b}(g),K=null,w=function(){return null==K&&(K=new i),K},A.restartOnRequestAfter!==!1&&w().on("request",function(b){var c,d,e;return e=b.type,d=b.request,Pace.running?void 0:(c=arguments,setTimeout(function(){var b,f,g,h,i,j,k;if(f="socket"===e?d.readyState<2:0<(i=d.readyState)&&4>i){for(Pace.restart(),j=Pace.sources,k=[],g=0,h=j.length;h>g;g++){if(b=j[g],b instanceof a){b.watch.apply(b,c);break}k.push(void 0)}return k}},A.restartOnRequestAfter))}),a=function(){function a(){var a=this;this.elements=[],w().on("request",function(){return a.watch.apply(a,arguments)})}return a.prototype.watch=function(a){var b,c,d;return d=a.type,b=a.request,c="socket"===d?new l(b):new m(b),this.elements.push(c)},a}(),m=function(){function a(a){var b,c,d,e,f,g,h=this;if(this.progress=0,null!=window.ProgressEvent)for(c=null,a.addEventListener("progress",function(a){return h.progress=a.lengthComputable?100*a.loaded/a.total:h.progress+(100-h.progress)/2}),g=["load","abort","timeout","error"],d=0,e=g.length;e>d;d++)b=g[d],a.addEventListener(b,function(){return h.progress=100});else f=a.onreadystatechange,a.onreadystatechange=function(){var b;return 0===(b=a.readyState)||4===b?h.progress=100:3===a.readyState&&(h.progress=50),"function"==typeof f?f.apply(null,arguments):void 0}}return a}(),l=function(){function a(a){var b,c,d,e,f=this;for(this.progress=0,e=["error","open"],c=0,d=e.length;d>c;c++)b=e[c],a.addEventListener(b,function(){return f.progress=100})}return a}(),d=function(){function a(a){var b,c,d,f;for(null==a&&(a={}),this.elements=[],null==a.selectors&&(a.selectors=[]),f=a.selectors,c=0,d=f.length;d>c;c++)b=f[c],this.elements.push(new e(b))}return a}(),e=function(){function a(a){this.selector=a,this.progress=0,this.check()}return a.prototype.check=function(){var a=this;return document.querySelector(this.selector)?this.done():setTimeout(function(){return a.check()},A.elements.checkInterval)},a.prototype.done=function(){return this.progress=100},a}(),c=function(){function a(){var a,b,c=this;this.progress=null!=(b=this.states[document.readyState])?b:100,a=document.onreadystatechange,document.onreadystatechange=function(){return null!=c.states[document.readyState]&&(c.progress=c.states[document.readyState]),"function"==typeof a?a.apply(null,arguments):void 0}}return a.prototype.states={loading:0,interactive:50,complete:100},a}(),f=function(){function a(){var a,b,c,d,e,f=this;this.progress=0,a=0,e=[],d=0,c=z(),b=setInterval(function(){var g;return g=z()-c-50,c=z(),e.push(g),e.length>A.eventLag.sampleCount&&e.shift(),a=o(e),++d>=A.eventLag.minSamples&&a<A.eventLag.lagThreshold?(f.progress=100,clearInterval(b)):f.progress=100*(3/(a+3))},50)}return a}(),k=function(){function a(a){this.source=a,this.last=this.sinceLastUpdate=0,this.rate=A.initialRate,this.catchup=0,this.progress=this.lastProgress=0,null!=this.source&&(this.progress=C(this.source,"progress"))}return a.prototype.tick=function(a,b){var c;return null==b&&(b=C(this.source,"progress")),b>=100&&(this.done=!0),b===this.last?this.sinceLastUpdate+=a:(this.sinceLastUpdate&&(this.rate=(b-this.last)/this.sinceLastUpdate),this.catchup=(b-this.progress)/A.catchupTime,this.sinceLastUpdate=0,this.last=b),b>this.progress&&(this.progress+=this.catchup*a),c=1-Math.pow(this.progress/100,A.easeFactor),this.progress+=c*this.rate*a,this.progress=Math.min(this.lastProgress+A.maxProgressPerFrame,this.progress),this.progress=Math.max(0,this.progress),this.progress=Math.min(100,this.progress),this.lastProgress=this.progress,this.progress},a}(),F=null,E=null,p=null,G=null,n=null,q=null,Pace.running=!1,x=function(){return A.restartOnPushState?Pace.restart():void 0},null!=window.history.pushState&&(L=window.history.pushState,window.history.pushState=function(){return x(),L.apply(window.history,arguments)}),null!=window.history.replaceState&&(N=window.history.replaceState,window.history.replaceState=function(){return x(),N.apply(window.history,arguments)}),j={ajax:a,elements:d,document:c,eventLag:f},(y=function(){var a,c,d,e,f,g,h,i,l;for(Pace.sources=F=[],h=["ajax","elements","document","eventLag"],d=0,f=h.length;f>d;d++)c=h[d],A[c]!==!1&&F.push(new j[c](A[c]));for(l=null!=(i=A.extraSources)?i:[],e=0,g=l.length;g>e;e++)a=l[e],F.push(new a(A));return Pace.bar=p=new b,E=[],G=new k})(),Pace.stop=function(){return Pace.running=!1,p.destroy(),q=!0,null!=n&&("function"==typeof r&&r(n),n=null),y()},Pace.restart=function(){return Pace.stop(),Pace.go()},Pace.go=function(){return Pace.running=!0,p.render(),q=!1,n=D(function(a,b){var c,d,e,f,g,h,i,j,l,m,n,o,r,s,t,u,v,w;for(j=100-p.progress,d=r=0,e=!0,h=s=0,u=F.length;u>s;h=++s)for(n=F[h],m=null!=E[h]?E[h]:E[h]=[],g=null!=(w=n.elements)?w:[n],i=t=0,v=g.length;v>t;i=++t)f=g[i],l=null!=m[i]?m[i]:m[i]=new k(f),e&=l.done,l.done||(d++,r+=l.tick(a));return c=r/d,p.update(G.tick(a,c)),o=z(),p.done()||e||q?(p.update(100),setTimeout(function(){return p.finish(),Pace.running=!1},Math.max(A.ghostTime,Math.min(A.minTime,z()-o)))):b()})},Pace.start=function(a){t(A,a),Pace.running=!0;try{p.render()}catch(b){h=b}return document.querySelector(".pace")?Pace.go():setTimeout(Pace.start,50)},"function"==typeof define&&define.amd?define(function(){return Pace}):"object"==typeof exports?module.exports=Pace:A.startOnPageLoad&&Pace.start()}).call(this);
+;//fgnass.github.com/spin.js#v1.3.2
+
+/**
+ * Copyright (c) 2011-2013 Felix Gnass
+ * Licensed under the MIT license
+ */
+(function(root, factory) {
+
+  /* CommonJS */
+  if (typeof exports == 'object')  module.exports = factory()
+
+  /* AMD module */
+  else if (typeof define == 'function' && define.amd) define(factory)
+
+  /* Browser global */
+  else root.Spinner = factory()
+}
+(this, function() {
+  "use strict";
+
+  var prefixes = ['webkit', 'Moz', 'ms', 'O'] /* Vendor prefixes */
+    , animations = {} /* Animation rules keyed by their name */
+    , useCssAnimations /* Whether to use CSS animations or setTimeout */
+
+  /**
+   * Utility function to create elements. If no tag name is given,
+   * a DIV is created. Optionally properties can be passed.
+   */
+  function createEl(tag, prop) {
+    var el = document.createElement(tag || 'div')
+      , n
+
+    for(n in prop) el[n] = prop[n]
+    return el
+  }
+
+  /**
+   * Appends children and returns the parent.
+   */
+  function ins(parent /* child1, child2, ...*/) {
+    for (var i=1, n=arguments.length; i<n; i++)
+      parent.appendChild(arguments[i])
+
+    return parent
+  }
+
+  /**
+   * Insert a new stylesheet to hold the @keyframe or VML rules.
+   */
+  var sheet = (function() {
+    var el = createEl('style', {type : 'text/css'})
+    ins(document.getElementsByTagName('head')[0], el)
+    return el.sheet || el.styleSheet
+  }())
+
+  /**
+   * Creates an opacity keyframe animation rule and returns its name.
+   * Since most mobile Webkits have timing issues with animation-delay,
+   * we create separate rules for each line/segment.
+   */
+  function addAnimation(alpha, trail, i, lines) {
+    var name = ['opacity', trail, ~~(alpha*100), i, lines].join('-')
+      , start = 0.01 + i/lines * 100
+      , z = Math.max(1 - (1-alpha) / trail * (100-start), alpha)
+      , prefix = useCssAnimations.substring(0, useCssAnimations.indexOf('Animation')).toLowerCase()
+      , pre = prefix && '-' + prefix + '-' || ''
+
+    if (!animations[name]) {
+      sheet.insertRule(
+        '@' + pre + 'keyframes ' + name + '{' +
+        '0%{opacity:' + z + '}' +
+        start + '%{opacity:' + alpha + '}' +
+        (start+0.01) + '%{opacity:1}' +
+        (start+trail) % 100 + '%{opacity:' + alpha + '}' +
+        '100%{opacity:' + z + '}' +
+        '}', sheet.cssRules.length)
+
+      animations[name] = 1
+    }
+
+    return name
+  }
+
+  /**
+   * Tries various vendor prefixes and returns the first supported property.
+   */
+  function vendor(el, prop) {
+    var s = el.style
+      , pp
+      , i
+
+    prop = prop.charAt(0).toUpperCase() + prop.slice(1)
+    for(i=0; i<prefixes.length; i++) {
+      pp = prefixes[i]+prop
+      if(s[pp] !== undefined) return pp
+    }
+    if(s[prop] !== undefined) return prop
+  }
+
+  /**
+   * Sets multiple style properties at once.
+   */
+  function css(el, prop) {
+    for (var n in prop)
+      el.style[vendor(el, n)||n] = prop[n]
+
+    return el
+  }
+
+  /**
+   * Fills in default values.
+   */
+  function merge(obj) {
+    for (var i=1; i < arguments.length; i++) {
+      var def = arguments[i]
+      for (var n in def)
+        if (obj[n] === undefined) obj[n] = def[n]
+    }
+    return obj
+  }
+
+  /**
+   * Returns the absolute page-offset of the given element.
+   */
+  function pos(el) {
+    var o = { x:el.offsetLeft, y:el.offsetTop }
+    while((el = el.offsetParent))
+      o.x+=el.offsetLeft, o.y+=el.offsetTop
+
+    return o
+  }
+
+  /**
+   * Returns the line color from the given string or array.
+   */
+  function getColor(color, idx) {
+    return typeof color == 'string' ? color : color[idx % color.length]
+  }
+
+  // Built-in defaults
+
+  var defaults = {
+    lines: 12,            // The number of lines to draw
+    length: 7,            // The length of each line
+    width: 5,             // The line thickness
+    radius: 10,           // The radius of the inner circle
+    rotate: 0,            // Rotation offset
+    corners: 1,           // Roundness (0..1)
+    color: '#000',        // #rgb or #rrggbb
+    direction: 1,         // 1: clockwise, -1: counterclockwise
+    speed: 1,             // Rounds per second
+    trail: 100,           // Afterglow percentage
+    opacity: 1/4,         // Opacity of the lines
+    fps: 20,              // Frames per second when using setTimeout()
+    zIndex: 2e9,          // Use a high z-index by default
+    className: 'spinner', // CSS class to assign to the element
+    top: 'auto',          // center vertically
+    left: 'auto',         // center horizontally
+    position: 'relative'  // element position
+  }
+
+  /** The constructor */
+  function Spinner(o) {
+    if (typeof this == 'undefined') return new Spinner(o)
+    this.opts = merge(o || {}, Spinner.defaults, defaults)
+  }
+
+  // Global defaults that override the built-ins:
+  Spinner.defaults = {}
+
+  merge(Spinner.prototype, {
+
+    /**
+     * Adds the spinner to the given target element. If this instance is already
+     * spinning, it is automatically removed from its previous target b calling
+     * stop() internally.
+     */
+    spin: function(target) {
+      this.stop()
+
+      var self = this
+        , o = self.opts
+        , el = self.el = css(createEl(0, {className: o.className}), {position: o.position, width: 0, zIndex: o.zIndex})
+        , mid = o.radius+o.length+o.width
+        , ep // element position
+        , tp // target position
+
+      if (target) {
+        target.insertBefore(el, target.firstChild||null)
+        tp = pos(target)
+        ep = pos(el)
+        css(el, {
+          left: (o.left == 'auto' ? tp.x-ep.x + (target.offsetWidth >> 1) : parseInt(o.left, 10) + mid) + 'px',
+          top: (o.top == 'auto' ? tp.y-ep.y + (target.offsetHeight >> 1) : parseInt(o.top, 10) + mid)  + 'px'
+        })
+      }
+
+      el.setAttribute('role', 'progressbar')
+      self.lines(el, self.opts)
+
+      if (!useCssAnimations) {
+        // No CSS animation support, use setTimeout() instead
+        var i = 0
+          , start = (o.lines - 1) * (1 - o.direction) / 2
+          , alpha
+          , fps = o.fps
+          , f = fps/o.speed
+          , ostep = (1-o.opacity) / (f*o.trail / 100)
+          , astep = f/o.lines
+
+        ;(function anim() {
+          i++;
+          for (var j = 0; j < o.lines; j++) {
+            alpha = Math.max(1 - (i + (o.lines - j) * astep) % f * ostep, o.opacity)
+
+            self.opacity(el, j * o.direction + start, alpha, o)
+          }
+          self.timeout = self.el && setTimeout(anim, ~~(1000/fps))
+        })()
+      }
+      return self
+    },
+
+    /**
+     * Stops and removes the Spinner.
+     */
+    stop: function() {
+      var el = this.el
+      if (el) {
+        clearTimeout(this.timeout)
+        if (el.parentNode) el.parentNode.removeChild(el)
+        this.el = undefined
+      }
+      return this
+    },
+
+    /**
+     * Internal method that draws the individual lines. Will be overwritten
+     * in VML fallback mode below.
+     */
+    lines: function(el, o) {
+      var i = 0
+        , start = (o.lines - 1) * (1 - o.direction) / 2
+        , seg
+
+      function fill(color, shadow) {
+        return css(createEl(), {
+          position: 'absolute',
+          width: (o.length+o.width) + 'px',
+          height: o.width + 'px',
+          background: color,
+          boxShadow: shadow,
+          transformOrigin: 'left',
+          transform: 'rotate(' + ~~(360/o.lines*i+o.rotate) + 'deg) translate(' + o.radius+'px' +',0)',
+          borderRadius: (o.corners * o.width>>1) + 'px'
+        })
+      }
+
+      for (; i < o.lines; i++) {
+        seg = css(createEl(), {
+          position: 'absolute',
+          top: 1+~(o.width/2) + 'px',
+          transform: o.hwaccel ? 'translate3d(0,0,0)' : '',
+          opacity: o.opacity,
+          animation: useCssAnimations && addAnimation(o.opacity, o.trail, start + i * o.direction, o.lines) + ' ' + 1/o.speed + 's linear infinite'
+        })
+
+        if (o.shadow) ins(seg, css(fill('#000', '0 0 4px ' + '#000'), {top: 2+'px'}))
+        ins(el, ins(seg, fill(getColor(o.color, i), '0 0 1px rgba(0,0,0,.1)')))
+      }
+      return el
+    },
+
+    /**
+     * Internal method that adjusts the opacity of a single line.
+     * Will be overwritten in VML fallback mode below.
+     */
+    opacity: function(el, i, val) {
+      if (i < el.childNodes.length) el.childNodes[i].style.opacity = val
+    }
+
+  })
+
+
+  function initVML() {
+
+    /* Utility function to create a VML tag */
+    function vml(tag, attr) {
+      return createEl('<' + tag + ' xmlns="urn:schemas-microsoft.com:vml" class="spin-vml">', attr)
+    }
+
+    // No CSS transforms but VML support, add a CSS rule for VML elements:
+    sheet.addRule('.spin-vml', 'behavior:url(#default#VML)')
+
+    Spinner.prototype.lines = function(el, o) {
+      var r = o.length+o.width
+        , s = 2*r
+
+      function grp() {
+        return css(
+          vml('group', {
+            coordsize: s + ' ' + s,
+            coordorigin: -r + ' ' + -r
+          }),
+          { width: s, height: s }
+        )
+      }
+
+      var margin = -(o.width+o.length)*2 + 'px'
+        , g = css(grp(), {position: 'absolute', top: margin, left: margin})
+        , i
+
+      function seg(i, dx, filter) {
+        ins(g,
+          ins(css(grp(), {rotation: 360 / o.lines * i + 'deg', left: ~~dx}),
+            ins(css(vml('roundrect', {arcsize: o.corners}), {
+                width: r,
+                height: o.width,
+                left: o.radius,
+                top: -o.width>>1,
+                filter: filter
+              }),
+              vml('fill', {color: getColor(o.color, i), opacity: o.opacity}),
+              vml('stroke', {opacity: 0}) // transparent stroke to fix color bleeding upon opacity change
+            )
+          )
+        )
+      }
+
+      if (o.shadow)
+        for (i = 1; i <= o.lines; i++)
+          seg(i, -2, 'progid:DXImageTransform.Microsoft.Blur(pixelradius=2,makeshadow=1,shadowopacity=.3)')
+
+      for (i = 1; i <= o.lines; i++) seg(i)
+      return ins(el, g)
+    }
+
+    Spinner.prototype.opacity = function(el, i, val, o) {
+      var c = el.firstChild
+      o = o.shadow && o.lines || 0
+      if (c && i+o < c.childNodes.length) {
+        c = c.childNodes[i+o]; c = c && c.firstChild; c = c && c.firstChild
+        if (c) c.opacity = val
+      }
+    }
+  }
+
+  var probe = css(createEl('group'), {behavior: 'url(#default#VML)'})
+
+  if (!vendor(probe, 'transform') && probe.adj) initVML()
+  else useCssAnimations = vendor(probe, 'animation')
+
+  return Spinner
+
+}));
 
 ;/*
   backgrid
@@ -17052,6 +17054,22 @@ var Grid = Backgrid.Grid = Backbone.View.extend({
 });
 
 }(this, jQuery, _, Backbone));
+;// Console-polyfill. MIT license.
+// https://github.com/paulmillr/console-polyfill
+// Make it safe to do console.log() always.
+(function (con) {
+  'use strict';
+  var prop, method;
+  var empty = {};
+  var dummy = function() {};
+  var properties = 'memory'.split(',');
+  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
+     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
+     'time,timeEnd,trace,warn').split(',');
+  while (prop = properties.pop()) con[prop] = con[prop] || empty;
+  while (method = methods.pop()) con[method] = con[method] || dummy;
+})(window.console = window.console || {});
+
 ;/*!
 	Autosize v1.17.8 - 2013-09-07
 	Automatically adjust textarea height based on user input.
@@ -17390,229 +17408,6 @@ $('#el').spin('flower', 'red');
     large: { lines: 10, length: 8, width: 4, radius: 8 }
   }
 
-}));
-
-;/**
- * Backbone localStorage Adapter
- * Version 1.1.7
- *
- * https://github.com/jeromegn/Backbone.localStorage
- */
-(function (root, factory) {
-   if (typeof exports === 'object' && typeof require === 'function') {
-     module.exports = factory(require("underscore"), require("backbone"));
-   } else if (typeof define === "function" && define.amd) {
-      // AMD. Register as an anonymous module.
-      define(["underscore","backbone"], function(_, Backbone) {
-        // Use global variables if the locals are undefined.
-        return factory(_ || root._, Backbone || root.Backbone);
-      });
-   } else {
-      // RequireJS isn't being used. Assume underscore and backbone are loaded in <script> tags
-      factory(_, Backbone);
-   }
-}(this, function(_, Backbone) {
-// A simple module to replace `Backbone.sync` with *localStorage*-based
-// persistence. Models are given GUIDS, and saved into a JSON object. Simple
-// as that.
-
-// Hold reference to Underscore.js and Backbone.js in the closure in order
-// to make things work even if they are removed from the global namespace
-
-// Generate four random hex digits.
-function S4() {
-   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-};
-
-// Generate a pseudo-GUID by concatenating random hexadecimal.
-function guid() {
-   return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
-};
-
-// Our Store is represented by a single JS object in *localStorage*. Create it
-// with a meaningful name, like the name you'd give a table.
-// window.Store is deprectated, use Backbone.LocalStorage instead
-Backbone.LocalStorage = window.Store = function(name) {
-  if( !this.localStorage ) {
-    throw "Backbone.localStorage: Environment does not support localStorage."
-  }
-  this.name = name;
-  var store = this.localStorage().getItem(this.name);
-  this.records = (store && store.split(",")) || [];
-};
-
-_.extend(Backbone.LocalStorage.prototype, {
-
-  // Save the current state of the **Store** to *localStorage*.
-  save: function() {
-    this.localStorage().setItem(this.name, this.records.join(","));
-  },
-
-  // Add a model, giving it a (hopefully)-unique GUID, if it doesn't already
-  // have an id of it's own.
-  create: function(model) {
-    if (!model.id) {
-      model.id = guid();
-      model.set(model.idAttribute, model.id);
-    }
-    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
-    this.records.push(model.id.toString());
-    this.save();
-    return this.find(model);
-  },
-
-  // Update a model by replacing its copy in `this.data`.
-  update: function(model) {
-    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
-    if (!_.include(this.records, model.id.toString()))
-      this.records.push(model.id.toString()); this.save();
-    return this.find(model);
-  },
-
-  // Retrieve a model from `this.data` by id.
-  find: function(model) {
-    return this.jsonData(this.localStorage().getItem(this.name+"-"+model.id));
-  },
-
-  // Return the array of all models currently in storage.
-  findAll: function() {
-    // Lodash removed _#chain in v1.0.0-rc.1
-    return (_.chain || _)(this.records)
-      .map(function(id){
-        return this.jsonData(this.localStorage().getItem(this.name+"-"+id));
-      }, this)
-      .compact()
-      .value();
-  },
-
-  // Delete a model from `this.data`, returning it.
-  destroy: function(model) {
-    if (model.isNew())
-      return false
-    this.localStorage().removeItem(this.name+"-"+model.id);
-    this.records = _.reject(this.records, function(id){
-      return id === model.id.toString();
-    });
-    this.save();
-    return model;
-  },
-
-  localStorage: function() {
-    return localStorage;
-  },
-
-  // fix for "illegal access" error on Android when JSON.parse is passed null
-  jsonData: function (data) {
-      return data && JSON.parse(data);
-  },
-
-  // Clear localStorage for specific collection.
-  _clear: function() {
-    var local = this.localStorage(),
-      itemRe = new RegExp("^" + this.name + "-");
-
-    // Remove id-tracking item (e.g., "foo").
-    local.removeItem(this.name);
-
-    // Lodash removed _#chain in v1.0.0-rc.1
-    // Match all data items (e.g., "foo-ID") and remove.
-    (_.chain || _)(local).keys()
-      .filter(function (k) { return itemRe.test(k); })
-      .each(function (k) { local.removeItem(k); });
-
-    this.records.length = 0;
-  },
-
-  // Size of localStorage.
-  _storageSize: function() {
-    return this.localStorage().length;
-  }
-
-});
-
-// localSync delegate to the model or collection's
-// *localStorage* property, which should be an instance of `Store`.
-// window.Store.sync and Backbone.localSync is deprecated, use Backbone.LocalStorage.sync instead
-Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function(method, model, options) {
-  var store = model.localStorage || model.collection.localStorage;
-
-  var resp, errorMessage, syncDfd = Backbone.$.Deferred && Backbone.$.Deferred(); //If $ is having Deferred - use it.
-
-  try {
-
-    switch (method) {
-      case "read":
-        resp = model.id != undefined ? store.find(model) : store.findAll();
-        break;
-      case "create":
-        resp = store.create(model);
-        break;
-      case "update":
-        resp = store.update(model);
-        break;
-      case "delete":
-        resp = store.destroy(model);
-        break;
-    }
-
-  } catch(error) {
-    if (error.code === 22 && store._storageSize() === 0)
-      errorMessage = "Private browsing is unsupported";
-    else
-      errorMessage = error.message;
-  }
-
-  if (resp) {
-    if (options && options.success) {
-      if (Backbone.VERSION === "0.9.10") {
-        options.success(model, resp, options);
-      } else {
-        options.success(resp);
-      }
-    }
-    if (syncDfd) {
-      syncDfd.resolve(resp);
-    }
-
-  } else {
-    errorMessage = errorMessage ? errorMessage
-                                : "Record Not Found";
-
-    if (options && options.error)
-      if (Backbone.VERSION === "0.9.10") {
-        options.error(model, errorMessage, options);
-      } else {
-        options.error(errorMessage);
-      }
-
-    if (syncDfd)
-      syncDfd.reject(errorMessage);
-  }
-
-  // add compatibility with $.ajax
-  // always execute callback for success and error
-  if (options && options.complete) options.complete(resp);
-
-  return syncDfd && syncDfd.promise();
-};
-
-Backbone.ajaxSync = Backbone.sync;
-
-Backbone.getSyncMethod = function(model) {
-  if(model.localStorage || (model.collection && model.collection.localStorage)) {
-    return Backbone.localSync;
-  }
-
-  return Backbone.ajaxSync;
-};
-
-// Override 'Backbone.sync' to default to localSync,
-// the original 'Backbone.sync' is still available in 'Backbone.ajaxSync'
-Backbone.sync = function(method, model, options) {
-  return Backbone.getSyncMethod(model).apply(this, [method, model, options]);
-};
-
-return Backbone.LocalStorage;
 }));
 
 ;// MarionetteJS (Backbone.Marionette)
@@ -20763,641 +20558,228 @@ if (typeof define !== 'undefined' && define.amd) {
 	window.FastClick = FastClick;
 }
 
-;// Console-polyfill. MIT license.
-// https://github.com/paulmillr/console-polyfill
-// Make it safe to do console.log() always.
-(function (con) {
-  'use strict';
-  var prop, method;
-  var empty = {};
-  var dummy = function() {};
-  var properties = 'memory'.split(',');
-  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
-     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
-     'time,timeEnd,trace,warn').split(',');
-  while (prop = properties.pop()) con[prop] = con[prop] || empty;
-  while (method = methods.pop()) con[method] = con[method] || dummy;
-})(window.console = window.console || {});
-
-;/*!
- * jQuery blockUI plugin
- * Version 2.66.0-2013.10.09
- * Requires jQuery v1.7 or later
+;/**
+ * Backbone localStorage Adapter
+ * Version 1.1.7
  *
- * Examples at: http://malsup.com/jquery/block/
- * Copyright (c) 2007-2013 M. Alsup
- * Dual licensed under the MIT and GPL licenses:
- * http://www.opensource.org/licenses/mit-license.php
- * http://www.gnu.org/licenses/gpl.html
- *
- * Thanks to Amir-Hossein Sobhi for some excellent contributions!
+ * https://github.com/jeromegn/Backbone.localStorage
  */
-
-;(function() {
-/*jshint eqeqeq:false curly:false latedef:false */
-"use strict";
-
-	function setup($) {
-		$.fn._fadeIn = $.fn.fadeIn;
-
-		var noOp = $.noop || function() {};
-
-		// this bit is to ensure we don't call setExpression when we shouldn't (with extra muscle to handle
-		// confusing userAgent strings on Vista)
-		var msie = /MSIE/.test(navigator.userAgent);
-		var ie6  = /MSIE 6.0/.test(navigator.userAgent) && ! /MSIE 8.0/.test(navigator.userAgent);
-		var mode = document.documentMode || 0;
-		var setExpr = $.isFunction( document.createElement('div').style.setExpression );
-
-		// global $ methods for blocking/unblocking the entire page
-		$.blockUI   = function(opts) { install(window, opts); };
-		$.unblockUI = function(opts) { remove(window, opts); };
-
-		// convenience method for quick growl-like notifications  (http://www.google.com/search?q=growl)
-		$.growlUI = function(title, message, timeout, onClose) {
-			var $m = $('<div class="growlUI"></div>');
-			if (title) $m.append('<h1>'+title+'</h1>');
-			if (message) $m.append('<h2>'+message+'</h2>');
-			if (timeout === undefined) timeout = 3000;
-
-			// Added by konapun: Set timeout to 30 seconds if this growl is moused over, like normal toast notifications
-			var callBlock = function(opts) {
-				opts = opts || {};
-
-				$.blockUI({
-					message: $m,
-					fadeIn : typeof opts.fadeIn  !== 'undefined' ? opts.fadeIn  : 700,
-					fadeOut: typeof opts.fadeOut !== 'undefined' ? opts.fadeOut : 1000,
-					timeout: typeof opts.timeout !== 'undefined' ? opts.timeout : timeout,
-					centerY: false,
-					showOverlay: false,
-					onUnblock: onClose,
-					css: $.blockUI.defaults.growlCSS
-				});
-			};
-
-			callBlock();
-			var nonmousedOpacity = $m.css('opacity');
-			$m.mouseover(function() {
-				callBlock({
-					fadeIn: 0,
-					timeout: 30000
-				});
-
-				var displayBlock = $('.blockMsg');
-				displayBlock.stop(); // cancel fadeout if it has started
-				displayBlock.fadeTo(300, 1); // make it easier to read the message by removing transparency
-			}).mouseout(function() {
-				$('.blockMsg').fadeOut(1000);
-			});
-			// End konapun additions
-		};
-
-		// plugin method for blocking element content
-		$.fn.block = function(opts) {
-			if ( this[0] === window ) {
-				$.blockUI( opts );
-				return this;
-			}
-			var fullOpts = $.extend({}, $.blockUI.defaults, opts || {});
-			this.each(function() {
-				var $el = $(this);
-				if (fullOpts.ignoreIfBlocked && $el.data('blockUI.isBlocked'))
-					return;
-				$el.unblock({ fadeOut: 0 });
-			});
-
-			return this.each(function() {
-				if ($.css(this,'position') == 'static') {
-					this.style.position = 'relative';
-					$(this).data('blockUI.static', true);
-				}
-				this.style.zoom = 1; // force 'hasLayout' in ie
-				install(this, opts);
-			});
-		};
-
-		// plugin method for unblocking element content
-		$.fn.unblock = function(opts) {
-			if ( this[0] === window ) {
-				$.unblockUI( opts );
-				return this;
-			}
-			return this.each(function() {
-				remove(this, opts);
-			});
-		};
-
-		$.blockUI.version = 2.66; // 2nd generation blocking at no extra cost!
-
-		// override these in your code to change the default behavior and style
-		$.blockUI.defaults = {
-			// message displayed when blocking (use null for no message)
-			message:  '<h1>Please wait...</h1>',
-
-			title: null,		// title string; only used when theme == true
-			draggable: true,	// only used when theme == true (requires jquery-ui.js to be loaded)
-
-			theme: false, // set to true to use with jQuery UI themes
-
-			// styles for the message when blocking; if you wish to disable
-			// these and use an external stylesheet then do this in your code:
-			// $.blockUI.defaults.css = {};
-			css: {
-				padding:	0,
-				margin:		0,
-				width:		'30%',
-				top:		'40%',
-				left:		'35%',
-				textAlign:	'center',
-				color:		'#000',
-				border:		'3px solid #aaa',
-				backgroundColor:'#fff',
-				cursor:		'wait'
-			},
-
-			// minimal style set used when themes are used
-			themedCSS: {
-				width:	'30%',
-				top:	'40%',
-				left:	'35%'
-			},
-
-			// styles for the overlay
-			overlayCSS:  {
-				backgroundColor:	'#000',
-				opacity:			0.6,
-				cursor:				'wait'
-			},
-
-			// style to replace wait cursor before unblocking to correct issue
-			// of lingering wait cursor
-			cursorReset: 'default',
-
-			// styles applied when using $.growlUI
-			growlCSS: {
-				width:		'350px',
-				top:		'10px',
-				left:		'',
-				right:		'10px',
-				border:		'none',
-				padding:	'5px',
-				opacity:	0.6,
-				cursor:		'default',
-				color:		'#fff',
-				backgroundColor: '#000',
-				'-webkit-border-radius':'10px',
-				'-moz-border-radius':	'10px',
-				'border-radius':		'10px'
-			},
-
-			// IE issues: 'about:blank' fails on HTTPS and javascript:false is s-l-o-w
-			// (hat tip to Jorge H. N. de Vasconcelos)
-			/*jshint scripturl:true */
-			iframeSrc: /^https/i.test(window.location.href || '') ? 'javascript:false' : 'about:blank',
-
-			// force usage of iframe in non-IE browsers (handy for blocking applets)
-			forceIframe: false,
-
-			// z-index for the blocking overlay
-			baseZ: 1000,
-
-			// set these to true to have the message automatically centered
-			centerX: true, // <-- only effects element blocking (page block controlled via css above)
-			centerY: true,
-
-			// allow body element to be stetched in ie6; this makes blocking look better
-			// on "short" pages.  disable if you wish to prevent changes to the body height
-			allowBodyStretch: true,
-
-			// enable if you want key and mouse events to be disabled for content that is blocked
-			bindEvents: true,
-
-			// be default blockUI will supress tab navigation from leaving blocking content
-			// (if bindEvents is true)
-			constrainTabKey: true,
-
-			// fadeIn time in millis; set to 0 to disable fadeIn on block
-			fadeIn:  200,
-
-			// fadeOut time in millis; set to 0 to disable fadeOut on unblock
-			fadeOut:  400,
-
-			// time in millis to wait before auto-unblocking; set to 0 to disable auto-unblock
-			timeout: 0,
-
-			// disable if you don't want to show the overlay
-			showOverlay: true,
-
-			// if true, focus will be placed in the first available input field when
-			// page blocking
-			focusInput: true,
-
-            // elements that can receive focus
-            focusableElements: ':input:enabled:visible',
-
-			// suppresses the use of overlay styles on FF/Linux (due to performance issues with opacity)
-			// no longer needed in 2012
-			// applyPlatformOpacityRules: true,
-
-			// callback method invoked when fadeIn has completed and blocking message is visible
-			onBlock: null,
-
-			// callback method invoked when unblocking has completed; the callback is
-			// passed the element that has been unblocked (which is the window object for page
-			// blocks) and the options that were passed to the unblock call:
-			//	onUnblock(element, options)
-			onUnblock: null,
-
-			// callback method invoked when the overlay area is clicked.
-			// setting this will turn the cursor to a pointer, otherwise cursor defined in overlayCss will be used.
-			onOverlayClick: null,
-
-			// don't ask; if you really must know: http://groups.google.com/group/jquery-en/browse_thread/thread/36640a8730503595/2f6a79a77a78e493#2f6a79a77a78e493
-			quirksmodeOffsetHack: 4,
-
-			// class name of the message block
-			blockMsgClass: 'blockMsg',
-
-			// if it is already blocked, then ignore it (don't unblock and reblock)
-			ignoreIfBlocked: false
-		};
-
-		// private data and functions follow...
-
-		var pageBlock = null;
-		var pageBlockEls = [];
-
-		function install(el, opts) {
-			var css, themedCSS;
-			var full = (el == window);
-			var msg = (opts && opts.message !== undefined ? opts.message : undefined);
-			opts = $.extend({}, $.blockUI.defaults, opts || {});
-
-			if (opts.ignoreIfBlocked && $(el).data('blockUI.isBlocked'))
-				return;
-
-			opts.overlayCSS = $.extend({}, $.blockUI.defaults.overlayCSS, opts.overlayCSS || {});
-			css = $.extend({}, $.blockUI.defaults.css, opts.css || {});
-			if (opts.onOverlayClick)
-				opts.overlayCSS.cursor = 'pointer';
-
-			themedCSS = $.extend({}, $.blockUI.defaults.themedCSS, opts.themedCSS || {});
-			msg = msg === undefined ? opts.message : msg;
-
-			// remove the current block (if there is one)
-			if (full && pageBlock)
-				remove(window, {fadeOut:0});
-
-			// if an existing element is being used as the blocking content then we capture
-			// its current place in the DOM (and current display style) so we can restore
-			// it when we unblock
-			if (msg && typeof msg != 'string' && (msg.parentNode || msg.jquery)) {
-				var node = msg.jquery ? msg[0] : msg;
-				var data = {};
-				$(el).data('blockUI.history', data);
-				data.el = node;
-				data.parent = node.parentNode;
-				data.display = node.style.display;
-				data.position = node.style.position;
-				if (data.parent)
-					data.parent.removeChild(node);
-			}
-
-			$(el).data('blockUI.onUnblock', opts.onUnblock);
-			var z = opts.baseZ;
-
-			// blockUI uses 3 layers for blocking, for simplicity they are all used on every platform;
-			// layer1 is the iframe layer which is used to supress bleed through of underlying content
-			// layer2 is the overlay layer which has opacity and a wait cursor (by default)
-			// layer3 is the message content that is displayed while blocking
-			var lyr1, lyr2, lyr3, s;
-			if (msie || opts.forceIframe)
-				lyr1 = $('<iframe class="blockUI" style="z-index:'+ (z++) +';display:none;border:none;margin:0;padding:0;position:absolute;width:100%;height:100%;top:0;left:0" src="'+opts.iframeSrc+'"></iframe>');
-			else
-				lyr1 = $('<div class="blockUI" style="display:none"></div>');
-
-			if (opts.theme)
-				lyr2 = $('<div class="blockUI blockOverlay ui-widget-overlay" style="z-index:'+ (z++) +';display:none"></div>');
-			else
-				lyr2 = $('<div class="blockUI blockOverlay" style="z-index:'+ (z++) +';display:none;border:none;margin:0;padding:0;width:100%;height:100%;top:0;left:0"></div>');
-
-			if (opts.theme && full) {
-				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockPage ui-dialog ui-widget ui-corner-all" style="z-index:'+(z+10)+';display:none;position:fixed">';
-				if ( opts.title ) {
-					s += '<div class="ui-widget-header ui-dialog-titlebar ui-corner-all blockTitle">'+(opts.title || '&nbsp;')+'</div>';
-				}
-				s += '<div class="ui-widget-content ui-dialog-content"></div>';
-				s += '</div>';
-			}
-			else if (opts.theme) {
-				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockElement ui-dialog ui-widget ui-corner-all" style="z-index:'+(z+10)+';display:none;position:absolute">';
-				if ( opts.title ) {
-					s += '<div class="ui-widget-header ui-dialog-titlebar ui-corner-all blockTitle">'+(opts.title || '&nbsp;')+'</div>';
-				}
-				s += '<div class="ui-widget-content ui-dialog-content"></div>';
-				s += '</div>';
-			}
-			else if (full) {
-				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockPage" style="z-index:'+(z+10)+';display:none;position:fixed"></div>';
-			}
-			else {
-				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockElement" style="z-index:'+(z+10)+';display:none;position:absolute"></div>';
-			}
-			lyr3 = $(s);
-
-			// if we have a message, style it
-			if (msg) {
-				if (opts.theme) {
-					lyr3.css(themedCSS);
-					lyr3.addClass('ui-widget-content');
-				}
-				else
-					lyr3.css(css);
-			}
-
-			// style the overlay
-			if (!opts.theme /*&& (!opts.applyPlatformOpacityRules)*/)
-				lyr2.css(opts.overlayCSS);
-			lyr2.css('position', full ? 'fixed' : 'absolute');
-
-			// make iframe layer transparent in IE
-			if (msie || opts.forceIframe)
-				lyr1.css('opacity',0.0);
-
-			//$([lyr1[0],lyr2[0],lyr3[0]]).appendTo(full ? 'body' : el);
-			var layers = [lyr1,lyr2,lyr3], $par = full ? $('body') : $(el);
-			$.each(layers, function() {
-				this.appendTo($par);
-			});
-
-			if (opts.theme && opts.draggable && $.fn.draggable) {
-				lyr3.draggable({
-					handle: '.ui-dialog-titlebar',
-					cancel: 'li'
-				});
-			}
-
-			// ie7 must use absolute positioning in quirks mode and to account for activex issues (when scrolling)
-			var expr = setExpr && (!$.support.boxModel || $('object,embed', full ? null : el).length > 0);
-			if (ie6 || expr) {
-				// give body 100% height
-				if (full && opts.allowBodyStretch && $.support.boxModel)
-					$('html,body').css('height','100%');
-
-				// fix ie6 issue when blocked element has a border width
-				if ((ie6 || !$.support.boxModel) && !full) {
-					var t = sz(el,'borderTopWidth'), l = sz(el,'borderLeftWidth');
-					var fixT = t ? '(0 - '+t+')' : 0;
-					var fixL = l ? '(0 - '+l+')' : 0;
-				}
-
-				// simulate fixed position
-				$.each(layers, function(i,o) {
-					var s = o[0].style;
-					s.position = 'absolute';
-					if (i < 2) {
-						if (full)
-							s.setExpression('height','Math.max(document.body.scrollHeight, document.body.offsetHeight) - (jQuery.support.boxModel?0:'+opts.quirksmodeOffsetHack+') + "px"');
-						else
-							s.setExpression('height','this.parentNode.offsetHeight + "px"');
-						if (full)
-							s.setExpression('width','jQuery.support.boxModel && document.documentElement.clientWidth || document.body.clientWidth + "px"');
-						else
-							s.setExpression('width','this.parentNode.offsetWidth + "px"');
-						if (fixL) s.setExpression('left', fixL);
-						if (fixT) s.setExpression('top', fixT);
-					}
-					else if (opts.centerY) {
-						if (full) s.setExpression('top','(document.documentElement.clientHeight || document.body.clientHeight) / 2 - (this.offsetHeight / 2) + (blah = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + "px"');
-						s.marginTop = 0;
-					}
-					else if (!opts.centerY && full) {
-						var top = (opts.css && opts.css.top) ? parseInt(opts.css.top, 10) : 0;
-						var expression = '((document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + '+top+') + "px"';
-						s.setExpression('top',expression);
-					}
-				});
-			}
-
-			// show the message
-			if (msg) {
-				if (opts.theme)
-					lyr3.find('.ui-widget-content').append(msg);
-				else
-					lyr3.append(msg);
-				if (msg.jquery || msg.nodeType)
-					$(msg).show();
-			}
-
-			if ((msie || opts.forceIframe) && opts.showOverlay)
-				lyr1.show(); // opacity is zero
-			if (opts.fadeIn) {
-				var cb = opts.onBlock ? opts.onBlock : noOp;
-				var cb1 = (opts.showOverlay && !msg) ? cb : noOp;
-				var cb2 = msg ? cb : noOp;
-				if (opts.showOverlay)
-					lyr2._fadeIn(opts.fadeIn, cb1);
-				if (msg)
-					lyr3._fadeIn(opts.fadeIn, cb2);
-			}
-			else {
-				if (opts.showOverlay)
-					lyr2.show();
-				if (msg)
-					lyr3.show();
-				if (opts.onBlock)
-					opts.onBlock();
-			}
-
-			// bind key and mouse events
-			bind(1, el, opts);
-
-			if (full) {
-				pageBlock = lyr3[0];
-				pageBlockEls = $(opts.focusableElements,pageBlock);
-				if (opts.focusInput)
-					setTimeout(focus, 20);
-			}
-			else
-				center(lyr3[0], opts.centerX, opts.centerY);
-
-			if (opts.timeout) {
-				// auto-unblock
-				var to = setTimeout(function() {
-					if (full)
-						$.unblockUI(opts);
-					else
-						$(el).unblock(opts);
-				}, opts.timeout);
-				$(el).data('blockUI.timeout', to);
-			}
-		}
-
-		// remove the block
-		function remove(el, opts) {
-			var count;
-			var full = (el == window);
-			var $el = $(el);
-			var data = $el.data('blockUI.history');
-			var to = $el.data('blockUI.timeout');
-			if (to) {
-				clearTimeout(to);
-				$el.removeData('blockUI.timeout');
-			}
-			opts = $.extend({}, $.blockUI.defaults, opts || {});
-			bind(0, el, opts); // unbind events
-
-			if (opts.onUnblock === null) {
-				opts.onUnblock = $el.data('blockUI.onUnblock');
-				$el.removeData('blockUI.onUnblock');
-			}
-
-			var els;
-			if (full) // crazy selector to handle odd field errors in ie6/7
-				els = $('body').children().filter('.blockUI').add('body > .blockUI');
-			else
-				els = $el.find('>.blockUI');
-
-			// fix cursor issue
-			if ( opts.cursorReset ) {
-				if ( els.length > 1 )
-					els[1].style.cursor = opts.cursorReset;
-				if ( els.length > 2 )
-					els[2].style.cursor = opts.cursorReset;
-			}
-
-			if (full)
-				pageBlock = pageBlockEls = null;
-
-			if (opts.fadeOut) {
-				count = els.length;
-				els.stop().fadeOut(opts.fadeOut, function() {
-					if ( --count === 0)
-						reset(els,data,opts,el);
-				});
-			}
-			else
-				reset(els, data, opts, el);
-		}
-
-		// move blocking element back into the DOM where it started
-		function reset(els,data,opts,el) {
-			var $el = $(el);
-			if ( $el.data('blockUI.isBlocked') )
-				return;
-
-			els.each(function(i,o) {
-				// remove via DOM calls so we don't lose event handlers
-				if (this.parentNode)
-					this.parentNode.removeChild(this);
-			});
-
-			if (data && data.el) {
-				data.el.style.display = data.display;
-				data.el.style.position = data.position;
-				if (data.parent)
-					data.parent.appendChild(data.el);
-				$el.removeData('blockUI.history');
-			}
-
-			if ($el.data('blockUI.static')) {
-				$el.css('position', 'static'); // #22
-			}
-
-			if (typeof opts.onUnblock == 'function')
-				opts.onUnblock(el,opts);
-
-			// fix issue in Safari 6 where block artifacts remain until reflow
-			var body = $(document.body), w = body.width(), cssW = body[0].style.width;
-			body.width(w-1).width(w);
-			body[0].style.width = cssW;
-		}
-
-		// bind/unbind the handler
-		function bind(b, el, opts) {
-			var full = el == window, $el = $(el);
-
-			// don't bother unbinding if there is nothing to unbind
-			if (!b && (full && !pageBlock || !full && !$el.data('blockUI.isBlocked')))
-				return;
-
-			$el.data('blockUI.isBlocked', b);
-
-			// don't bind events when overlay is not in use or if bindEvents is false
-			if (!full || !opts.bindEvents || (b && !opts.showOverlay))
-				return;
-
-			// bind anchors and inputs for mouse and key events
-			var events = 'mousedown mouseup keydown keypress keyup touchstart touchend touchmove';
-			if (b)
-				$(document).bind(events, opts, handler);
-			else
-				$(document).unbind(events, handler);
-
-		// former impl...
-		//		var $e = $('a,:input');
-		//		b ? $e.bind(events, opts, handler) : $e.unbind(events, handler);
-		}
-
-		// event handler to suppress keyboard/mouse events when blocking
-		function handler(e) {
-			// allow tab navigation (conditionally)
-			if (e.type === 'keydown' && e.keyCode && e.keyCode == 9) {
-				if (pageBlock && e.data.constrainTabKey) {
-					var els = pageBlockEls;
-					var fwd = !e.shiftKey && e.target === els[els.length-1];
-					var back = e.shiftKey && e.target === els[0];
-					if (fwd || back) {
-						setTimeout(function(){focus(back);},10);
-						return false;
-					}
-				}
-			}
-			var opts = e.data;
-			var target = $(e.target);
-			if (target.hasClass('blockOverlay') && opts.onOverlayClick)
-				opts.onOverlayClick(e);
-
-			// allow events within the message content
-			if (target.parents('div.' + opts.blockMsgClass).length > 0)
-				return true;
-
-			// allow events for content that is not being blocked
-			return target.parents().children().filter('div.blockUI').length === 0;
-		}
-
-		function focus(back) {
-			if (!pageBlockEls)
-				return;
-			var e = pageBlockEls[back===true ? pageBlockEls.length-1 : 0];
-			if (e)
-				e.focus();
-		}
-
-		function center(el, x, y) {
-			var p = el.parentNode, s = el.style;
-			var l = ((p.offsetWidth - el.offsetWidth)/2) - sz(p,'borderLeftWidth');
-			var t = ((p.offsetHeight - el.offsetHeight)/2) - sz(p,'borderTopWidth');
-			if (x) s.left = l > 0 ? (l+'px') : '0';
-			if (y) s.top  = t > 0 ? (t+'px') : '0';
-		}
-
-		function sz(el, p) {
-			return parseInt($.css(el,p),10)||0;
-		}
-
-	}
-
-
-	/*global define:true */
-	if (typeof define === 'function' && define.amd && define.amd.jQuery) {
-		define(['jquery'], setup);
-	} else {
-		setup(jQuery);
-	}
-
-})();
+(function (root, factory) {
+   if (typeof exports === 'object' && typeof require === 'function') {
+     module.exports = factory(require("underscore"), require("backbone"));
+   } else if (typeof define === "function" && define.amd) {
+      // AMD. Register as an anonymous module.
+      define(["underscore","backbone"], function(_, Backbone) {
+        // Use global variables if the locals are undefined.
+        return factory(_ || root._, Backbone || root.Backbone);
+      });
+   } else {
+      // RequireJS isn't being used. Assume underscore and backbone are loaded in <script> tags
+      factory(_, Backbone);
+   }
+}(this, function(_, Backbone) {
+// A simple module to replace `Backbone.sync` with *localStorage*-based
+// persistence. Models are given GUIDS, and saved into a JSON object. Simple
+// as that.
+
+// Hold reference to Underscore.js and Backbone.js in the closure in order
+// to make things work even if they are removed from the global namespace
+
+// Generate four random hex digits.
+function S4() {
+   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+};
+
+// Generate a pseudo-GUID by concatenating random hexadecimal.
+function guid() {
+   return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+};
+
+// Our Store is represented by a single JS object in *localStorage*. Create it
+// with a meaningful name, like the name you'd give a table.
+// window.Store is deprectated, use Backbone.LocalStorage instead
+Backbone.LocalStorage = window.Store = function(name) {
+  if( !this.localStorage ) {
+    throw "Backbone.localStorage: Environment does not support localStorage."
+  }
+  this.name = name;
+  var store = this.localStorage().getItem(this.name);
+  this.records = (store && store.split(",")) || [];
+};
+
+_.extend(Backbone.LocalStorage.prototype, {
+
+  // Save the current state of the **Store** to *localStorage*.
+  save: function() {
+    this.localStorage().setItem(this.name, this.records.join(","));
+  },
+
+  // Add a model, giving it a (hopefully)-unique GUID, if it doesn't already
+  // have an id of it's own.
+  create: function(model) {
+    if (!model.id) {
+      model.id = guid();
+      model.set(model.idAttribute, model.id);
+    }
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    this.records.push(model.id.toString());
+    this.save();
+    return this.find(model);
+  },
+
+  // Update a model by replacing its copy in `this.data`.
+  update: function(model) {
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    if (!_.include(this.records, model.id.toString()))
+      this.records.push(model.id.toString()); this.save();
+    return this.find(model);
+  },
+
+  // Retrieve a model from `this.data` by id.
+  find: function(model) {
+    return this.jsonData(this.localStorage().getItem(this.name+"-"+model.id));
+  },
+
+  // Return the array of all models currently in storage.
+  findAll: function() {
+    // Lodash removed _#chain in v1.0.0-rc.1
+    return (_.chain || _)(this.records)
+      .map(function(id){
+        return this.jsonData(this.localStorage().getItem(this.name+"-"+id));
+      }, this)
+      .compact()
+      .value();
+  },
+
+  // Delete a model from `this.data`, returning it.
+  destroy: function(model) {
+    if (model.isNew())
+      return false
+    this.localStorage().removeItem(this.name+"-"+model.id);
+    this.records = _.reject(this.records, function(id){
+      return id === model.id.toString();
+    });
+    this.save();
+    return model;
+  },
+
+  localStorage: function() {
+    return localStorage;
+  },
+
+  // fix for "illegal access" error on Android when JSON.parse is passed null
+  jsonData: function (data) {
+      return data && JSON.parse(data);
+  },
+
+  // Clear localStorage for specific collection.
+  _clear: function() {
+    var local = this.localStorage(),
+      itemRe = new RegExp("^" + this.name + "-");
+
+    // Remove id-tracking item (e.g., "foo").
+    local.removeItem(this.name);
+
+    // Lodash removed _#chain in v1.0.0-rc.1
+    // Match all data items (e.g., "foo-ID") and remove.
+    (_.chain || _)(local).keys()
+      .filter(function (k) { return itemRe.test(k); })
+      .each(function (k) { local.removeItem(k); });
+
+    this.records.length = 0;
+  },
+
+  // Size of localStorage.
+  _storageSize: function() {
+    return this.localStorage().length;
+  }
+
+});
+
+// localSync delegate to the model or collection's
+// *localStorage* property, which should be an instance of `Store`.
+// window.Store.sync and Backbone.localSync is deprecated, use Backbone.LocalStorage.sync instead
+Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function(method, model, options) {
+  var store = model.localStorage || model.collection.localStorage;
+
+  var resp, errorMessage, syncDfd = Backbone.$.Deferred && Backbone.$.Deferred(); //If $ is having Deferred - use it.
+
+  try {
+
+    switch (method) {
+      case "read":
+        resp = model.id != undefined ? store.find(model) : store.findAll();
+        break;
+      case "create":
+        resp = store.create(model);
+        break;
+      case "update":
+        resp = store.update(model);
+        break;
+      case "delete":
+        resp = store.destroy(model);
+        break;
+    }
+
+  } catch(error) {
+    if (error.code === 22 && store._storageSize() === 0)
+      errorMessage = "Private browsing is unsupported";
+    else
+      errorMessage = error.message;
+  }
+
+  if (resp) {
+    if (options && options.success) {
+      if (Backbone.VERSION === "0.9.10") {
+        options.success(model, resp, options);
+      } else {
+        options.success(resp);
+      }
+    }
+    if (syncDfd) {
+      syncDfd.resolve(resp);
+    }
+
+  } else {
+    errorMessage = errorMessage ? errorMessage
+                                : "Record Not Found";
+
+    if (options && options.error)
+      if (Backbone.VERSION === "0.9.10") {
+        options.error(model, errorMessage, options);
+      } else {
+        options.error(errorMessage);
+      }
+
+    if (syncDfd)
+      syncDfd.reject(errorMessage);
+  }
+
+  // add compatibility with $.ajax
+  // always execute callback for success and error
+  if (options && options.complete) options.complete(resp);
+
+  return syncDfd && syncDfd.promise();
+};
+
+Backbone.ajaxSync = Backbone.sync;
+
+Backbone.getSyncMethod = function(model) {
+  if(model.localStorage || (model.collection && model.collection.localStorage)) {
+    return Backbone.localSync;
+  }
+
+  return Backbone.ajaxSync;
+};
+
+// Override 'Backbone.sync' to default to localSync,
+// the original 'Backbone.sync' is still available in 'Backbone.ajaxSync'
+Backbone.sync = function(method, model, options) {
+  return Backbone.getSyncMethod(model).apply(this, [method, model, options]);
+};
+
+return Backbone.LocalStorage;
+}));
 
 ;//! moment.js
 //! version : 2.2.1
@@ -23174,6 +22556,626 @@ if (typeof define !== 'undefined' && define.amd) {
         });
     }
 }).call(this);
+
+;/*!
+ * jQuery blockUI plugin
+ * Version 2.66.0-2013.10.09
+ * Requires jQuery v1.7 or later
+ *
+ * Examples at: http://malsup.com/jquery/block/
+ * Copyright (c) 2007-2013 M. Alsup
+ * Dual licensed under the MIT and GPL licenses:
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
+ *
+ * Thanks to Amir-Hossein Sobhi for some excellent contributions!
+ */
+
+;(function() {
+/*jshint eqeqeq:false curly:false latedef:false */
+"use strict";
+
+	function setup($) {
+		$.fn._fadeIn = $.fn.fadeIn;
+
+		var noOp = $.noop || function() {};
+
+		// this bit is to ensure we don't call setExpression when we shouldn't (with extra muscle to handle
+		// confusing userAgent strings on Vista)
+		var msie = /MSIE/.test(navigator.userAgent);
+		var ie6  = /MSIE 6.0/.test(navigator.userAgent) && ! /MSIE 8.0/.test(navigator.userAgent);
+		var mode = document.documentMode || 0;
+		var setExpr = $.isFunction( document.createElement('div').style.setExpression );
+
+		// global $ methods for blocking/unblocking the entire page
+		$.blockUI   = function(opts) { install(window, opts); };
+		$.unblockUI = function(opts) { remove(window, opts); };
+
+		// convenience method for quick growl-like notifications  (http://www.google.com/search?q=growl)
+		$.growlUI = function(title, message, timeout, onClose) {
+			var $m = $('<div class="growlUI"></div>');
+			if (title) $m.append('<h1>'+title+'</h1>');
+			if (message) $m.append('<h2>'+message+'</h2>');
+			if (timeout === undefined) timeout = 3000;
+
+			// Added by konapun: Set timeout to 30 seconds if this growl is moused over, like normal toast notifications
+			var callBlock = function(opts) {
+				opts = opts || {};
+
+				$.blockUI({
+					message: $m,
+					fadeIn : typeof opts.fadeIn  !== 'undefined' ? opts.fadeIn  : 700,
+					fadeOut: typeof opts.fadeOut !== 'undefined' ? opts.fadeOut : 1000,
+					timeout: typeof opts.timeout !== 'undefined' ? opts.timeout : timeout,
+					centerY: false,
+					showOverlay: false,
+					onUnblock: onClose,
+					css: $.blockUI.defaults.growlCSS
+				});
+			};
+
+			callBlock();
+			var nonmousedOpacity = $m.css('opacity');
+			$m.mouseover(function() {
+				callBlock({
+					fadeIn: 0,
+					timeout: 30000
+				});
+
+				var displayBlock = $('.blockMsg');
+				displayBlock.stop(); // cancel fadeout if it has started
+				displayBlock.fadeTo(300, 1); // make it easier to read the message by removing transparency
+			}).mouseout(function() {
+				$('.blockMsg').fadeOut(1000);
+			});
+			// End konapun additions
+		};
+
+		// plugin method for blocking element content
+		$.fn.block = function(opts) {
+			if ( this[0] === window ) {
+				$.blockUI( opts );
+				return this;
+			}
+			var fullOpts = $.extend({}, $.blockUI.defaults, opts || {});
+			this.each(function() {
+				var $el = $(this);
+				if (fullOpts.ignoreIfBlocked && $el.data('blockUI.isBlocked'))
+					return;
+				$el.unblock({ fadeOut: 0 });
+			});
+
+			return this.each(function() {
+				if ($.css(this,'position') == 'static') {
+					this.style.position = 'relative';
+					$(this).data('blockUI.static', true);
+				}
+				this.style.zoom = 1; // force 'hasLayout' in ie
+				install(this, opts);
+			});
+		};
+
+		// plugin method for unblocking element content
+		$.fn.unblock = function(opts) {
+			if ( this[0] === window ) {
+				$.unblockUI( opts );
+				return this;
+			}
+			return this.each(function() {
+				remove(this, opts);
+			});
+		};
+
+		$.blockUI.version = 2.66; // 2nd generation blocking at no extra cost!
+
+		// override these in your code to change the default behavior and style
+		$.blockUI.defaults = {
+			// message displayed when blocking (use null for no message)
+			message:  '<h1>Please wait...</h1>',
+
+			title: null,		// title string; only used when theme == true
+			draggable: true,	// only used when theme == true (requires jquery-ui.js to be loaded)
+
+			theme: false, // set to true to use with jQuery UI themes
+
+			// styles for the message when blocking; if you wish to disable
+			// these and use an external stylesheet then do this in your code:
+			// $.blockUI.defaults.css = {};
+			css: {
+				padding:	0,
+				margin:		0,
+				width:		'30%',
+				top:		'40%',
+				left:		'35%',
+				textAlign:	'center',
+				color:		'#000',
+				border:		'3px solid #aaa',
+				backgroundColor:'#fff',
+				cursor:		'wait'
+			},
+
+			// minimal style set used when themes are used
+			themedCSS: {
+				width:	'30%',
+				top:	'40%',
+				left:	'35%'
+			},
+
+			// styles for the overlay
+			overlayCSS:  {
+				backgroundColor:	'#000',
+				opacity:			0.6,
+				cursor:				'wait'
+			},
+
+			// style to replace wait cursor before unblocking to correct issue
+			// of lingering wait cursor
+			cursorReset: 'default',
+
+			// styles applied when using $.growlUI
+			growlCSS: {
+				width:		'350px',
+				top:		'10px',
+				left:		'',
+				right:		'10px',
+				border:		'none',
+				padding:	'5px',
+				opacity:	0.6,
+				cursor:		'default',
+				color:		'#fff',
+				backgroundColor: '#000',
+				'-webkit-border-radius':'10px',
+				'-moz-border-radius':	'10px',
+				'border-radius':		'10px'
+			},
+
+			// IE issues: 'about:blank' fails on HTTPS and javascript:false is s-l-o-w
+			// (hat tip to Jorge H. N. de Vasconcelos)
+			/*jshint scripturl:true */
+			iframeSrc: /^https/i.test(window.location.href || '') ? 'javascript:false' : 'about:blank',
+
+			// force usage of iframe in non-IE browsers (handy for blocking applets)
+			forceIframe: false,
+
+			// z-index for the blocking overlay
+			baseZ: 1000,
+
+			// set these to true to have the message automatically centered
+			centerX: true, // <-- only effects element blocking (page block controlled via css above)
+			centerY: true,
+
+			// allow body element to be stetched in ie6; this makes blocking look better
+			// on "short" pages.  disable if you wish to prevent changes to the body height
+			allowBodyStretch: true,
+
+			// enable if you want key and mouse events to be disabled for content that is blocked
+			bindEvents: true,
+
+			// be default blockUI will supress tab navigation from leaving blocking content
+			// (if bindEvents is true)
+			constrainTabKey: true,
+
+			// fadeIn time in millis; set to 0 to disable fadeIn on block
+			fadeIn:  200,
+
+			// fadeOut time in millis; set to 0 to disable fadeOut on unblock
+			fadeOut:  400,
+
+			// time in millis to wait before auto-unblocking; set to 0 to disable auto-unblock
+			timeout: 0,
+
+			// disable if you don't want to show the overlay
+			showOverlay: true,
+
+			// if true, focus will be placed in the first available input field when
+			// page blocking
+			focusInput: true,
+
+            // elements that can receive focus
+            focusableElements: ':input:enabled:visible',
+
+			// suppresses the use of overlay styles on FF/Linux (due to performance issues with opacity)
+			// no longer needed in 2012
+			// applyPlatformOpacityRules: true,
+
+			// callback method invoked when fadeIn has completed and blocking message is visible
+			onBlock: null,
+
+			// callback method invoked when unblocking has completed; the callback is
+			// passed the element that has been unblocked (which is the window object for page
+			// blocks) and the options that were passed to the unblock call:
+			//	onUnblock(element, options)
+			onUnblock: null,
+
+			// callback method invoked when the overlay area is clicked.
+			// setting this will turn the cursor to a pointer, otherwise cursor defined in overlayCss will be used.
+			onOverlayClick: null,
+
+			// don't ask; if you really must know: http://groups.google.com/group/jquery-en/browse_thread/thread/36640a8730503595/2f6a79a77a78e493#2f6a79a77a78e493
+			quirksmodeOffsetHack: 4,
+
+			// class name of the message block
+			blockMsgClass: 'blockMsg',
+
+			// if it is already blocked, then ignore it (don't unblock and reblock)
+			ignoreIfBlocked: false
+		};
+
+		// private data and functions follow...
+
+		var pageBlock = null;
+		var pageBlockEls = [];
+
+		function install(el, opts) {
+			var css, themedCSS;
+			var full = (el == window);
+			var msg = (opts && opts.message !== undefined ? opts.message : undefined);
+			opts = $.extend({}, $.blockUI.defaults, opts || {});
+
+			if (opts.ignoreIfBlocked && $(el).data('blockUI.isBlocked'))
+				return;
+
+			opts.overlayCSS = $.extend({}, $.blockUI.defaults.overlayCSS, opts.overlayCSS || {});
+			css = $.extend({}, $.blockUI.defaults.css, opts.css || {});
+			if (opts.onOverlayClick)
+				opts.overlayCSS.cursor = 'pointer';
+
+			themedCSS = $.extend({}, $.blockUI.defaults.themedCSS, opts.themedCSS || {});
+			msg = msg === undefined ? opts.message : msg;
+
+			// remove the current block (if there is one)
+			if (full && pageBlock)
+				remove(window, {fadeOut:0});
+
+			// if an existing element is being used as the blocking content then we capture
+			// its current place in the DOM (and current display style) so we can restore
+			// it when we unblock
+			if (msg && typeof msg != 'string' && (msg.parentNode || msg.jquery)) {
+				var node = msg.jquery ? msg[0] : msg;
+				var data = {};
+				$(el).data('blockUI.history', data);
+				data.el = node;
+				data.parent = node.parentNode;
+				data.display = node.style.display;
+				data.position = node.style.position;
+				if (data.parent)
+					data.parent.removeChild(node);
+			}
+
+			$(el).data('blockUI.onUnblock', opts.onUnblock);
+			var z = opts.baseZ;
+
+			// blockUI uses 3 layers for blocking, for simplicity they are all used on every platform;
+			// layer1 is the iframe layer which is used to supress bleed through of underlying content
+			// layer2 is the overlay layer which has opacity and a wait cursor (by default)
+			// layer3 is the message content that is displayed while blocking
+			var lyr1, lyr2, lyr3, s;
+			if (msie || opts.forceIframe)
+				lyr1 = $('<iframe class="blockUI" style="z-index:'+ (z++) +';display:none;border:none;margin:0;padding:0;position:absolute;width:100%;height:100%;top:0;left:0" src="'+opts.iframeSrc+'"></iframe>');
+			else
+				lyr1 = $('<div class="blockUI" style="display:none"></div>');
+
+			if (opts.theme)
+				lyr2 = $('<div class="blockUI blockOverlay ui-widget-overlay" style="z-index:'+ (z++) +';display:none"></div>');
+			else
+				lyr2 = $('<div class="blockUI blockOverlay" style="z-index:'+ (z++) +';display:none;border:none;margin:0;padding:0;width:100%;height:100%;top:0;left:0"></div>');
+
+			if (opts.theme && full) {
+				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockPage ui-dialog ui-widget ui-corner-all" style="z-index:'+(z+10)+';display:none;position:fixed">';
+				if ( opts.title ) {
+					s += '<div class="ui-widget-header ui-dialog-titlebar ui-corner-all blockTitle">'+(opts.title || '&nbsp;')+'</div>';
+				}
+				s += '<div class="ui-widget-content ui-dialog-content"></div>';
+				s += '</div>';
+			}
+			else if (opts.theme) {
+				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockElement ui-dialog ui-widget ui-corner-all" style="z-index:'+(z+10)+';display:none;position:absolute">';
+				if ( opts.title ) {
+					s += '<div class="ui-widget-header ui-dialog-titlebar ui-corner-all blockTitle">'+(opts.title || '&nbsp;')+'</div>';
+				}
+				s += '<div class="ui-widget-content ui-dialog-content"></div>';
+				s += '</div>';
+			}
+			else if (full) {
+				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockPage" style="z-index:'+(z+10)+';display:none;position:fixed"></div>';
+			}
+			else {
+				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockElement" style="z-index:'+(z+10)+';display:none;position:absolute"></div>';
+			}
+			lyr3 = $(s);
+
+			// if we have a message, style it
+			if (msg) {
+				if (opts.theme) {
+					lyr3.css(themedCSS);
+					lyr3.addClass('ui-widget-content');
+				}
+				else
+					lyr3.css(css);
+			}
+
+			// style the overlay
+			if (!opts.theme /*&& (!opts.applyPlatformOpacityRules)*/)
+				lyr2.css(opts.overlayCSS);
+			lyr2.css('position', full ? 'fixed' : 'absolute');
+
+			// make iframe layer transparent in IE
+			if (msie || opts.forceIframe)
+				lyr1.css('opacity',0.0);
+
+			//$([lyr1[0],lyr2[0],lyr3[0]]).appendTo(full ? 'body' : el);
+			var layers = [lyr1,lyr2,lyr3], $par = full ? $('body') : $(el);
+			$.each(layers, function() {
+				this.appendTo($par);
+			});
+
+			if (opts.theme && opts.draggable && $.fn.draggable) {
+				lyr3.draggable({
+					handle: '.ui-dialog-titlebar',
+					cancel: 'li'
+				});
+			}
+
+			// ie7 must use absolute positioning in quirks mode and to account for activex issues (when scrolling)
+			var expr = setExpr && (!$.support.boxModel || $('object,embed', full ? null : el).length > 0);
+			if (ie6 || expr) {
+				// give body 100% height
+				if (full && opts.allowBodyStretch && $.support.boxModel)
+					$('html,body').css('height','100%');
+
+				// fix ie6 issue when blocked element has a border width
+				if ((ie6 || !$.support.boxModel) && !full) {
+					var t = sz(el,'borderTopWidth'), l = sz(el,'borderLeftWidth');
+					var fixT = t ? '(0 - '+t+')' : 0;
+					var fixL = l ? '(0 - '+l+')' : 0;
+				}
+
+				// simulate fixed position
+				$.each(layers, function(i,o) {
+					var s = o[0].style;
+					s.position = 'absolute';
+					if (i < 2) {
+						if (full)
+							s.setExpression('height','Math.max(document.body.scrollHeight, document.body.offsetHeight) - (jQuery.support.boxModel?0:'+opts.quirksmodeOffsetHack+') + "px"');
+						else
+							s.setExpression('height','this.parentNode.offsetHeight + "px"');
+						if (full)
+							s.setExpression('width','jQuery.support.boxModel && document.documentElement.clientWidth || document.body.clientWidth + "px"');
+						else
+							s.setExpression('width','this.parentNode.offsetWidth + "px"');
+						if (fixL) s.setExpression('left', fixL);
+						if (fixT) s.setExpression('top', fixT);
+					}
+					else if (opts.centerY) {
+						if (full) s.setExpression('top','(document.documentElement.clientHeight || document.body.clientHeight) / 2 - (this.offsetHeight / 2) + (blah = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + "px"');
+						s.marginTop = 0;
+					}
+					else if (!opts.centerY && full) {
+						var top = (opts.css && opts.css.top) ? parseInt(opts.css.top, 10) : 0;
+						var expression = '((document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + '+top+') + "px"';
+						s.setExpression('top',expression);
+					}
+				});
+			}
+
+			// show the message
+			if (msg) {
+				if (opts.theme)
+					lyr3.find('.ui-widget-content').append(msg);
+				else
+					lyr3.append(msg);
+				if (msg.jquery || msg.nodeType)
+					$(msg).show();
+			}
+
+			if ((msie || opts.forceIframe) && opts.showOverlay)
+				lyr1.show(); // opacity is zero
+			if (opts.fadeIn) {
+				var cb = opts.onBlock ? opts.onBlock : noOp;
+				var cb1 = (opts.showOverlay && !msg) ? cb : noOp;
+				var cb2 = msg ? cb : noOp;
+				if (opts.showOverlay)
+					lyr2._fadeIn(opts.fadeIn, cb1);
+				if (msg)
+					lyr3._fadeIn(opts.fadeIn, cb2);
+			}
+			else {
+				if (opts.showOverlay)
+					lyr2.show();
+				if (msg)
+					lyr3.show();
+				if (opts.onBlock)
+					opts.onBlock();
+			}
+
+			// bind key and mouse events
+			bind(1, el, opts);
+
+			if (full) {
+				pageBlock = lyr3[0];
+				pageBlockEls = $(opts.focusableElements,pageBlock);
+				if (opts.focusInput)
+					setTimeout(focus, 20);
+			}
+			else
+				center(lyr3[0], opts.centerX, opts.centerY);
+
+			if (opts.timeout) {
+				// auto-unblock
+				var to = setTimeout(function() {
+					if (full)
+						$.unblockUI(opts);
+					else
+						$(el).unblock(opts);
+				}, opts.timeout);
+				$(el).data('blockUI.timeout', to);
+			}
+		}
+
+		// remove the block
+		function remove(el, opts) {
+			var count;
+			var full = (el == window);
+			var $el = $(el);
+			var data = $el.data('blockUI.history');
+			var to = $el.data('blockUI.timeout');
+			if (to) {
+				clearTimeout(to);
+				$el.removeData('blockUI.timeout');
+			}
+			opts = $.extend({}, $.blockUI.defaults, opts || {});
+			bind(0, el, opts); // unbind events
+
+			if (opts.onUnblock === null) {
+				opts.onUnblock = $el.data('blockUI.onUnblock');
+				$el.removeData('blockUI.onUnblock');
+			}
+
+			var els;
+			if (full) // crazy selector to handle odd field errors in ie6/7
+				els = $('body').children().filter('.blockUI').add('body > .blockUI');
+			else
+				els = $el.find('>.blockUI');
+
+			// fix cursor issue
+			if ( opts.cursorReset ) {
+				if ( els.length > 1 )
+					els[1].style.cursor = opts.cursorReset;
+				if ( els.length > 2 )
+					els[2].style.cursor = opts.cursorReset;
+			}
+
+			if (full)
+				pageBlock = pageBlockEls = null;
+
+			if (opts.fadeOut) {
+				count = els.length;
+				els.stop().fadeOut(opts.fadeOut, function() {
+					if ( --count === 0)
+						reset(els,data,opts,el);
+				});
+			}
+			else
+				reset(els, data, opts, el);
+		}
+
+		// move blocking element back into the DOM where it started
+		function reset(els,data,opts,el) {
+			var $el = $(el);
+			if ( $el.data('blockUI.isBlocked') )
+				return;
+
+			els.each(function(i,o) {
+				// remove via DOM calls so we don't lose event handlers
+				if (this.parentNode)
+					this.parentNode.removeChild(this);
+			});
+
+			if (data && data.el) {
+				data.el.style.display = data.display;
+				data.el.style.position = data.position;
+				if (data.parent)
+					data.parent.appendChild(data.el);
+				$el.removeData('blockUI.history');
+			}
+
+			if ($el.data('blockUI.static')) {
+				$el.css('position', 'static'); // #22
+			}
+
+			if (typeof opts.onUnblock == 'function')
+				opts.onUnblock(el,opts);
+
+			// fix issue in Safari 6 where block artifacts remain until reflow
+			var body = $(document.body), w = body.width(), cssW = body[0].style.width;
+			body.width(w-1).width(w);
+			body[0].style.width = cssW;
+		}
+
+		// bind/unbind the handler
+		function bind(b, el, opts) {
+			var full = el == window, $el = $(el);
+
+			// don't bother unbinding if there is nothing to unbind
+			if (!b && (full && !pageBlock || !full && !$el.data('blockUI.isBlocked')))
+				return;
+
+			$el.data('blockUI.isBlocked', b);
+
+			// don't bind events when overlay is not in use or if bindEvents is false
+			if (!full || !opts.bindEvents || (b && !opts.showOverlay))
+				return;
+
+			// bind anchors and inputs for mouse and key events
+			var events = 'mousedown mouseup keydown keypress keyup touchstart touchend touchmove';
+			if (b)
+				$(document).bind(events, opts, handler);
+			else
+				$(document).unbind(events, handler);
+
+		// former impl...
+		//		var $e = $('a,:input');
+		//		b ? $e.bind(events, opts, handler) : $e.unbind(events, handler);
+		}
+
+		// event handler to suppress keyboard/mouse events when blocking
+		function handler(e) {
+			// allow tab navigation (conditionally)
+			if (e.type === 'keydown' && e.keyCode && e.keyCode == 9) {
+				if (pageBlock && e.data.constrainTabKey) {
+					var els = pageBlockEls;
+					var fwd = !e.shiftKey && e.target === els[els.length-1];
+					var back = e.shiftKey && e.target === els[0];
+					if (fwd || back) {
+						setTimeout(function(){focus(back);},10);
+						return false;
+					}
+				}
+			}
+			var opts = e.data;
+			var target = $(e.target);
+			if (target.hasClass('blockOverlay') && opts.onOverlayClick)
+				opts.onOverlayClick(e);
+
+			// allow events within the message content
+			if (target.parents('div.' + opts.blockMsgClass).length > 0)
+				return true;
+
+			// allow events for content that is not being blocked
+			return target.parents().children().filter('div.blockUI').length === 0;
+		}
+
+		function focus(back) {
+			if (!pageBlockEls)
+				return;
+			var e = pageBlockEls[back===true ? pageBlockEls.length-1 : 0];
+			if (e)
+				e.focus();
+		}
+
+		function center(el, x, y) {
+			var p = el.parentNode, s = el.style;
+			var l = ((p.offsetWidth - el.offsetWidth)/2) - sz(p,'borderLeftWidth');
+			var t = ((p.offsetHeight - el.offsetHeight)/2) - sz(p,'borderTopWidth');
+			if (x) s.left = l > 0 ? (l+'px') : '0';
+			if (y) s.top  = t > 0 ? (t+'px') : '0';
+		}
+
+		function sz(el, p) {
+			return parseInt($.css(el,p),10)||0;
+		}
+
+	}
+
+
+	/*global define:true */
+	if (typeof define === 'function' && define.amd && define.amd.jQuery) {
+		define(['jquery'], setup);
+	} else {
+		setup(jQuery);
+	}
+
+})();
 
 ;/*
 

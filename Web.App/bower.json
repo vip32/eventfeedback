@@ -21,7 +21,8 @@
     "jquery-autosize": "~1.17.8",
     "spin.js": "~1.3.2",
     "backgrid": "~0.2.6",
-    "blockui": "*"
+    "blockui": "*",
+    "pace": "~0.4.15"
   },
   "overrides": {
     "backbone": {
@@ -79,6 +80,12 @@
         "jquery": "*"
       },
       "main": "jquery.blockUI.js"
+    },
+    "pace": {
+      "main": [
+        "pace.min.js",
+        "themes/pace-theme-minimal.css"
+      ]
     }
   },
   "resolutions": {

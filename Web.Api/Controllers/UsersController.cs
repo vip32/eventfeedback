@@ -33,7 +33,7 @@ namespace EventFeedback.Web.Api.Controllers
         {
             Guard.Against<ArgumentException>(login == null, "login cannot be empty be null");
 
-//            Thread.Sleep(5500);
+            //Thread.Sleep(1500);
 
             var user = _userService.FindUser(login.UserName, login.Password);
             if (user != null && user.IsActive())
@@ -64,6 +64,8 @@ namespace EventFeedback.Web.Api.Controllers
         [Authorize]
         public HttpResponseMessage Profile()
         {
+            Thread.Sleep(1500);
+
             var user = _userService.FindUserByName(User.Identity.Name);
             if (user == null || !user.IsActive()) return new HttpResponseMessage(HttpStatusCode.Unauthorized);
             _userService.HideSensitiveData(user);

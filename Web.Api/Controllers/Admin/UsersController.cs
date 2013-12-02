@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Description;
 using EventFeedback.Common;
@@ -35,7 +36,7 @@ namespace EventFeedback.Web.Api.Controllers.Admin
         [ResponseType(typeof(IEnumerable<User>))]
         public IHttpActionResult Get([FromUri] string filter = "")
         {
-            //Thread.Sleep(1500);
+            Thread.Sleep(1500);
 
             _traceSource.TraceInformation("usersscontroller get all");
             IEnumerable<User> users;
