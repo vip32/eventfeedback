@@ -7096,6 +7096,25 @@ td.visible-print {
     display: none !important;
   }
 }
+/* This is a compiled file, you should be editing the file in the templates directory */
+.pace .pace-progress {
+  background: #29d;
+  position: fixed;
+  z-index: 2000;
+  top: 0;
+  left: 0;
+  height: 2px;
+
+  -webkit-transition: width 1s;
+  -moz-transition: width 1s;
+  -o-transition: width 1s;
+  transition: width 1s;
+}
+
+.pace-inactive {
+  display: none;
+}
+
 /*
   backgrid
   http://github.com/wyuenho/backgrid
@@ -7719,25 +7738,6 @@ td.visible-print {
 .has-switch span.switch-default:active,
 .has-switch span.switch-default.active {
   background-color: #e6e6e6 \9;
-}
-
-/* This is a compiled file, you should be editing the file in the templates directory */
-.pace .pace-progress {
-  background: #29d;
-  position: fixed;
-  z-index: 2000;
-  top: 0;
-  left: 0;
-  height: 2px;
-
-  -webkit-transition: width 1s;
-  -moz-transition: width 1s;
-  -o-transition: width 1s;
-  transition: width 1s;
-}
-
-.pace-inactive {
-  display: none;
 }
 
 * {
