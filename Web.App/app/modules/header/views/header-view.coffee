@@ -52,20 +52,23 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
       @setSubHeader(title, glyphicon)
 
     vent.on 'fetch:start', (title) =>
-      $('.page-content').block(message:null)
-      $('#spinner').spin
-        lines: 5, length: 8, width: 5, radius: 4
-        corners: 0, rotate: 56, trail: 40, speed: 1.5,
-        direction: 1, color: '#64b92a'
-      $('.page-content').addClass('loading')
+      $('#wrapper').block(message:null)
+      if config.spinneractive
+        $('#spinner').spin
+          lines: 5, length: 8, width: 5, radius: 4
+          corners: 0, rotate: 56, trail: 40, speed: 1.5,
+          direction: 1, color: '#64b92a'
+      # $('#wrapper').addClass('loading')
     vent.on 'fetch:done', =>
-      $('#spinner').spin(false)
-      $('.page-content').removeClass('loading')
-      $('.page-content').unblock()
+      if config.spinneractive
+        $('#spinner').spin(false)
+      # $('#wrapper').removeClass('loading')
+      $('#wrapper').unblock()
     vent.on 'fetch:fail', =>
-      $('#spinner').spin(false)
-      $('.page-content').removeClass('loading')
-      $('.page-content').unblock()
+      if config.spinneractive
+        $('#spinner').spin(false)
+      # $('#wrapper').removeClass('loading')
+      $('#wrapper').unblock()
 
     application.on 'navigation:back:on', ->
       $('#menu-back').show()

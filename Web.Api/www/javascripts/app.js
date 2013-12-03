@@ -205,6 +205,8 @@ Config = (function() {
 
   Config.prototype.apiroot = '/api/v1';
 
+  Config.prototype.apitimeout = 30000;
+
   Config.prototype.startuptrigger = 'events:index';
 
   Config.prototype.signintrigger = 'signin:index';
@@ -214,6 +216,8 @@ Config = (function() {
   Config.prototype.layout = 'layouts/app-layout';
 
   Config.prototype.sidebarglyphicon = 'minus';
+
+  Config.prototype.spinneractive = false;
 
   Config.prototype.modules = {
     'header': 'modules/header/router',
@@ -230,16 +234,18 @@ module.exports = new Config();
 });
 
 ;require.register("initialize", function(exports, require, module) {
-var app;
+var app, config;
 
 app = require('application');
 
+config = require('config');
+
 $(function() {
   $.ajaxSetup({
-    timeout: 30000
+    timeout: config.apitimeout
   });
-  $.blockUI.defaults.fadeOut = 150;
   $.blockUI.defaults.fadeIn = 50;
+  $.blockUI.defaults.fadeOut = 150;
   FastClick.attach(document.body);
   return app.initialize();
 });
@@ -3662,32 +3668,35 @@ module.exports.Header = View = (function(_super) {
       return _this.setSubHeader(title, glyphicon);
     });
     vent.on('fetch:start', function(title) {
-      $('.page-content').block({
+      $('#wrapper').block({
         message: null
       });
-      $('#spinner').spin({
-        lines: 5,
-        length: 8,
-        width: 5,
-        radius: 4,
-        corners: 0,
-        rotate: 56,
-        trail: 40,
-        speed: 1.5,
-        direction: 1,
-        color: '#64b92a'
-      });
-      return $('.page-content').addClass('loading');
+      if (config.spinneractive) {
+        return $('#spinner').spin({
+          lines: 5,
+          length: 8,
+          width: 5,
+          radius: 4,
+          corners: 0,
+          rotate: 56,
+          trail: 40,
+          speed: 1.5,
+          direction: 1,
+          color: '#64b92a'
+        });
+      }
     });
     vent.on('fetch:done', function() {
-      $('#spinner').spin(false);
-      $('.page-content').removeClass('loading');
-      return $('.page-content').unblock();
+      if (config.spinneractive) {
+        $('#spinner').spin(false);
+      }
+      return $('#wrapper').unblock();
     });
     vent.on('fetch:fail', function() {
-      $('#spinner').spin(false);
-      $('.page-content').removeClass('loading');
-      return $('.page-content').unblock();
+      if (config.spinneractive) {
+        $('#spinner').spin(false);
+      }
+      return $('#wrapper').unblock();
     });
     application.on('navigation:back:on', function() {
       return $('#menu-back').show();

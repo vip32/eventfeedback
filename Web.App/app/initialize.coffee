@@ -1,8 +1,9 @@
 app = require 'application'
+config = require 'config'
 
 $ ->
-  $.ajaxSetup(timeout:30000)
-  $.blockUI.defaults.fadeOut = 150
+  $.ajaxSetup(timeout:config.apitimeout)
   $.blockUI.defaults.fadeIn = 50
+  $.blockUI.defaults.fadeOut = 150
   FastClick.attach(document.body)
   app.initialize()
