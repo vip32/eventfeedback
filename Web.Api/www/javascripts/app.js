@@ -2086,7 +2086,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  <h3>Home</h3>\r\n  <p></p>\r\n</div>";
+  return "<div class=\"container\">\r\n  <h3>Home</h3>\r\n</div>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {

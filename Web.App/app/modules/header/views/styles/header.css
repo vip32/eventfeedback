@@ -1,7 +1,9 @@
+/* browser */
+
 #wrapper {
   height: 100%;
   padding-left: 188px;
-  transition: all 0.1s ease 0s;
+  /*transition: all 0.1s ease 0s;*/
 }
 
 #sidebar-wrapper {
@@ -127,7 +129,8 @@
   padding: 20px;
 }
 
-@media (max-width:767px) {
+@media (max-width:767px) { 
+  /* mobile */   
 
   #wrapper {
     padding-left: 0;

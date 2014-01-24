@@ -7761,6 +7761,12 @@ body {
   user-select: none;
   background-color: #eee;
 }
+.content {
+  width: 500px;
+}
+.container {
+  width: 100%;
+}
 .form-contact {
   padding: 15px;
   margin: 0 auto;
@@ -7957,10 +7963,12 @@ textarea {
   background-color: #64b92a;
 }
 
+/* browser */
+
 #wrapper {
   height: 100%;
   padding-left: 188px;
-  transition: all 0.1s ease 0s;
+  /*transition: all 0.1s ease 0s;*/
 }
 
 #sidebar-wrapper {
@@ -8086,7 +8094,8 @@ textarea {
   padding: 20px;
 }
 
-@media (max-width:767px) {
+@media (max-width:767px) { 
+  /* mobile */   
 
   #wrapper {
     padding-left: 0;
