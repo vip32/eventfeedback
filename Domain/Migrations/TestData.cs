@@ -50,7 +50,7 @@ namespace EventFeedback.Domain
                     Email = "guest1@acme.com"
                 }
             };
-            for (var i = 0; i < 100; i++)
+            for (var i = 0; i < 50; i++)
             {
                 var no = Random.Next(1000, 9999);
                 users.Add(new User
@@ -102,12 +102,21 @@ namespace EventFeedback.Domain
             {
                 context.ResourceTexts.AddOrUpdate(
                     p => p.Key,
+
+                    
+                    new ResourceText { Key = "Feedback_Saved_Success", Value = "Feedback saved", Language = "en-US" },
+                    new ResourceText { Key = "Feedback_Saved_Failed", Value = "Feedback NOT saved", Language = "en-US" },
                     new ResourceText { Key = "Title_Home", Value = "Home", Language = "en-US" },
                     new ResourceText { Key = "Title_About", Value = "About", Language = "en-US" },
                     new ResourceText { Key = "Title_Events", Value = "Events", Language = "en-US" },
+                    new ResourceText { Key = "Title_Admin_Users", Value = "Users", Language = "en-US" },
                     new ResourceText { Key = "Title_Sessions", Value = "Sessions", Language = "en-US" },
                     new ResourceText { Key = "Title_SignIn", Value = "Sign-in", Language = "en-US" },
+                    new ResourceText { Key = "Title_SignOut", Value = "Sign-out", Language = "en-US" },
                     new ResourceText { Key = "Title_Debug", Value = "Debug", Language = "en-US" },
+
+                    new ResourceText { Key = "Feedback_Saved_Success", Value = "Feedback gespeichert", Language = "de-DE" },
+                    new ResourceText { Key = "Feedback_Saved_Failed", Value = "Feedback NICHT gespeichert", Language = "de-DE" },
                     new ResourceText { Key = "Title_Home", Value = "Home", Language = "de-DE" },
                     new ResourceText { Key = "Title_About", Value = "Über", Language = "de-DE" },
                     new ResourceText { Key = "Title_Events", Value = "Veranstaltungen", Language = "de-DE" },
@@ -115,43 +124,7 @@ namespace EventFeedback.Domain
                     new ResourceText { Key = "Title_Sessions", Value = "Sessions", Language = "de-DE" },
                     new ResourceText { Key = "Title_SignIn", Value = "Einloggen", Language = "de-DE" },
                     new ResourceText { Key = "Title_SignOut", Value = "Ausloggen", Language = "de-DE" },
-                    new ResourceText { Key = "Title_Debug", Value = "Debug", Language = "de-DE" },
-                    new ResourceText { Key = "Question1_Title", Value = "Vortragsstil", Language = "de-DE" },
-                    new ResourceText
-                    {
-                        Key = "Question1_Description",
-                        Value = "Dein Kommentar zum Vortragstil und dem Transport von Inhalten",
-                        Language = "de-DE"
-                    },
-                    new ResourceText { Key = "Question2_Title", Value = "Folien", Language = "de-DE" },
-                    new ResourceText
-                    {
-                        Key = "Question2_Description",
-                        Value = "Dein Kommentar zu den Folien",
-                        Language = "de-DE"
-                    },
-                    new ResourceText { Key = "Question3_Title", Value = "Transport von Inhalten", Language = "de-DE" },
-                    new ResourceText { Key = "Question3_Description", Value = "", Language = "de-DE" },
-                    new ResourceText { Key = "Question4_Title", Value = "Business-Relevanz", Language = "de-DE" },
-                    new ResourceText
-                    {
-                        Key = "Question4_Description",
-                        Value = "Dein Kommentar zum Business-Relevanz",
-                        Language = "de-DE"
-                    },
-                    new ResourceText
-                    {
-                        Key = "Question5_Title",
-                        Value = "Dein Kommentar zum Vortragstil und dem Transport von Inhalten",
-                        Language = "de-DE"
-                    },
-                    new ResourceText
-                    {
-                        Key = "Question6_Title",
-                        Value = "Dein Kommentar zu den Folien",
-                        Language = "de-DE"
-                    },
-                    new ResourceText { Key = "Question7_Title", Value = "Dein Kommentar zum Thema", Language = "de-DE" }
+                    new ResourceText { Key = "Title_Debug", Value = "Debug", Language = "de-DE" }
                     );
             }
 
@@ -453,21 +426,24 @@ namespace EventFeedback.Domain
 
                         foreach (var s in e.Sessions)
                         {
-                            context.Feedbacks.Add(
-                                new Feedback
-                                {
-                                    FeedbackDefinitionId = feedbackDefinitions.Last().Id,
-                                    UserId = user.Id,
-                                    SessionId = s.Id,
-                                    AverageRate = Random.Next(1, 5),
-                                    Answer0 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
-                                    Answer1 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
-                                    Answer2 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
-                                    Answer3 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
-                                    Answer4 = "session feedback q4 " + Lorem1,
-                                    Answer5 = "session feedback q5 " + Lorem1,
-                                    Answer6 = "session feedback q6 " + Lorem1,
-                                });
+                            if (!s.Title.StartsWith("Keynote"))
+                            {
+                                context.Feedbacks.Add(
+                                    new Feedback
+                                    {
+                                        FeedbackDefinitionId = feedbackDefinitions.Last().Id,
+                                        UserId = user.Id,
+                                        SessionId = s.Id,
+                                        AverageRate = Random.Next(1, 5),
+                                        Answer0 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
+                                        Answer1 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
+                                        Answer2 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
+                                        //Answer3 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
+                                        Answer4 = "session feedback q4 " + Lorem1,
+                                        Answer5 = "session feedback q5 " + Lorem1,
+                                        //Answer6 = "session feedback q6 " + Lorem1,
+                                    });
+                            }
                         }
                     }
                 }

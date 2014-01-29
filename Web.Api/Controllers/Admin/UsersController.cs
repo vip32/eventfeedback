@@ -71,8 +71,8 @@ namespace EventFeedback.Web.Api.Controllers.Admin
         }
 
         [HttpPut]
-        [ResponseType(typeof(User))]
         [Route("{id}")]
+        [ResponseType(typeof(User))]
         public IHttpActionResult Put(string id, UserAdminBindingModel entity)
         {
             _traceSource.TraceInformation("usersscontroller put");

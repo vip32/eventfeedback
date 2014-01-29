@@ -111,6 +111,14 @@
     <Compile Include="Migrations\201311251411364_EventDefinitionOrder.Designer.cs">
       <DependentUpon>201311251411364_EventDefinitionOrder.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201401291550007_FeedbacksUserIdFix.cs" />
+    <Compile Include="Migrations\201401291550007_FeedbacksUserIdFix.Designer.cs">
+      <DependentUpon>201401291550007_FeedbacksUserIdFix.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201401291553198_FeedbacksUserIdIndex.cs" />
+    <Compile Include="Migrations\201401291553198_FeedbacksUserIdIndex.Designer.cs">
+      <DependentUpon>201401291553198_FeedbacksUserIdIndex.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Migrations\TestData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -146,6 +154,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201311251411364_EventDefinitionOrder.resx">
       <DependentUpon>201311251411364_EventDefinitionOrder.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201401291550007_FeedbacksUserIdFix.resx">
+      <DependentUpon>201401291550007_FeedbacksUserIdFix.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201401291553198_FeedbacksUserIdIndex.resx">
+      <DependentUpon>201401291553198_FeedbacksUserIdIndex.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

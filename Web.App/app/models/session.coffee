@@ -3,7 +3,7 @@ Model = require '../lib/base/model'
 Collection = require '../lib/base/collection'
 settings = require '../settings'
 
-module.exports.Model = class Contact extends Model
+module.exports.Model = class Session extends Model
 
 module.exports.Collection = class SessionsCollection extends Collection
 

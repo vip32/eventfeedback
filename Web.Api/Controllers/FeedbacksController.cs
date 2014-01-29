@@ -40,7 +40,7 @@ namespace EventFeedback.Web.Api.Controllers
         {
             var user = _userService.FindUserByName(User.Identity.Name);
             if (user == null || !user.IsActive()) return StatusCode(HttpStatusCode.Unauthorized);
-            var result = _context.Feedbacks.Where(f => user != null && f.UserId == user.Id);
+            var result = _context.Feedbacks.Where(f => f.UserId == user.Id);
             return Ok(result);
         }
 
@@ -53,12 +53,15 @@ namespace EventFeedback.Web.Api.Controllers
 
             var user = _userService.FindUserByName(User.Identity.Name);
             if (user == null || !user.IsActive()) return StatusCode(HttpStatusCode.Unauthorized);
-            var result = _context.Feedbacks.FirstOrDefault(f => user != null && f.UserId == user.Id);
+            var result = _context.Feedbacks
+                .FirstOrDefault(f => f.UserId == user.Id && f.Id == id);
             if (result == null) return StatusCode(HttpStatusCode.NotFound);
             return Ok(result);
         }
 
         [HttpPost]
+        [Route("")]
+        [ResponseType(typeof(Feedback))]
         public IHttpActionResult Post([FromBody] Feedback entity)
         {
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
@@ -88,6 +91,7 @@ namespace EventFeedback.Web.Api.Controllers
         
         [HttpPut]
         [Route("{id:int}")]
+        [ResponseType(typeof(Feedback))]
         public IHttpActionResult Put(int id, [FromBody] Feedback entity)
         {
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
@@ -102,18 +106,29 @@ namespace EventFeedback.Web.Api.Controllers
             var oldEntity = _context.Feedbacks.Find(entity.Id);
             if (oldEntity == null) throw new HttpResponseException(HttpStatusCode.NotFound);
             if (oldEntity.UserId != user.Id) return StatusCode(HttpStatusCode.Unauthorized);
+            if (oldEntity.SessionId != entity.SessionId) return StatusCode(HttpStatusCode.BadRequest);
 
+            oldEntity.Answer0 = entity.Answer0;
+            oldEntity.Answer1 = entity.Answer1;
+            oldEntity.Answer2 = entity.Answer2;
+            oldEntity.Answer3 = entity.Answer3;
+            oldEntity.Answer4 = entity.Answer4;
+            oldEntity.Answer5 = entity.Answer5;
+            oldEntity.Answer6 = entity.Answer6;
+            oldEntity.Answer7 = entity.Answer7;
+            oldEntity.Answer8 = entity.Answer8;
+            oldEntity.Answer9 = entity.Answer9;
             // TODO: check if the event is still active (DB!)
 
-            entity.Id = id;
-            entity.SessionId = oldEntity.SessionId;
-            entity.EventId = oldEntity.EventId;
-            var entry = _context.Entry(entity);
-            if (entry.State == System.Data.Entity.EntityState.Detached)
-            {
-                _context.Feedbacks.Attach(entity);
-                entry.State = System.Data.Entity.EntityState.Modified;
-            }
+            //entity.Id = id;
+            //entity.SessionId = oldEntity.SessionId;
+            //entity.EventId = oldEntity.EventId;
+            //var entry = _context.Entry(entity);
+            //if (entry.State == System.Data.Entity.EntityState.Detached)
+            //{
+            //    _context.Feedbacks.Attach(entity);
+            //    entry.State = System.Data.Entity.EntityState.Modified;
+            //}
             _context.SaveChanges();
             return Ok(entity);
         }

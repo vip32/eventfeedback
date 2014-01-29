@@ -14,6 +14,7 @@ namespace EventFeedback.Domain
         [StringLength(128)]
         public string DeletedBy { get; set; }
 
+        [StringLength(256)]
         public string UserId { get; set; }
 
         public int FeedbackDefinitionId { get; set; }
