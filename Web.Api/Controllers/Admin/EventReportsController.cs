@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -11,7 +10,7 @@ using EventFeedback.Domain;
 
 namespace EventFeedback.Web.Api.Controllers
 {
-    [Authorize()] //Roles = "Administrator"
+    [Authorize(Roles = "Administrator")]
     [RoutePrefix("api/v1/events/{eventId}/report")] 
     public class EventReportsController : ApiController
     {
