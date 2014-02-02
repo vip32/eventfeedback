@@ -67,6 +67,7 @@ namespace EventFeedback.Web.Api.Controllers
         [ResponseType(typeof(Feedback))]
         public IHttpActionResult Post([FromBody] Feedback entity)
         {
+            Thread.Sleep(2500);
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
             Guard.Against<ArgumentException>(entity.Id != 0, "entity.id must be empty");
             Guard.Against<ArgumentException>(!entity.EventId.HasValue && !entity.SessionId.HasValue, "entity.eventid or entity.sessionid should be set");
@@ -98,6 +99,7 @@ namespace EventFeedback.Web.Api.Controllers
         [ResponseType(typeof(Feedback))]
         public IHttpActionResult Put(int id, [FromBody] Feedback entity)
         {
+            Thread.Sleep(2500);
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
             Guard.Against<ArgumentException>(entity.Id == 0 && id == 0, "entity.id or id must be set");
             //Guard.Against<ArgumentException>(!entity.EventId.HasValue && !entity.SessionId.HasValue, "entity.eventid or entity.sessionid should be set");

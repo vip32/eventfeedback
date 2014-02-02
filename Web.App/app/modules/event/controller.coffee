@@ -77,13 +77,15 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         
   saveFeedback: (feedback) ->
     feedback.credentials = @feedbacks.credentials
-    console.log 'saved', feedback
+    vent.trigger 'fetch:start'
     feedback.save null,
       success: (model, response, options) =>
         vent.trigger 'message:success:show', application.resources.key('Feedback_Saved_Success')
+        vent.trigger 'fetch:done'
         application.trigger 'event:details', settings.get('active-event')
       error: (model, xhr, options) =>
         vent.trigger 'message:error:show', application.resources.key('Feedback_Saved_Failed')
+        vent.trigger 'fetch:fail'
 
   onClose: ->
     console.log 'event controller close'

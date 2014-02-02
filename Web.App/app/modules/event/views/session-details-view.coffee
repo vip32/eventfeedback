@@ -34,7 +34,6 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
   onSubmit: (e) ->
     e.preventDefault()
     data = Backbone.Syphon.serialize(@)
-    console.log '-------------->', data
     # vent.trigger 'view:feedback:do', data
     @feedback.set('answer0', data.answer0) # TODO: optimize this with unserscore (merge 2 objects)
     @feedback.set('answer1', data.answer1)
@@ -46,8 +45,6 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
     @feedback.set('answer7', data.answer7)
     @feedback.set('answer8', data.answer8)
     @feedback.set('answer9', data.answer9)
-    console.log '==========data:', data, @feedback
-#    alert 'TODO'
     vent.trigger 'feedback:save', @feedback
 
   onClose: ->

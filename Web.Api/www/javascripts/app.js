@@ -2062,7 +2062,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n    <h3>About</h3>\r\n    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n    <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n    <p>\r\n      <a class=\"btn btn-lg btn-primary\" href=\"#\">More &raquo;</a>\r\n    </p>\r\n      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n</div>";
+  return "<div class=\"container\">\r\n  <p>\r\n    <ul>\r\n      <li>Backbone 1.1.0</li>\r\n      <li>Underscore 1.5.2</li>\r\n      <li>Twitter Bootstrap 3.0.0</li>\r\n      <li>MarionetteJS 1.2.2</li>\r\n      <li>MomentJS 2.2.1</li>\r\n      <li>jQuery 2.0.3</li>\r\n      <li>JQuery RateIt 1.0.19</li>\r\n      <li>Fastclick 0.6.10</li>\r\n      <li>Pace 0.4.15</li>\r\n    </ul>\r\n  </p>\r\n  <p>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.App\">App sources</a>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.Api\">Api sources</a>\r\n  </p>\r\n</div>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -2300,14 +2300,16 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.saveFeedback = function(feedback) {
     var _this = this;
     feedback.credentials = this.feedbacks.credentials;
-    console.log('saved', feedback);
+    vent.trigger('fetch:start');
     return feedback.save(null, {
       success: function(model, response, options) {
         vent.trigger('message:success:show', application.resources.key('Feedback_Saved_Success'));
+        vent.trigger('fetch:done');
         return application.trigger('event:details', settings.get('active-event'));
       },
       error: function(model, xhr, options) {
-        return vent.trigger('message:error:show', application.resources.key('Feedback_Saved_Failed'));
+        vent.trigger('message:error:show', application.resources.key('Feedback_Saved_Failed'));
+        return vent.trigger('fetch:fail');
       }
     });
   };
@@ -2588,7 +2590,6 @@ module.exports = EventDetailsView = (function(_super) {
     var data;
     e.preventDefault();
     data = Backbone.Syphon.serialize(this);
-    console.log('-------------->', data);
     this.feedback.set('answer0', data.answer0);
     this.feedback.set('answer1', data.answer1);
     this.feedback.set('answer2', data.answer2);
@@ -2599,7 +2600,6 @@ module.exports = EventDetailsView = (function(_super) {
     this.feedback.set('answer7', data.answer7);
     this.feedback.set('answer8', data.answer8);
     this.feedback.set('answer9', data.answer9);
-    console.log('==========data:', data, this.feedback);
     return vent.trigger('feedback:save', this.feedback);
   };
 
