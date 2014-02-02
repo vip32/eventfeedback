@@ -67,6 +67,9 @@
     <Compile Include="Controllers\EventsController.cs" />
     <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
+    <Compile Include="Models\FeedbackReportModel.cs" />
+    <Compile Include="Models\SessionReportModel.cs" />
+    <Compile Include="Models\EventReportModel.cs" />
     <Compile Include="Models\RoleAdminBindingModel.cs" />
     <Compile Include="Models\UserAdminBindingModel.cs" />
     <Compile Include="Models\LoginBindingModel.cs" />

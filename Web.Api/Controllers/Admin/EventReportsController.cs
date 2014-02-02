@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -34,15 +35,14 @@ namespace EventFeedback.Web.Api.Controllers
             _traceSource.TraceInformation("eventreportscontroller get " + eventId);
             var sessionIds = _context.Sessions
                 .Where(s => s.EventId == eventId).Select(s => s.Id);
-            //if (!sessionIds.Any()) return StatusCode(HttpStatusCode.NotFound);
+            if (!sessionIds.Any()) return StatusCode(HttpStatusCode.NotFound);
 
             var result = _context.Feedbacks
                 .Where(f => sessionIds.Contains(f.SessionId.Value));
 
             return Ok(result);
 
-            // TODO: get event feedbacks and put on event.feedbacks
-            // TODO: get session feedbacks and put on event.session[x].feedbacks 
+            // TODO: return EventReportModel events-sessions-feedbacks + ratings
         }
     }
 }
