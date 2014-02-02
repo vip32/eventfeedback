@@ -95,6 +95,7 @@
     <Compile Include="Extensions\FirstOrDefaultValue.cs" />
     <Compile Include="Extensions\ForEach.cs" />
     <Compile Include="Extensions\GetEnumDescription.cs" />
+    <Compile Include="Extensions\IsDouble.cs" />
     <Compile Include="Extensions\IsNull.cs">
       <SubType>Code</SubType>
     </Compile>

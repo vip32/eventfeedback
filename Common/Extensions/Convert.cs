@@ -43,6 +43,26 @@ namespace EventFeedback.Common
         }
 
         /// <summary>
+        /// Converts an object safely to integer or assigns 0
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static double ToDouble(this Object obj)
+        {
+            if (obj == null) return 0;
+            try
+            {
+                if (obj.GetType() == typeof(double?)) return ((int?)obj).Value;
+                if (obj.GetType() == typeof(DBNull)) return 0;
+                return Convert.ToDouble(obj, CultureInfo.InvariantCulture);
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
         /// Converts an object safely to bool or assigns false
         /// </summary>
         /// <param name="obj"></param>

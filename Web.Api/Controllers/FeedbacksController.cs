@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading;
+using System.Web.DynamicData;
 using System.Web.Http;
 using System.Web.Http.Description;
+using System.Web.WebPages;
 using EventFeedback.Common;
 using EventFeedback.Domain;
 
@@ -83,6 +86,7 @@ namespace EventFeedback.Web.Api.Controllers
             // TODO: check if the event is still active (DB!)
 
             entity.UserId = user.Id;
+            entity.UpdateAverageRate();
             _context.Feedbacks.Add(entity);
             _context.SaveChanges();
 
@@ -118,6 +122,7 @@ namespace EventFeedback.Web.Api.Controllers
             oldEntity.Answer7 = entity.Answer7;
             oldEntity.Answer8 = entity.Answer8;
             oldEntity.Answer9 = entity.Answer9;
+            oldEntity.UpdateAverageRate();
             // TODO: check if the event is still active (DB!)
 
             //entity.Id = id;

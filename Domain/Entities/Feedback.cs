@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+using System.Linq;
+using EventFeedback.Common;
 
 namespace EventFeedback.Domain
 {
@@ -23,7 +27,8 @@ namespace EventFeedback.Domain
         public int? SessionId { get; set; }
         public int? EventId { get; set; }
 
-        public int? AverageRate { get; set; }
+        [StringLength(2048)]
+        public string AverageRate { get; set; }
 
         [StringLength(2048)]
         public string Answer0 { get; set; }
@@ -55,7 +60,6 @@ namespace EventFeedback.Domain
         [StringLength(2048)]
         public string Answer9 { get; set; }
 
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Session"/> class.
         /// </summary>
@@ -63,6 +67,22 @@ namespace EventFeedback.Domain
         {
             CreateDate = DateTime.Now;
             Active = true;
+        }
+
+        public void UpdateAverageRate()
+        {
+            var counts = new List<double>();
+            if (Answer0.IsDouble()) counts.Add(Answer0.ToDouble());
+            if (Answer1.IsDouble()) counts.Add(Answer1.ToDouble());
+            if (Answer2.IsDouble()) counts.Add(Answer2.ToDouble());
+            if (Answer3.IsDouble()) counts.Add(Answer3.ToDouble());
+            if (Answer4.IsDouble()) counts.Add(Answer4.ToDouble());
+            if (Answer5.IsDouble()) counts.Add(Answer5.ToDouble());
+            if (Answer6.IsDouble()) counts.Add(Answer6.ToDouble());
+            if (Answer7.IsDouble()) counts.Add(Answer7.ToDouble());
+            if (Answer8.IsDouble()) counts.Add(Answer8.ToDouble());
+            if (Answer9.IsDouble()) counts.Add(Answer9.ToDouble());
+            AverageRate = Math.Round(counts.Average(), 1).ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>

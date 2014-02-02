@@ -102,7 +102,6 @@ namespace EventFeedback.Domain
             {
                 context.ResourceTexts.AddOrUpdate(
                     p => p.Key,
-
                     
                     new ResourceText { Key = "Feedback_Saved_Success", Value = "Feedback saved", Language = "en-US" },
                     new ResourceText { Key = "Feedback_Saved_Failed", Value = "Feedback NOT saved", Language = "en-US" },
@@ -411,7 +410,7 @@ namespace EventFeedback.Domain
                                 FeedbackDefinitionId = feedbackDefinitions.First().Id,
                                 UserId = user.Id,
                                 EventId = e.Id,
-                                AverageRate = Random.Next(1, 5),
+                                //AverageRate = Random.Next(1, 5),
                                 Answer0 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
                                 Answer1 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
                                 Answer2 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
@@ -434,7 +433,7 @@ namespace EventFeedback.Domain
                                         FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                         UserId = user.Id,
                                         SessionId = s.Id,
-                                        AverageRate = Random.Next(1, 5),
+                                        //AverageRate = Random.Next(1, 5),
                                         Answer0 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
                                         Answer1 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
                                         Answer2 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
