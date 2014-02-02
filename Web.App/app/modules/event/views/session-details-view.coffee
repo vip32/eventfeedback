@@ -24,12 +24,17 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
     application.trigger 'event:details', @model.get('eventId')
 
   onShow: ->
-    $('input.rating[type=number]').rating()
+    #$('input.rating[type=number]').rating()
+    for id in [0..9]
+      $("#rateit#{id}").rateit()
+      console.log id
+    $('#rateit0').rateit()
     $('textarea').autosize()
 
   onSubmit: (e) ->
     e.preventDefault()
     data = Backbone.Syphon.serialize(@)
+    console.log '-------------->', data
     # vent.trigger 'view:feedback:do', data
     @feedback.set('answer0', data.answer0) # TODO: optimize this with unserscore (merge 2 objects)
     @feedback.set('answer1', data.answer1)

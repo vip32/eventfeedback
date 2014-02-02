@@ -2575,7 +2575,12 @@ module.exports = EventDetailsView = (function(_super) {
   };
 
   EventDetailsView.prototype.onShow = function() {
-    $('input.rating[type=number]').rating();
+    var id, _i;
+    for (id = _i = 0; _i <= 9; id = ++_i) {
+      $("#rateit" + id).rateit();
+      console.log(id);
+    }
+    $('#rateit0').rateit();
     return $('textarea').autosize();
   };
 
@@ -2583,6 +2588,7 @@ module.exports = EventDetailsView = (function(_super) {
     var data;
     e.preventDefault();
     data = Backbone.Syphon.serialize(this);
+    console.log('-------------->', data);
     this.feedback.set('answer0', data.answer0);
     this.feedback.set('answer1', data.answer1);
     this.feedback.set('answer2', data.answer2);
@@ -2813,9 +2819,11 @@ function program10(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer0\" id=\"answer0\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer0\" id=\"answer0\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer0\" type=\"range\" min=\"0\" max=\"3\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing0\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit0\" data-rateit-backingfld=\"#backing0\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -2824,9 +2832,11 @@ function program12(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer0\" id=\"answer0\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer0\" id=\"answer0\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer0\" type=\"range\" min=\"0\" max=\"5\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing0\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit0\" data-rateit-backingfld=\"#backing0\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -2835,9 +2845,11 @@ function program14(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer0\" id=\"answer0\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer0\" id=\"answer0\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer0\" type=\"range\" min=\"0\" max=\"10\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing0\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit0\" data-rateit-backingfld=\"#backing0\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -2894,9 +2906,11 @@ function program21(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer1\" id=\"answer1\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer1\" id=\"answer1\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer1\" type=\"range\" min=\"0\" max=\"3\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing1\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit1\" data-rateit-backingfld=\"#backing1\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -2905,9 +2919,11 @@ function program23(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer1\" id=\"answer1\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer1\" id=\"answer1\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer1\" type=\"range\" min=\"0\" max=\"5\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing1\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit1\" data-rateit-backingfld=\"#backing1\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -2916,9 +2932,11 @@ function program25(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer1\" id=\"answer1\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer1\" id=\"answer1\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer1\" type=\"range\" min=\"0\" max=\"10\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing1\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit1\" data-rateit-backingfld=\"#backing1\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -2975,9 +2993,11 @@ function program32(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer2\" id=\"answer2\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer2\" id=\"answer2\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer2\" type=\"range\" min=\"0\" max=\"3\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing2\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit2\" data-rateit-backingfld=\"#backing2\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -2986,9 +3006,11 @@ function program34(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer2\" id=\"answer2\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer2\" id=\"answer2\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer2\" type=\"range\" min=\"0\" max=\"5\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing2\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit2\" data-rateit-backingfld=\"#backing2\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -2997,9 +3019,11 @@ function program36(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer2\" id=\"answer2\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer2\" id=\"answer2\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer2\" type=\"range\" min=\"0\" max=\"10\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing2\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit2\" data-rateit-backingfld=\"#backing2\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3056,9 +3080,11 @@ function program43(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer3\" id=\"answer3\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer3\" id=\"answer3\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer3\" type=\"range\" min=\"0\" max=\"3\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing3\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit3\" data-rateit-backingfld=\"#backing3\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3067,9 +3093,11 @@ function program45(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer3\" id=\"answer3\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer3\" id=\"answer3\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer3\" type=\"range\" min=\"0\" max=\"5\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing3\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit3\" data-rateit-backingfld=\"#backing3\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3078,9 +3106,11 @@ function program47(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer3\" id=\"answer3\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer3\" id=\"answer3\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer3\" type=\"range\" min=\"0\" max=\"10\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing3\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit3\" data-rateit-backingfld=\"#backing3\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3137,9 +3167,11 @@ function program54(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer4\" id=\"answer4\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer4\" id=\"answer4\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer4\" type=\"range\" min=\"0\" max=\"3\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing4\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit4\" data-rateit-backingfld=\"#backing4\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3148,9 +3180,11 @@ function program56(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer4\" id=\"answer4\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer4\" id=\"answer4\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer4\" type=\"range\" min=\"0\" max=\"5\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing4\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit4\" data-rateit-backingfld=\"#backing4\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3159,9 +3193,11 @@ function program58(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer4\" id=\"answer4\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer4\" id=\"answer4\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer4\" type=\"range\" min=\"0\" max=\"10\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing4\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit4\" data-rateit-backingfld=\"#backing4\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3218,9 +3254,11 @@ function program65(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer5\" id=\"answer5\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer5\" id=\"answer5\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer5\" type=\"range\" min=\"0\" max=\"3\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing5\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit5\" data-rateit-backingfld=\"#backing5\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3229,9 +3267,11 @@ function program67(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer5\" id=\"answer5\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer5\" id=\"answer5\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer5\" type=\"range\" min=\"0\" max=\"5\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing5\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit5\" data-rateit-backingfld=\"#backing5\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>        \r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3240,9 +3280,11 @@ function program69(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer5\" id=\"answer5\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer5\" id=\"answer5\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer5\" type=\"range\" min=\"0\" max=\"10\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing5\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit5\" data-rateit-backingfld=\"#backing5\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3299,9 +3341,11 @@ function program76(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer6\" id=\"answer6\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer6\" id=\"answer6\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer6\" type=\"range\" min=\"0\" max=\"3\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing6\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit6\" data-rateit-backingfld=\"#backing6\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3310,9 +3354,11 @@ function program78(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer6\" id=\"answer6\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer6\" id=\"answer6\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer6\" type=\"range\" min=\"0\" max=\"5\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing6\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit6\" data-rateit-backingfld=\"#backing6\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3321,9 +3367,11 @@ function program80(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer6\" id=\"answer6\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer6\" id=\"answer6\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer6\" type=\"range\" min=\"0\" max=\"10\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing6\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit6\" data-rateit-backingfld=\"#backing6\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3380,9 +3428,11 @@ function program87(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer7\" id=\"answer7\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer7\" id=\"answer7\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer7\" type=\"range\" min=\"0\" max=\"3\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing7\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit7\" data-rateit-backingfld=\"#backing7\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3391,9 +3441,11 @@ function program89(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer7\" id=\"answer7\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer7\" id=\"answer7\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer7\" type=\"range\" min=\"0\" max=\"5\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing7\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit7\" data-rateit-backingfld=\"#backing7\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3402,9 +3454,11 @@ function program91(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer7\" id=\"answer7\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer7\" id=\"answer7\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer7\" type=\"range\" min=\"0\" max=\"10\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing7\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit7\" data-rateit-backingfld=\"#backing7\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3461,9 +3515,11 @@ function program98(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer8\" id=\"answer8\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer8\" id=\"answer8\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer8\" type=\"range\" min=\"0\" max=\"3\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing8\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit8\" data-rateit-backingfld=\"#backing8\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3472,9 +3528,11 @@ function program100(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer8\" id=\"answer8\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer8\" id=\"answer8\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer8\" type=\"range\" min=\"0\" max=\"5\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing8\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit8\" data-rateit-backingfld=\"#backing8\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3483,9 +3541,11 @@ function program102(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer8\" id=\"answer8\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer8\" id=\"answer8\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer8\" type=\"range\" min=\"0\" max=\"10\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing8\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit8\" data-rateit-backingfld=\"#backing8\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3542,9 +3602,11 @@ function program109(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer9\" id=\"answer9\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer9\" id=\"answer9\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer9\" type=\"range\" min=\"0\" max=\"3\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing9\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit9\" data-rateit-backingfld=\"#backing9\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3553,9 +3615,11 @@ function program111(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer9\" id=\"answer9\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer9\" id=\"answer9\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer9\" type=\"range\" min=\"0\" max=\"5\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing9\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit9\" data-rateit-backingfld=\"#backing9\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
@@ -3564,9 +3628,11 @@ function program113(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer9\" id=\"answer9\" class=\"rating\" value=\""
+    + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer9\" id=\"answer9\" class=\"rating\" value=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" />\r\n      </div>\r\n      ";
+    + "\" />-->\r\n        <input name=\"answer9\" type=\"range\" min=\"0\" max=\"10\" value=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" step=\"0.5\" id=\"backing9\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit9\" data-rateit-backingfld=\"#backing9\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
