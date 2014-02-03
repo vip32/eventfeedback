@@ -2876,10 +2876,12 @@ var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,par
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, stack2, functionType="function", escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
 
-function program1(depth0,data) {
+function program1(depth0,data,depth1) {
   
   var buffer = "", stack1, stack2, options;
-  buffer += "\r\n  <div class=\"list-group-item\">\r\n    <div>\r\n      <strong>"
+  buffer += "\r\n  <div class=\"list-group-item\" style=\"page-break-after: always;\">\r\n    <div>\r\n      <strong>"
+    + escapeExpression(((stack1 = ((stack1 = depth1.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + " - "
     + escapeExpression(((stack1 = depth0.title),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</strong>&emsp;<span class=\"badge\">"
     + escapeExpression(((stack1 = depth0.averageRate),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
@@ -2939,10 +2941,10 @@ function program1(depth0,data) {
     + escapeExpression(((stack1 = depth0.quesstionTitle9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + " &emsp;<span class=\"badge\">"
     + escapeExpression(((stack1 = depth0.averageRateAnswer9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</span>\r\n        </li>\r\n      </ol>\r\n    </div>\r\n    <div>\r\n      ";
+    + "</span>\r\n        </li>\r\n      </ol>\r\n    </div>\r\n    ";
   stack2 = helpers.each.call(depth0, depth0.feedbacks, {hash:{},inverse:self.noop,fn:self.programWithDepth(6, program6, data, depth0),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\r\n    </div>\r\n  </div>\r\n  ";
+  buffer += "\r\n  </div>\r\n  ";
   return buffer;
   }
 function program2(depth0,data) {
@@ -2965,7 +2967,7 @@ function program4(depth0,data) {
 function program6(depth0,data,depth1) {
   
   var buffer = "", stack1;
-  buffer += "\r\n      <h4>\r\n        <span class=\"label label-default\">\r\n          Feedback on "
+  buffer += "\r\n    <div>\r\n      <h4>\r\n        <span class=\"label label-default\">\r\n          Feedback on "
     + escapeExpression(((stack1 = depth0.createDate),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n        </span>\r\n        &emsp;<span class=\"badge\">"
     + escapeExpression(((stack1 = depth0.averageRate),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
@@ -3009,14 +3011,12 @@ function program6(depth0,data,depth1) {
     + escapeExpression(((stack1 = depth1.quesstionTitle9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
     + escapeExpression(((stack1 = depth0.answer9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n        </li>\r\n      </ol>\r\n      ";
+    + "\r\n        </li>\r\n      </ol>\r\n    </div>\r\n    ";
   return buffer;
   }
 
-  buffer += "﻿<div class=\"container\">\r\n  "
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n\r\n\r\n  ";
-  stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.sessions), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  buffer += "﻿<div class=\"container\">\r\n  ";
+  stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.sessions), {hash:{},inverse:self.noop,fn:self.programWithDepth(1, program1, data, depth0),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\r\n\r\n  <textarea>\r\n    ";
   if (stack2 = helpers.json) { stack2 = stack2.call(depth0, {hash:{},data:data}); }

@@ -1,11 +1,8 @@
 ﻿<div class="container">
-  {{model.title}}
-
-
   {{#each model.sessions}}
-  <div class="list-group-item">
+  <div class="list-group-item" style="page-break-after: always;">
     <div>
-      <strong>{{this.title}}</strong>&emsp;<span class="badge">{{this.averageRate}}</span>
+      <strong>{{../model.title}} - {{this.title}}</strong>&emsp;<span class="badge">{{this.averageRate}}</span>
     </div>
     {{#each this.tags}}<span class="badge pull-right">{{this}}</span>{{/each}}
     <div class="glyphicon glyphicon-time">
@@ -49,8 +46,8 @@
         </li>
       </ol>
     </div>
+    {{#each this.feedbacks}}
     <div>
-      {{#each this.feedbacks}}
       <h4>
         <span class="label label-default">
           Feedback on {{this.createDate}}
@@ -89,8 +86,8 @@
           {{this.answer9}}
         </li>
       </ol>
-      {{/each}}
     </div>
+    {{/each}}
   </div>
   {{/each}}
 
