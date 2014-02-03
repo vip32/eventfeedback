@@ -60,6 +60,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
   showEventReport: (id) ->
     settings.set('active-event', id)
     @eventreports.fetch(
+      reload: true
       data:
         filter: 'all'
     ).done (models) =>

@@ -2322,6 +2322,7 @@ module.exports = Controller = (function(_super) {
     var _this = this;
     settings.set('active-event', id);
     return this.eventreports.fetch({
+      reload: true,
       data: {
         filter: 'all'
       }
