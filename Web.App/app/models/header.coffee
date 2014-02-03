@@ -130,16 +130,16 @@ module.exports.TestData = class TestData
     trigger: "admin:settings:index"
     intern: true
     order: 12
-  ,
-    id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f8"
-    title: "Admin - Reports"
-    authenticated: true
-    roles: ['Administrator']
-    resource: ''
-    glyphicon: 'list'
-    trigger: "admin:reports:index"
-    intern: true
-    order: 13
+#  ,
+#    id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f8"
+#    title: "Admin - Reports"
+#    authenticated: true
+#    roles: ['Administrator']
+#    resource: ''
+#    glyphicon: 'list'
+#    trigger: "admin:reports:index"
+#    intern: true
+#    order: 13
   ,
     id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f9"
     title: "Admin - Users"

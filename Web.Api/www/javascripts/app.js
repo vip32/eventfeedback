@@ -846,16 +846,6 @@ module.exports.TestData = TestData = (function() {
       intern: true,
       order: 12
     }, {
-      id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f8",
-      title: "Admin - Reports",
-      authenticated: true,
-      roles: ['Administrator'],
-      resource: '',
-      glyphicon: 'list',
-      trigger: "admin:reports:index",
-      intern: true,
-      order: 13
-    }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f9",
       title: "Admin - Users",
       authenticated: true,
@@ -2824,7 +2814,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
   buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-12\">\r\n      <div class=\"btn-group pull-right\">\r\n        <button type=\"button\" class=\"btn btn-default active badge\">All</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">C#</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">Java</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">SAP</button>\r\n      </div>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n  <p>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</p>\r\n  <a class=\"btn btn-lg btn-primary js-report\" href=\"#\">Report</a>\r\n</div>";
+    + "</p>\r\n  \r\n  <div class=\"row\">\r\n    <div class=\"col-xs-7\">&nbsp;</div>\r\n    <div class=\"col-xs-5\">\r\n      <a class=\"btn btn-lg btn-primary js-report\" href=\"#\">\r\n        <span class=\"glyphicon glyphicon-list\"></span>&emsp;Report\r\n      </a>\r\n    </div>\r\n  </div>\r\n</div>";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
@@ -3997,7 +3987,7 @@ function program113(depth0,data) {
   buffer += "\r\n\r\n    ";
   stack2 = helpers['if'].call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.active9), {hash:{},inverse:self.noop,fn:self.program(104, program104, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\r\n\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\">&nbsp;</div>\r\n      <div class=\"col-xs-5\">\r\n        <button class=\"btn btn-primary btn-lg pull-right js-submit\">Save</button>\r\n      </div>\r\n    </div>\r\n  </form>\r\n\r\n</div>";
+  buffer += "\r\n\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\">&nbsp;</div>\r\n      <div class=\"col-xs-5\">\r\n        <button class=\"btn btn-primary btn-lg pull-right js-submit\">\r\n          <span class=\"glyphicon glyphicon-save\"></span>&emsp;Save\r\n        </button>\r\n      </div>\r\n    </div>\r\n  </form>\r\n\r\n</div>";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
