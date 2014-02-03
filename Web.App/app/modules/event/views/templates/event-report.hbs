@@ -1,0 +1,100 @@
+﻿<div class="container">
+  {{model.title}}
+
+
+  {{#each model.sessions}}
+  <div class="list-group-item">
+    <div>
+      <strong>{{this.title}}</strong>&emsp;<span class="badge">{{this.averageRate}}</span>
+    </div>
+    {{#each this.tags}}<span class="badge pull-right">{{this}}</span>{{/each}}
+    <div class="glyphicon glyphicon-time">
+      {{dateFormat this.startDate format="HH:mm"}}-{{dateFormat this.endDate format="HH:mm"}}
+    </div>
+    <div class="glyphicon glyphicon-user">
+      {{#each this.speakers}}{{this}} {{/each}}
+    </div>
+    <div>
+      <hr/>
+      <ol>
+        <li>
+          {{this.quesstionTitle0}} &emsp;<span class="badge">{{this.averageRateAnswer0}}</span>
+        </li>
+        <li>
+          {{this.quesstionTitle1}} &emsp;<span class="badge">{{this.averageRateAnswer1}}</span>
+        </li>
+        <li>
+          {{this.quesstionTitle2}} &emsp;<span class="badge">{{this.averageRateAnswer2}}</span>
+        </li>
+        <li>
+          {{this.quesstionTitle3}} &emsp;<span class="badge">{{this.averageRateAnswer3}}</span>
+        </li>
+        <li>
+          {{this.quesstionTitle4}} &emsp;<span class="badge">{{this.averageRateAnswer4}}</span>
+        </li>
+        <li>
+          {{this.quesstionTitle5}} &emsp;<span class="badge">{{this.averageRateAnswer5}}</span>
+        </li>
+        <li>
+          {{this.quesstionTitle6}} &emsp;<span class="badge">{{this.averageRateAnswer6}}</span>
+        </li>
+        <li>
+          {{this.quesstionTitle7}} &emsp;<span class="badge">{{this.averageRateAnswer7}}</span>
+        </li>
+        <li>
+          {{this.quesstionTitle8}} &emsp;<span class="badge">{{this.averageRateAnswer8}}</span>
+        </li>
+        <li>
+          {{this.quesstionTitle9}} &emsp;<span class="badge">{{this.averageRateAnswer9}}</span>
+        </li>
+      </ol>
+    </div>
+    <div>
+      {{#each this.feedbacks}}
+      <h4>
+        <span class="label label-default">
+          Feedback on {{this.createDate}}
+        </span>
+        &emsp;<span class="badge">{{this.averageRate}}</span>
+      </h4>
+      <ol>
+        <li data-toggle="tooltip" data-placement="bottom" title="{{../quesstionTitle0}}">
+          {{this.answer0}}
+        </li>
+        <li data-toggle="tooltip" data-placement="bottom" title="{{../quesstionTitle1}}">
+          {{this.answer1}}
+        </li>
+        <li data-toggle="tooltip" data-placement="bottom" title="{{../quesstionTitle2}}">
+          {{this.answer2}}
+        </li>
+        <li data-toggle="tooltip" data-placement="bottom" title="{{../quesstionTitle3}}">
+          {{this.answer3}}
+        </li>
+        <li data-toggle="tooltip" data-placement="bottom" title="{{../quesstionTitle4}}">
+          {{this.answer4}}
+        </li>
+        <li data-toggle="tooltip" data-placement="bottom" title="{{../quesstionTitle5}}">
+          {{this.answer5}}
+        </li>
+        <li data-toggle="tooltip" data-placement="bottom" title="{{../quesstionTitle6}}">
+          {{this.answer6}}
+        </li>
+        <li data-toggle="tooltip" data-placement="bottom" title="{{../quesstionTitle7}}">
+          {{this.answer7}}
+        </li>
+        <li data-toggle="tooltip" data-placement="bottom" title="{{../quesstionTitle8}}">
+          {{this.answer8}}
+        </li>
+        <li data-toggle="tooltip" data-placement="bottom" title="{{../quesstionTitle9}}">
+          {{this.answer9}}
+        </li>
+      </ol>
+      {{/each}}
+    </div>
+  </div>
+  {{/each}}
+
+  <textarea>
+    {{json}}
+  </textarea>
+</div>

@@ -133,7 +133,7 @@ namespace EventFeedback.Web.Api.Controllers
             //var entry = _context.Entry(entity);
             //if (entry.State == System.Data.Entity.EntityState.Detached)
             //{
-            //    _context.Feedbacks.Attach(entity);
+            //    _context.FeedbackReportModel.Attach(entity);
             //    entry.State = System.Data.Entity.EntityState.Modified;
             //}
             _context.SaveChanges();

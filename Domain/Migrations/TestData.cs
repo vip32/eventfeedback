@@ -422,6 +422,7 @@ namespace EventFeedback.Domain
                                 Answer8 = "event feedback q8 " + Lorem1,
                                 Answer9 = "event feedback q9 " + Lorem1,
                             });
+                        
 
                         foreach (var s in e.Sessions)
                         {
@@ -444,6 +445,10 @@ namespace EventFeedback.Domain
                                     });
                             }
                         }
+                        //foreach (var feedback in context.Feedbacks)
+                        //{
+                        //    feedback.UpdateAverageRate();
+                        //}
                     }
                 }
                 context.SaveChanges();

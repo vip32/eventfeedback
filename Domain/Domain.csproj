@@ -123,6 +123,14 @@
     <Compile Include="Migrations\201402022108554_AverageRate.Designer.cs">
       <DependentUpon>201402022108554_AverageRate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201402030952552_FeedbacksIndexes.cs" />
+    <Compile Include="Migrations\201402030952552_FeedbacksIndexes.Designer.cs">
+      <DependentUpon>201402030952552_FeedbacksIndexes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201402031000571_FeedbackDefWeight.cs" />
+    <Compile Include="Migrations\201402031000571_FeedbackDefWeight.Designer.cs">
+      <DependentUpon>201402031000571_FeedbackDefWeight.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Migrations\TestData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -167,6 +175,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201402022108554_AverageRate.resx">
       <DependentUpon>201402022108554_AverageRate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402030952552_FeedbacksIndexes.resx">
+      <DependentUpon>201402030952552_FeedbacksIndexes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402031000571_FeedbackDefWeight.resx">
+      <DependentUpon>201402031000571_FeedbackDefWeight.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

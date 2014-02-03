@@ -1,11 +1,14 @@
 application = require 'application'
 vent = require 'vent'
+settings = require 'settings'
 
 module.exports = class EventDetailsView extends Backbone.Marionette.CompositeView
   id: 'event-details-view'
   template: require './templates/event-details'
   itemView: require './session-item-view'
   itemViewContainer: '.js-sessions'
+  events:
+    'click .js-report': 'onReport'
 
   initialize: (options) ->
     @resources = options?.resources
@@ -22,6 +25,10 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
   onBack: =>
     console.log 'back from event-details'
     application.trigger 'events:index'
+    
+  onReport: (e) ->
+    e.preventDefault()
+    application.trigger 'event:report',  settings.get('active-event')
 
   onClose: ->
     application.off 'navigation:back', @onBack

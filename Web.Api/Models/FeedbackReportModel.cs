@@ -1,8 +1,12 @@
-﻿namespace EventFeedback.Domain.Entities
+﻿using System;
+
+namespace EventFeedback.Web.Api.Models
 {
     public class FeedbackReportModel
     {
         public int Id { get; set; }
+
+        public DateTime? CreateDate { get; set; }
 
         public string AverageRate { get; set; }
 

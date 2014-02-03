@@ -56,7 +56,7 @@
     </Compile>
     <Compile Include="Controllers\Admin\RolesController.cs" />
     <Compile Include="Controllers\Admin\UsersController.cs" />
-    <Compile Include="Controllers\Admin\EventReportsController.cs" />
+    <Compile Include="Controllers\EventReportsController.cs" />
     <Compile Include="Controllers\FeedbackDefinitionsController.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -103,10 +103,6 @@
     <Content Include="www\images\icon-57x57.png" />
     <Content Include="www\images\icon-72x72.png" />
     <Content Include="www\images\icon-76x76.png" />
-    <Content Include="www\images\star-black32.png" />
-    <Content Include="www\images\star-gold32.png" />
-    <Content Include="www\images\star-red32.png" />
-    <Content Include="www\images\star-white32.png" />
     <Content Include="www\images\star.gif" />
     <Content Include="www\images\star_empty_24.png" />
     <Content Include="www\images\star_empty_32.png" />
@@ -114,9 +110,6 @@
     <Content Include="www\images\star_full_24.png" />
     <Content Include="www\images\star_full_32.png" />
     <Content Include="www\images\star_full_48.png" />
-    <Content Include="www\images\star_half_full_24.png" />
-    <Content Include="www\images\star_half_full_32.png" />
-    <Content Include="www\images\star_half_full_48.png" />
     <Content Include="www\index.html" />
     <Content Include="www\index.local.html" />
     <Content Include="www\javascripts\app.js" />

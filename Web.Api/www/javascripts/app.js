@@ -543,6 +543,58 @@ module.exports.Collection = EventsCollection = (function(_super) {
 })(Collection);
 });
 
+;require.register("models/eventreport", function(exports, require, module) {
+var Collection, EventReport, EventReportsCollection, Model, config, settings, _ref, _ref1,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+config = require('../config');
+
+Model = require('../lib/base/model');
+
+Collection = require('../lib/base/collection');
+
+settings = require('../settings');
+
+module.exports.Model = EventReport = (function(_super) {
+  __extends(EventReport, _super);
+
+  function EventReport() {
+    _ref = EventReport.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  return EventReport;
+
+})(Model);
+
+module.exports.Collection = EventReportsCollection = (function(_super) {
+  __extends(EventReportsCollection, _super);
+
+  function EventReportsCollection() {
+    _ref1 = EventReportsCollection.__super__.constructor.apply(this, arguments);
+    return _ref1;
+  }
+
+  EventReportsCollection.prototype.url = function() {
+    return "" + config.apiroot + "/events/" + (settings.get('active-event')) + "/report";
+  };
+
+  EventReportsCollection.prototype.credentials = function() {
+    return {
+      token: settings.get('api_token')
+    };
+  };
+
+  EventReportsCollection.prototype.model = module.exports.Model;
+
+  EventReportsCollection.prototype.comparator = 'title';
+
+  return EventReportsCollection;
+
+})(Collection);
+});
+
 ;require.register("models/feedback", function(exports, require, module) {
 var Collection, Feedback, FeedbacksCollection, Model, config, settings, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
@@ -2062,7 +2114,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  <p>\r\n    <ul>\r\n      <li>Backbone 1.1.0</li>\r\n      <li>Underscore 1.5.2</li>\r\n      <li>Twitter Bootstrap 3.0.0</li>\r\n      <li>MarionetteJS 1.2.2</li>\r\n      <li>MomentJS 2.2.1</li>\r\n      <li>jQuery 2.0.3</li>\r\n      <li>JQuery RateIt 1.0.19</li>\r\n      <li>Fastclick 0.6.10</li>\r\n      <li>Pace 0.4.15</li>\r\n    </ul>\r\n  </p>\r\n  <p>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.App\">App sources</a>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.Api\">Api sources</a>\r\n  </p>\r\n</div>";
+  return "<div class=\"container\">\r\n  <p>\r\n    <h3>App</h3>\r\n    <ul>\r\n      <li>Backbone 1.1.0</li>\r\n      <li>Underscore 1.5.2</li>\r\n      <li>Twitter Bootstrap 3.0.0</li>\r\n      <li>MarionetteJS 1.2.2</li>\r\n      <li>MomentJS 2.2.1</li>\r\n      <li>jQuery 2.0.3</li>\r\n      <li>JQuery RateIt 1.0.19</li>\r\n      <li>Fastclick 0.6.10</li>\r\n      <li>Pace 0.4.15</li>\r\n    </ul>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.App\">App sources</a>\r\n  </p>\r\n  <p>\r\n    <h3>Api</h3>\r\n    <ul>\r\n      <li>C#</li>\r\n      <li>Microsoft Web Api 2</li>\r\n      <li>EntityFramework 6.0</li>\r\n    </ul>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.Api\">Api sources</a>\r\n  </p>\r\n</div>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -2181,7 +2233,7 @@ if (typeof define === 'function' && define.amd) {
 });
 
 ;require.register("modules/event/controller", function(exports, require, module) {
-var Controller, Event, Feedback, Session, application, config, settings, vent,
+var Controller, Event, EventReport, Feedback, Session, application, config, settings, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2199,6 +2251,8 @@ Feedback = require('../../models/feedback');
 
 Session = require('../../models/session');
 
+EventReport = require('../../models/eventreport');
+
 module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
 
@@ -2209,6 +2263,7 @@ module.exports = Controller = (function(_super) {
       _this.events = new Event.Collection();
       _this.feedbacks = new Feedback.Collection();
       _this.sessions = new Session.Collection();
+      _this.eventreports = new EventReport.Collection();
       return vent.on('feedback:save', function(feedback) {
         return _this.saveFeedback(feedback);
       });
@@ -2263,6 +2318,30 @@ module.exports = Controller = (function(_super) {
           return application.layout.content.show(view);
         });
       }
+    });
+  };
+
+  Controller.prototype.showEventReport = function(id) {
+    var _this = this;
+    settings.set('active-event', id);
+    return this.eventreports.fetch({
+      data: {
+        filter: 'all'
+      }
+    }).done(function(models) {
+      var View, event, view;
+      event = models.get(id);
+      if (event == null) {
+        vent.trigger('message:error:show', 'event not found');
+      } else {
+        vent.trigger('set:active:header', 'events:index', event.get('title'), 'bookmark');
+      }
+      View = require('./views/event-report-view');
+      view = new View({
+        model: event,
+        resources: application.resources
+      });
+      return application.layout.content.show(view);
     });
   };
 
@@ -2347,7 +2426,8 @@ module.exports = Router = (function(_super) {
   Router.prototype.appRoutes = {
     'events': 'showEventsIndex',
     'events/:id': 'showEventDetails',
-    'sessions/:id': 'showSessionDetails'
+    'sessions/:id': 'showSessionDetails',
+    'eventreport/:id': 'showEventReport'
   };
 
   Router.prototype.initialize = function(options) {
@@ -2366,9 +2446,13 @@ module.exports = Router = (function(_super) {
         application.navigate('events/' + id);
         return _this.controller.showEventDetails(id);
       });
-      return application.on('session:details', function(id) {
+      application.on('session:details', function(id) {
         application.navigate('sessions/' + id);
         return _this.controller.showSessionDetails(id);
+      });
+      return application.on('event:report', function(id) {
+        application.navigate('eventreport/' + id);
+        return _this.controller.showEventReport(id);
       });
     });
   };
@@ -2381,7 +2465,7 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/event/views/event-details-view", function(exports, require, module) {
-var EventDetailsView, application, vent, _ref,
+var EventDetailsView, application, settings, vent, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2389,6 +2473,8 @@ var EventDetailsView, application, vent, _ref,
 application = require('application');
 
 vent = require('vent');
+
+settings = require('settings');
 
 module.exports = EventDetailsView = (function(_super) {
   __extends(EventDetailsView, _super);
@@ -2406,6 +2492,10 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.itemView = require('./session-item-view');
 
   EventDetailsView.prototype.itemViewContainer = '.js-sessions';
+
+  EventDetailsView.prototype.events = {
+    'click .js-report': 'onReport'
+  };
 
   EventDetailsView.prototype.initialize = function(options) {
     this.resources = options != null ? options.resources : void 0;
@@ -2430,6 +2520,11 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.onBack = function() {
     console.log('back from event-details');
     return application.trigger('events:index');
+  };
+
+  EventDetailsView.prototype.onReport = function(e) {
+    e.preventDefault();
+    return application.trigger('event:report', settings.get('active-event'));
   };
 
   EventDetailsView.prototype.onClose = function() {
@@ -2485,6 +2580,60 @@ module.exports = EventItemView = (function(_super) {
   return EventItemView;
 
 })(ItemView);
+});
+
+;require.register("modules/event/views/event-report-view", function(exports, require, module) {
+var EventReportView, application, vent, _ref,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+vent = require('vent');
+
+module.exports = EventReportView = (function(_super) {
+  __extends(EventReportView, _super);
+
+  function EventReportView() {
+    this.onBack = __bind(this.onBack, this);
+    _ref = EventReportView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  EventReportView.prototype.id = 'event-report-view';
+
+  EventReportView.prototype.template = require('./templates/event-report');
+
+  EventReportView.prototype.initialize = function(options) {
+    this.resources = options != null ? options.resources : void 0;
+    application.trigger('navigation:back:on');
+    application.on('navigation:back', this.onBack);
+    return console.log('------>', options);
+  };
+
+  EventReportView.prototype.serializeData = function() {
+    var _ref1;
+    return {
+      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      model: this.model.toJSON(),
+      json: JSON.stringify(this.model, null, 4)
+    };
+  };
+
+  EventReportView.prototype.onBack = function() {
+    console.log('back from event-report');
+    return application.trigger('event:report', this.model.get('eventId'));
+  };
+
+  EventReportView.prototype.onClose = function() {
+    application.off('navigation:back', this.onBack);
+    return console.log('event-report view close');
+  };
+
+  return EventReportView;
+
+})(Backbone.Marionette.ItemView);
 });
 
 ;require.register("modules/event/views/events-index-view", function(exports, require, module) {
@@ -2580,9 +2729,7 @@ module.exports = EventDetailsView = (function(_super) {
     var id, _i;
     for (id = _i = 0; _i <= 9; id = ++_i) {
       $("#rateit" + id).rateit();
-      console.log(id);
     }
-    $('#rateit0').rateit();
     return $('textarea').autosize();
   };
 
@@ -2679,7 +2826,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
   buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-12\">\r\n      <div class=\"btn-group pull-right\">\r\n        <button type=\"button\" class=\"btn btn-default active badge\">All</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">C#</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">Java</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">SAP</button>\r\n      </div>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n  <p>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</p>\r\n</div>";
+    + "</p>\r\n  <a class=\"btn btn-lg btn-primary js-report\" href=\"#\">Report</a>\r\n</div>";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
@@ -2710,6 +2857,172 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   },data:data};
   buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.startDate, options) : helperMissing.call(depth0, "dateFormat", depth0.startDate, options)))
     + "\r\n</div>";
+  return buffer;
+  });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("modules/event/views/templates/event-report", function(exports, require, module) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, stack2, functionType="function", escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
+
+function program1(depth0,data) {
+  
+  var buffer = "", stack1, stack2, options;
+  buffer += "\r\n  <div class=\"list-group-item\">\r\n    <div>\r\n      <strong>"
+    + escapeExpression(((stack1 = depth0.title),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</strong>&emsp;<span class=\"badge\">"
+    + escapeExpression(((stack1 = depth0.averageRate),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</span>\r\n    </div>\r\n    ";
+  stack2 = helpers.each.call(depth0, depth0.tags, {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n    <div class=\"glyphicon glyphicon-time\">\r\n      ";
+  options = {hash:{
+    'format': ("HH:mm")
+  },data:data};
+  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.startDate, options) : helperMissing.call(depth0, "dateFormat", depth0.startDate, options)))
+    + "-";
+  options = {hash:{
+    'format': ("HH:mm")
+  },data:data};
+  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.endDate, options) : helperMissing.call(depth0, "dateFormat", depth0.endDate, options)))
+    + "\r\n    </div>\r\n    <div class=\"glyphicon glyphicon-user\">\r\n      ";
+  stack2 = helpers.each.call(depth0, depth0.speakers, {hash:{},inverse:self.noop,fn:self.program(4, program4, data),data:data});
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n    </div>\r\n    <div>\r\n      <hr/>\r\n      <ol>\r\n        <li>\r\n          "
+    + escapeExpression(((stack1 = depth0.quesstionTitle0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + " &emsp;<span class=\"badge\">"
+    + escapeExpression(((stack1 = depth0.averageRateAnswer0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + escapeExpression(((stack1 = depth0.quesstionTitle1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + " &emsp;<span class=\"badge\">"
+    + escapeExpression(((stack1 = depth0.averageRateAnswer1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + escapeExpression(((stack1 = depth0.quesstionTitle2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + " &emsp;<span class=\"badge\">"
+    + escapeExpression(((stack1 = depth0.averageRateAnswer2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + escapeExpression(((stack1 = depth0.quesstionTitle3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + " &emsp;<span class=\"badge\">"
+    + escapeExpression(((stack1 = depth0.averageRateAnswer3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + escapeExpression(((stack1 = depth0.quesstionTitle4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + " &emsp;<span class=\"badge\">"
+    + escapeExpression(((stack1 = depth0.averageRateAnswer4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + escapeExpression(((stack1 = depth0.quesstionTitle5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + " &emsp;<span class=\"badge\">"
+    + escapeExpression(((stack1 = depth0.averageRateAnswer5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + escapeExpression(((stack1 = depth0.quesstionTitle6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + " &emsp;<span class=\"badge\">"
+    + escapeExpression(((stack1 = depth0.averageRateAnswer6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + escapeExpression(((stack1 = depth0.quesstionTitle7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + " &emsp;<span class=\"badge\">"
+    + escapeExpression(((stack1 = depth0.averageRateAnswer7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + escapeExpression(((stack1 = depth0.quesstionTitle8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + " &emsp;<span class=\"badge\">"
+    + escapeExpression(((stack1 = depth0.averageRateAnswer8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + escapeExpression(((stack1 = depth0.quesstionTitle9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + " &emsp;<span class=\"badge\">"
+    + escapeExpression(((stack1 = depth0.averageRateAnswer9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</span>\r\n        </li>\r\n      </ol>\r\n    </div>\r\n    <div>\r\n      ";
+  stack2 = helpers.each.call(depth0, depth0.feedbacks, {hash:{},inverse:self.noop,fn:self.programWithDepth(6, program6, data, depth0),data:data});
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n    </div>\r\n  </div>\r\n  ";
+  return buffer;
+  }
+function program2(depth0,data) {
+  
+  var buffer = "";
+  buffer += "<span class=\"badge pull-right\">"
+    + escapeExpression((typeof depth0 === functionType ? depth0.apply(depth0) : depth0))
+    + "</span>";
+  return buffer;
+  }
+
+function program4(depth0,data) {
+  
+  var buffer = "";
+  buffer += escapeExpression((typeof depth0 === functionType ? depth0.apply(depth0) : depth0))
+    + " ";
+  return buffer;
+  }
+
+function program6(depth0,data,depth1) {
+  
+  var buffer = "", stack1;
+  buffer += "\r\n      <h4>\r\n        <span class=\"label label-default\">\r\n          Feedback on "
+    + escapeExpression(((stack1 = depth0.createDate),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n        </span>\r\n        &emsp;<span class=\"badge\">"
+    + escapeExpression(((stack1 = depth0.averageRate),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</span>\r\n      </h4>\r\n      <ol>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth1.quesstionTitle0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\">\r\n          "
+    + escapeExpression(((stack1 = depth0.answer0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth1.quesstionTitle1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\">\r\n          "
+    + escapeExpression(((stack1 = depth0.answer1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth1.quesstionTitle2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\">\r\n          "
+    + escapeExpression(((stack1 = depth0.answer2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth1.quesstionTitle3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\">\r\n          "
+    + escapeExpression(((stack1 = depth0.answer3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth1.quesstionTitle4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\">\r\n          "
+    + escapeExpression(((stack1 = depth0.answer4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth1.quesstionTitle5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\">\r\n          "
+    + escapeExpression(((stack1 = depth0.answer5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth1.quesstionTitle6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\">\r\n          "
+    + escapeExpression(((stack1 = depth0.answer6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth1.quesstionTitle7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\">\r\n          "
+    + escapeExpression(((stack1 = depth0.answer7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth1.quesstionTitle8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\">\r\n          "
+    + escapeExpression(((stack1 = depth0.answer8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth1.quesstionTitle9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\">\r\n          "
+    + escapeExpression(((stack1 = depth0.answer9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n        </li>\r\n      </ol>\r\n      ";
+  return buffer;
+  }
+
+  buffer += "﻿<div class=\"container\">\r\n  "
+    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n\r\n\r\n  ";
+  stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.sessions), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n\r\n  <textarea>\r\n    ";
+  if (stack2 = helpers.json) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.json; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
+    + "\r\n  </textarea>\r\n</div>";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {

@@ -5,6 +5,7 @@ settings = require 'settings'
 Event = require '../../models/event'
 Feedback = require '../../models/feedback'
 Session = require '../../models/session'
+EventReport = require '../../models/eventreport'
 
 module.exports = class Controller extends Backbone.Marionette.Controller
 
@@ -16,6 +17,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       @events = new Event.Collection()
       @feedbacks = new Feedback.Collection()
       @sessions = new Session.Collection()
+      @eventreports = new EventReport.Collection()
       
       vent.on 'feedback:save', (feedback) =>
         @saveFeedback feedback
@@ -54,6 +56,22 @@ module.exports = class Controller extends Backbone.Marionette.Controller
           View = require './views/event-details-view'
           view = new View(model: event, collection: sessions, resources: application.resources)
           application.layout.content.show(view)
+          
+  showEventReport: (id) ->
+    settings.set('active-event', id)
+    @eventreports.fetch(
+      data:
+        filter: 'all'
+    ).done (models) =>
+      event = models.get(id)
+      if not event?
+        vent.trigger 'message:error:show', 'event not found'
+      else
+        vent.trigger 'set:active:header', 'events:index', event.get('title'), 'bookmark'
+
+      View = require './views/event-report-view'
+      view = new View(model: event, resources: application.resources)
+      application.layout.content.show(view)
 
   showSessionDetails: (id) ->
     @sessions.fetch().done (models) =>
