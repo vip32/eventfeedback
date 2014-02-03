@@ -21,6 +21,11 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
 
   itemViewOptions: ->
     resources: @resources
+    
+  onShow: ->
+    roles = settings.get('api_userroles') ? []
+    if not _.contains(roles, 'Administrator')
+      $('.js-report').hide()
 
   onBack: =>
     console.log 'back from event-details'

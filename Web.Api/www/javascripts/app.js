@@ -2505,6 +2505,14 @@ module.exports = EventDetailsView = (function(_super) {
     };
   };
 
+  EventDetailsView.prototype.onShow = function() {
+    var roles, _ref1;
+    roles = (_ref1 = settings.get('api_userroles')) != null ? _ref1 : [];
+    if (!_.contains(roles, 'Administrator')) {
+      return $('.js-report').hide();
+    }
+  };
+
   EventDetailsView.prototype.onBack = function() {
     console.log('back from event-details');
     return application.trigger('events:index');
