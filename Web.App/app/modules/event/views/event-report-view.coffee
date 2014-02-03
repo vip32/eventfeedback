@@ -9,7 +9,6 @@ module.exports = class EventReportView extends Backbone.Marionette.ItemView
     @resources = options?.resources
     application.trigger 'navigation:back:on'
     application.on 'navigation:back', @onBack
-    console.log '------>', options
 
   serializeData: ->
     resources: @resources?.toJSON()
@@ -18,7 +17,7 @@ module.exports = class EventReportView extends Backbone.Marionette.ItemView
 
   onBack: =>
     console.log 'back from event-report'
-    application.trigger 'event:report', @model.get('eventId')
+    application.trigger 'event:details', @model?.id
 
   onClose: ->
     application.off 'navigation:back', @onBack

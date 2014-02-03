@@ -1,24 +1,27 @@
 <div class="container">
 
   <div class="list-group" style="margin-top:39px;">
-      <div id="session-item-view" class="list-group-item">
-        <div><strong>{{model.title}}</strong></div>
-        {{#each model.tags}}<span class="badge pull-right">{{this}}</span>{{/each}}
-        <div class="glyphicon glyphicon-time">
-          {{dateFormat model.startDate format="HH:mm"}}-{{dateFormat model.endDate format="HH:mm"}}
-        </div>
-        <div class="glyphicon glyphicon-user">
-          {{#each model.speakers}}{{this}} {{/each}}
-        </div>
-        <br/><br/>
-        <p>{{model.description}}</p>
+    <div id="session-item-view" class="list-group-item">
+      <div>
+        <div class="glyphicon glyphicon-comment"></div>
+        &emsp;&emsp;<strong>{{model.title}}</strong>
       </div>
+      {{#each model.tags}}<span class="badge pull-right">{{this}}</span>{{/each}}
+      <div class="glyphicon glyphicon-time">
+        &emsp;{{dateFormat model.startDate format="HH:mm"}}-{{dateFormat model.endDate format="HH:mm"}}
+      </div>
+      &emsp;&emsp;<div class="glyphicon glyphicon-user">
+        &emsp;{{#each model.speakers}}{{this}} {{/each}}
+      </div>
+      <br/><br/>
+      <p>{{model.description}}</p>
+    </div>
   </div>
 
   <form>
     {{#if feedbackdefinition.active0}}
     <div class="row">
-      {{#ifCond feedbackdefinition.questionType0 0}} 
+      {{#ifCond feedbackdefinition.questionType0 0}}
       <div class="col-md-3">{{feedbackdefinition.title0}} </div>
       <div class="col-md-9">
         <textarea name="answer0">{{feedback.answer0}}</textarea>
@@ -265,7 +268,7 @@
         <!--<input type="number" data-max="5" data-min="1"
              name="answer5" id="answer5" class="rating" value="{{feedback.answer5}}" />-->
         <input name="answer5" type="range" min="0" max="5" value="{{feedback.answer5}}" step="0.5" id="backing5"/>
-        <div class="rateit bigstars" id="rateit5" data-rateit-backingfld="#backing5" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>        
+        <div class="rateit bigstars" id="rateit5" data-rateit-backingfld="#backing5" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
       {{#ifCond feedbackdefinition.questionType5 12}}

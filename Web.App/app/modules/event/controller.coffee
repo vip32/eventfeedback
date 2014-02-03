@@ -25,8 +25,8 @@ module.exports = class Controller extends Backbone.Marionette.Controller
   showEventsIndex: ->
     @events.fetch(
       reload: true # needed after login, otherwise FAIL on fetch
-      data:
-        filter: 'all'
+#      data:
+#        filter: 'all'
     ).done (models) =>
       @feedbacks.fetch(
           # reload: true
@@ -63,7 +63,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       data:
         filter: 'all'
     ).done (models) =>
-      event = models.get(id)
+      event = models.first()
       if not event?
         vent.trigger 'message:error:show', 'event not found'
       else
