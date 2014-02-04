@@ -1642,7 +1642,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "&emsp;/&emsp;"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.password)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</h3></div>\r\n        <div class=\"col-xs-6\"><img src=\"images/qr.png\" alt=\"qr\" width=\"88\" height=\"88\" /></div>\r\n        <div class=\"col-xs-6\"></div>\r\n    </div>\r\n    <a href=\"https://eventfeedback.azurewebsites.net\">https://eventfeedback.azurewebsites.net</a>\r\n</div>\r\n";
+    + "</h3></div>\r\n        <div class=\"col-xs-6\"><img src=\"../images/qr.png\" alt=\"qr\" width=\"88\" height=\"88\" /></div>\r\n        <div class=\"col-xs-6\"></div>\r\n    </div>\r\n    <a href=\"https://eventfeedback.azurewebsites.net\">https://eventfeedback.azurewebsites.net</a>\r\n</div>\r\n";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
