@@ -57,6 +57,7 @@ namespace EventFeedback.Web.Api.Controllers.Admin
             _traceSource.TraceInformation("userscontroller post");
             Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
             Guard.Against<ArgumentException>(!string.IsNullOrEmpty(entity.Id), "entity.id must be empty");
+            Guard.Against<ArgumentException>(string.IsNullOrEmpty(entity.UserName), "entity.userName cannot be empty");
             Guard.Against<ArgumentException>(string.IsNullOrEmpty(entity.Password), "entity.password cannot be empty");
             
             var user = Map(entity);
@@ -126,7 +127,7 @@ namespace EventFeedback.Web.Api.Controllers.Admin
                     yield return new UserAdminBindingModel
                     {
                         Id = user.Id,
-                        Name = user.UserName,
+                        UserName = user.UserName,
                         Password = string.Empty,
                         Active = !user.Active.HasValue || user.Active.Value,
                         Organization = user.Organization,
@@ -143,7 +144,7 @@ namespace EventFeedback.Web.Api.Controllers.Admin
             return new User
             {
                 Id = source.Id,
-                UserName = source.Name,
+                UserName = source.UserName,
                 Organization = source.Organization,
                 Email = source.Email,
                 Active = source.Active

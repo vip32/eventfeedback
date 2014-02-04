@@ -14,6 +14,8 @@ module.exports = class DebugView extends Backbone.Marionette.ItemView
 
   serializeData: ->
     resources: @resources?.toJSON()
+    user: settings.get('api_username')
+    roles: settings.get('api_userroles')
 
   onTriggerEvent: (e) ->
     model = Backbone.Syphon.serialize(@)
@@ -23,7 +25,7 @@ module.exports = class DebugView extends Backbone.Marionette.ItemView
 
   onShow: ->
     console.log 'resources', @resources
-    $('input.rating[type=number]').rating();
+    #$('input.rating[type=number]').rating();
 
   onClose: ->
     console.log 'debug view close'

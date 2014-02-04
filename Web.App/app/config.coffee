@@ -3,7 +3,7 @@ class Config
   appcontainer: 'content'
   approot: '/'
   apiroot: '/api/v1'
-  apitimeout: 30000
+  apitimeout: 60000
   startuptrigger: 'events:index'
   signintrigger: 'signin:index'
   brandtrigger: 'events:index'

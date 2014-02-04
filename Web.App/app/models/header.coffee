@@ -150,4 +150,14 @@ module.exports.TestData = class TestData
     trigger: "admin:users:edit"
     intern: true
     order: 14
+#  ,
+#    id: "b85fd64c-3d4a-e8f1-8f1b-1d5e6ed8b801"
+#    title: "Admin - Users Generator"
+#    authenticated: true
+#    roles: ['Administrator']
+#    resource: ''
+#    glyphicon: 'user'
+#    trigger: "admin:users:generator"
+#    intern: true
+#    order: 14
   ]

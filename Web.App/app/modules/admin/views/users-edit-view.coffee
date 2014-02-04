@@ -7,10 +7,13 @@ module.exports = class UsersEditView extends Backbone.Marionette.ItemView
   events:
     'click #js-add': 'onAdd'
     'click #js-save': 'onSave'
+    'click #js-generate': 'onGenerate'
 
   initialize: (options) ->
     @resources = options?.resources
     @roles = options?.roles
+    application.trigger 'navigation:back:on'
+    application.on 'navigation:back', @onBack
 
   onShow: ->
     columns = [
@@ -24,8 +27,8 @@ module.exports = class UsersEditView extends Backbone.Marionette.ItemView
       label: "Active"
       cell: "boolean"
     ,
-      name: "name"
-      label: "Name"
+      name: "userName"
+      label: "userName"
       editable: true
       cell: "string"
     ,
@@ -64,3 +67,9 @@ module.exports = class UsersEditView extends Backbone.Marionette.ItemView
   onSave: ->
     vent.trigger 'save:users'
     # TODO: button > trigger event for controller to save all 'dirty' models
+    
+  onGenerate: ->
+    application.trigger 'admin:users:generator'
+    
+  onBack: =>
+    application.trigger 'admin:users:edit'

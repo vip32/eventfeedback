@@ -205,7 +205,7 @@ Config = (function() {
 
   Config.prototype.apiroot = '/api/v1';
 
-  Config.prototype.apitimeout = 30000;
+  Config.prototype.apitimeout = 60000;
 
   Config.prototype.startuptrigger = 'events:index';
 
@@ -1264,6 +1264,7 @@ module.exports = Controller = (function(_super) {
 
   function Controller(options) {
     this.onSaveUsers = __bind(this.onSaveUsers, this);
+    this.showUsersGenerator = __bind(this.showUsersGenerator, this);
     this.showUsersEdit = __bind(this.showUsersEdit, this);
     var _this = this;
     console.log('admin controller init');
@@ -1322,6 +1323,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showUsersEdit = function() {
     var _this = this;
+    this.users.reset();
     return this.roles.fetch({
       reload: true
     }).done(function(roles) {
@@ -1351,9 +1353,33 @@ module.exports = Controller = (function(_super) {
     });
   };
 
+  Controller.prototype.showUsersGenerator = function() {
+    var _this = this;
+    this.users.reset();
+    return this.roles.fetch({
+      reload: true
+    }).done(function(roles) {
+      var View, view;
+      _this.users.on('add', function(model) {
+        console.log('user add:', model);
+        model.credentials = _this.users.credentials;
+        return model.set('dirty', true, {
+          silent: true
+        });
+      });
+      View = require('./views/users-generator-view');
+      view = new View({
+        collection: _this.users,
+        roles: roles,
+        resources: application.resources
+      });
+      return application.layout.content.show(view);
+    });
+  };
+
   Controller.prototype.onSaveUsers = function() {
     return this.users.each(function(model) {
-      if (model.get('dirty') && model.get('name') !== '') {
+      if (model.get('dirty') && model.get('userName') !== '') {
         return model.save(null, {
           success: function(model, response, options) {
             return model.set('dirty', false, {
@@ -1401,7 +1427,8 @@ module.exports = Router = (function(_super) {
   Router.prototype.appRoutes = {
     'admin/events': 'showEventsEdit',
     'admin/events/:id': 'showSessionsEdit',
-    'admin/users': 'showUsersEdit'
+    'admin/users': 'showUsersEdit',
+    'admin/usersgenerator': 'showUsersGenerator'
   };
 
   Router.prototype.initialize = function(options) {
@@ -1416,9 +1443,13 @@ module.exports = Router = (function(_super) {
         application.navigate('admin/events/' + id);
         return _this.controller.showSessionsEdit(id);
       });
-      return application.on('admin:users:edit', function() {
+      application.on('admin:users:edit', function() {
         application.navigate('admin/users');
         return _this.controller.showUsersEdit();
+      });
+      return application.on('admin:users:generator', function() {
+        application.navigate('admin/usersgenerator');
+        return _this.controller.showUsersGenerator();
       });
     });
   };
@@ -1587,7 +1618,66 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<p>\r\n  <button type=\"button\" id=\"js-add\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-plus\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-refresh\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-refresh\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-save\" class=\"btn btn-success btn-lg\">\r\n    <span class=\"glyphicon glyphicon-save\"></span>\r\n  </button>\r\n</p>\r\n\r\n<p>\r\n  <div class=\"container\" id=\"js-table\">\r\n    <!-- table here -->\r\n  </div>\r\n</p>\r\n\r\n<p>\r\n  <button type=\"button\" id=\"js-add\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-plus\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-refresh\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-refresh\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-save\" class=\"btn btn-success btn-lg\">\r\n    <span class=\"glyphicon glyphicon-save\"></span>\r\n  </button>\r\n</p>";
+  return "<p>\r\n  <button type=\"button\" id=\"js-add\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-plus\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-refresh\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-refresh\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-generate\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-user\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-save\" class=\"btn btn-success btn-lg\">\r\n    <span class=\"glyphicon glyphicon-save\"></span>\r\n  </button>\r\n</p>\r\n\r\n<p>\r\n  <div class=\"container\" id=\"js-table\">\r\n    <!-- table here -->\r\n  </div>\r\n</p>\r\n\r\n<p>\r\n  <button type=\"button\" id=\"js-add\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-plus\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-refresh\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-refresh\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-generate\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-user\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-save\" class=\"btn btn-success btn-lg\">\r\n    <span class=\"glyphicon glyphicon-save\"></span>\r\n  </button>\r\n</p>";
+  });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("modules/admin/views/templates/users-generator-item", function(exports, require, module) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "﻿<div>\r\n    <!--<div class=\"glyphicon glyphicon-user\"></div>-->\r\n\r\n    <div class=\"row\">\r\n        <div class=\"col-xs-6\"><h3 style=\"color: #000000;\">"
+    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "&emsp;/&emsp;"
+    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.password)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</h3></div>\r\n        <div class=\"col-xs-6\"><img src=\"images/qr.png\" alt=\"qr\" width=\"88\" height=\"88\" /></div>\r\n        <div class=\"col-xs-6\"></div>\r\n    </div>\r\n    <a href=\"https://eventfeedback.azurewebsites.net\">https://eventfeedback.azurewebsites.net</a>\r\n</div>\r\n";
+  return buffer;
+  });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("modules/admin/views/templates/users-generator", function(exports, require, module) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
+
+function program1(depth0,data) {
+  
+  var buffer = "";
+  buffer += "\r\n          <option value=\""
+    + escapeExpression((typeof depth0 === functionType ? depth0.apply(depth0) : depth0))
+    + "\">"
+    + escapeExpression((typeof depth0 === functionType ? depth0.apply(depth0) : depth0))
+    + "</option>\r\n          ";
+  return buffer;
+  }
+
+  buffer += "﻿<div class=\"container\">\r\n  <form class=\"form-horizontal noprint\" role=\"form\">\r\n    <div class=\"form-group\">\r\n      <label for=\"amount\" class=\"col-sm-4 control-label\">Amount</label>\r\n      <div class=\"col-sm-8\">\r\n        <select name=\"amount\" id=\"amount\" class=\"form-control\">\r\n          <option value=\"1\">1</option>\r\n          <option value=\"10\">10</option>\r\n          <option value=\"25\">25</option>\r\n          <option value=\"50\">50</option>\r\n          <option value=\"100\">100</option>\r\n        </select>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"prefix\" class=\"col-sm-4 control-label\">Prefix</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"prefix\" id=\"prefix\" placeholder=\"\"></input>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"roles\" class=\"col-sm-4 control-label\">Role</label>\r\n      <div class=\"col-sm-8\">\r\n        <select name=\"roles\" id=\"roles\" class=\"form-control\">\r\n          <option value=\"\"></option>\r\n          ";
+  stack1 = helpers.each.call(depth0, depth0.roles, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\r\n        </select>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <div class=\"col-sm-offset-4 col-sm-8\">\r\n        <button type=\"button\" id=\"js-generate\" class=\"btn btn-success btn-lg\">\r\n          <span class=\"glyphicon glyphicon-user\"></span>&emsp;Generate</button>\r\n      </div>\r\n    </div>\r\n  </form>\r\n  \r\n  <div class=\"list-group js-users\" style=\"margin-top:39px;\">\r\n    <!-- users -->\r\n  </div>\r\n</div>\r\n\r\n";
+  return buffer;
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -1602,6 +1692,7 @@ if (typeof define === 'function' && define.amd) {
 
 ;require.register("modules/admin/views/users-edit-view", function(exports, require, module) {
 var UsersEditView, application, vent, _ref,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1613,6 +1704,7 @@ module.exports = UsersEditView = (function(_super) {
   __extends(UsersEditView, _super);
 
   function UsersEditView() {
+    this.onBack = __bind(this.onBack, this);
     _ref = UsersEditView.__super__.constructor.apply(this, arguments);
     return _ref;
   }
@@ -1623,12 +1715,15 @@ module.exports = UsersEditView = (function(_super) {
 
   UsersEditView.prototype.events = {
     'click #js-add': 'onAdd',
-    'click #js-save': 'onSave'
+    'click #js-save': 'onSave',
+    'click #js-generate': 'onGenerate'
   };
 
   UsersEditView.prototype.initialize = function(options) {
     this.resources = options != null ? options.resources : void 0;
-    return this.roles = options != null ? options.roles : void 0;
+    this.roles = options != null ? options.roles : void 0;
+    application.trigger('navigation:back:on');
+    return application.on('navigation:back', this.onBack);
   };
 
   UsersEditView.prototype.onShow = function() {
@@ -1639,8 +1734,8 @@ module.exports = UsersEditView = (function(_super) {
         label: "Active",
         cell: "boolean"
       }, {
-        name: "name",
-        label: "Name",
+        name: "userName",
+        label: "userName",
         editable: true,
         cell: "string"
       }, {
@@ -1682,9 +1777,161 @@ module.exports = UsersEditView = (function(_super) {
     return vent.trigger('save:users');
   };
 
+  UsersEditView.prototype.onGenerate = function() {
+    return application.trigger('admin:users:generator');
+  };
+
+  UsersEditView.prototype.onBack = function() {
+    return application.trigger('admin:users:edit');
+  };
+
   return UsersEditView;
 
 })(Backbone.Marionette.ItemView);
+});
+
+;require.register("modules/admin/views/users-generator-item-view", function(exports, require, module) {
+var ItemView, UsersGeneratorItemView, application, settings, vent, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+vent = require('vent');
+
+settings = require('settings');
+
+ItemView = require('../../../../lib/base/item-view');
+
+module.exports = UsersGeneratorItemView = (function(_super) {
+  __extends(UsersGeneratorItemView, _super);
+
+  function UsersGeneratorItemView() {
+    _ref = UsersGeneratorItemView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  UsersGeneratorItemView.prototype.id = 'users-generator-item-view';
+
+  UsersGeneratorItemView.prototype.template = require('./templates/users-generator-item');
+
+  UsersGeneratorItemView.prototype.tagName = 'div';
+
+  UsersGeneratorItemView.prototype.className = 'list-group-item';
+
+  UsersGeneratorItemView.prototype.initialize = function(options) {
+    this.resources = options != null ? options.resources : void 0;
+    return console.log('--------', options);
+  };
+
+  UsersGeneratorItemView.prototype.serializeData = function() {
+    var _ref1;
+    return {
+      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      model: this.model.toJSON()
+    };
+  };
+
+  return UsersGeneratorItemView;
+
+})(Backbone.Marionette.ItemView);
+});
+
+;require.register("modules/admin/views/users-generator-view", function(exports, require, module) {
+var UsersGeneratorView, application, vent, _ref,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+vent = require('vent');
+
+module.exports = UsersGeneratorView = (function(_super) {
+  __extends(UsersGeneratorView, _super);
+
+  function UsersGeneratorView() {
+    this.onBack = __bind(this.onBack, this);
+    _ref = UsersGeneratorView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  UsersGeneratorView.prototype.id = 'users-generator-view';
+
+  UsersGeneratorView.prototype.template = require('./templates/users-generator');
+
+  UsersGeneratorView.prototype.itemView = require('./users-generator-item-view');
+
+  UsersGeneratorView.prototype.itemViewContainer = '.js-users';
+
+  application.trigger('navigation:back:on');
+
+  application.on('navigation:back', UsersGeneratorView.onBack);
+
+  UsersGeneratorView.prototype.events = {
+    'click #js-generate': 'onGenerate'
+  };
+
+  UsersGeneratorView.prototype.initialize = function(options) {
+    this.resources = options != null ? options.resources : void 0;
+    return this.roles = options != null ? options.roles : void 0;
+  };
+
+  UsersGeneratorView.prototype.serializeData = function() {
+    var _ref1, _ref2;
+    return {
+      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      roles: (_ref2 = this.roles) != null ? _ref2.pluck('name') : void 0
+    };
+  };
+
+  UsersGeneratorView.prototype.itemViewOptions = function() {
+    return {
+      resources: this.resources
+    };
+  };
+
+  UsersGeneratorView.prototype.onGenerate = function(e) {
+    var data, i, _i, _ref1;
+    e.preventDefault();
+    this.collection.reset();
+    data = Backbone.Syphon.serialize(this);
+    for (i = _i = 1, _ref1 = data.amount; 1 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 1 <= _ref1 ? ++_i : --_i) {
+      this.collection.add({
+        userName: data.prefix + this.makeid() + i,
+        password: this.makeid(),
+        roles: data.roles,
+        active: true,
+        dirty: true
+      });
+    }
+    console.log('new users', this.collection);
+    return vent.trigger('save:users');
+  };
+
+  UsersGeneratorView.prototype.makeid = function() {
+    var i, possible, text;
+    text = '';
+    possible = 'abcdefghjkmnpqrstuvwxy23456789';
+    i = 0;
+    while (i < 5) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+      i++;
+    }
+    return text;
+  };
+
+  UsersGeneratorView.prototype.onSave = function() {
+    return vent.trigger('save:users');
+  };
+
+  UsersGeneratorView.prototype.onBack = function() {
+    return application.trigger('admin:users:edit');
+  };
+
+  return UsersGeneratorView;
+
+})(Backbone.Marionette.CompositeView);
 });
 
 ;require.register("modules/common/controller", function(exports, require, module) {
@@ -1953,7 +2200,9 @@ module.exports = DebugView = (function(_super) {
   DebugView.prototype.serializeData = function() {
     var _ref1;
     return {
-      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0
+      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      user: settings.get('api_username'),
+      roles: settings.get('api_userroles')
     };
   };
 
@@ -1966,8 +2215,7 @@ module.exports = DebugView = (function(_super) {
   };
 
   DebugView.prototype.onShow = function() {
-    console.log('resources', this.resources);
-    return $('input.rating[type=number]').rating();
+    return console.log('resources', this.resources);
   };
 
   DebugView.prototype.onClose = function() {
@@ -2104,7 +2352,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  <p>\r\n    <h3>App</h3>\r\n    <ul>\r\n      <li>Backbone 1.1.0</li>\r\n      <li>Underscore 1.5.2</li>\r\n      <li>Twitter Bootstrap 3.0.0</li>\r\n      <li>MarionetteJS 1.2.2</li>\r\n      <li>MomentJS 2.2.1</li>\r\n      <li>jQuery 2.0.3</li>\r\n      <li>JQuery RateIt 1.0.19</li>\r\n      <li>Fastclick 0.6.10</li>\r\n      <li>Pace 0.4.15</li>\r\n    </ul>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.App\">App sources</a>\r\n  </p>\r\n  <p>\r\n    <h3>Api</h3>\r\n    <ul>\r\n      <li>C#</li>\r\n      <li>Microsoft Web Api 2</li>\r\n      <li>EntityFramework 6.0</li>\r\n    </ul>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.Api\">Api sources</a>\r\n  </p>\r\n</div>";
+  return "<div class=\"container\">\r\n  <p>\r\n    <h3>App</h3>\r\n    <ul>\r\n      <li>Backbone 1.1.0</li>\r\n      <li>Underscore 1.5.2</li>\r\n      <li>Twitter Bootstrap 3.0.0</li>\r\n      <li>MarionetteJS 1.2.2</li>\r\n      <li>MomentJS 2.2.1</li>\r\n      <li>jQuery 2.0.3</li>\r\n      <li>JQuery RateIt 1.0.19</li>\r\n      <li>Fastclick 0.6.10</li>\r\n      <li>Pace 0.4.15</li>\r\n    </ul>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.App\">App sources</a>\r\n  </p>\r\n  <p>\r\n    <h3>Api</h3>\r\n    <ul>\r\n      <li>C#</li>\r\n      <li>Microsoft Web Api 2</li>\r\n      <li>EntityFramework 6.0</li>\r\n    </ul>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.Api\">Api sources</a>\r\n  </p>\r\n  <p>\r\n    <!--<img src=\"http://qrfree.kaywa.com/?l=1&s=8&d=https%3A%2F%2Feventfeedback.azurewebsites.net\" alt=\"QRCode\"/>-->\r\n    <img src=\"images/qr.png\" alt=\"qr\"/>\r\n  </p>\r\n</div>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -2124,7 +2372,15 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div class=\"container\">\r\n  <h3>Debug</h3>\r\n  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n  cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n  proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n  <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n  <form>\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n    <textarea></textarea>\r\n\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n    <textarea></textarea>\r\n    <br/>\r\n    <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n    <button class=\"js-triggerevent\">trigger</button>\r\n    resources: "
+  buffer += "<div class=\"container\">\r\n  <h3>Debug</h3>\r\n  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n  cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n  proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n  <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n  <form>\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n    <textarea></textarea>\r\n\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n    <textarea></textarea>\r\n    <br/>\r\n    <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n    <button class=\"js-triggerevent\">trigger</button>\r\n    <br/>user: ";
+  if (stack1 = helpers.user) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.user; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\r\n    <br/>roles: ";
+  if (stack1 = helpers.roles) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.roles; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\r\n    <br/>resources: "
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.TestKey1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n  </form>\r\n</div>";
   return buffer;

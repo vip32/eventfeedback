@@ -48,6 +48,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         application.layout.content.show(view)
 
   showUsersEdit: =>
+    @users.reset()
     @roles.fetch(
       reload: true
     ).done (roles) =>
@@ -64,10 +65,23 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         View = require './views/users-edit-view'
         view = new View(collection: users, roles: roles, resources: application.resources)
         application.layout.content.show(view)
-
+        
+  showUsersGenerator: =>
+    @users.reset()
+    @roles.fetch(
+      reload: true
+    ).done (roles) =>
+      @users.on 'add', (model) =>
+        console.log 'user add:', model
+        model.credentials = @users.credentials
+        model.set('dirty', true, silent: true)
+      View = require './views/users-generator-view'
+      view = new View(collection: @users, roles: roles, resources: application.resources)
+      application.layout.content.show(view)
+        
   onSaveUsers: =>
     @users.each (model) ->
-      if model.get('dirty') and model.get('name') isnt ''
+      if model.get('dirty') and model.get('userName') isnt ''
         model.save null,
           success: (model, response, options) ->
             model.set('dirty', false, silent: true)

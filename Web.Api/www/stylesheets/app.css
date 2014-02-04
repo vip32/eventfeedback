@@ -7962,6 +7962,11 @@ textarea {
 .success {
   background-color: #64b92a;
 }
+@media print {
+  .noprint {
+    display: none !important;
+  }
+}
 
 ﻿.rateit {
     display: -moz-inline-box;
