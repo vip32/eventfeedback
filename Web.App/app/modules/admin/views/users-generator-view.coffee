@@ -36,10 +36,6 @@ module.exports = class UsersGeneratorView extends Backbone.Marionette.CompositeV
     console.log 'new users', @collection
     vent.trigger 'save:users'
     
-    # hide generate form
-    # show generated users + qr
-    # no back button
-    
   makeid: ->
     text = ''
     possible = 'abcdefghjkmnpqrstuvwxy23456789'

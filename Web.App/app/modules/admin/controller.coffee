@@ -80,6 +80,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       application.layout.content.show(view)
         
   onSaveUsers: =>
+#    vent.trigger 'fetch:start'
     @users.each (model) ->
       if model.get('dirty') and model.get('userName') isnt ''
         model.save null,
@@ -87,6 +88,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
             model.set('dirty', false, silent: true)
           error: (model, xhr, options) ->
             console.warn 'user save error', model
+#    vent.trigger 'fetch:done'
 
   onClose: ->
     console.log 'admin controller close'
