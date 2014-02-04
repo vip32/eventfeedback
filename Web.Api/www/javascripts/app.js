@@ -1638,11 +1638,11 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "﻿<div>\r\n    <!--<div class=\"glyphicon glyphicon-user\"></div>-->\r\n\r\n    <div class=\"row\">\r\n        <div class=\"col-xs-6\"><h3 style=\"color: #000000;\">"
+  buffer += "﻿<div>\r\n  <!--<div class=\"glyphicon glyphicon-user\"></div>-->\r\n\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-6\">\r\n      <h3 style=\"color: #000000;\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "&emsp;/&emsp;"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.password)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</h3></div>\r\n        <div class=\"col-xs-6\"><img src=\"../images/qr.png\" alt=\"qr\" width=\"88\" height=\"88\" /></div>\r\n        <div class=\"col-xs-6\"></div>\r\n    </div>\r\n    <a href=\"https://eventfeedback.azurewebsites.net\">https://eventfeedback.azurewebsites.net</a>\r\n</div>\r\n";
+    + "</h3>\r\n    </div>\r\n    <div class=\"col-xs-6\">\r\n      <img class=\"qr\" height=\"88\" width=\"88\"/>\r\n    </div>\r\n    <div class=\"col-xs-6\"></div>\r\n  </div>\r\n  <a href=\"https://eventfeedback.azurewebsites.net\">https://eventfeedback.azurewebsites.net</a>\r\n</div>\r\n";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
@@ -2352,7 +2352,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  <p>\r\n    <h3>App</h3>\r\n    <ul>\r\n      <li>Backbone 1.1.0</li>\r\n      <li>Underscore 1.5.2</li>\r\n      <li>Twitter Bootstrap 3.0.0</li>\r\n      <li>MarionetteJS 1.2.2</li>\r\n      <li>MomentJS 2.2.1</li>\r\n      <li>jQuery 2.0.3</li>\r\n      <li>JQuery RateIt 1.0.19</li>\r\n      <li>Fastclick 0.6.10</li>\r\n      <li>Pace 0.4.15</li>\r\n    </ul>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.App\">App sources</a>\r\n  </p>\r\n  <p>\r\n    <h3>Api</h3>\r\n    <ul>\r\n      <li>C#</li>\r\n      <li>Microsoft Web Api 2</li>\r\n      <li>EntityFramework 6.0</li>\r\n    </ul>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.Api\">Api sources</a>\r\n  </p>\r\n  <p>\r\n    <!--<img src=\"http://qrfree.kaywa.com/?l=1&s=8&d=https%3A%2F%2Feventfeedback.azurewebsites.net\" alt=\"QRCode\"/>-->\r\n    <img src=\"../images/qr.png\" alt=\"qr\"/>  \r\n  </p>\r\n</div>";
+  return "<div class=\"container\">\r\n  <p>\r\n    <h3>App</h3>\r\n    <ul>\r\n      <li>Backbone 1.1.0</li>\r\n      <li>Underscore 1.5.2</li>\r\n      <li>Twitter Bootstrap 3.0.0</li>\r\n      <li>MarionetteJS 1.2.2</li>\r\n      <li>MomentJS 2.2.1</li>\r\n      <li>jQuery 2.0.3</li>\r\n      <li>JQuery RateIt 1.0.19</li>\r\n      <li>Fastclick 0.6.10</li>\r\n      <li>Pace 0.4.15</li>\r\n    </ul>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.App\">App sources</a>\r\n  </p>\r\n  <p>\r\n    <h3>Api</h3>\r\n    <ul>\r\n      <li>C#</li>\r\n      <li>Microsoft Web Api 2</li>\r\n      <li>EntityFramework 6.0</li>\r\n    </ul>\r\n    <a class=\"btn btn-lg btn-primary\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.Api\">Api sources</a>\r\n  </p>\r\n  <p>\r\n    <!--<img src=\"http://qrfree.kaywa.com/?l=1&s=8&d=https%3A%2F%2Feventfeedback.azurewebsites.net\" alt=\"QRCode\"/>-->\r\n    <img class=\"qr\" height=\"88\" width=\"88\"/>  \r\n  </p>\r\n</div>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {

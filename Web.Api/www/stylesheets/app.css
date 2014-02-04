@@ -7962,6 +7962,9 @@ textarea {
 .success {
   background-color: #64b92a;
 }
+.qr {
+  background: url("../images/qr.png");
+}
 @media print {
   .noprint {
     display: none !important;
