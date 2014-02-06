@@ -3248,16 +3248,16 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 function program1(depth0,data,depth1) {
   
   var buffer = "", stack1, stack2, options;
-  buffer += "\r\n  <div class=\"list-group-item\" style=\"page-break-after: always;\">\r\n    <div>\r\n      <strong>\r\n        &emsp;<div class=\"glyphicon glyphicon-bookmark\"></div>&emsp;&emsp;"
+  buffer += "\r\n  <div class=\"list-group-item\" style=\"page-break-after: always;\">\r\n    <div>\r\n      <strong>\r\n        <div class=\"glyphicon glyphicon-bookmark\"></div>\r\n        &emsp;&emsp;"
     + escapeExpression(((stack1 = ((stack1 = depth1.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + " <br/>&emsp;<div class=\"glyphicon glyphicon-comment\"></div>&emsp;&emsp; "
+    + " <br/>\r\n        <div class=\"glyphicon glyphicon-comment\"></div>\r\n        &emsp;&emsp;"
     + escapeExpression(((stack1 = depth0.title),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n      </strong>&emsp;<span class=\"badge\">"
     + escapeExpression(((stack1 = depth0.averageRate),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</span>\r\n    </div>\r\n    ";
   stack2 = helpers.each.call(depth0, depth0.tags, {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\r\n    &emsp;<div class=\"glyphicon glyphicon-time\">\r\n      &emsp;";
+  buffer += "\r\n    <div>\r\n      <div class=\"glyphicon glyphicon-time\"></div>\r\n      &emsp;&emsp;";
   options = {hash:{
     'format': ("HH:mm")
   },data:data};
@@ -3267,7 +3267,7 @@ function program1(depth0,data,depth1) {
     'format': ("HH:mm")
   },data:data};
   buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.endDate, options) : helperMissing.call(depth0, "dateFormat", depth0.endDate, options)))
-    + "\r\n    </div>\r\n    &emsp;&emsp;<div class=\"glyphicon glyphicon-user\">\r\n      &emsp;";
+    + "\r\n    </div>\r\n    <div>\r\n      <div class=\"glyphicon glyphicon-user\"></div>\r\n      &emsp;&emsp;";
   stack2 = helpers.each.call(depth0, depth0.speakers, {hash:{},inverse:self.noop,fn:self.program(4, program4, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\r\n    </div>\r\n    <div>\r\n      <hr/>\r\n      <ol>\r\n        <li>\r\n          "
@@ -4555,7 +4555,7 @@ function program113(depth0,data) {
     'format': ("HH:mm")
   },data:data};
   buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options)))
-    + "\r\n      </div>\r\n      &emsp;&emsp;<div class=\"glyphicon glyphicon-user\">\r\n        &emsp;";
+    + "\r\n      </div>\r\n      <div>\r\n        <div class=\"glyphicon glyphicon-user\"></div>\r\n        &emsp;&emsp;";
   stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.speakers), {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\r\n      </div>\r\n      <br/><br/>\r\n      <p>"
@@ -4642,7 +4642,7 @@ function program3(depth0,data) {
     'format': ("HH:mm")
   },data:data};
   buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options)))
-    + "\r\n</div>\r\n&emsp;&emsp;<div class=\"glyphicon glyphicon-user\">\r\n  &emsp;";
+    + "\r\n</div>\r\n<div>\r\n  <div class=\"glyphicon glyphicon-user\"></div>\r\n  &emsp;&emsp;";
   stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.speakers), {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\r\n</div>\r\n";

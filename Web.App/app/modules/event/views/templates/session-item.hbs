@@ -6,6 +6,7 @@
 <div class="glyphicon glyphicon-time">
   &emsp;{{dateFormat model.startDate format="HH:mm"}}-{{dateFormat model.endDate format="HH:mm"}}
 </div>
-&emsp;&emsp;<div class="glyphicon glyphicon-user">
-  &emsp;{{#each model.speakers}}{{this}} {{/each}}
+<div>
+  <div class="glyphicon glyphicon-user"></div>
+  &emsp;&emsp;{{#each model.speakers}}{{this}} {{/each}}
 </div>
