@@ -552,8 +552,6 @@ module.exports.Collection = EventsCollection = (function(_super) {
 
   EventsCollection.prototype.model = module.exports.Model;
 
-  EventsCollection.prototype.comparator = 'title';
-
   return EventsCollection;
 
 })(Collection);
