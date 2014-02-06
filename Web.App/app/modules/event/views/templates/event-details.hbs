@@ -2,10 +2,10 @@
   <div class="row">
     <div class="col-xs-12">
       <div class="btn-group pull-right">
-        <button type="button" class="btn btn-default active badge">All</button>
-        <button type="button" class="btn btn-default badge">C#</button>
-        <button type="button" class="btn btn-default badge">Java</button>
-        <button type="button" class="btn btn-default badge">SAP</button>
+        <button type="button" class="btn btn-primary badge js-tag" value="">&nbsp;<&nbsp;</button>
+        {{#each tags}}
+        <button type="button" class="btn btn-default badge js-tag {{#ifCond ../activetag this.name}}active{{/ifCond}}" value="{{this.name}}">{{this.name}}</button>
+        {{/each}}
       </div>
     </div>
   </div>
@@ -13,7 +13,7 @@
     <!-- sessions -->
   </div>
   <p>{{model.description}}</p>
-  
+
   <div class="row">
     <div class="col-xs-7">&nbsp;</div>
     <div class="col-xs-5">

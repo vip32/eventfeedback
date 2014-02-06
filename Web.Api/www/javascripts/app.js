@@ -491,6 +491,12 @@ Handlebars.registerHelper("ifCond", function(v1, v2, options) {
     return options.fn(this);
   }
 });
+
+Handlebars.registerHelper("unlessCond", function(v1, v2, options) {
+  if (v1 !== v2) {
+    return options.fn(this);
+  }
+});
 });
 
 ;require.register("models/event", function(exports, require, module) {
@@ -591,6 +597,56 @@ module.exports.Collection = EventReportsCollection = (function(_super) {
   EventReportsCollection.prototype.comparator = 'title';
 
   return EventReportsCollection;
+
+})(Collection);
+});
+
+;require.register("models/eventtag", function(exports, require, module) {
+var Collection, EventTag, EventTagsCollection, Model, config, settings, _ref, _ref1,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+config = require('../config');
+
+Model = require('../lib/base/model');
+
+Collection = require('../lib/base/collection');
+
+settings = require('../settings');
+
+module.exports.Model = EventTag = (function(_super) {
+  __extends(EventTag, _super);
+
+  function EventTag() {
+    _ref = EventTag.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  return EventTag;
+
+})(Model);
+
+module.exports.Collection = EventTagsCollection = (function(_super) {
+  __extends(EventTagsCollection, _super);
+
+  function EventTagsCollection() {
+    _ref1 = EventTagsCollection.__super__.constructor.apply(this, arguments);
+    return _ref1;
+  }
+
+  EventTagsCollection.prototype.url = function() {
+    return "" + config.apiroot + "/lookup/tags/" + (settings.get('active-event'));
+  };
+
+  EventTagsCollection.prototype.credentials = function() {
+    return {
+      token: settings.get('api_token')
+    };
+  };
+
+  EventTagsCollection.prototype.model = module.exports.Model;
+
+  return EventTagsCollection;
 
 })(Collection);
 });
@@ -1032,6 +1088,12 @@ module.exports.Collection = SessionsCollection = (function(_super) {
   SessionsCollection.prototype.model = module.exports.Model;
 
   SessionsCollection.prototype.comparator = 'title';
+
+  SessionsCollection.prototype.filterForTag = function(tag) {
+    return this.filter(function(model) {
+      return _.contains(model.get('tags'), tag);
+    });
+  };
 
   return SessionsCollection;
 
@@ -1985,6 +2047,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showHome = function() {
     var View, view;
+    vent.trigger('fetch:done');
     vent.trigger('set:active:header', 'home:index', '', 'home');
     View = require('./views/home-view');
     view = new View({
@@ -1995,6 +2058,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showSignin = function() {
     var View, view;
+    vent.trigger('fetch:done');
     vent.trigger('set:active:header', 'signin:index', application.resources.key('Title_SignIn'), 'user');
     View = require('./views/signin-view');
     view = new View({
@@ -2005,6 +2069,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showAbout = function() {
     var View, view;
+    vent.trigger('fetch:done');
     vent.trigger('set:active:header', 'about:index', application.resources.key('Title_About'), 'info-sign');
     View = require('./views/about-view');
     view = new View({
@@ -2015,6 +2080,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showDebug = function() {
     var View, view;
+    vent.trigger('fetch:done');
     vent.trigger('set:active:header', 'debug:index', application.resources.key('Title_Debug'), 'cog');
     View = require('./views/debug-view');
     view = new View({
@@ -2479,7 +2545,7 @@ if (typeof define === 'function' && define.amd) {
 });
 
 ;require.register("modules/event/controller", function(exports, require, module) {
-var Controller, Event, EventReport, Feedback, Session, application, config, settings, vent,
+var Controller, Event, EventReport, EventTag, Feedback, Session, application, config, settings, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2499,6 +2565,8 @@ Session = require('../../models/session');
 
 EventReport = require('../../models/eventreport');
 
+EventTag = require('../../models/eventtag');
+
 module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
 
@@ -2510,6 +2578,7 @@ module.exports = Controller = (function(_super) {
       _this.feedbacks = new Feedback.Collection();
       _this.sessions = new Session.Collection();
       _this.eventreports = new EventReport.Collection();
+      _this.eventtags = new EventTag.Collection();
       return vent.on('feedback:save', function(feedback) {
         return _this.saveFeedback(feedback);
       });
@@ -2518,6 +2587,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showEventsIndex = function() {
     var _this = this;
+    vent.trigger('fetch:done');
     return this.events.fetch({
       reload: true
     }).done(function(models) {
@@ -2548,17 +2618,22 @@ module.exports = Controller = (function(_super) {
       } else {
         vent.trigger('set:active:header', 'events:index', event.get('title'), 'bookmark');
         settings.set('active-event', id);
-        return _this.sessions.fetch({
+        return _this.eventtags.fetch({
           reload: true
-        }).done(function(sessions) {
-          var View, view;
-          View = require('./views/event-details-view');
-          view = new View({
-            model: event,
-            collection: sessions,
-            resources: application.resources
+        }).done(function(tags) {
+          return _this.sessions.fetch({
+            reload: true
+          }).done(function(sessions) {
+            var View, view;
+            View = require('./views/event-details-view');
+            view = new View({
+              model: event,
+              collection: sessions,
+              tags: tags,
+              resources: application.resources
+            });
+            return application.layout.content.show(view);
           });
-          return application.layout.content.show(view);
         });
       }
     });
@@ -2738,19 +2813,24 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.itemViewContainer = '.js-sessions';
 
   EventDetailsView.prototype.events = {
-    'click .js-report': 'onReport'
+    'click .js-report': 'onReport',
+    'click .js-tag': 'onTag'
   };
 
   EventDetailsView.prototype.initialize = function(options) {
     this.resources = options != null ? options.resources : void 0;
+    this.tags = options != null ? options.tags : void 0;
     application.trigger('navigation:back:on');
-    return application.on('navigation:back', this.onBack);
+    application.on('navigation:back', this.onBack);
+    return this.orgcoll = options != null ? new options.collection.constructor(options != null ? options.collection.models : void 0) : void 0;
   };
 
   EventDetailsView.prototype.serializeData = function() {
-    var _ref1;
+    var _ref1, _ref2;
     return {
       resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      tags: (_ref2 = this.tags) != null ? _ref2.toJSON() : void 0,
+      activetag: settings.get('active-eventtag'),
       model: this.model.toJSON()
     };
   };
@@ -2762,7 +2842,9 @@ module.exports = EventDetailsView = (function(_super) {
   };
 
   EventDetailsView.prototype.onShow = function() {
-    var roles, _ref1;
+    var roles, tag, _ref1;
+    tag = settings.get('active-eventtag');
+    this.filterByTag(tag);
     roles = (_ref1 = settings.get('api_userroles')) != null ? _ref1 : [];
     if (!_.contains(roles, 'Administrator')) {
       return $('.js-report').hide();
@@ -2777,6 +2859,22 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.onReport = function(e) {
     e.preventDefault();
     return application.trigger('event:report', settings.get('active-event'));
+  };
+
+  EventDetailsView.prototype.onTag = function(e) {
+    var tag;
+    e.preventDefault();
+    tag = e.target.value;
+    settings.set('active-eventtag', tag);
+    return this.filterByTag(tag);
+  };
+
+  EventDetailsView.prototype.filterByTag = function(tag) {
+    if (tag !== "") {
+      return this.collection.reset(this.orgcoll.filterForTag(tag));
+    } else {
+      return this.collection.reset(this.orgcoll.models);
+    }
   };
 
   EventDetailsView.prototype.onClose = function() {
@@ -3073,12 +3171,34 @@ module.exports = SessionItemView = (function(_super) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, self=this, helperMissing=helpers.helperMissing, functionType="function", escapeExpression=this.escapeExpression;
 
+function program1(depth0,data,depth1) {
+  
+  var buffer = "", stack1, stack2, options;
+  buffer += "\r\n        <button type=\"button\" class=\"btn btn-default badge js-tag ";
+  options = {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data};
+  stack2 = ((stack1 = helpers.ifCond || depth1.ifCond),stack1 ? stack1.call(depth0, depth1.activetag, depth0.name, options) : helperMissing.call(depth0, "ifCond", depth1.activetag, depth0.name, options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\" value=\""
+    + escapeExpression(((stack1 = depth0.name),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\">"
+    + escapeExpression(((stack1 = depth0.name),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</button>\r\n        ";
+  return buffer;
+  }
+function program2(depth0,data) {
+  
+  
+  return "active";
+  }
 
-  buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-12\">\r\n      <div class=\"btn-group pull-right\">\r\n        <button type=\"button\" class=\"btn btn-default active badge\">All</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">C#</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">Java</button>\r\n        <button type=\"button\" class=\"btn btn-default badge\">SAP</button>\r\n      </div>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n  <p>"
+  buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-12\">\r\n      <div class=\"btn-group pull-right\">\r\n        <button type=\"button\" class=\"btn btn-primary badge js-tag\" value=\"\">&nbsp;<&nbsp;</button>\r\n        ";
+  stack1 = helpers.each.call(depth0, depth0.tags, {hash:{},inverse:self.noop,fn:self.programWithDepth(1, program1, data, depth0),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\r\n      </div>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n  <p>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</p>\r\n  \r\n  <div class=\"row\">\r\n    <div class=\"col-xs-7\">&nbsp;</div>\r\n    <div class=\"col-xs-5\">\r\n      <a class=\"btn btn-lg btn-primary js-report\" href=\"#\">\r\n        <span class=\"glyphicon glyphicon-list\"></span>&emsp;Report\r\n      </a>\r\n    </div>\r\n  </div>\r\n</div>";
+    + "</p>\r\n\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-7\">&nbsp;</div>\r\n    <div class=\"col-xs-5\">\r\n      <a class=\"btn btn-lg btn-primary js-report\" href=\"#\">\r\n        <span class=\"glyphicon glyphicon-list\"></span>&emsp;Report\r\n      </a>\r\n    </div>\r\n  </div>\r\n</div>";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
@@ -3155,46 +3275,66 @@ function program1(depth0,data,depth1) {
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\r\n    </div>\r\n    <div>\r\n      <hr/>\r\n      <ol>\r\n        <li>\r\n          "
     + escapeExpression(((stack1 = depth0.quesstionTitle0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + " &emsp;<span class=\"badge\">"
-    + escapeExpression(((stack1 = depth0.averageRateAnswer0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + ":&emsp;";
+  options = {hash:{},inverse:self.noop,fn:self.program(6, program6, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion0, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion0, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li>\r\n          "
     + escapeExpression(((stack1 = depth0.quesstionTitle1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + " &emsp;<span class=\"badge\">"
-    + escapeExpression(((stack1 = depth0.averageRateAnswer1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + ":&emsp;";
+  options = {hash:{},inverse:self.noop,fn:self.program(8, program8, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion1, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion1, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li>\r\n          "
     + escapeExpression(((stack1 = depth0.quesstionTitle2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + " &emsp;<span class=\"badge\">"
-    + escapeExpression(((stack1 = depth0.averageRateAnswer2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + ":&emsp;";
+  options = {hash:{},inverse:self.noop,fn:self.program(10, program10, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion2, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion2, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li>\r\n          "
     + escapeExpression(((stack1 = depth0.quesstionTitle3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + " &emsp;<span class=\"badge\">"
-    + escapeExpression(((stack1 = depth0.averageRateAnswer3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + ":&emsp;";
+  options = {hash:{},inverse:self.noop,fn:self.program(12, program12, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion3, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion3, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li>\r\n          "
     + escapeExpression(((stack1 = depth0.quesstionTitle4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + " &emsp;<span class=\"badge\">"
-    + escapeExpression(((stack1 = depth0.averageRateAnswer4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + ":&emsp;";
+  options = {hash:{},inverse:self.noop,fn:self.program(14, program14, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion4, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion4, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li>\r\n          "
     + escapeExpression(((stack1 = depth0.quesstionTitle5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + " &emsp;<span class=\"badge\">"
-    + escapeExpression(((stack1 = depth0.averageRateAnswer5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + ":&emsp;";
+  options = {hash:{},inverse:self.noop,fn:self.program(16, program16, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion5, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion5, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li>\r\n          "
     + escapeExpression(((stack1 = depth0.quesstionTitle6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + " &emsp;<span class=\"badge\">"
-    + escapeExpression(((stack1 = depth0.averageRateAnswer6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + ":&emsp;";
+  options = {hash:{},inverse:self.noop,fn:self.program(18, program18, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion6, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion6, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li>\r\n          "
     + escapeExpression(((stack1 = depth0.quesstionTitle7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + " &emsp;<span class=\"badge\">"
-    + escapeExpression(((stack1 = depth0.averageRateAnswer7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + ":&emsp;";
+  options = {hash:{},inverse:self.noop,fn:self.program(20, program20, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion7, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion7, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li>\r\n          "
     + escapeExpression(((stack1 = depth0.quesstionTitle8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + " &emsp;<span class=\"badge\">"
-    + escapeExpression(((stack1 = depth0.averageRateAnswer8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</span>\r\n        </li>\r\n        <li>\r\n          "
+    + ":&emsp;";
+  options = {hash:{},inverse:self.noop,fn:self.program(22, program22, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion8, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion8, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li>\r\n          "
     + escapeExpression(((stack1 = depth0.quesstionTitle9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + " &emsp;<span class=\"badge\">"
-    + escapeExpression(((stack1 = depth0.averageRateAnswer9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</span>\r\n        </li>\r\n      </ol>\r\n    </div>\r\n    ";
-  stack2 = helpers.each.call(depth0, depth0.feedbacks, {hash:{},inverse:self.noop,fn:self.programWithDepth(6, program6, data, depth0),data:data});
+    + ":&emsp;";
+  options = {hash:{},inverse:self.noop,fn:self.program(24, program24, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion9, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion9, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n      </ol>\r\n    </div>\r\n    ";
+  stack2 = helpers.each.call(depth0, depth0.feedbacks, {hash:{},inverse:self.noop,fn:self.programWithDepth(26, program26, data, depth0),data:data});
   if(stack2 || stack2 === 0) { buffer += stack2; }
   buffer += "\r\n  </div>\r\n  ";
   return buffer;
@@ -3216,9 +3356,99 @@ function program4(depth0,data) {
   return buffer;
   }
 
-function program6(depth0,data,depth1) {
+function program6(depth0,data) {
   
   var buffer = "", stack1;
+  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program8(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program10(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program12(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program14(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program16(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program18(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program20(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program22(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program24(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program26(depth0,data,depth1) {
+  
+  var buffer = "", stack1, stack2, options;
   buffer += "\r\n    <div>\r\n      <h4>\r\n        <span class=\"label label-default\">\r\n          Feedback on "
     + escapeExpression(((stack1 = depth0.createDate),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n        </span>\r\n        &emsp;<span class=\"badge\">"
@@ -3226,44 +3456,153 @@ function program6(depth0,data,depth1) {
     + "</span>\r\n      </h4>\r\n      <ol>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
     + escapeExpression(((stack1 = depth1.quesstionTitle0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth0.answer0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  options = {hash:{},inverse:self.noop,fn:self.program(27, program27, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion0, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion0, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
     + escapeExpression(((stack1 = depth1.quesstionTitle1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth0.answer1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  options = {hash:{},inverse:self.noop,fn:self.program(29, program29, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion1, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion1, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
     + escapeExpression(((stack1 = depth1.quesstionTitle2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth0.answer2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  options = {hash:{},inverse:self.noop,fn:self.program(31, program31, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion2, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion2, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
     + escapeExpression(((stack1 = depth1.quesstionTitle3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth0.answer3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  options = {hash:{},inverse:self.noop,fn:self.program(33, program33, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion3, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion3, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
     + escapeExpression(((stack1 = depth1.quesstionTitle4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth0.answer4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  options = {hash:{},inverse:self.noop,fn:self.program(35, program35, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion4, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion4, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
     + escapeExpression(((stack1 = depth1.quesstionTitle5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth0.answer5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  options = {hash:{},inverse:self.noop,fn:self.program(37, program37, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion5, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion5, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
     + escapeExpression(((stack1 = depth1.quesstionTitle6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth0.answer6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  options = {hash:{},inverse:self.noop,fn:self.program(39, program39, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion6, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion6, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
     + escapeExpression(((stack1 = depth1.quesstionTitle7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth0.answer7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  options = {hash:{},inverse:self.noop,fn:self.program(41, program41, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion7, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion7, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
     + escapeExpression(((stack1 = depth1.quesstionTitle8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
+    + escapeExpression(((stack1 = depth0.answer8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  options = {hash:{},inverse:self.noop,fn:self.program(43, program43, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion8, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion8, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
     + escapeExpression(((stack1 = depth1.quesstionTitle9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n        </li>\r\n      </ol>\r\n    </div>\r\n    ";
+    + escapeExpression(((stack1 = depth0.answer9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  options = {hash:{},inverse:self.noop,fn:self.program(45, program45, data),data:data};
+  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion9, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion9, "0", options));
+  if(stack2 || stack2 === 0) { buffer += stack2; }
+  buffer += "\r\n        </li>\r\n      </ol>\r\n    </div>\r\n    ";
+  return buffer;
+  }
+function program27(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program29(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program31(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program33(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program35(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program37(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program39(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program41(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program43(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  return buffer;
+  }
+
+function program45(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "/ "
+    + escapeExpression(((stack1 = depth0.maxRateQuestion9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 

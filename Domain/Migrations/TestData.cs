@@ -438,7 +438,7 @@ namespace EventFeedback.Domain
                                         Answer0 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
                                         Answer1 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
                                         Answer2 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
-                                        //Answer3 = Random.Next(1, 5).ToString(CultureInfo.InvariantCulture),
+                                        Answer3 = "0",
                                         Answer4 = "session feedback q4 " + Lorem1,
                                         Answer5 = "session feedback q5 " + Lorem1,
                                         //Answer6 = "session feedback q6 " + Lorem1,

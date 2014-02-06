@@ -34,24 +34,28 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     , 3000
 
   showHome: ->
+    vent.trigger 'fetch:done' # switch off block
     vent.trigger 'set:active:header', 'home:index', '', 'home'
     View = require './views/home-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)
 
   showSignin: ->
+    vent.trigger 'fetch:done' # switch off block
     vent.trigger 'set:active:header', 'signin:index', application.resources.key('Title_SignIn'), 'user'
     View = require './views/signin-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)
 
   showAbout: ->
+    vent.trigger 'fetch:done' # switch off block
     vent.trigger 'set:active:header', 'about:index', application.resources.key('Title_About'), 'info-sign'
     View = require './views/about-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)
 
   showDebug: ->
+    vent.trigger 'fetch:done' # switch off block
     vent.trigger 'set:active:header', 'debug:index', application.resources.key('Title_Debug'), 'cog'
     View = require './views/debug-view'
     view = new View(resources: application.resources)
@@ -60,7 +64,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
   doSignin: (username, password) ->
     # get the accesstoken
 
-    vent.trigger 'fetch:start' # bacuase save() does not trigger spinner
+    vent.trigger 'fetch:start' # because save() does not trigger block
     userToken = new UserToken.Model
       userName: username
       password: password

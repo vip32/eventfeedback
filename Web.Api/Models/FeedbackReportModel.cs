@@ -29,5 +29,25 @@ namespace EventFeedback.Web.Api.Models
         public string Answer8 { get; set; }
         
         public string Answer9 { get; set; }
+
+        public string MaxRateQuestion0 { get; set; }
+        
+        public string MaxRateQuestion1 { get; set; }
+        
+        public string MaxRateQuestion2 { get; set; }
+        
+        public string MaxRateQuestion3 { get; set; }
+        
+        public string MaxRateQuestion4 { get; set; }
+        
+        public string MaxRateQuestion5 { get; set; }
+        
+        public string MaxRateQuestion6 { get; set; }
+        
+        public string MaxRateQuestion7 { get; set; }
+        
+        public string MaxRateQuestion8 { get; set; }
+        
+        public string MaxRateQuestion9 { get; set; }
     }
 }

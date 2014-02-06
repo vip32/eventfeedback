@@ -16,3 +16,8 @@ Handlebars.registerHelper "dateFormat", (context, options) ->
 Handlebars.registerHelper "ifCond", (v1, v2, options) ->
   if v1 is v2
     options.fn(@)
+    
+# unless conditional (compare) helper
+Handlebars.registerHelper "unlessCond", (v1, v2, options) ->
+  if v1 isnt v2
+    options.fn(@)

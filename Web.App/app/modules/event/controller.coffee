@@ -6,6 +6,7 @@ Event = require '../../models/event'
 Feedback = require '../../models/feedback'
 Session = require '../../models/session'
 EventReport = require '../../models/eventreport'
+EventTag = require '../../models/eventtag'
 
 module.exports = class Controller extends Backbone.Marionette.Controller
 
@@ -18,11 +19,13 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       @feedbacks = new Feedback.Collection()
       @sessions = new Session.Collection()
       @eventreports = new EventReport.Collection()
+      @eventtags= new EventTag.Collection()
       
       vent.on 'feedback:save', (feedback) =>
         @saveFeedback feedback
 
   showEventsIndex: ->
+    vent.trigger 'fetch:done' # switch off block
     @events.fetch(
       reload: true # needed after login, otherwise FAIL on fetch
 #      data:
@@ -50,12 +53,15 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         vent.trigger 'set:active:header', 'events:index', event.get('title'), 'bookmark'
         settings.set('active-event', id)
 
-        @sessions.fetch(
+        @eventtags.fetch(
           reload: true
-        ).done (sessions) =>
-          View = require './views/event-details-view'
-          view = new View(model: event, collection: sessions, resources: application.resources)
-          application.layout.content.show(view)
+        ).done (tags) =>
+          @sessions.fetch(
+            reload: true
+          ).done (sessions) =>
+            View = require './views/event-details-view'
+            view = new View(model: event, collection: sessions, tags: tags, resources: application.resources)
+            application.layout.content.show(view)
           
   showEventReport: (id) ->
     settings.set('active-event', id)
