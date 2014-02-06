@@ -12,7 +12,7 @@
       </div>
       <div>
         <div class="glyphicon glyphicon-user"></div>
-        &emsp;&emsp;{{#each model.speakers}}{{this}} {{/each}}
+        &emsp;&emsp;{{seperatelist model.speakerList}}
       </div>
       <br/><br/>
       <p>{{model.description}}</p>
@@ -460,6 +460,7 @@
     </div>
     {{/if}}
 
+    {{#if model.feedbackAllowed}}
     <div class="row">
       <div class="col-xs-7">&nbsp;</div>
       <div class="col-xs-5">
@@ -468,6 +469,7 @@
         </button>
       </div>
     </div>
+    {{/if}}
   </form>
 
 </div>

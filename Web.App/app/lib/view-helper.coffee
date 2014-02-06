@@ -33,3 +33,8 @@ Handlebars.registerHelper "dateFormat", (context, block) ->
   else
     return context #  moment plugin not available. return data as is.
   return
+  
+Handlebars.registerHelper "seperatelist", (text) ->
+  text = Handlebars.Utils.escapeExpression(text)
+  text = text.replace(';', ', ')
+  new Handlebars.SafeString(text)

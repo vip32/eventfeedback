@@ -9,11 +9,13 @@ namespace EventFeedback.Web.Api.Models
 
         public string Title { get; set; }
 
-        public ICollection<string> Speakers { get; set; }
+        public string SpeakerList { get; set; }
 
         public DateTime? StartDate { get; set; }
 
         public DateTime? EndDate { get; set; }
+
+        public bool FeedbackAllowed { get; set; }
 
         public string AverageRate { get; set; }
         
@@ -78,6 +80,5 @@ namespace EventFeedback.Web.Api.Models
         public string MaxRateQuestion9 { get; set; }
 
         public IEnumerable<FeedbackReportModel> Feedbacks { get; set; }
-        
     }
 }

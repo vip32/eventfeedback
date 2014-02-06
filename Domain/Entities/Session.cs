@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using EventFeedback.Common;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -51,6 +52,7 @@ namespace EventFeedback.Domain
         {
             get
             {
+                if (Speakers == null || !Speakers.Any()) return null;
                 return String.Join(";", Speakers);
             }
             set
@@ -65,6 +67,7 @@ namespace EventFeedback.Domain
         {
             get
             {
+                if (Tags == null || !Tags.Any()) return null;
                 return String.Join(";", Tags);
             }
             set

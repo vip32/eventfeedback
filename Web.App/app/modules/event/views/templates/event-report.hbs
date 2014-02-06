@@ -1,6 +1,6 @@
 ﻿<div class="container">
   {{#each model.sessions}}
-  <div class="list-group-item" style="page-break-after: always;">
+    <div class="list-group-item" style="page-break-after: always;">
     <div>
       <strong>
         <div class="glyphicon glyphicon-bookmark"></div>
@@ -16,8 +16,9 @@
     </div>
     <div>
       <div class="glyphicon glyphicon-user"></div>
-      &emsp;&emsp;{{#each this.speakers}}{{this}} {{/each}}
+      &emsp;&emsp;{{seperatelist this.speakerList}}
     </div>
+    {{#if this.feedbackAllowed}}
     <div> 
       <hr/>
       <ol>
@@ -95,6 +96,7 @@
       </ol>
     </div>
     {{/each}}
+    {{/if}}
   </div>
   {{/each}}
 

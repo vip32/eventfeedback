@@ -17,6 +17,12 @@ module.exports = class SessionItemView extends ItemView
   initialize: (options) ->
     @resources = options?.resources
 
+  onShow: ->
+    if @model.get('feedbackAllowed') is false
+      console.log @model, @model.get('feedbackAllowed')
+      
+      @$el.addClass('nofeedback') 
+
   serializeData: ->
     resources: @resources?.toJSON()
     model: @model.toJSON()

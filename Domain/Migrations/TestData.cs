@@ -263,7 +263,7 @@ namespace EventFeedback.Domain
                 },
                 new Event
                 {
-                    Title = "2013 ET 2",
+                    Title = "2013 ET 2 (Pauses)",
                     FeedbackDefinitionId = feedbackDefinitions.First().Id,
                     StartDate = new DateTime(2013, 5, 10),
                     EndDate = new DateTime(2013, 5, 10),
@@ -284,13 +284,29 @@ namespace EventFeedback.Domain
                             },
                             new Session
                             {
+                                Title = "Pause 1",
+                                Description = Lorem1,
+                                FeedbackAllowed = false,
+                                StartDate = new DateTime(2013, 5, 10, 11, 30, 0),
+                                EndDate = new DateTime(2013, 5, 10, 11, 45, 0),
+                            },
+                            new Session
+                            {
                                 Title = "Session1 ET2",
                                 Description = Lorem1,
                                 FeedbackDefinitionId = feedbackDefinitions.Last().Id,
-                                StartDate = new DateTime(2013, 5, 10, 11, 30, 0),
+                                StartDate = new DateTime(2013, 5, 10, 11, 45, 0),
                                 EndDate = new DateTime(2013, 5, 10, 12, 30, 0),
                                 TagList = "C#",
                                 SpeakerList = "Speaker1",
+                            },
+                            new Session
+                            {
+                                Title = "Pause 2",
+                                Description = Lorem1,
+                                FeedbackAllowed = false,
+                                StartDate = new DateTime(2013, 5, 10, 12, 30, 0),
+                                EndDate = new DateTime(2013, 5, 10, 13, 00, 0),
                             },
                             new Session
                             {
