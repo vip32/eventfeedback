@@ -497,6 +497,16 @@ Handlebars.registerHelper("unlessCond", function(v1, v2, options) {
     return options.fn(this);
   }
 });
+
+Handlebars.registerHelper("dateFormat", function(context, block) {
+  var f;
+  if (window.moment) {
+    f = block.hash.format || "MMM DD, YYYY hh:mm:ss A";
+    return moment(context).format(f);
+  } else {
+    return context;
+  }
+});
 });
 
 ;require.register("models/event", function(exports, require, module) {
@@ -2843,7 +2853,7 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.onShow = function() {
     var roles, tag, _ref1;
     tag = settings.get('active-eventtag');
-    $("input:radio[name='tags'][value='" + tag + "']").attr('checked', 'checked').parent().addClass('active');
+    this.$("input:radio[name='tags'][value='" + tag + "']").attr('checked', 'checked').parent().addClass('active');
     this.filterByTag(tag);
     roles = (_ref1 = settings.get('api_userroles')) != null ? _ref1 : [];
     if (!_.contains(roles, 'Administrator')) {
@@ -3237,7 +3247,7 @@ if (typeof define === 'function' && define.amd) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, stack2, functionType="function", escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
+  var buffer = "", stack1, stack2, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
 
 function program1(depth0,data,depth1) {
   
@@ -3440,8 +3450,11 @@ function program24(depth0,data) {
 function program26(depth0,data,depth1) {
   
   var buffer = "", stack1, stack2, options;
-  buffer += "\r\n    <div>\r\n      <h4>\r\n        <span class=\"label label-default\">\r\n          Feedback on "
-    + escapeExpression(((stack1 = depth0.createDate),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+  buffer += "\r\n    <div>\r\n      <h4>\r\n        <span class=\"label label-default\">\r\n          Feedback ";
+  options = {hash:{
+    'format': ("MM.DD.YYYY hh:mm")
+  },data:data};
+  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.createDate, options) : helperMissing.call(depth0, "dateFormat", depth0.createDate, options)))
     + "\r\n        </span>\r\n        &emsp;<span class=\"badge\">"
     + escapeExpression(((stack1 = depth0.averageRate),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</span>\r\n      </h4>\r\n      <ol>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""

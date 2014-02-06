@@ -16,6 +16,7 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
     @tags = options?.tags
     application.trigger 'navigation:back:on'
     application.on 'navigation:back', @onBack
+    # keep the original collections, for resetting the filtered collection
     @orgcoll = new options?.collection.constructor(options?.collection.models)
 
   serializeData: ->
@@ -27,19 +28,22 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
     resources: @resources
     
   onShow: ->
+    # highlight the active tag
     tag = settings.get('active-eventtag')
-    $("input:radio[name='tags'][value='" + tag + "']").attr('checked', 'checked').parent().addClass('active');
+    @$("input:radio[name='tags'][value='" + tag + "']").attr('checked', 'checked').parent().addClass('active');
+    # ^^ replace with bootstrap api: set the correct radio    
     @filterByTag(tag)
-    
+    # hide some administrator only elements
     roles = settings.get('api_userroles') ? []
     if not _.contains(roles, 'Administrator')
       $('.js-report').hide()
 
   onTag: (e) ->
     e.preventDefault()
-    @filterByTag @$("input:radio[name='tags']:checked").val()
+    @filterByTag @$("input:radio[name='tags']:checked").val() # << replace with bootstrap api: get the selected value
     
   filterByTag: (tag) ->
+    # filter the session collection by tag
     if tag?
       settings.set('active-eventtag', tag)
       if tag isnt ""

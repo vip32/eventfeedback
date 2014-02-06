@@ -21,3 +21,15 @@ Handlebars.registerHelper "ifCond", (v1, v2, options) ->
 Handlebars.registerHelper "unlessCond", (v1, v2, options) ->
   if v1 isnt v2
     options.fn(@)
+    
+#  format an ISO date using moment.js
+#  http://momentjs.com/
+#  moment syntax example: moment(Date("2011-07-18T15:50:52")).format("MMMM YYYY")
+#  usage: {{dateFormat creation_date format="MMMM YYYY"}}
+Handlebars.registerHelper "dateFormat", (context, block) ->
+  if window.moment
+    f = block.hash.format or "MMM DD, YYYY hh:mm:ss A"
+    return moment(context).format(f) #had to remove Date(context)
+  else
+    return context #  moment plugin not available. return data as is.
+  return
