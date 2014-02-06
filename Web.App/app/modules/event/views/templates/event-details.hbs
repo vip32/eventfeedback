@@ -1,10 +1,15 @@
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-      <div class="btn-group pull-right">
-        <button type="button" class="btn btn-primary badge js-tag" value="">&nbsp;<&nbsp;</button>
+      <div class="btn-group pull-right" data-toggle="buttons">
+        <label class="btn btn-primary badge">
+          <input type="radio" class="js-tag" name="tags" value="">&nbsp;&nbsp;
+          </input>
+        </label>
         {{#each tags}}
-        <button type="button" class="btn btn-default badge js-tag {{#ifCond ../activetag this.name}}active{{/ifCond}}" value="{{this.name}}">{{this.name}}</button>
+        <label class="btn badge">
+          <input type="radio" class="js-tag" name="tags" value="{{this.name}}">{{this.name}}</input>
+        </label>
         {{/each}}
       </div>
     </div>

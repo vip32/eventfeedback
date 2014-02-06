@@ -2814,7 +2814,7 @@ module.exports = EventDetailsView = (function(_super) {
 
   EventDetailsView.prototype.events = {
     'click .js-report': 'onReport',
-    'click .js-tag': 'onTag'
+    'change .js-tag': 'onTag'
   };
 
   EventDetailsView.prototype.initialize = function(options) {
@@ -2844,6 +2844,7 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.onShow = function() {
     var roles, tag, _ref1;
     tag = settings.get('active-eventtag');
+    $("input:radio[name='tags'][value='" + tag + "']").attr('checked', 'checked').parent().addClass('active');
     this.filterByTag(tag);
     roles = (_ref1 = settings.get('api_userroles')) != null ? _ref1 : [];
     if (!_.contains(roles, 'Administrator')) {
@@ -2862,18 +2863,18 @@ module.exports = EventDetailsView = (function(_super) {
   };
 
   EventDetailsView.prototype.onTag = function(e) {
-    var tag;
     e.preventDefault();
-    tag = e.target.value;
-    settings.set('active-eventtag', tag);
-    return this.filterByTag(tag);
+    return this.filterByTag(this.$("input:radio[name='tags']:checked").val());
   };
 
   EventDetailsView.prototype.filterByTag = function(tag) {
-    if (tag !== "") {
-      return this.collection.reset(this.orgcoll.filterForTag(tag));
-    } else {
-      return this.collection.reset(this.orgcoll.models);
+    if (tag != null) {
+      settings.set('active-eventtag', tag);
+      if (tag !== "") {
+        return this.collection.reset(this.orgcoll.filterForTag(tag));
+      } else {
+        return this.collection.reset(this.orgcoll.models);
+      }
     }
   };
 
@@ -3171,30 +3172,21 @@ module.exports = SessionItemView = (function(_super) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, self=this, helperMissing=helpers.helperMissing, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
 
-function program1(depth0,data,depth1) {
+function program1(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
-  buffer += "\r\n        <button type=\"button\" class=\"btn btn-default badge js-tag ";
-  options = {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth1.ifCond),stack1 ? stack1.call(depth0, depth1.activetag, depth0.name, options) : helperMissing.call(depth0, "ifCond", depth1.activetag, depth0.name, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\" value=\""
+  var buffer = "", stack1;
+  buffer += "\r\n        <label class=\"btn badge\">\r\n          <input type=\"radio\" class=\"js-tag\" name=\"tags\" value=\""
     + escapeExpression(((stack1 = depth0.name),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">"
     + escapeExpression(((stack1 = depth0.name),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</button>\r\n        ";
+    + "</input>\r\n        </label>\r\n        ";
   return buffer;
   }
-function program2(depth0,data) {
-  
-  
-  return "active";
-  }
 
-  buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-12\">\r\n      <div class=\"btn-group pull-right\">\r\n        <button type=\"button\" class=\"btn btn-primary badge js-tag\" value=\"\">&nbsp;<&nbsp;</button>\r\n        ";
-  stack1 = helpers.each.call(depth0, depth0.tags, {hash:{},inverse:self.noop,fn:self.programWithDepth(1, program1, data, depth0),data:data});
+  buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-12\">\r\n      <div class=\"btn-group pull-right\" data-toggle=\"buttons\">\r\n        <label class=\"btn btn-primary badge\">\r\n          <input type=\"radio\" class=\"js-tag\" name=\"tags\" value=\"\">&nbsp;&nbsp;\r\n          </input>\r\n        </label>\r\n        ";
+  stack1 = helpers.each.call(depth0, depth0.tags, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      </div>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n  <p>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))

@@ -9,7 +9,7 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
   itemViewContainer: '.js-sessions'
   events:
     'click .js-report': 'onReport'
-    'click .js-tag': 'onTag'
+    'change .js-tag': 'onTag'
 
   initialize: (options) ->
     @resources = options?.resources
@@ -29,8 +29,9 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
     
   onShow: ->
     tag = settings.get('active-eventtag')
-    # TODO: highlight correct button
+    $("input:radio[name='tags'][value='" + tag + "']").attr('checked', 'checked').parent().addClass('active');
     @filterByTag(tag)
+    
     roles = settings.get('api_userroles') ? []
     if not _.contains(roles, 'Administrator')
       $('.js-report').hide()
@@ -45,15 +46,15 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
     
   onTag: (e) ->
     e.preventDefault()
-    tag = e.target.value
-    settings.set('active-eventtag', tag)
-    @filterByTag(tag)
+    @filterByTag @$("input:radio[name='tags']:checked").val()
     
   filterByTag: (tag) ->
-    if tag isnt ""
-      @collection.reset(@orgcoll.filterForTag(tag))
-    else
-      @collection.reset(@orgcoll.models)
+    if tag?
+      settings.set('active-eventtag', tag)
+      if tag isnt ""
+        @collection.reset(@orgcoll.filterForTag(tag))
+      else
+        @collection.reset(@orgcoll.models)
       
   onClose: ->
     application.off 'navigation:back', @onBack
