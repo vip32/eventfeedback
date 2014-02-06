@@ -510,7 +510,7 @@ Handlebars.registerHelper("dateFormat", function(context, block) {
 
 Handlebars.registerHelper("seperatelist", function(text) {
   text = Handlebars.Utils.escapeExpression(text);
-  text = text.replace(';', ', ');
+  text = text.replace(/;/g, ', ');
   return new Handlebars.SafeString(text);
 });
 });

@@ -36,5 +36,5 @@ Handlebars.registerHelper "dateFormat", (context, block) ->
   
 Handlebars.registerHelper "seperatelist", (text) ->
   text = Handlebars.Utils.escapeExpression(text)
-  text = text.replace(';', ', ')
+  text = text.replace(/;/g, ', ')
   new Handlebars.SafeString(text)
