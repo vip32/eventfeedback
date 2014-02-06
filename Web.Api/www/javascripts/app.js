@@ -1097,8 +1097,6 @@ module.exports.Collection = SessionsCollection = (function(_super) {
 
   SessionsCollection.prototype.model = module.exports.Model;
 
-  SessionsCollection.prototype.comparator = 'title';
-
   SessionsCollection.prototype.filterForTag = function(tag) {
     return this.filter(function(model) {
       return _.contains(model.get('tags'), tag);
