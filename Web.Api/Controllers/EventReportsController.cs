@@ -51,7 +51,7 @@ namespace EventFeedback.Web.Api.Controllers
                 AverageRate = Math.Round(eventFeedbacks
                         .Where(f => f.UpdateAverageRate().IsDouble())
                         .Select(f => f.UpdateAverageRate().ToDouble()).DefaultIfEmpty()
-                        .Average(), 1).ToString(CultureInfo.InvariantCulture),
+                        .Average(), 2).ToString(CultureInfo.InvariantCulture),
                 QuesstionTitle0 = ev.FeedbackDefinition.Title0, QuesstionTitle1 = ev.FeedbackDefinition.Title1,
                 QuesstionTitle2 = ev.FeedbackDefinition.Title2, QuesstionTitle3 = ev.FeedbackDefinition.Title3,
                 QuesstionTitle4 = ev.FeedbackDefinition.Title4, QuesstionTitle5 = ev.FeedbackDefinition.Title5,
@@ -88,56 +88,56 @@ namespace EventFeedback.Web.Api.Controllers
                     AverageRate = Math.Round(sessionFeedbacks.NullToEmpty().Where(f => f.SessionId == s.Id)
                         .Where(f => f.UpdateAverageRate().IsDouble())
                         .Select(f => f.UpdateAverageRate().ToDouble()).DefaultIfEmpty()
-                        .Average(), 1).ToString(CultureInfo.InvariantCulture),
+                        .Average(), 2).ToString(CultureInfo.InvariantCulture),
                     AverageRateAnswer0 = Math.Round(sessionFeedbacks.NullToEmpty().Where(f => f.SessionId == s.Id)
                        .Where(f => f.Answer0.IsDouble())
                        .Select(f => f.Answer0.ToDouble()).DefaultIfEmpty()
-                       .Average(), 1).ToString(CultureInfo.InvariantCulture),
+                       .Average(), 2).ToString(CultureInfo.InvariantCulture),
                     MaxRateQuestion0 = s.FeedbackDefinition == null ? "" : MaxRate(s.FeedbackDefinition.QuestionType0).ToString(CultureInfo.InvariantCulture),
                     AverageRateAnswer1 = Math.Round(sessionFeedbacks.NullToEmpty().Where(f => f.SessionId == s.Id)
                         .Where(f => f.Answer1.IsDouble())
                         .Select(f => f.Answer1.ToDouble()).DefaultIfEmpty()
-                        .Average(), 1).ToString(CultureInfo.InvariantCulture),
+                        .Average(), 2).ToString(CultureInfo.InvariantCulture),
                     MaxRateQuestion1 = s.FeedbackDefinition == null ? "" : MaxRate(s.FeedbackDefinition.QuestionType1).ToString(CultureInfo.InvariantCulture),
                     AverageRateAnswer2 = Math.Round(sessionFeedbacks.NullToEmpty().Where(f => f.SessionId == s.Id)
                         .Where(f => f.Answer2.IsDouble())
                         .Select(f => f.Answer2.ToDouble()).DefaultIfEmpty()
-                        .Average(), 1).ToString(CultureInfo.InvariantCulture),
+                        .Average(), 2).ToString(CultureInfo.InvariantCulture),
                     MaxRateQuestion2 = s.FeedbackDefinition == null ? "" : MaxRate(s.FeedbackDefinition.QuestionType2).ToString(CultureInfo.InvariantCulture),
                     AverageRateAnswer3 = Math.Round(sessionFeedbacks.NullToEmpty().Where(f => f.SessionId == s.Id)
                         .Where(f => f.Answer3.IsDouble())
                         .Select(f => f.Answer3.ToDouble()).DefaultIfEmpty()
-                        .Average(), 1).ToString(CultureInfo.InvariantCulture),
+                        .Average(), 2).ToString(CultureInfo.InvariantCulture),
                     MaxRateQuestion3 = s.FeedbackDefinition == null ? "" : MaxRate(s.FeedbackDefinition.QuestionType3).ToString(CultureInfo.InvariantCulture),
                     AverageRateAnswer4 = Math.Round(sessionFeedbacks.NullToEmpty().Where(f => f.SessionId == s.Id)
                         .Where(f => f.Answer4.IsDouble())
                         .Select(f => f.Answer4.ToDouble()).DefaultIfEmpty()
-                        .Average(), 1).ToString(CultureInfo.InvariantCulture),
+                        .Average(), 2).ToString(CultureInfo.InvariantCulture),
                     MaxRateQuestion4 = s.FeedbackDefinition == null ? "" : MaxRate(s.FeedbackDefinition.QuestionType4).ToString(CultureInfo.InvariantCulture),
                     AverageRateAnswer5 = Math.Round(sessionFeedbacks.NullToEmpty().Where(f => f.SessionId == s.Id)
                         .Where(f => f.Answer5.IsDouble())
                         .Select(f => f.Answer6.ToDouble()).DefaultIfEmpty()
-                        .Average(), 1).ToString(CultureInfo.InvariantCulture),
+                        .Average(), 2).ToString(CultureInfo.InvariantCulture),
                     MaxRateQuestion5 = s.FeedbackDefinition == null ? "" : MaxRate(s.FeedbackDefinition.QuestionType5).ToString(CultureInfo.InvariantCulture),
                     AverageRateAnswer6 = Math.Round(sessionFeedbacks.NullToEmpty().Where(f => f.SessionId == s.Id)
                         .Where(f => f.Answer6.IsDouble())
                         .Select(f => f.Answer6.ToDouble()).DefaultIfEmpty()
-                        .Average(), 1).ToString(CultureInfo.InvariantCulture),
+                        .Average(), 2).ToString(CultureInfo.InvariantCulture),
                     MaxRateQuestion6 = s.FeedbackDefinition == null ? "" : MaxRate(s.FeedbackDefinition.QuestionType6).ToString(CultureInfo.InvariantCulture),
                     AverageRateAnswer7 = Math.Round(sessionFeedbacks.NullToEmpty().Where(f => f.SessionId == s.Id)
                         .Where(f => f.Answer7.IsDouble())
                         .Select(f => f.Answer7.ToDouble()).DefaultIfEmpty()
-                        .Average(), 1).ToString(CultureInfo.InvariantCulture),
+                        .Average(), 2).ToString(CultureInfo.InvariantCulture),
                     MaxRateQuestion7 = s.FeedbackDefinition == null ? "" : MaxRate(s.FeedbackDefinition.QuestionType7).ToString(CultureInfo.InvariantCulture),
                     AverageRateAnswer8 = Math.Round(sessionFeedbacks.NullToEmpty().Where(f => f.SessionId == s.Id)
                         .Where(f => f.Answer8.IsDouble())
                         .Select(f => f.Answer8.ToDouble()).DefaultIfEmpty()
-                        .Average(), 1).ToString(CultureInfo.InvariantCulture),
+                        .Average(), 2).ToString(CultureInfo.InvariantCulture),
                     MaxRateQuestion8 = s.FeedbackDefinition == null ? "" : MaxRate(s.FeedbackDefinition.QuestionType8).ToString(CultureInfo.InvariantCulture),
                     AverageRateAnswer9 = Math.Round(sessionFeedbacks.NullToEmpty().Where(f => f.SessionId == s.Id)
                         .Where(f => f.Answer9.IsDouble())
                         .Select(f => f.Answer9.ToDouble()).DefaultIfEmpty()
-                        .Average(), 1).ToString(CultureInfo.InvariantCulture),
+                        .Average(), 2).ToString(CultureInfo.InvariantCulture),
                     MaxRateQuestion9 = s.FeedbackDefinition == null ? "" : MaxRate(s.FeedbackDefinition.QuestionType9).ToString(CultureInfo.InvariantCulture),
                     QuesstionTitle0 = s.FeedbackDefinition == null ? "" : s.FeedbackDefinition.Title0,
                     QuesstionTitle1 = s.FeedbackDefinition == null ? "" : s.FeedbackDefinition.Title1,

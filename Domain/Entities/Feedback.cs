@@ -82,7 +82,7 @@ namespace EventFeedback.Domain
             if (Answer7.IsDouble()) counts.Add(Answer7.ToDouble());
             if (Answer8.IsDouble()) counts.Add(Answer8.ToDouble());
             if (Answer9.IsDouble()) counts.Add(Answer9.ToDouble());
-            var result = Math.Round(counts.Average(), 1).ToString(CultureInfo.InvariantCulture);
+            var result = Math.Round(counts.Average(), 2).ToString(CultureInfo.InvariantCulture);
             AverageRate = result;
             return result;
         }
