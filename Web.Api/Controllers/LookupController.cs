@@ -70,7 +70,7 @@ namespace EventFeedback.Web.Api.Controllers
 
             var tags = new List<string>();
             var tagLists = _context.Sessions.Where(s => s.EventId == eventId).Select(e => e.TagList);
-            tagLists.NullToEmpty().ForEach(tl => tags.AddRange(tl.Split(';')));
+            tagLists.NullToEmpty().ForEach(tl => tags.AddRange(tl.NullToEmpty().Split(';')));
 
             return Ok(tags.Distinct().Select(t => new { Name = t }));
         }
@@ -83,7 +83,7 @@ namespace EventFeedback.Web.Api.Controllers
 
             var speakers = new List<string>();
             var speakerList = _context.Sessions.Where(s => s.EventId == eventId).Select(e => e.SpeakerList);
-            speakerList.NullToEmpty().ForEach(tl => speakers.AddRange(tl.Split(';')));
+            speakerList.NullToEmpty().ForEach(tl => speakers.AddRange(tl.NullToEmpty().Split(';')));
 
             return Ok(speakers.Distinct().Select(t => new { Name = t }));
         }
