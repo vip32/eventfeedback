@@ -99,6 +99,7 @@
     <Compile Include="Extensions\IsNull.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Extensions\Linkify.cs" />
     <Compile Include="Extensions\Match.cs" />
     <Compile Include="Extensions\NullToEmpty.cs" />
     <Compile Include="Extensions\RemoveSpecialCharacters.cs" />

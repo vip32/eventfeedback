@@ -7,9 +7,11 @@
           </input>
         </label>
         {{#each tags}}
+        {{#if this.name}}
         <label class="btn badge">
           <input type="radio" class="js-tag" name="tags" value="{{this.name}}">{{this.name}}</input>
         </label>
+        {{/if}}
         {{/each}}
       </div>
     </div>

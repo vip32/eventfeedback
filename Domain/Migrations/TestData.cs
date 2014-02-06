@@ -216,8 +216,7 @@ namespace EventFeedback.Domain
                                 FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 2, 18, 9, 0, 0),
                                 EndDate = new DateTime(2013, 2, 18, 11, 30, 0),
-                                TagList = "C#;Java",
-                                SpeakerList = "Speaker1;Speaker2",
+                                SpeakerList = "Speaker1;Speaker2;Speaker3",
                             },
                             new Session
                             {
@@ -279,8 +278,7 @@ namespace EventFeedback.Domain
                                 FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 5, 10, 9, 0, 0),
                                 EndDate = new DateTime(2013, 5, 10, 11, 30, 0),
-                                TagList = "C#;Java",
-                                SpeakerList = "Speaker1;Speaker2",
+                                SpeakerList = "Speaker1;Speaker2;Speaker3",
                             },
                             new Session
                             {
@@ -338,8 +336,7 @@ namespace EventFeedback.Domain
                                 FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 7, 1, 9, 0, 0),
                                 EndDate = new DateTime(2013, 7, 1, 11, 30, 0),
-                                TagList = "C#;Java",
-                                SpeakerList = "Speaker1;Speaker2",
+                                SpeakerList = "Speaker1;Speaker2;Speaker3",
                             },
                             new Session
                             {
@@ -381,8 +378,7 @@ namespace EventFeedback.Domain
                                 FeedbackDefinitionId = feedbackDefinitions.Last().Id,
                                 StartDate = new DateTime(2013, 10, 24, 9, 0, 0),
                                 EndDate = new DateTime(2013, 10, 24, 11, 30, 0),
-                                TagList = "C#;Java",
-                                SpeakerList = "Speaker1;Speaker2",
+                                SpeakerList = "Speaker1;Speaker2;Speaker3",
                             },
                             new Session
                             {

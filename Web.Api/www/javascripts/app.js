@@ -1103,7 +1103,7 @@ module.exports.Collection = SessionsCollection = (function(_super) {
 
   SessionsCollection.prototype.filterForTag = function(tag) {
     return this.filter(function(model) {
-      return _.contains(model.get('tags'), tag);
+      return (_.contains(model.get('tags'), tag)) || (_.isEmpty(model.get('tags')));
     });
   };
 
@@ -3193,6 +3193,15 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
 
 function program1(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\r\n        ";
+  stack1 = helpers['if'].call(depth0, depth0.name, {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\r\n        ";
+  return buffer;
+  }
+function program2(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n        <label class=\"btn badge\">\r\n          <input type=\"radio\" class=\"js-tag\" name=\"tags\" value=\""
