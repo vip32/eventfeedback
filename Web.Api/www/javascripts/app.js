@@ -2830,7 +2830,6 @@ module.exports = EventDetailsView = (function(_super) {
     return {
       resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
       tags: (_ref2 = this.tags) != null ? _ref2.toJSON() : void 0,
-      activetag: settings.get('active-eventtag'),
       model: this.model.toJSON()
     };
   };
@@ -2852,16 +2851,6 @@ module.exports = EventDetailsView = (function(_super) {
     }
   };
 
-  EventDetailsView.prototype.onBack = function() {
-    console.log('back from event-details');
-    return application.trigger('events:index');
-  };
-
-  EventDetailsView.prototype.onReport = function(e) {
-    e.preventDefault();
-    return application.trigger('event:report', settings.get('active-event'));
-  };
-
   EventDetailsView.prototype.onTag = function(e) {
     e.preventDefault();
     return this.filterByTag(this.$("input:radio[name='tags']:checked").val());
@@ -2876,6 +2865,16 @@ module.exports = EventDetailsView = (function(_super) {
         return this.collection.reset(this.orgcoll.models);
       }
     }
+  };
+
+  EventDetailsView.prototype.onBack = function() {
+    console.log('back from event-details');
+    return application.trigger('events:index');
+  };
+
+  EventDetailsView.prototype.onReport = function(e) {
+    e.preventDefault();
+    return application.trigger('event:report', settings.get('active-event'));
   };
 
   EventDetailsView.prototype.onClose = function() {

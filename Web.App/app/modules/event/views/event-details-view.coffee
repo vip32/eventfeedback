@@ -21,7 +21,6 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
   serializeData: ->
     resources: @resources?.toJSON()
     tags: @tags?.toJSON()
-    activetag: settings.get('active-eventtag')
     model: @model.toJSON()
 
   itemViewOptions: ->
@@ -36,14 +35,6 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
     if not _.contains(roles, 'Administrator')
       $('.js-report').hide()
 
-  onBack: =>
-    console.log 'back from event-details'
-    application.trigger 'events:index'
-    
-  onReport: (e) ->
-    e.preventDefault()
-    application.trigger 'event:report',  settings.get('active-event')
-    
   onTag: (e) ->
     e.preventDefault()
     @filterByTag @$("input:radio[name='tags']:checked").val()
@@ -56,6 +47,14 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
       else
         @collection.reset(@orgcoll.models)
       
+  onBack: =>
+    console.log 'back from event-details'
+    application.trigger 'events:index'
+    
+  onReport: (e) ->
+    e.preventDefault()
+    application.trigger 'event:report',  settings.get('active-event')
+    
   onClose: ->
     application.off 'navigation:back', @onBack
     console.log 'events-details view close'
