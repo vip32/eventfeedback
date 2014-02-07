@@ -7892,7 +7892,7 @@ input.form-control {
   -webkit-border-radius: 0px;
   border-radius: 0px;
   background-color: #fff;
-  color: #2986b9;
+  color: #fa6900;
   border: 1px solid #ddd !important;
 }
 .btn-group .badge {
@@ -7942,10 +7942,12 @@ label.btn.btn-primary.badge.active {
 .btn-success {
   background-color: #b1d43f;
   color: #0b486b;
+  font-weight: bold;
 }
 .btn-success:hover {
   background-color: #e3eb37;
   color: #0b486b;
+  font-weight: bold;
 }
 .btn-warning {
   background-color: #d7af0d;
@@ -7968,12 +7970,12 @@ label.btn.btn-primary.badge.active {
 .btn-default {
   background-color: #fff;
   border: 1px solid #ddd !important;
-  color: #fa6900;
+  color: #b1d43f;
 }
 .btn-default:hover {
   background-color: #ebebeb;
   border-color: #adadad;
-  color: #f38630;
+  color: #e3eb37;
 }
 .success {
   background-color: #64b92a;
@@ -8187,7 +8189,7 @@ div.bigstars div.rateit-reset:hover
   text-decoration: none;
   /*background-color: #C6E5D9;*/
   background-color: #FA6900;
-  font-weight: bold;
+  /*font-weight: bold;*/
   color: #0B486B; 
 }
 
@@ -8231,13 +8233,15 @@ div.bigstars div.rateit-reset:hover
   margin-top: -5px;
   display: block;
   color: #FFF;
+  font-weight: bold;
 }
 
 .content-header-subtitle {
     font-size:1.1em;
     margin-top: -5px;
     display: block;
-    color: #DBDBDB;
+    /*color: #DBDBDB;*/
+    color: #B1D43F;
 }
 
 .content-header-subtitle #js-subtitle {

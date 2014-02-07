@@ -68,7 +68,7 @@
   text-decoration: none;
   /*background-color: #C6E5D9;*/
   background-color: #FA6900;
-  font-weight: bold;
+  /*font-weight: bold;*/
   color: #0B486B; 
 }
 
@@ -112,13 +112,15 @@
   margin-top: -5px;
   display: block;
   color: #FFF;
+  font-weight: bold;
 }
 
 .content-header-subtitle {
     font-size:1.1em;
     margin-top: -5px;
     display: block;
-    color: #DBDBDB;
+    /*color: #DBDBDB;*/
+    color: #B1D43F;
 }
 
 .content-header-subtitle #js-subtitle {
