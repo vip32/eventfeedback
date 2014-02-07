@@ -7759,7 +7759,7 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  background-color: #eee;
+  background-color: #e5e6df;
 }
 .content {
   width: 500px;
@@ -7856,7 +7856,7 @@ input.form-control {
 }
 .list-group-item {
   border: 0px;
-  border-bottom: 3px solid #dbdbdb;
+  border-bottom: 3px solid #cdc6b3;
   -webkit-border-radius: 3px;
   border-radius: 3px;
   margin-bottom: 4px;
@@ -7914,7 +7914,7 @@ input.form-control {
 textarea {
   width: 100%;
   border: 0px;
-  border-bottom: 3px solid #dbdbdb;
+  border-bottom: 3px solid #cdc6b3;
   -webkit-border-radius: 3px;
   border-radius: 3px;
   resize: none;
