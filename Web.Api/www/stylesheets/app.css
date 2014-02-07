@@ -7987,6 +7987,9 @@ label.btn.btn-primary.badge.active {
 .list-group-item strong {
   font-size: large;
 }
+p {
+  color: #000;
+}
 @media print {
   .noprint {
     display: none !important;
