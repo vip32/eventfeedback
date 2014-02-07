@@ -7988,6 +7988,10 @@ label.btn.btn-primary.badge.active {
 }
 .list-group-item strong {
   font-size: large;
+  color: #0b486b;
+}
+.list-group-item {
+  color: #000;
 }
 p {
   color: #000;
