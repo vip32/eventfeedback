@@ -24,9 +24,10 @@ body
   background-color #EEEEEE
 
 .content   // fix for desktop vert scroll bar
-    width: 500px
+    width 500px
 .container // fix for desktop vert scroll bar
-    width: 100%
+    width 100%
+    color #0B486B
 
 .form-contact
   padding 15px
@@ -82,6 +83,12 @@ body
 
 .btn
   border none
+  border-radius 0px
+
+.container .btn
+  border-radius 3px
+
+#menu-back
   border-radius 0px
 
 .make-switch
@@ -161,15 +168,20 @@ textarea
   transition height 0.01s
 
 // set some button colors, from http://bootswatch.com/cosmo/
+// http://pltts.me/palettes/92095
 .btn-primary
-  background-color #2986b9
+  background-color #FA6900 // #2986b9
 .btn-primary:hover
-  background-color #3276b1
+  background-color #F38630 // #3276b1
+label.btn.btn-primary.badge.active
+  background-color #0B486B
 
 .btn-success
-  background-color #64b92a
+  background-color #B1D43F // #64b92a
+  color #0B486B
 .btn-success:hover
-  background-color #47a447
+  background-color #E3EB37// #47a447
+  color #0B486B
 
 .btn-warning
   background-color #d7af0d
@@ -189,9 +201,11 @@ textarea
 .btn-default
   background-color #fff
   border 1px solid #ddd !important
+  color #FA6900
 .btn-default:hover
   background-color #ebebeb
   border-color #adadad
+  color #F38630
 
 .success
   background-color #64b92a
@@ -201,6 +215,9 @@ textarea
 
 .nofeedback
     background-color #E2E2E2
+
+.list-group-item strong
+    font-size large
 
 @media print
   .noprint

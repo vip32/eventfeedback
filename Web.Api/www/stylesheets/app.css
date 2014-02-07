@@ -7766,6 +7766,7 @@ body {
 }
 .container {
   width: 100%;
+  color: #0b486b;
 }
 .form-contact {
   padding: 15px;
@@ -7834,6 +7835,14 @@ body {
 }
 .btn {
   border: none;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+}
+.container .btn {
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+#menu-back {
   -webkit-border-radius: 0px;
   border-radius: 0px;
 }
@@ -7922,16 +7931,21 @@ textarea {
   transition: height 0.01s;
 }
 .btn-primary {
-  background-color: #2986b9;
+  background-color: #fa6900;
 }
 .btn-primary:hover {
-  background-color: #3276b1;
+  background-color: #f38630;
+}
+label.btn.btn-primary.badge.active {
+  background-color: #0b486b;
 }
 .btn-success {
-  background-color: #64b92a;
+  background-color: #b1d43f;
+  color: #0b486b;
 }
 .btn-success:hover {
-  background-color: #47a447;
+  background-color: #e3eb37;
+  color: #0b486b;
 }
 .btn-warning {
   background-color: #d7af0d;
@@ -7954,10 +7968,12 @@ textarea {
 .btn-default {
   background-color: #fff;
   border: 1px solid #ddd !important;
+  color: #fa6900;
 }
 .btn-default:hover {
   background-color: #ebebeb;
   border-color: #adadad;
+  color: #f38630;
 }
 .success {
   background-color: #64b92a;
@@ -7967,6 +7983,9 @@ textarea {
 }
 .nofeedback {
   background-color: #e2e2e2;
+}
+.list-group-item strong {
+  font-size: large;
 }
 @media print {
   .noprint {
@@ -8108,7 +8127,7 @@ div.bigstars div.rateit-reset:hover
   margin-left: -188px;
   left: 188px;
   width: 188px;
-  background: #2986b9;
+  background: #0B486B;/*#2986b9;*/
   position: fixed;
   height: 100%;
   overflow-y: auto;
@@ -8156,13 +8175,17 @@ div.bigstars div.rateit-reset:hover
 
 .sidebar-nav li a:hover {
   color: #fff;
-  background: rgba(255,255,255,0.2);
+  /*background: rgba(255,255,255,0.2);*/
+  background-color: #F38630;
   text-decoration: none;
 }
 
 .sidebar-nav .active{
   text-decoration: none;
-  background-color: #90BFD8;
+  /*background-color: #C6E5D9;*/
+  background-color: #FA6900;
+  font-weight: bold;
+  color: #0B486B; 
 }
 
 .sidebar-nav > .sidebar-brand {
