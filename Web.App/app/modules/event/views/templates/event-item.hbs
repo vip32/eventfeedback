@@ -2,6 +2,13 @@
   <div class="glyphicon glyphicon-bookmark"></div>
     &emsp;&emsp;<strong>{{title}}</strong>
 </div>
-<div class="glyphicon glyphicon-time">
-  &emsp;{{dateFormat startDate format="DD.MM.YYYY"}}
+<div>
+<div class="glyphicon glyphicon-time"></div>
+  &emsp;&emsp;{{dateFormat startDate format="DD.MM.YYYY"}}
 </div>
+{{#if location}}
+<div>
+<div class="glyphicon glyphicon-map-marker"></div>
+  &emsp;&emsp;{{location}}
+</div>
+{{/if}}

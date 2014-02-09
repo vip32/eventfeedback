@@ -13,6 +13,8 @@ namespace EventFeedback.Web.Api.Models
 
         public DateTime? EndDate { get; set; }
         
+        public string Location { get; set; }
+        
         public string AverageRate { get; set; }
         
         public string QuesstionTitle0 { get; set; }

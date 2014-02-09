@@ -48,6 +48,7 @@ namespace EventFeedback.Web.Api.Controllers
                 Title = ev.Title,
                 StartDate = ev.StartDate,
                 EndDate = ev.EndDate,
+                Location = ev.Location,
                 AverageRate = Math.Round(eventFeedbacks
                         .Where(f => f.UpdateAverageRate().IsDouble())
                         .Select(f => f.UpdateAverageRate().ToDouble()).DefaultIfEmpty()
@@ -84,6 +85,7 @@ namespace EventFeedback.Web.Api.Controllers
                     SpeakerList = s.SpeakerList,
                     StartDate = s.StartDate,
                     EndDate = s.EndDate,
+                    Location = s.Location,
                     FeedbackAllowed = !(s.FeedbackAllowed != null && !(bool)s.FeedbackAllowed),
                     AverageRate = Math.Round(sessionFeedbacks.NullToEmpty().Where(f => f.SessionId == s.Id)
                         .Where(f => f.UpdateAverageRate().IsDouble())

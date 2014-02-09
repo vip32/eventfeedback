@@ -17,10 +17,8 @@
     <div>
       <div class="glyphicon glyphicon-time"></div>
       &emsp;&emsp;{{dateFormat this.startDate format="HH:mm"}}-{{dateFormat this.endDate format="HH:mm"}}
-    </div>
-    <div>
-      <div class="glyphicon glyphicon-map-marker"></div>
-      &emsp;&emsp;{{this.location}}
+      &emsp;&emsp;<div class="glyphicon glyphicon-map-marker"></div>
+      &emsp;&emsp;{{../model.location}}/ {{this.location}}
     </div>
     {{#if this.feedbackAllowed}}
     <div> 

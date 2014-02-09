@@ -15,10 +15,12 @@
       <div class="glyphicon glyphicon-time"></div>
         &emsp;&emsp;{{dateFormat model.startDate format="HH:mm"}}-{{dateFormat model.endDate format="HH:mm"}}
       </div>
+      {{#if model.location}}
       <div>
         <div class="glyphicon glyphicon-map-marker"></div>
         &emsp;&emsp;{{model.location}}
       </div>
+      {{/if}}
       <br/><br/>
       <p>{{model.description}}</p>
     </div>

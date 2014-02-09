@@ -10,6 +10,8 @@ namespace EventFeedback.Web.Api.Models
         public string Title { get; set; }
 
         public string SpeakerList { get; set; }
+        
+        public string Location { get; set; }
 
         public DateTime? StartDate { get; set; }
 
