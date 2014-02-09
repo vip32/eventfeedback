@@ -3319,11 +3319,9 @@ function program1(depth0,data,depth1) {
     'format': ("HH:mm")
   },data:data};
   buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.endDate, options) : helperMissing.call(depth0, "dateFormat", depth0.endDate, options)))
-    + "&emsp;";
-  if (stack2 = helpers.thislocation) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
-  else { stack2 = depth0.thislocation; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
-  buffer += escapeExpression(stack2)
-    + "\r\n  </div>\r\n    <div>\r\n      <div class=\"glyphicon glyphicon-user\"></div>\r\n      &emsp;&emsp;";
+    + "\r\n    </div>\r\n    <div>\r\n      <div class=\"glyphicon glyphicon-marker\"></div>\r\n      &emsp;&emsp;"
+    + escapeExpression(((stack1 = depth0.location),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n    </div>\r\n    <div>\r\n      <div class=\"glyphicon glyphicon-user\"></div>\r\n      &emsp;&emsp;";
   options = {hash:{},data:data};
   buffer += escapeExpression(((stack1 = helpers.seperatelist || depth0.seperatelist),stack1 ? stack1.call(depth0, depth0.speakerList, options) : helperMissing.call(depth0, "seperatelist", depth0.speakerList, options)))
     + "\r\n    </div>\r\n    ";
@@ -4610,7 +4608,7 @@ function program113(depth0,data) {
     'format': ("HH:mm")
   },data:data};
   buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options)))
-    + "&emsp;"
+    + "\r\n      </div>\r\n      <div>\r\n        <div class=\"glyphicon glyphicon-marker\"></div>\r\n        &emsp;&emsp;"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.location)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n      </div>\r\n      <div>\r\n        <div class=\"glyphicon glyphicon-user\"></div>\r\n        &emsp;&emsp;";
   options = {hash:{},data:data};
@@ -4694,9 +4692,9 @@ function program1(depth0,data) {
     'format': ("HH:mm")
   },data:data};
   buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options)))
-    + "&emsp;"
+    + "\r\n</div>\r\n<div>\r\n  <div class=\"glyphicon glyphicon-marker\"></div>\r\n  &emsp;&emsp;"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.location)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n</div> \r\n<div>\r\n  <div class=\"glyphicon glyphicon-user\"></div>\r\n  &emsp;&emsp;";
+    + "\r\n</div>\r\n<div>\r\n  <div class=\"glyphicon glyphicon-user\"></div>\r\n  &emsp;&emsp;";
   options = {hash:{},data:data};
   buffer += escapeExpression(((stack1 = helpers.seperatelist || depth0.seperatelist),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.speakerList), options) : helperMissing.call(depth0, "seperatelist", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.speakerList), options)))
     + "\r\n</div>\r\n";
