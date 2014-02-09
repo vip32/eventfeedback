@@ -3319,7 +3319,7 @@ function program1(depth0,data,depth1) {
     'format': ("HH:mm")
   },data:data};
   buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.endDate, options) : helperMissing.call(depth0, "dateFormat", depth0.endDate, options)))
-    + "\r\n    </div>\r\n    <div>\r\n      <div class=\"glyphicon glyphicon-marker\"></div>\r\n      &emsp;&emsp;"
+    + "\r\n    </div>\r\n    <div>\r\n      <div class=\"glyphicon glyphicon-map-marker\"></div>\r\n      &emsp;&emsp;"
     + escapeExpression(((stack1 = depth0.location),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n    </div>\r\n    <div>\r\n      <div class=\"glyphicon glyphicon-user\"></div>\r\n      &emsp;&emsp;";
   options = {hash:{},data:data};
@@ -4608,7 +4608,7 @@ function program113(depth0,data) {
     'format': ("HH:mm")
   },data:data};
   buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options)))
-    + "\r\n      </div>\r\n      <div>\r\n        <div class=\"glyphicon glyphicon-marker\"></div>\r\n        &emsp;&emsp;"
+    + "\r\n      </div>\r\n      <div>\r\n        <div class=\"glyphicon glyphicon-map-marker\"></div>\r\n        &emsp;&emsp;"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.location)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n      </div>\r\n      <div>\r\n        <div class=\"glyphicon glyphicon-user\"></div>\r\n        &emsp;&emsp;";
   options = {hash:{},data:data};
@@ -4692,7 +4692,7 @@ function program1(depth0,data) {
     'format': ("HH:mm")
   },data:data};
   buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options)))
-    + "\r\n</div>\r\n<div>\r\n  <div class=\"glyphicon glyphicon-marker\"></div>\r\n  &emsp;&emsp;"
+    + "\r\n</div>\r\n<div>\r\n  <div class=\"glyphicon glyphicon-map-marker\"></div>\r\n  &emsp;&emsp;"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.location)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n</div>\r\n<div>\r\n  <div class=\"glyphicon glyphicon-user\"></div>\r\n  &emsp;&emsp;";
   options = {hash:{},data:data};
