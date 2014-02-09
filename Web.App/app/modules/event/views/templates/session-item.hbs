@@ -3,8 +3,9 @@
   &emsp;&emsp;<strong>{{model.title}}</strong>
 </div>
 {{#each model.tags}}<span class="badge pull-right">{{this}}</span>{{/each}}
-<div class="glyphicon glyphicon-time">
-  &emsp;{{dateFormat model.startDate format="HH:mm"}}-{{dateFormat model.endDate format="HH:mm"}}
+<div>
+<div class="glyphicon glyphicon-time"></div>
+  &emsp;&emsp;{{dateFormat model.startDate format="HH:mm"}}-{{dateFormat model.endDate format="HH:mm"}}&emsp;{{model.location}}
 </div> 
 <div>
   <div class="glyphicon glyphicon-user"></div>

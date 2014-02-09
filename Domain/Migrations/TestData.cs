@@ -217,6 +217,7 @@ namespace EventFeedback.Domain
                                 StartDate = new DateTime(2013, 2, 18, 9, 0, 0),
                                 EndDate = new DateTime(2013, 2, 18, 11, 30, 0),
                                 SpeakerList = "Speaker1;Speaker2;Speaker3",
+                                Location = "Loc A"
                             },
                             new Session
                             {
@@ -227,6 +228,7 @@ namespace EventFeedback.Domain
                                 EndDate = new DateTime(2013, 2, 18, 12, 30, 0),
                                 TagList = "C#",
                                 SpeakerList = "Speaker1",
+                                Location = "Loc A"
                             },
                             new Session
                             {
@@ -237,6 +239,7 @@ namespace EventFeedback.Domain
                                 EndDate = new DateTime(2013, 2, 18, 14, 30, 0),
                                 TagList = "Java",
                                 SpeakerList = "Speaker1",
+                                Location = "Loc A"
                             },
                             new Session
                             {
@@ -247,6 +250,7 @@ namespace EventFeedback.Domain
                                 EndDate = new DateTime(2013, 2, 18, 16, 30, 0),
                                 TagList = "C#",
                                 SpeakerList = "Speaker1",
+                                Location = "Loc A"
                             },
                             new Session
                             {
@@ -257,6 +261,7 @@ namespace EventFeedback.Domain
                                 EndDate = new DateTime(2013, 2, 18, 17, 30, 0),
                                 TagList = "Java",
                                 SpeakerList = "Speaker1",
+                                Location = "Loc A"
                             }
                         }
                 },
@@ -279,6 +284,7 @@ namespace EventFeedback.Domain
                                 StartDate = new DateTime(2013, 5, 10, 9, 0, 0),
                                 EndDate = new DateTime(2013, 5, 10, 11, 30, 0),
                                 SpeakerList = "Speaker1;Speaker2;Speaker3",
+                                Location = "Loc A"
                             },
                             new Session
                             {
@@ -287,6 +293,7 @@ namespace EventFeedback.Domain
                                 FeedbackAllowed = false,
                                 StartDate = new DateTime(2013, 5, 10, 11, 30, 0),
                                 EndDate = new DateTime(2013, 5, 10, 11, 45, 0),
+                                Location = "Loc A"
                             },
                             new Session
                             {
@@ -297,6 +304,7 @@ namespace EventFeedback.Domain
                                 EndDate = new DateTime(2013, 5, 10, 12, 30, 0),
                                 TagList = "C#",
                                 SpeakerList = "Speaker1",
+                                Location = "Loc A"
                             },
                             new Session
                             {
@@ -305,6 +313,7 @@ namespace EventFeedback.Domain
                                 FeedbackAllowed = false,
                                 StartDate = new DateTime(2013, 5, 10, 12, 30, 0),
                                 EndDate = new DateTime(2013, 5, 10, 13, 00, 0),
+                                Location = "Loc A"
                             },
                             new Session
                             {
@@ -315,6 +324,7 @@ namespace EventFeedback.Domain
                                 EndDate = new DateTime(2013, 5, 10, 14, 30, 0),
                                 TagList = "Java",
                                 SpeakerList = "Speaker1",
+                                Location = "Loc A"
                             }
                         }
                 },
@@ -337,6 +347,7 @@ namespace EventFeedback.Domain
                                 StartDate = new DateTime(2013, 7, 1, 9, 0, 0),
                                 EndDate = new DateTime(2013, 7, 1, 11, 30, 0),
                                 SpeakerList = "Speaker1;Speaker2;Speaker3",
+                                Location = "Loc A"
                             },
                             new Session
                             {
@@ -347,6 +358,7 @@ namespace EventFeedback.Domain
                                 EndDate = new DateTime(2013, 7, 1, 12, 30, 0),
                                 TagList = "C#",
                                 SpeakerList = "Speaker1",
+                                Location = "Loc A"
                             },
                             new Session
                             {
@@ -357,6 +369,7 @@ namespace EventFeedback.Domain
                                 EndDate = new DateTime(2013, 7, 1, 14, 30, 0),
                                 TagList = "Java",
                                 SpeakerList = "Speaker1",
+                                Location = "Loc A"
                             }
                         }
                 },
@@ -379,6 +392,7 @@ namespace EventFeedback.Domain
                                 StartDate = new DateTime(2013, 10, 24, 9, 0, 0),
                                 EndDate = new DateTime(2013, 10, 24, 11, 30, 0),
                                 SpeakerList = "Speaker1;Speaker2;Speaker3",
+                                Location = "Loc A"
                             },
                             new Session
                             {
@@ -389,6 +403,7 @@ namespace EventFeedback.Domain
                                 EndDate = new DateTime(2013, 10, 23, 12, 30, 0),
                                 TagList = "C#",
                                 SpeakerList = "Speaker1",
+                                Location = "Loc A"
                             },
                             new Session
                             {
@@ -399,6 +414,7 @@ namespace EventFeedback.Domain
                                 EndDate = new DateTime(2013, 10, 23, 14, 30, 0),
                                 TagList = "Java",
                                 SpeakerList = "Speaker1",
+                                Location = "Loc A"
                             }
                         }
                 }
