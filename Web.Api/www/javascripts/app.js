@@ -879,7 +879,8 @@ module.exports.TestData = TestData = (function() {
     }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f4",
       title: "Debug",
-      authenticated: false,
+      authenticated: true,
+      roles: ['Administrator'],
       resource: 'Title_Debug',
       glyphicon: 'cog',
       trigger: "debug:index",
