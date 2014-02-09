@@ -8,16 +8,16 @@
       </div>
       {{#each model.tags}}<span class="badge pull-right">{{this}}</span>{{/each}}
       <div>
+      <div>
+        <div class="glyphicon glyphicon-user"></div>
+        &emsp;&emsp;{{seperatelist model.speakerList}}
+      </div>
       <div class="glyphicon glyphicon-time"></div>
         &emsp;&emsp;{{dateFormat model.startDate format="HH:mm"}}-{{dateFormat model.endDate format="HH:mm"}}
       </div>
       <div>
         <div class="glyphicon glyphicon-map-marker"></div>
         &emsp;&emsp;{{model.location}}
-      </div>
-      <div>
-        <div class="glyphicon glyphicon-user"></div>
-        &emsp;&emsp;{{seperatelist model.speakerList}}
       </div>
       <br/><br/>
       <p>{{model.description}}</p>
