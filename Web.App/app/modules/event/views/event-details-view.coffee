@@ -28,6 +28,7 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
     resources: @resources
     
   onShow: ->
+    scrollTo(0,0)
     # highlight the active tag
     tag = settings.get('active-eventtag')
     @$("input:radio[name='tags'][value='" + tag + "']").attr('checked', 'checked').parent().addClass('active');

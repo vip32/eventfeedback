@@ -23,6 +23,7 @@ module.exports = class SigninView extends Backbone.Marionette.ItemView
     vent.trigger 'view:signin:do', data
 
   onShow: ->
+    scrollTo(0,0)
     $('.make-switch').bootstrapSwitch()
 
   onClose: ->

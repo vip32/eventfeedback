@@ -8,5 +8,8 @@ module.exports = class HomeView extends Backbone.Marionette.ItemView
   initialize: (options) ->
     application.trigger 'navigation:back:off'
 
+  onShow: ->
+    scrollTo(0,0)
+    
   onClose: ->
     console.log 'home view close'

@@ -6,6 +6,8 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
   template: require './templates/session-details'
   events:
     'click .js-submit': 'onSubmit'
+    'change textarea': 'onChange'
+    'input textarea': 'onChange'
 
   initialize: (options) ->
     @resources = options?.resources
@@ -24,9 +26,15 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
     application.trigger 'event:details', @model.get('eventId')
 
   onShow: ->
+    scrollTo(0,0)
     for id in [0..9]
       $("#rateit#{id}").rateit()
     $('textarea').autosize()
+    
+  onChange: (e) ->
+    maxlength = $(e.currentTarget).attr('data-maxlength')
+    if maxlength > 0 and $(e.currentTarget).val().length > maxlength
+      $(e.currentTarget).val($(e.currentTarget).val().substring(0, maxlength));  
 
   onSubmit: (e) ->
     e.preventDefault()

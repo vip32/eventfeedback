@@ -24,6 +24,7 @@ module.exports = class DebugView extends Backbone.Marionette.ItemView
     e.preventDefault()
 
   onShow: ->
+    scrollTo(0,0)
     console.log 'resources', @resources
     #$('input.rating[type=number]').rating();
 

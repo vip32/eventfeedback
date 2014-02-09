@@ -20,7 +20,7 @@ namespace EventFeedback.Domain
         public string DeletedBy { get; set; }
         [StringLength(256)]
         public string Title { get; set; }
-        [StringLength(512)]
+        [StringLength(2048)]
         public string Description { get; set; }
 
         public DateTime? StartDate { get; set; }

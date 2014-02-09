@@ -16,6 +16,7 @@ module.exports = class UsersEditView extends Backbone.Marionette.ItemView
     application.on 'navigation:back', @onBack
 
   onShow: ->
+    scrollTo(0,0)
     columns = [
     #   name: "id" # The key of the model attribute
     #   label: "ID" # The name to display in the header

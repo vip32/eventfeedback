@@ -1562,6 +1562,7 @@ module.exports = EventsEditView = (function(_super) {
 
   EventsEditView.prototype.onShow = function() {
     var columns, grid;
+    scrollTo(0, 0);
     columns = [
       {
         name: "id",
@@ -1617,6 +1618,7 @@ module.exports = SessionsEditView = (function(_super) {
 
   SessionsEditView.prototype.onShow = function() {
     var columns, grid;
+    scrollTo(0, 0);
     columns = [
       {
         name: "id",
@@ -1802,6 +1804,7 @@ module.exports = UsersEditView = (function(_super) {
 
   UsersEditView.prototype.onShow = function() {
     var columns, grid, _ref1;
+    scrollTo(0, 0);
     columns = [
       {
         name: "active",
@@ -1963,6 +1966,10 @@ module.exports = UsersGeneratorView = (function(_super) {
     return {
       resources: this.resources
     };
+  };
+
+  UsersGeneratorView.prototype.onShow = function() {
+    return scrollTo(0, 0);
   };
 
   UsersGeneratorView.prototype.onGenerate = function(e) {
@@ -2234,6 +2241,10 @@ module.exports = AboutView = (function(_super) {
     return application.trigger('navigation:back:off');
   };
 
+  AboutView.prototype.onShow = function() {
+    return scrollTo(0, 0);
+  };
+
   AboutView.prototype.onClose = function() {
     return console.log('about view close');
   };
@@ -2293,6 +2304,7 @@ module.exports = DebugView = (function(_super) {
   };
 
   DebugView.prototype.onShow = function() {
+    scrollTo(0, 0);
     return console.log('resources', this.resources);
   };
 
@@ -2354,6 +2366,10 @@ module.exports = HomeView = (function(_super) {
     return application.trigger('navigation:back:off');
   };
 
+  HomeView.prototype.onShow = function() {
+    return scrollTo(0, 0);
+  };
+
   HomeView.prototype.onClose = function() {
     return console.log('home view close');
   };
@@ -2411,6 +2427,7 @@ module.exports = SigninView = (function(_super) {
   };
 
   SigninView.prototype.onShow = function() {
+    scrollTo(0, 0);
     return $('.make-switch').bootstrapSwitch();
   };
 
@@ -2854,6 +2871,7 @@ module.exports = EventDetailsView = (function(_super) {
 
   EventDetailsView.prototype.onShow = function() {
     var roles, tag, _ref1;
+    scrollTo(0, 0);
     tag = settings.get('active-eventtag');
     this.$("input:radio[name='tags'][value='" + tag + "']").attr('checked', 'checked').parent().addClass('active');
     this.filterByTag(tag);
@@ -3062,7 +3080,9 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.template = require('./templates/session-details');
 
   EventDetailsView.prototype.events = {
-    'click .js-submit': 'onSubmit'
+    'click .js-submit': 'onSubmit',
+    'change textarea': 'onChange',
+    'input textarea': 'onChange'
   };
 
   EventDetailsView.prototype.initialize = function(options) {
@@ -3089,10 +3109,19 @@ module.exports = EventDetailsView = (function(_super) {
 
   EventDetailsView.prototype.onShow = function() {
     var id, _i;
+    scrollTo(0, 0);
     for (id = _i = 0; _i <= 9; id = ++_i) {
       $("#rateit" + id).rateit();
     }
     return $('textarea').autosize();
+  };
+
+  EventDetailsView.prototype.onChange = function(e) {
+    var maxlength;
+    maxlength = $(e.currentTarget).attr('data-maxlength');
+    if (maxlength > 0 && $(e.currentTarget).val().length > maxlength) {
+      return $(e.currentTarget).val($(e.currentTarget).val().substring(0, maxlength));
+    }
   };
 
   EventDetailsView.prototype.onSubmit = function(e) {
@@ -3716,7 +3745,7 @@ function program4(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + " </div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer0\">"
+    + " </div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer0\" data-maxlength=\"2048\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
@@ -3803,7 +3832,7 @@ function program15(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer1\">"
+    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer1\" data-maxlength=\"2048\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
@@ -3890,7 +3919,7 @@ function program26(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer2\">"
+    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer2\" data-maxlength=\"2048\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
@@ -3977,7 +4006,7 @@ function program37(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer3\">"
+    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer3\" maxlength=\"2048\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
@@ -4064,7 +4093,7 @@ function program48(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer4\">"
+    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer4\" id=\"answer4\" data-maxlength=\"2048\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
@@ -4151,7 +4180,7 @@ function program59(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer5\">"
+    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer5\" data-maxlength=\"2048\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
@@ -4238,7 +4267,7 @@ function program70(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer6\">"
+    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer6\" data-maxlength=\"2048\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
@@ -4325,7 +4354,7 @@ function program81(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer7\">"
+    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer7\" data-maxlength=\"2048\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
@@ -4412,7 +4441,7 @@ function program92(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer8\">"
+    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer8\" data-maxlength=\"2048\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
@@ -4499,7 +4528,7 @@ function program103(depth0,data) {
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer9\">"
+    + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer9\" data-maxlength=\"2048\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;

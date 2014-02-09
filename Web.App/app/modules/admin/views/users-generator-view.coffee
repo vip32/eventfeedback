@@ -22,6 +22,9 @@ module.exports = class UsersGeneratorView extends Backbone.Marionette.CompositeV
   itemViewOptions: ->
     resources: @resources
 
+  onShow: ->
+    scrollTo(0,0)
+    
   onGenerate: (e) ->
     e.preventDefault()
     @collection.reset()

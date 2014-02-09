@@ -131,6 +131,10 @@
     <Compile Include="Migrations\201402031000571_FeedbackDefWeight.Designer.cs">
       <DependentUpon>201402031000571_FeedbackDefWeight.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201402091806585_DescrLenght.cs" />
+    <Compile Include="Migrations\201402091806585_DescrLenght.Designer.cs">
+      <DependentUpon>201402091806585_DescrLenght.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Migrations\TestData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -181,6 +185,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201402031000571_FeedbackDefWeight.resx">
       <DependentUpon>201402031000571_FeedbackDefWeight.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402091806585_DescrLenght.resx">
+      <DependentUpon>201402091806585_DescrLenght.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
