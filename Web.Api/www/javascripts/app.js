@@ -3247,7 +3247,9 @@ function program2(depth0,data) {
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      </div>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n  <p>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</p>\r\n\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-7\">&nbsp;</div>\r\n    <div class=\"col-xs-5\">\r\n      <a class=\"btn btn-lg btn-success js-report\" href=\"#\">\r\n        <span class=\"glyphicon glyphicon-list\"></span>&emsp;Report\r\n      </a>\r\n    </div>\r\n  </div>\r\n</div>";
+    + "</p>\r\n\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-7\">&nbsp;</div>\r\n    <div class=\"col-xs-5\">\r\n      <a class=\"btn btn-lg btn-success js-report\" href=\"#\">\r\n        <span class=\"glyphicon glyphicon-list\"></span>&emsp;"
+    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Text_Report)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n      </a>\r\n    </div>\r\n  </div>\r\n</div>";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
@@ -4612,8 +4614,11 @@ function program113(depth0,data) {
 
 function program115(depth0,data) {
   
-  
-  return "\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\">&nbsp;</div>\r\n      <div class=\"col-xs-5\">\r\n        <button class=\"btn btn-success btn-lg pull-right js-submit\">\r\n          <span class=\"glyphicon glyphicon-save\"></span>&emsp;Save\r\n        </button>\r\n      </div>\r\n    </div>\r\n    ";
+  var buffer = "", stack1;
+  buffer += "\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\">&nbsp;</div>\r\n      <div class=\"col-xs-5\">\r\n        <button class=\"btn btn-success btn-lg pull-right js-submit\">\r\n          <span class=\"glyphicon glyphicon-save\"></span>&emsp;"
+    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Text_Save)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n        </button>\r\n      </div>\r\n    </div>\r\n    ";
+  return buffer;
   }
 
   buffer += "<div class=\"container\">\r\n\r\n  <div class=\"list-group\" style=\"margin-top:39px;\">\r\n    <div id=\"session-item-view\" class=\"list-group-item\">\r\n      <div>\r\n        <div class=\"glyphicon glyphicon-comment\"></div>\r\n        &emsp;&emsp;<strong>"

@@ -113,6 +113,8 @@ namespace EventFeedback.Domain
                     new ResourceText { Key = "Title_SignIn", Value = "Sign-in", Language = "en-US" },
                     new ResourceText { Key = "Title_SignOut", Value = "Sign-out", Language = "en-US" },
                     new ResourceText { Key = "Title_Debug", Value = "Debug", Language = "en-US" },
+                    new ResourceText { Key = "Text_Save", Value = "Save", Language = "en-US" },
+                    new ResourceText { Key = "Text_Report", Value = "Report", Language = "en-US" },
 
                     new ResourceText { Key = "Feedback_Saved_Success", Value = "Feedback gespeichert", Language = "de-DE" },
                     new ResourceText { Key = "Feedback_Saved_Failed", Value = "Feedback NICHT gespeichert", Language = "de-DE" },
@@ -123,7 +125,9 @@ namespace EventFeedback.Domain
                     new ResourceText { Key = "Title_Sessions", Value = "Sessions", Language = "de-DE" },
                     new ResourceText { Key = "Title_SignIn", Value = "Einloggen", Language = "de-DE" },
                     new ResourceText { Key = "Title_SignOut", Value = "Ausloggen", Language = "de-DE" },
-                    new ResourceText { Key = "Title_Debug", Value = "Debug", Language = "de-DE" }
+                    new ResourceText { Key = "Title_Debug", Value = "Debug", Language = "de-DE" },
+                    new ResourceText { Key = "Text_Save", Value = "Speichern", Language = "de-DE" },
+                    new ResourceText { Key = "Text_Report", Value = "Report", Language = "de-DE" }
                     );
             }
 
