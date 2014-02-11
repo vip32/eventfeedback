@@ -7996,6 +7996,9 @@ label.btn.btn-primary.badge.active {
 p {
   color: #000;
 }
+div#preload {
+  display: none;
+}
 @media print {
   .noprint {
     display: none !important;

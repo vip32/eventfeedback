@@ -308,7 +308,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div id=\"wrapper\">\r\n\r\n  <div id=\"header\" class=\"container\"></div>\r\n  <div class=\"page-content inset\">\r\n    <div id=\"content\" class=\"container\"></div>\r\n  </div>\r\n  <div id=\"messagebox\"></div>\r\n  <hr/>\r\n  <div id=\"footer\" class=\"container\"></div>\r\n\r\n</div>";
+  return "<div id=\"wrapper\">\r\n\r\n  <div id=\"header\" class=\"container\"></div>\r\n  <div class=\"page-content inset\">\r\n    <div id=\"content\" class=\"container\"></div>\r\n  </div>\r\n  <div id=\"messagebox\"></div>\r\n  <hr/>\r\n  <div id=\"footer\" class=\"container\"></div>\r\n  <div id=\"preload\">\r\n    <img src=\"images/qr.png\" width=\"1\" height=\"1\" alt=\"qr\" />\r\n    <img src=\"images/star.gif\" width=\"1\" height=\"1\" alt=\"star\" />\r\n    <img src=\"images/delete.gif\" width=\"1\" height=\"1\" alt=\"star\" />\r\n    <img src=\"images/star_full_32.png\" width=\"1\" height=\"1\" alt=\"starfull\" />\r\n    <img src=\"images/star_empty_32.png\" width=\"1\" height=\"1\" alt=\"starempty\" />\r\n  </div>\r\n</div>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
