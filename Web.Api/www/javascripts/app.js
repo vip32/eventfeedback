@@ -308,7 +308,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div id=\"wrapper\">\r\n\r\n  <div id=\"header\" class=\"container\"></div>\r\n  <div class=\"page-content inset\">\r\n    <div id=\"content\" class=\"container\"></div>\r\n  </div>\r\n  <div id=\"messagebox\"></div>\r\n  <hr/>\r\n  <div id=\"footer\" class=\"container\"></div>\r\n  <div id=\"preload\">\r\n    <img src=\"images/qr.png\" width=\"1\" height=\"1\" alt=\"qr\" />\r\n    <img src=\"images/star.gif\" width=\"1\" height=\"1\" alt=\"star\" />\r\n    <img src=\"images/delete.gif\" width=\"1\" height=\"1\" alt=\"star\" />\r\n    <img src=\"images/star_full_32.png\" width=\"1\" height=\"1\" alt=\"starfull\" />\r\n    <img src=\"images/star_empty_32.png\" width=\"1\" height=\"1\" alt=\"starempty\" />\r\n  </div>\r\n</div>";
+  return "<div id=\"wrapper\">\r\n\r\n  <div id=\"header\" class=\"container\"></div>\r\n  <div class=\"page-content inset\">\r\n    <div id=\"content\" class=\"container\"></div>\r\n  </div>\r\n  <div id=\"messagebox\"></div>\r\n  <hr/>\r\n  <div id=\"footer\" class=\"container\"></div>\r\n  <div id=\"preload\">\r\n    <img src=\"/www/images/qr.png\" width=\"1\" height=\"1\" alt=\"qr\" />\r\n    <img src=\"/www/images/star.gif\" width=\"1\" height=\"1\" alt=\"star\" />\r\n    <img src=\"/www/images/delete.gif\" width=\"1\" height=\"1\" alt=\"star\" />\r\n    <img src=\"/www/images/star_full_32.png\" width=\"1\" height=\"1\" alt=\"starfull\" />\r\n    <img src=\"/www/images/star_empty_32.png\" width=\"1\" height=\"1\" alt=\"starempty\" />\r\n  </div>\r\n</div>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -1719,7 +1719,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "&emsp;/&emsp;"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.password)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</h3>\r\n    </div>\r\n    <div class=\"col-xs-6\">\r\n      <img src=\"images/qr.png\" height=\"88\" width=\"88\"/>\r\n    </div>\r\n    <div class=\"col-xs-6\"></div>\r\n  </div>\r\n  <a href=\"https://eventfeedback.azurewebsites.net\">https://eventfeedback.azurewebsites.net</a>\r\n</div>\r\n";
+    + "</h3>\r\n    </div>\r\n    <div class=\"col-xs-6\">\r\n      <img src=\"/www/images/qr.png\" height=\"88\" width=\"88\"/>\r\n    </div>\r\n    <div class=\"col-xs-6\"></div>\r\n  </div>\r\n  <a href=\"https://eventfeedback.azurewebsites.net\">https://eventfeedback.azurewebsites.net</a>\r\n</div>\r\n";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
