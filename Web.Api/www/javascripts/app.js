@@ -2640,7 +2640,6 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showEventsIndex = function() {
     var _this = this;
-    logger.log('aa');
     vent.trigger('fetch:done');
     return this.events.fetch({
       reload: true

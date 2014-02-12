@@ -25,7 +25,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         @saveFeedback feedback
 
   showEventsIndex: ->
-    logger.log 'aa'
+#    logger.log 'aa'
     
     vent.trigger 'fetch:done' # switch off block
     @events.fetch(
