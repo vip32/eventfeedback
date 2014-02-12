@@ -12,7 +12,7 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
     'signin': 'showSignin'
 
   initialize: (options)  ->
-    console.log 'about router init'
+    log 'about router init'
 
     application.addInitializer (options) =>
 

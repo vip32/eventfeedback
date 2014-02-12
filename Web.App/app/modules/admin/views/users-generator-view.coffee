@@ -36,7 +36,7 @@ module.exports = class UsersGeneratorView extends Backbone.Marionette.CompositeV
         roles: data.roles
         active: true
         dirty: true
-    console.log 'new users', @collection
+    log 'new users', @collection
     vent.trigger 'save:users'
     
   makeid: ->

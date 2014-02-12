@@ -9,7 +9,7 @@ Role = require '../../models/role'
 module.exports = class Controller extends Backbone.Marionette.Controller
 
   constructor: (options) ->
-    console.log 'admin controller init'
+    log 'admin controller init'
 
     application.addInitializer (options) =>
 
@@ -59,7 +59,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       ).done (users) =>
         vent.trigger 'set:active:header', 'admin:users:edit', application.resources.key('Title_Admin_Users'), 'user' #
         users.on 'change', (model) =>
-          console.log 'user change:', model
+          log 'user change:', model
           model.credentials = users.credentials
           model.set('dirty', true, silent: true)
         View = require './views/users-edit-view'
@@ -72,7 +72,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       reload: true
     ).done (roles) =>
       @users.on 'add', (model) =>
-        console.log 'user add:', model
+        log 'user add:', model
         model.credentials = @users.credentials
         model.set('dirty', true, silent: true)
       View = require './views/users-generator-view'
@@ -91,4 +91,4 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 #    vent.trigger 'fetch:done'
 
   onClose: ->
-    console.log 'admin controller close'
+    log 'admin controller close'

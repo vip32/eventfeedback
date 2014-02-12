@@ -7,7 +7,7 @@ settings = require 'settings'
 module.exports = class Controller extends Backbone.Marionette.Controller
 
   constructor: (options) ->
-    console.log 'about controller init'
+    log 'about controller init'
 
     application.addInitializer (options) =>
 

@@ -12,4 +12,4 @@ module.exports = class HomeView extends Backbone.Marionette.ItemView
     scrollTo(0,0)
     
   onClose: ->
-    console.log 'home view close'
+    log 'home view close'

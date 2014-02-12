@@ -121,21 +121,21 @@ Application = (function(_super) {
 
   Application.prototype.initialize = function() {
     var _this = this;
-    console.log('application init');
+    log('application:initialize');
     vent.setup();
     this.hookGlobalEvents();
     this.on("initialize:after", function(options) {
       var module, name, router, _ref1;
-      console.log('application init after');
+      log('application init after');
       _ref1 = config.modules;
       for (name in _ref1) {
         module = _ref1[name];
-        console.log('module', name);
+        log('module', name);
         router = new (require(module));
         _this.routers[name] = router;
       }
       Backbone.history.start();
-      console.log('current route', _this.getCurrentRoute());
+      log('current route', _this.getCurrentRoute());
       return _this.on('start', function() {
         return _this.trigger(config.startuptrigger);
       });
@@ -157,11 +157,11 @@ Application = (function(_super) {
   };
 
   Application.prototype.checkauth = function(trigger) {
-    return console.log('checkauth', trigger);
+    return log('checkauth', trigger);
   };
 
   Application.prototype.navigate = function(route, options) {
-    console.log('navigate', route);
+    log('navigate', route);
     options = options || {};
     return Backbone.history.navigate(route, options);
   };
@@ -172,7 +172,7 @@ Application = (function(_super) {
 
   Application.prototype.startModule = function(name, options) {
     var currentModule;
-    console.log('startmodule', route);
+    log('startmodule', route);
     currentModule = name || this.module(name) || null;
     if (ContactManager.currentModule === currentModule) {
       return;
@@ -190,7 +190,7 @@ Application = (function(_super) {
     return $(window).error(function(msg, url, line) {
       var message;
       message = "'" + msg.originalEvent.message + "' at " + msg.originalEvent.filename + ":" + msg.originalEvent.lineno;
-      console.error('ERROR', message);
+      log('ERROR:', message);
       alert(message);
       return vent.trigger('about:index');
     });
@@ -381,13 +381,13 @@ module.exports = Collection = (function(_super) {
   };
 
   Collection.prototype.fetch = function(options) {
-    console.log('fetch:start', this.constructor.name);
+    log('fetch:start', this.constructor.name);
     this.trigger('fetch:start');
     vent.trigger('fetch:start');
     return Collection.__super__.fetch.call(this, options).done(function(collection, response, options) {
       this.trigger('fetch:done');
       vent.trigger('fetch:done');
-      return console.log('fetch:done', this.constructor.name, collection, response, options);
+      return log('fetch:done', this.constructor.name, collection, response, options);
     }).fail(function(collection, response, options) {
       vent.trigger('fetch:fail');
       return console.warn('fetch:fail', this.constructor.name, collection, response, options);
@@ -823,7 +823,7 @@ module.exports.Collection = HeadersCollection = (function(_super) {
       _this = this;
     filtered = this.filter(function(item) {
       var visible, _ref2;
-      console.log('header:item', item.get('title'), item.get('roles'), '>', roles);
+      log('header:item', item.get('title'), item.get('roles'), '>', roles);
       visible = (_ref2 = item.get('visible')) != null ? _ref2 : true;
       if (visible && _.isEmpty(item.get('roles'))) {
         return true;
@@ -832,7 +832,7 @@ module.exports.Collection = HeadersCollection = (function(_super) {
         return true;
       }
     });
-    console.log('header:filtered', filtered);
+    log('header:filtered', filtered);
     return new HeadersCollection(filtered);
   };
 
@@ -1353,7 +1353,7 @@ module.exports = Controller = (function(_super) {
     this.showUsersGenerator = __bind(this.showUsersGenerator, this);
     this.showUsersEdit = __bind(this.showUsersEdit, this);
     var _this = this;
-    console.log('admin controller init');
+    log('admin controller init');
     application.addInitializer(function(options) {
       _this.events = new Event.Collection();
       _this.sessions = new Session.Collection();
@@ -1422,7 +1422,7 @@ module.exports = Controller = (function(_super) {
         var View, view;
         vent.trigger('set:active:header', 'admin:users:edit', application.resources.key('Title_Admin_Users'), 'user');
         users.on('change', function(model) {
-          console.log('user change:', model);
+          log('user change:', model);
           model.credentials = users.credentials;
           return model.set('dirty', true, {
             silent: true
@@ -1447,7 +1447,7 @@ module.exports = Controller = (function(_super) {
     }).done(function(roles) {
       var View, view;
       _this.users.on('add', function(model) {
-        console.log('user add:', model);
+        log('user add:', model);
         model.credentials = _this.users.credentials;
         return model.set('dirty', true, {
           silent: true
@@ -1481,7 +1481,7 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.onClose = function() {
-    return console.log('admin controller close');
+    return log('admin controller close');
   };
 
   return Controller;
@@ -1519,7 +1519,7 @@ module.exports = Router = (function(_super) {
 
   Router.prototype.initialize = function(options) {
     var _this = this;
-    console.log('admin router init');
+    log('admin router init');
     return application.addInitializer(function(options) {
       vent.on('admin:events:edit', function() {
         application.navigate('admin/events');
@@ -1997,7 +1997,7 @@ module.exports = UsersGeneratorView = (function(_super) {
         dirty: true
       });
     }
-    console.log('new users', this.collection);
+    log('new users', this.collection);
     return vent.trigger('save:users');
   };
 
@@ -2046,7 +2046,7 @@ module.exports = Controller = (function(_super) {
 
   function Controller(options) {
     var _this = this;
-    console.log('about controller init');
+    log('about controller init');
     application.addInitializer(function(options) {
       vent.on('view:signin:do', function(data) {
         if (!_.isEmpty(data.username) && !_.isEmpty(data.password)) {
@@ -2190,7 +2190,7 @@ module.exports = Router = (function(_super) {
 
   Router.prototype.initialize = function(options) {
     var _this = this;
-    console.log('about router init');
+    log('about router init');
     return application.addInitializer(function(options) {
       vent.on('sync:fail:unauthorized', function() {
         return vent.trigger(config.signintrigger);
@@ -2270,7 +2270,7 @@ module.exports = AboutView = (function(_super) {
   };
 
   AboutView.prototype.onClose = function() {
-    return console.log('about view close');
+    return log('about view close');
   };
 
   return AboutView;
@@ -2322,18 +2322,18 @@ module.exports = DebugView = (function(_super) {
   DebugView.prototype.onTriggerEvent = function(e) {
     var model;
     model = Backbone.Syphon.serialize(this);
-    console.log('onTriggerEvent', model);
+    log('onTriggerEvent', model);
     vent.trigger(model.event);
     return e.preventDefault();
   };
 
   DebugView.prototype.onShow = function() {
     scrollTo(0, 0);
-    return console.log('resources', this.resources);
+    return log('resources', this.resources);
   };
 
   DebugView.prototype.onClose = function() {
-    return console.log('debug view close');
+    return log('debug view close');
   };
 
   return DebugView;
@@ -2395,7 +2395,7 @@ module.exports = HomeView = (function(_super) {
   };
 
   HomeView.prototype.onClose = function() {
-    return console.log('home view close');
+    return log('home view close');
   };
 
   return HomeView;
@@ -2456,7 +2456,7 @@ module.exports = SigninView = (function(_super) {
   };
 
   SigninView.prototype.onClose = function() {
-    return console.log('signin view close');
+    return log('signin view close');
   };
 
   return SigninView;
@@ -2625,7 +2625,7 @@ module.exports = Controller = (function(_super) {
 
   function Controller(options) {
     var _this = this;
-    console.log('event controller init');
+    log('event controller init');
     application.addInitializer(function(options) {
       _this.events = new Event.Collection();
       _this.feedbacks = new Feedback.Collection();
@@ -2766,7 +2766,7 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.onClose = function() {
-    return console.log('event controller close');
+    return log('event controller close');
   };
 
   return Controller;
@@ -2804,7 +2804,7 @@ module.exports = Router = (function(_super) {
 
   Router.prototype.initialize = function(options) {
     var _this = this;
-    console.log('event router init');
+    log('event router init');
     return application.addInitializer(function(options) {
       vent.on('navigation:signin', function() {
         application.navigate('events');
@@ -2922,7 +2922,7 @@ module.exports = EventDetailsView = (function(_super) {
   };
 
   EventDetailsView.prototype.onBack = function() {
-    console.log('back from event-details');
+    log('back from event-details');
     return vent.trigger('events:index');
   };
 
@@ -2933,7 +2933,7 @@ module.exports = EventDetailsView = (function(_super) {
 
   EventDetailsView.prototype.onClose = function() {
     vent.off('navigation:back', this.onBack);
-    return console.log('events-details view close');
+    return log('events-details view close');
   };
 
   return EventDetailsView;
@@ -3026,13 +3026,13 @@ module.exports = EventReportView = (function(_super) {
 
   EventReportView.prototype.onBack = function() {
     var _ref1;
-    console.log('back from event-report');
+    log('back from event-report');
     return vent.trigger('event:details', (_ref1 = this.model) != null ? _ref1.id : void 0);
   };
 
   EventReportView.prototype.onClose = function() {
     vent.off('navigation:back', this.onBack);
-    return console.log('event-report view close');
+    return log('event-report view close');
   };
 
   return EventReportView;
@@ -3072,7 +3072,7 @@ module.exports = EventIndexView = (function(_super) {
   };
 
   EventIndexView.prototype.onClose = function() {
-    return console.log('events-index view close');
+    return log('events-index view close');
   };
 
   return EventIndexView;
@@ -3127,7 +3127,7 @@ module.exports = EventDetailsView = (function(_super) {
   };
 
   EventDetailsView.prototype.onBack = function() {
-    console.log('back from session-details');
+    log('back from session-details');
     return vent.trigger('event:details', this.model.get('eventId'));
   };
 
@@ -3167,7 +3167,7 @@ module.exports = EventDetailsView = (function(_super) {
 
   EventDetailsView.prototype.onClose = function() {
     vent.off('navigation:back', this.onBack);
-    return console.log('session-details view close');
+    return log('session-details view close');
   };
 
   return EventDetailsView;
@@ -3214,7 +3214,7 @@ module.exports = SessionItemView = (function(_super) {
 
   SessionItemView.prototype.onShow = function() {
     if (this.model.get('feedbackAllowed') === false) {
-      console.log(this.model, this.model.get('feedbackAllowed'));
+      log(this.model, this.model.get('feedbackAllowed'));
       return this.$el.addClass('nofeedback');
     }
   };
@@ -4790,7 +4790,7 @@ module.exports = Controller = (function(_super) {
 
   function Controller(options) {
     var _this = this;
-    console.log('about controller init');
+    log('about controller init');
     application.addInitializer(function(options) {
       _this.headers = new Header.Collection();
       new Header.TestData().addTo(_this.headers);
@@ -4811,7 +4811,7 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.onClose = function() {
-    return console.log('header controller close');
+    return log('header controller close');
   };
 
   return Controller;
@@ -4840,7 +4840,7 @@ module.exports = Router = (function(_super) {
 
   Router.prototype.initialize = function(options) {
     var _this = this;
-    console.log('header router init');
+    log('header router init');
     return application.addInitializer(function(options) {
       application.on('start', function() {
         return _this.controller.showHeader();
@@ -5103,7 +5103,7 @@ Settings = (function() {
   function Settings() {
     /* initializes this instance*/
 
-    console.log('settings store init');
+    log('settings store init');
     this.store = new Store.Collection({
       name: 'settings'
     });
@@ -5170,7 +5170,7 @@ Vent = (function(_super) {
 
   Vent.setup = function() {
     return this.on('all', function(name) {
-      return console.log('vent:trigger', name);
+      return log('vent:trigger -->', name);
     });
   };
 

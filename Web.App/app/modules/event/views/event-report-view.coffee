@@ -16,9 +16,9 @@ module.exports = class EventReportView extends Backbone.Marionette.ItemView
     json: JSON.stringify(@model, null, 4)
 
   onBack: =>
-    console.log 'back from event-report'
+    log 'back from event-report'
     vent.trigger 'event:details', @model?.id
 
   onClose: ->
     vent.off 'navigation:back', @onBack
-    console.log 'event-report view close'
+    log 'event-report view close'

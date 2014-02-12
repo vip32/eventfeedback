@@ -12,7 +12,7 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
     'admin/usersgenerator': 'showUsersGenerator'
 
   initialize: (options)  ->
-    console.log 'admin router init'
+    log 'admin router init'
 
     application.addInitializer (options) =>
 

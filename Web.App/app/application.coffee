@@ -9,19 +9,19 @@ class Application extends Backbone.Marionette.Application
   routers: {}
 
   initialize: =>
-    console.log 'application init'
+    log 'application:initialize'
     vent.setup()
     @hookGlobalEvents()
     @on "initialize:after", (options) =>
-      console.log 'application init after'
+      log 'application init after'
 
       for name, module of config.modules
-        console.log 'module', name
+        log 'module', name
         router = new (require module)
         @routers[name] = router
 
       Backbone.history.start()
-      console.log 'current route', @getCurrentRoute()
+      log 'current route', @getCurrentRoute()
       @on 'start', =>
         # if @getCurrentRoute() is ''
           @trigger(config.startuptrigger)
@@ -41,11 +41,11 @@ class Application extends Backbone.Marionette.Application
     @start()
 
   checkauth: (trigger) ->
-    console.log 'checkauth', trigger
+    log 'checkauth', trigger
     # TODO possible trigger config.signintrigger + add return url
 
   navigate: (route, options) ->
-    console.log 'navigate', route
+    log 'navigate', route
     options = options or {}
     Backbone.history.navigate(route, options)
 
@@ -53,7 +53,7 @@ class Application extends Backbone.Marionette.Application
     Backbone.history.fragment
 
   startModule: (name, options) ->
-    console.log 'startmodule', route
+    log 'startmodule', route
     currentModule = name or @module(name) or null
     if ContactManager.currentModule is currentModule then return
     if @currentModule? then @currentModule.stop()
@@ -65,7 +65,7 @@ class Application extends Backbone.Marionette.Application
     $(window).error (msg, url, line) ->
       # general error handler ###
       message = "'#{msg.originalEvent.message}' at #{msg.originalEvent.filename}:#{msg.originalEvent.lineno}"
-      console.error 'ERROR', message
+      log 'ERROR:', message
       #vent.trigger 'message:error:show', message
       alert message
       vent.trigger 'about:index'

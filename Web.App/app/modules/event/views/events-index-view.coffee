@@ -12,4 +12,4 @@ module.exports = class EventIndexView extends Backbone.Marionette.CompositeView
     vent.trigger 'navigation:back:off'
 
   onClose: ->
-    console.log 'events-index view close'
+    log 'events-index view close'

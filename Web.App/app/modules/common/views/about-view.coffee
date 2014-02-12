@@ -21,4 +21,4 @@ module.exports = class AboutView extends Backbone.Marionette.ItemView
     vent.trigger 'resources:loaded' # resets the header + nav
     
   onClose: ->
-    console.log 'about view close'
+    log 'about view close'

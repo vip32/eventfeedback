@@ -7,7 +7,7 @@ class Settings
 
   constructor: ->
     ### initializes this instance ###
-    console.log 'settings store init'
+    log 'settings store init'
     @store = new Store.Collection(name: 'settings')
     _.extend(@, Backbone.Events)
     @store.fetch

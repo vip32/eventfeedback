@@ -6,7 +6,7 @@ settings = require 'settings'
 module.exports = class Controller extends Backbone.Marionette.Controller
 
   constructor: (options) ->
-    console.log 'about controller init'
+    log 'about controller init'
 
     application.addInitializer (options) =>
 
@@ -24,4 +24,4 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     application.layout.header.show(view)
 
   onClose: ->
-    console.log 'header controller close'
+    log 'header controller close'

@@ -19,14 +19,14 @@ module.exports = class DebugView extends Backbone.Marionette.ItemView
 
   onTriggerEvent: (e) ->
     model = Backbone.Syphon.serialize(@)
-    console.log 'onTriggerEvent', model
+    log 'onTriggerEvent', model
     vent.trigger model.event
     e.preventDefault()
 
   onShow: ->
     scrollTo(0,0)
-    console.log 'resources', @resources
+    log 'resources', @resources
     #$('input.rating[type=number]').rating();
 
   onClose: ->
-    console.log 'debug view close'
+    log 'debug view close'

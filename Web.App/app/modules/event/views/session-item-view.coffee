@@ -19,7 +19,7 @@ module.exports = class SessionItemView extends ItemView
 
   onShow: ->
     if @model.get('feedbackAllowed') is false
-      console.log @model, @model.get('feedbackAllowed')
+      log @model, @model.get('feedbackAllowed')
       
       @$el.addClass('nofeedback') 
 

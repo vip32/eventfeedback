@@ -12,7 +12,7 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
     'eventreport/:id': 'showEventReport'
 
   initialize: (options)  ->
-    console.log 'event router init'
+    log 'event router init'
 
     application.addInitializer (options) =>
 

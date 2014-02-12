@@ -27,4 +27,4 @@ module.exports = class SigninView extends Backbone.Marionette.ItemView
     $('.make-switch').bootstrapSwitch()
 
   onClose: ->
-    console.log 'signin view close'
+    log 'signin view close'

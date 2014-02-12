@@ -19,7 +19,7 @@ module.exports.Collection = class HeadersCollection extends Collection
   active: (roles) ->
     # authenticated = settings.getValueOrDefault('api_authenticated', false)
     filtered = @filter (item) =>
-      console.log 'header:item', item.get('title'), item.get('roles'), '>', roles
+      log 'header:item', item.get('title'), item.get('roles'), '>', roles
       visible = item.get('visible') ? true
       return true if visible and _.isEmpty(item.get('roles'))
       return true if visible and not _.isEmpty(roles) and _.intersection(roles, item.get('roles')).length > 0
@@ -33,7 +33,7 @@ module.exports.Collection = class HeadersCollection extends Collection
       # if itemAuthenticated is false and authenticated is false
       #   return true
 
-    console.log 'header:filtered', filtered
+    log 'header:filtered', filtered
     new HeadersCollection(filtered)
 
 module.exports.TestData = class TestData

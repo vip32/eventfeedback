@@ -11,7 +11,7 @@ EventTag = require '../../models/eventtag'
 module.exports = class Controller extends Backbone.Marionette.Controller
 
   constructor: (options) ->
-    console.log 'event controller init'
+    log 'event controller init'
 
     application.addInitializer (options) =>
 
@@ -25,7 +25,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         @saveFeedback feedback
 
   showEventsIndex: ->
-#    logger.log 'aa'
+    #logger.log 'aa'
     
     vent.trigger 'fetch:done' # switch off block
     @events.fetch(
@@ -115,4 +115,4 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         vent.trigger 'fetch:fail'
 
   onClose: ->
-    console.log 'event controller close'
+    log 'event controller close'

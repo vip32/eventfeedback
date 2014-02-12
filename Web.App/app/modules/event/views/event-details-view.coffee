@@ -53,7 +53,7 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
         @collection.reset(@orgcoll.models)
       
   onBack: =>
-    console.log 'back from event-details'
+    log 'back from event-details'
     vent.trigger 'events:index'
     
   onReport: (e) ->
@@ -62,4 +62,4 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
     
   onClose: ->
     vent.off 'navigation:back', @onBack
-    console.log 'events-details view close'
+    log 'events-details view close'

@@ -22,7 +22,7 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
     feedbackdefinition: @model.get('feedbackDefinition')
 
   onBack: =>
-    console.log 'back from session-details'
+    log 'back from session-details'
     vent.trigger 'event:details', @model.get('eventId')
 
   onShow: ->
@@ -54,4 +54,4 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
 
   onClose: ->
     vent.off 'navigation:back', @onBack
-    console.log 'session-details view close'
+    log 'session-details view close'
