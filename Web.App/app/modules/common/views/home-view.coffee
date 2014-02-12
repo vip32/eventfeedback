@@ -6,7 +6,7 @@ module.exports = class HomeView extends Backbone.Marionette.ItemView
   template: require './templates/home'
 
   initialize: (options) ->
-    application.trigger 'navigation:back:off'
+    vent.trigger 'navigation:back:off'
 
   onShow: ->
     scrollTo(0,0)

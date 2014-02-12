@@ -11,7 +11,6 @@ module.exports = class UsersGeneratorItemView extends Backbone.Marionette.ItemVi
   
   initialize: (options) ->
     @resources = options?.resources
-    console.log '--------', options
 
   serializeData: ->
     resources: @resources?.toJSON()

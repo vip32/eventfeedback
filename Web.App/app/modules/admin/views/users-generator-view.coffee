@@ -6,8 +6,8 @@ module.exports = class UsersGeneratorView extends Backbone.Marionette.CompositeV
   template: require './templates/users-generator'
   itemView: require './users-generator-item-view'
   itemViewContainer: '.js-users'
-  application.trigger 'navigation:back:on'
-  application.on 'navigation:back', @onBack
+  vent.trigger 'navigation:back:on'
+  vent.on 'navigation:back', @onBack
   events:
     'click #js-generate': 'onGenerate'
 
@@ -53,4 +53,4 @@ module.exports = class UsersGeneratorView extends Backbone.Marionette.CompositeV
     # TODO: button > trigger event for controller to save all 'dirty' models
     
   onBack: =>
-    application.trigger 'admin:users:edit'
+    vent.trigger 'admin:users:edit'

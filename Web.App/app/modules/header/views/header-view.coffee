@@ -26,8 +26,8 @@ module.exports.HeaderItem = class ItemView extends Backbone.Marionette.ItemView
 
   onClick: (e) ->
     e.preventDefault()
-    application.trigger 'sidebar:hide'
-    application.trigger @model.get('trigger')
+    vent.trigger 'sidebar:hide'
+    vent.trigger @model.get('trigger')
 
   setActive: ->
     @$el.addClass('active')
@@ -70,9 +70,9 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
       # $('#wrapper').removeClass('loading')
       $('#wrapper').unblock()
 
-    application.on 'navigation:back:on', ->
+    vent.on 'navigation:back:on', ->
       $('#menu-back').show()
-    application.on 'navigation:back:off', ->
+    vent.on 'navigation:back:off', ->
       $('#menu-back').hide()
 
   serializeData: ->
@@ -87,11 +87,11 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
 
   onSidebarToggle: (e) ->
     e.preventDefault()
-    application.trigger 'sidebar:toggle'
+    vent.trigger 'sidebar:toggle'
 
   onBack: (e) ->
     e.preventDefault()
-    application.trigger 'navigation:back'
+    vent.trigger 'navigation:back'
 
   setSubHeader: (title, glyphicon) ->
     @$('#js-subtitle').text(title)

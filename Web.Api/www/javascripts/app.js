@@ -123,6 +123,7 @@ Application = (function(_super) {
     var _this = this;
     console.log('application init');
     vent.setup();
+    this.hookGlobalEvents();
     this.on("initialize:after", function(options) {
       var module, name, router, _ref1;
       console.log('application init after');
@@ -183,6 +184,16 @@ Application = (function(_super) {
     if (currentModule) {
       return currentModule.start(options);
     }
+  };
+
+  Application.prototype.hookGlobalEvents = function() {
+    return $(window).error(function(msg, url, line) {
+      var message;
+      message = "'" + msg.originalEvent.message + "' at " + msg.originalEvent.filename + ":" + msg.originalEvent.lineno;
+      console.error('ERROR', message);
+      alert(message);
+      return vent.trigger('about:index');
+    });
   };
 
   return Application;
@@ -280,8 +291,8 @@ module.exports = AppLayout = (function(_super) {
   };
 
   AppLayout.prototype.initialize = function() {
-    application.on('sidebar:toggle', this.onSidebarToggle);
-    return application.on('sidebar:hide', this.onSidebarHide);
+    vent.on('sidebar:toggle', this.onSidebarToggle);
+    return vent.on('sidebar:hide', this.onSidebarHide);
   };
 
   AppLayout.prototype.events = {
@@ -1510,19 +1521,19 @@ module.exports = Router = (function(_super) {
     var _this = this;
     console.log('admin router init');
     return application.addInitializer(function(options) {
-      application.on('admin:events:edit', function() {
+      vent.on('admin:events:edit', function() {
         application.navigate('admin/events');
         return _this.controller.showEventsEdit();
       });
-      application.on('admin:sessions:edit', function(id) {
+      vent.on('admin:sessions:edit', function(id) {
         application.navigate('admin/events/' + id);
         return _this.controller.showSessionsEdit(id);
       });
-      application.on('admin:users:edit', function() {
+      vent.on('admin:users:edit', function() {
         application.navigate('admin/users');
         return _this.controller.showUsersEdit();
       });
-      return application.on('admin:users:generator', function() {
+      return vent.on('admin:users:generator', function() {
         application.navigate('admin/usersgenerator');
         return _this.controller.showUsersGenerator();
       });
@@ -1799,8 +1810,8 @@ module.exports = UsersEditView = (function(_super) {
   UsersEditView.prototype.initialize = function(options) {
     this.resources = options != null ? options.resources : void 0;
     this.roles = options != null ? options.roles : void 0;
-    application.trigger('navigation:back:on');
-    return application.on('navigation:back', this.onBack);
+    vent.trigger('navigation:back:on');
+    return vent.on('navigation:back', this.onBack);
   };
 
   UsersEditView.prototype.onShow = function() {
@@ -1856,11 +1867,11 @@ module.exports = UsersEditView = (function(_super) {
   };
 
   UsersEditView.prototype.onGenerate = function() {
-    return application.trigger('admin:users:generator');
+    return vent.trigger('admin:users:generator');
   };
 
   UsersEditView.prototype.onBack = function() {
-    return application.trigger('admin:users:edit');
+    return vent.trigger('admin:users:edit');
   };
 
   return UsersEditView;
@@ -1898,8 +1909,7 @@ module.exports = UsersGeneratorItemView = (function(_super) {
   UsersGeneratorItemView.prototype.className = 'list-group-item';
 
   UsersGeneratorItemView.prototype.initialize = function(options) {
-    this.resources = options != null ? options.resources : void 0;
-    return console.log('--------', options);
+    return this.resources = options != null ? options.resources : void 0;
   };
 
   UsersGeneratorItemView.prototype.serializeData = function() {
@@ -1942,9 +1952,9 @@ module.exports = UsersGeneratorView = (function(_super) {
 
   UsersGeneratorView.prototype.itemViewContainer = '.js-users';
 
-  application.trigger('navigation:back:on');
+  vent.trigger('navigation:back:on');
 
-  application.on('navigation:back', UsersGeneratorView.onBack);
+  vent.on('navigation:back', UsersGeneratorView.onBack);
 
   UsersGeneratorView.prototype.events = {
     'click #js-generate': 'onGenerate'
@@ -2008,7 +2018,7 @@ module.exports = UsersGeneratorView = (function(_super) {
   };
 
   UsersGeneratorView.prototype.onBack = function() {
-    return application.trigger('admin:users:edit');
+    return vent.trigger('admin:users:edit');
   };
 
   return UsersGeneratorView;
@@ -2183,7 +2193,7 @@ module.exports = Router = (function(_super) {
     console.log('about router init');
     return application.addInitializer(function(options) {
       vent.on('sync:fail:unauthorized', function() {
-        return application.trigger(config.signintrigger);
+        return vent.trigger(config.signintrigger);
       });
       vent.on('sync:fail:servererror', function() {
         return console.warn('sync:server error');
@@ -2191,19 +2201,19 @@ module.exports = Router = (function(_super) {
       vent.on('sync:fail:unknown', function() {
         return console.warn('sync:unknown error');
       });
-      application.on('home:index', function() {
+      vent.on('home:index', function() {
         application.navigate('home');
         return _this.controller.showHome();
       });
-      application.on('signin:index', function() {
+      vent.on('signin:index', function() {
         application.navigate('signin');
         return _this.controller.showSignin();
       });
-      application.on('about:index', function() {
+      vent.on('about:index', function() {
         application.navigate('about');
         return _this.controller.showAbout();
       });
-      return application.on('debug:index', function() {
+      return vent.on('debug:index', function() {
         application.navigate('debug');
         return _this.controller.showDebug();
       });
@@ -2245,7 +2255,7 @@ module.exports = AboutView = (function(_super) {
   };
 
   AboutView.prototype.initialize = function(options) {
-    return application.trigger('navigation:back:off');
+    return vent.trigger('navigation:back:off');
   };
 
   AboutView.prototype.onShow = function() {
@@ -2255,7 +2265,7 @@ module.exports = AboutView = (function(_super) {
   AboutView.prototype.onReset = function(e) {
     e.preventDefault();
     settings.destroy();
-    application.trigger('home:index');
+    vent.trigger('home:index');
     return vent.trigger('resources:loaded');
   };
 
@@ -2297,7 +2307,7 @@ module.exports = DebugView = (function(_super) {
 
   DebugView.prototype.initialize = function(options) {
     this.resources = options != null ? options.resources : void 0;
-    return application.trigger('navigation:back:off');
+    return vent.trigger('navigation:back:off');
   };
 
   DebugView.prototype.serializeData = function() {
@@ -2313,7 +2323,7 @@ module.exports = DebugView = (function(_super) {
     var model;
     model = Backbone.Syphon.serialize(this);
     console.log('onTriggerEvent', model);
-    application.trigger(model.event);
+    vent.trigger(model.event);
     return e.preventDefault();
   };
 
@@ -2377,7 +2387,7 @@ module.exports = HomeView = (function(_super) {
   HomeView.prototype.template = require('./templates/home');
 
   HomeView.prototype.initialize = function(options) {
-    return application.trigger('navigation:back:off');
+    return vent.trigger('navigation:back:off');
   };
 
   HomeView.prototype.onShow = function() {
@@ -2421,7 +2431,7 @@ module.exports = SigninView = (function(_super) {
   };
 
   SigninView.prototype.initialize = function(options) {
-    return application.trigger('navigation:back:off');
+    return vent.trigger('navigation:back:off');
   };
 
   SigninView.prototype.serializeData = function() {
@@ -2630,6 +2640,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showEventsIndex = function() {
     var _this = this;
+    logger.log('aa');
     vent.trigger('fetch:done');
     return this.events.fetch({
       reload: true
@@ -2746,7 +2757,7 @@ module.exports = Controller = (function(_super) {
       success: function(model, response, options) {
         vent.trigger('message:success:show', application.resources.key('Feedback_Saved_Success'));
         vent.trigger('fetch:done');
-        return application.trigger('event:details', settings.get('active-event'));
+        return vent.trigger('event:details', settings.get('active-event'));
       },
       error: function(model, xhr, options) {
         vent.trigger('message:error:show', application.resources.key('Feedback_Saved_Failed'));
@@ -2800,19 +2811,19 @@ module.exports = Router = (function(_super) {
         application.navigate('events');
         return _this.controller.showEventsIndex();
       });
-      application.on('events:index', function() {
+      vent.on('events:index', function() {
         application.navigate('events');
         return _this.controller.showEventsIndex();
       });
-      application.on('event:details', function(id) {
+      vent.on('event:details', function(id) {
         application.navigate('events/' + id);
         return _this.controller.showEventDetails(id);
       });
-      application.on('session:details', function(id) {
+      vent.on('session:details', function(id) {
         application.navigate('sessions/' + id);
         return _this.controller.showSessionDetails(id);
       });
-      return application.on('event:report', function(id) {
+      return vent.on('event:report', function(id) {
         application.navigate('eventreport/' + id);
         return _this.controller.showEventReport(id);
       });
@@ -2863,8 +2874,8 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.initialize = function(options) {
     this.resources = options != null ? options.resources : void 0;
     this.tags = options != null ? options.tags : void 0;
-    application.trigger('navigation:back:on');
-    application.on('navigation:back', this.onBack);
+    vent.trigger('navigation:back:on');
+    vent.on('navigation:back', this.onBack);
     return this.orgcoll = options != null ? new options.collection.constructor(options != null ? options.collection.models : void 0) : void 0;
   };
 
@@ -2913,16 +2924,16 @@ module.exports = EventDetailsView = (function(_super) {
 
   EventDetailsView.prototype.onBack = function() {
     console.log('back from event-details');
-    return application.trigger('events:index');
+    return vent.trigger('events:index');
   };
 
   EventDetailsView.prototype.onReport = function(e) {
     e.preventDefault();
-    return application.trigger('event:report', settings.get('active-event'));
+    return vent.trigger('event:report', settings.get('active-event'));
   };
 
   EventDetailsView.prototype.onClose = function() {
-    application.off('navigation:back', this.onBack);
+    vent.off('navigation:back', this.onBack);
     return console.log('events-details view close');
   };
 
@@ -2968,7 +2979,7 @@ module.exports = EventItemView = (function(_super) {
     e.preventDefault();
     this.$el.addClass('active');
     settings.set('active-event', this.model.get('id'));
-    return application.trigger('event:details', this.model.get('id'));
+    return vent.trigger('event:details', this.model.get('id'));
   };
 
   return EventItemView;
@@ -3001,8 +3012,8 @@ module.exports = EventReportView = (function(_super) {
 
   EventReportView.prototype.initialize = function(options) {
     this.resources = options != null ? options.resources : void 0;
-    application.trigger('navigation:back:on');
-    return application.on('navigation:back', this.onBack);
+    vent.trigger('navigation:back:on');
+    return vent.on('navigation:back', this.onBack);
   };
 
   EventReportView.prototype.serializeData = function() {
@@ -3017,11 +3028,11 @@ module.exports = EventReportView = (function(_super) {
   EventReportView.prototype.onBack = function() {
     var _ref1;
     console.log('back from event-report');
-    return application.trigger('event:details', (_ref1 = this.model) != null ? _ref1.id : void 0);
+    return vent.trigger('event:details', (_ref1 = this.model) != null ? _ref1.id : void 0);
   };
 
   EventReportView.prototype.onClose = function() {
-    application.off('navigation:back', this.onBack);
+    vent.off('navigation:back', this.onBack);
     return console.log('event-report view close');
   };
 
@@ -3058,7 +3069,7 @@ module.exports = EventIndexView = (function(_super) {
   EventIndexView.prototype.itemViewContainer = '.js-events';
 
   EventIndexView.prototype.initialize = function(options) {
-    return application.trigger('navigation:back:off');
+    return vent.trigger('navigation:back:off');
   };
 
   EventIndexView.prototype.onClose = function() {
@@ -3102,8 +3113,8 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.initialize = function(options) {
     this.resources = options != null ? options.resources : void 0;
     this.feedback = options != null ? options.feedback : void 0;
-    application.trigger('navigation:back:on');
-    return application.on('navigation:back', this.onBack);
+    vent.trigger('navigation:back:on');
+    return vent.on('navigation:back', this.onBack);
   };
 
   EventDetailsView.prototype.serializeData = function() {
@@ -3118,7 +3129,7 @@ module.exports = EventDetailsView = (function(_super) {
 
   EventDetailsView.prototype.onBack = function() {
     console.log('back from session-details');
-    return application.trigger('event:details', this.model.get('eventId'));
+    return vent.trigger('event:details', this.model.get('eventId'));
   };
 
   EventDetailsView.prototype.onShow = function() {
@@ -3156,7 +3167,7 @@ module.exports = EventDetailsView = (function(_super) {
   };
 
   EventDetailsView.prototype.onClose = function() {
-    application.off('navigation:back', this.onBack);
+    vent.off('navigation:back', this.onBack);
     return console.log('session-details view close');
   };
 
@@ -3221,7 +3232,7 @@ module.exports = SessionItemView = (function(_super) {
     e.preventDefault();
     this.$el.addClass('active');
     settings.set('active-session', this.model.get('id'));
-    return application.trigger('session:details', this.model.get('id'));
+    return vent.trigger('session:details', this.model.get('id'));
   };
 
   return SessionItemView;
@@ -4906,8 +4917,8 @@ module.exports.HeaderItem = ItemView = (function(_super) {
 
   ItemView.prototype.onClick = function(e) {
     e.preventDefault();
-    application.trigger('sidebar:hide');
-    return application.trigger(this.model.get('trigger'));
+    vent.trigger('sidebar:hide');
+    return vent.trigger(this.model.get('trigger'));
   };
 
   ItemView.prototype.setActive = function() {
@@ -4980,10 +4991,10 @@ module.exports.Header = View = (function(_super) {
       }
       return $('#wrapper').unblock();
     });
-    application.on('navigation:back:on', function() {
+    vent.on('navigation:back:on', function() {
       return $('#menu-back').show();
     });
-    return application.on('navigation:back:off', function() {
+    return vent.on('navigation:back:off', function() {
       return $('#menu-back').hide();
     });
   };
@@ -5008,12 +5019,12 @@ module.exports.Header = View = (function(_super) {
 
   View.prototype.onSidebarToggle = function(e) {
     e.preventDefault();
-    return application.trigger('sidebar:toggle');
+    return vent.trigger('sidebar:toggle');
   };
 
   View.prototype.onBack = function(e) {
     e.preventDefault();
-    return application.trigger('navigation:back');
+    return vent.trigger('navigation:back');
   };
 
   View.prototype.setSubHeader = function(title, glyphicon) {

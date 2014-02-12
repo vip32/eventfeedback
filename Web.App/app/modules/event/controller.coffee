@@ -25,6 +25,8 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         @saveFeedback feedback
 
   showEventsIndex: ->
+    logger.log 'aa'
+    
     vent.trigger 'fetch:done' # switch off block
     @events.fetch(
       reload: true # needed after login, otherwise FAIL on fetch
@@ -107,7 +109,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       success: (model, response, options) =>
         vent.trigger 'message:success:show', application.resources.key('Feedback_Saved_Success')
         vent.trigger 'fetch:done'
-        application.trigger 'event:details', settings.get('active-event')
+        vent.trigger 'event:details', settings.get('active-event')
       error: (model, xhr, options) =>
         vent.trigger 'message:error:show', application.resources.key('Feedback_Saved_Failed')
         vent.trigger 'fetch:fail'

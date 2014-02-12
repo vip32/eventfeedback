@@ -18,4 +18,4 @@ module.exports = class EventItemView extends ItemView
     e.preventDefault()
     @$el.addClass('active')
     settings.set('active-event', @model.get('id'))
-    application.trigger 'event:details', @model.get('id')
+    vent.trigger 'event:details', @model.get('id')

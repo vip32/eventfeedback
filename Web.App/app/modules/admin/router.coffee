@@ -16,19 +16,19 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
 
     application.addInitializer (options) =>
 
-      application.on 'admin:events:edit', =>
+      vent.on 'admin:events:edit', =>
         application.navigate 'admin/events'
         @controller.showEventsEdit()
 
-      application.on 'admin:sessions:edit', (id) =>
+      vent.on 'admin:sessions:edit', (id) =>
         application.navigate 'admin/events/' + id
         @controller.showSessionsEdit(id)
 
-      application.on 'admin:users:edit', =>
+      vent.on 'admin:users:edit', =>
         application.navigate 'admin/users'
         @controller.showUsersEdit()
         
-      application.on 'admin:users:generator', =>
+      vent.on 'admin:users:generator', =>
         application.navigate 'admin/usersgenerator'
         @controller.showUsersGenerator()
 

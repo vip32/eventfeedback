@@ -20,28 +20,28 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
         application.navigate 'events'
         @controller.showEventsIndex()
 
-      application.on 'events:index', =>
+      vent.on 'events:index', =>
         # application.checkauth 'events:index'
         application.navigate 'events'
         @controller.showEventsIndex()
 
-      application.on 'event:details', (id) =>
+      vent.on 'event:details', (id) =>
         # if @noActiveEvent()
-        #   application.trigger 'events:index'
+        #   vent.trigger 'events:index'
         # else
         application.navigate 'events/' + id
         @controller.showEventDetails(id)
 
-      application.on 'session:details', (id) =>
+      vent.on 'session:details', (id) =>
         # if @noActiveEvent()
-        #   application.trigger 'events:index'
+        #   vent.trigger 'events:index'
         # else
         application.navigate 'sessions/' + id
         @controller.showSessionDetails(id)
         
-      application.on 'event:report', (id) =>
+      vent.on 'event:report', (id) =>
         # if @noActiveEvent()
-        #   application.trigger 'events:index'
+        #   vent.trigger 'events:index'
         # else
         application.navigate 'eventreport/' + id
         @controller.showEventReport(id)

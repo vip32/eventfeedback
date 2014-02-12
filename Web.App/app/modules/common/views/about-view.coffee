@@ -9,7 +9,7 @@ module.exports = class AboutView extends Backbone.Marionette.ItemView
     'click .js-reset': 'onReset'
 
   initialize: (options) ->
-    application.trigger 'navigation:back:off'
+    vent.trigger 'navigation:back:off'
   
   onShow: ->
     scrollTo(0,0)
@@ -17,7 +17,7 @@ module.exports = class AboutView extends Backbone.Marionette.ItemView
   onReset: (e) ->
     e.preventDefault()
     settings.destroy()
-    application.trigger 'home:index'
+    vent.trigger 'home:index'
     vent.trigger 'resources:loaded' # resets the header + nav
     
   onClose: ->

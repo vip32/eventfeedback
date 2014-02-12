@@ -12,8 +12,8 @@ module.exports = class UsersEditView extends Backbone.Marionette.ItemView
   initialize: (options) ->
     @resources = options?.resources
     @roles = options?.roles
-    application.trigger 'navigation:back:on'
-    application.on 'navigation:back', @onBack
+    vent.trigger 'navigation:back:on'
+    vent.on 'navigation:back', @onBack
 
   onShow: ->
     scrollTo(0,0)
@@ -70,7 +70,7 @@ module.exports = class UsersEditView extends Backbone.Marionette.ItemView
     # TODO: button > trigger event for controller to save all 'dirty' models
     
   onGenerate: ->
-    application.trigger 'admin:users:generator'
+    vent.trigger 'admin:users:generator'
     
   onBack: =>
-    application.trigger 'admin:users:edit'
+    vent.trigger 'admin:users:edit'

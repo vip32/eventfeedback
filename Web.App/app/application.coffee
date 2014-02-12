@@ -11,6 +11,7 @@ class Application extends Backbone.Marionette.Application
   initialize: =>
     console.log 'application init'
     vent.setup()
+    @hookGlobalEvents()
     @on "initialize:after", (options) =>
       console.log 'application init after'
 
@@ -37,7 +38,6 @@ class Application extends Backbone.Marionette.Application
       vent.trigger 'resources:loaded'
 
     settings.set('last-visit', moment())
-
     @start()
 
   checkauth: (trigger) ->
@@ -60,5 +60,14 @@ class Application extends Backbone.Marionette.Application
 
     @currentModule = currentModule;
     if(currentModule) then currentModule.start(options)
+    
+  hookGlobalEvents: ->
+    $(window).error (msg, url, line) ->
+      # general error handler ###
+      message = "'#{msg.originalEvent.message}' at #{msg.originalEvent.filename}:#{msg.originalEvent.lineno}"
+      console.error 'ERROR', message
+      #vent.trigger 'message:error:show', message
+      alert message
+      vent.trigger 'about:index'
 
 module.exports = new Application()

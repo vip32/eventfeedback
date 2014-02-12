@@ -17,7 +17,7 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
     application.addInitializer (options) =>
 
       vent.on 'sync:fail:unauthorized', =>
-        application.trigger config.signintrigger
+        vent.trigger config.signintrigger
 
       vent.on 'sync:fail:servererror', =>
         console.warn 'sync:server error'
@@ -25,19 +25,19 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
       vent.on 'sync:fail:unknown', =>
         console.warn 'sync:unknown error'
 
-      application.on 'home:index', =>
+      vent.on 'home:index', =>
         application.navigate 'home'
         @controller.showHome()
 
-      application.on 'signin:index', =>
+      vent.on 'signin:index', =>
         application.navigate 'signin'
         @controller.showSignin()
 
-      application.on 'about:index', =>
+      vent.on 'about:index', =>
         application.navigate 'about'
         @controller.showAbout()
 
-      application.on 'debug:index', =>
+      vent.on 'debug:index', =>
         application.navigate 'debug'
         @controller.showDebug()
 

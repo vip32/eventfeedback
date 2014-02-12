@@ -14,8 +14,8 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
   initialize: (options) ->
     @resources = options?.resources
     @tags = options?.tags
-    application.trigger 'navigation:back:on'
-    application.on 'navigation:back', @onBack
+    vent.trigger 'navigation:back:on'
+    vent.on 'navigation:back', @onBack
     # keep the original collections, for resetting the filtered collection
     @orgcoll = new options?.collection.constructor(options?.collection.models)
 
@@ -54,12 +54,12 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
       
   onBack: =>
     console.log 'back from event-details'
-    application.trigger 'events:index'
+    vent.trigger 'events:index'
     
   onReport: (e) ->
     e.preventDefault()
-    application.trigger 'event:report',  settings.get('active-event')
+    vent.trigger 'event:report',  settings.get('active-event')
     
   onClose: ->
-    application.off 'navigation:back', @onBack
+    vent.off 'navigation:back', @onBack
     console.log 'events-details view close'

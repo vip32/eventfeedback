@@ -9,7 +9,7 @@ module.exports = class SigninView extends Backbone.Marionette.ItemView
     'click .js-signin': 'onSignin'
 
   initialize: (options) ->
-    application.trigger 'navigation:back:off'
+    vent.trigger 'navigation:back:off'
 
   serializeData: ->
     resources: @resources?.toJSON()
