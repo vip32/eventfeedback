@@ -14,7 +14,6 @@ module.exports.Collection = class ResourceCollection extends Collection
 
   key: (key) ->
     result = @find (model) =>
-      console.log model.get('key'), key
       model.get('key') is key
     result?.get('value') ? ''
 

@@ -10,7 +10,7 @@ class Application extends Backbone.Marionette.Application
 
   initialize: =>
     console.log 'application init'
-
+    vent.setup()
     @on "initialize:after", (options) =>
       console.log 'application init after'
 

@@ -122,6 +122,7 @@ Application = (function(_super) {
   Application.prototype.initialize = function() {
     var _this = this;
     console.log('application init');
+    vent.setup();
     this.on("initialize:after", function(options) {
       var module, name, router, _ref1;
       console.log('application init after');
@@ -375,7 +376,7 @@ module.exports = Collection = (function(_super) {
     return Collection.__super__.fetch.call(this, options).done(function(collection, response, options) {
       this.trigger('fetch:done');
       vent.trigger('fetch:done');
-      return console.log('fetch:off', this.constructor.name, collection, response, options);
+      return console.log('fetch:done', this.constructor.name, collection, response, options);
     }).fail(function(collection, response, options) {
       vent.trigger('fetch:fail');
       return console.warn('fetch:fail', this.constructor.name, collection, response, options);
@@ -811,7 +812,7 @@ module.exports.Collection = HeadersCollection = (function(_super) {
       _this = this;
     filtered = this.filter(function(item) {
       var visible, _ref2;
-      console.log('---->', item.get('title'), item.get('roles'), '>', roles);
+      console.log('header:item', item.get('title'), item.get('roles'), '>', roles);
       visible = (_ref2 = item.get('visible')) != null ? _ref2 : true;
       if (visible && _.isEmpty(item.get('roles'))) {
         return true;
@@ -820,7 +821,7 @@ module.exports.Collection = HeadersCollection = (function(_super) {
         return true;
       }
     });
-    console.log('=============>', filtered);
+    console.log('header:filtered', filtered);
     return new HeadersCollection(filtered);
   };
 
@@ -977,7 +978,6 @@ module.exports.Collection = ResourceCollection = (function(_super) {
     var result, _ref2,
       _this = this;
     result = this.find(function(model) {
-      console.log(model.get('key'), key);
       return model.get('key') === key;
     });
     return (_ref2 = result != null ? result.get('value') : void 0) != null ? _ref2 : '';
@@ -5150,7 +5150,7 @@ var Vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-module.exports = Vent = (function(_super) {
+Vent = (function(_super) {
   __extends(Vent, _super);
 
   function Vent() {
@@ -5158,9 +5158,17 @@ module.exports = Vent = (function(_super) {
     return _ref;
   }
 
+  Vent.setup = function() {
+    return this.on('all', function(name) {
+      return console.log('vent:trigger', name);
+    });
+  };
+
   return Vent;
 
 })(Backbone.Events);
+
+module.exports = Vent;
 });
 
 ;
