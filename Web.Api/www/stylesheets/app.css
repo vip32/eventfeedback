@@ -7996,6 +7996,32 @@ label.btn.btn-primary.badge.active {
 p {
   color: #000;
 }
+div#messagebox {
+  position: fixed;
+  top: 50px;
+  left: 25%;
+  z-index: 9999;
+}
+.alert {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 15px;
+  padding-right: 15px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+.alert-success {
+  background-color: #0b486b;
+  border-color: #0b486b;
+  color: #fff;
+  font-weight: bold;
+}
+.alert-danger {
+  background-color: #0b486b;
+  border-color: #0b486b;
+  color: #f38630;
+  font-weight: bold;
+}
 div#preload {
   display: none;
 }

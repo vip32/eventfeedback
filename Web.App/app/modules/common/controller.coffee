@@ -28,7 +28,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         @showMessage data, 'danger'
 
   showMessage: (data, type) ->
-    $('#messagebox').append('<div id="currentmessage" class="alert alert-' +  type + '"><a class="close" data-dismiss="alert">×</a><span>'+data+'</span></div>')
+    $('#messagebox').append('<div id="currentmessage" class="alert alert-' +  type + '"><a class="close" data-dismiss="alert">&emsp;×</a><span>'+data+'</span></div>')
     setTimeout ->
       $("#currentmessage").remove();
     , 3000

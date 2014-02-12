@@ -104,7 +104,7 @@ namespace EventFeedback.Domain
                     p => p.Key,
                     
                     new ResourceText { Key = "Feedback_Saved_Success", Value = "Feedback saved", Language = "en-US" },
-                    new ResourceText { Key = "Feedback_Saved_Failed", Value = "Feedback NOT saved", Language = "en-US" },
+                    new ResourceText { Key = "Feedback_Saved_Failed", V\alue = "Feedback NOT saved", Language = "en-US" },
                     new ResourceText { Key = "Title_Home", Value = "Home", Language = "en-US" },
                     new ResourceText { Key = "Title_About", Value = "About", Language = "en-US" },
                     new ResourceText { Key = "Title_Events", Value = "Events", Language = "en-US" },
@@ -424,11 +424,15 @@ namespace EventFeedback.Domain
                 }
             };
 
-            context.Events.AddOrUpdate(
-                p => p.Title,
-                events.ToArray()
-                );
+            if (!context.Events.Any())
+            {
+                context.Events.AddOrUpdate(
+                    p => p.Title,
+                    events.ToArray()
+                    );
+            }
             context.SaveChanges();
+
 
             if (!context.Feedbacks.Any())
             {

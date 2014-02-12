@@ -2059,7 +2059,7 @@ module.exports = Controller = (function(_super) {
   }
 
   Controller.prototype.showMessage = function(data, type) {
-    $('#messagebox').append('<div id="currentmessage" class="alert alert-' + type + '"><a class="close" data-dismiss="alert">×</a><span>' + data + '</span></div>');
+    $('#messagebox').append('<div id="currentmessage" class="alert alert-' + type + '"><a class="close" data-dismiss="alert">&emsp;×</a><span>' + data + '</span></div>');
     return setTimeout(function() {
       return $("#currentmessage").remove();
     }, 3000);
