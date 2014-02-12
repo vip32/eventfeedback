@@ -1422,7 +1422,6 @@ module.exports = Controller = (function(_super) {
         var View, view;
         vent.trigger('set:active:header', 'admin:users:edit', application.resources.key('Title_Admin_Users'), 'user');
         users.on('change', function(model) {
-          log('user change:', model);
           model.credentials = users.credentials;
           return model.set('dirty', true, {
             silent: true
@@ -1447,7 +1446,6 @@ module.exports = Controller = (function(_super) {
     }).done(function(roles) {
       var View, view;
       _this.users.on('add', function(model) {
-        log('user add:', model);
         model.credentials = _this.users.credentials;
         return model.set('dirty', true, {
           silent: true
