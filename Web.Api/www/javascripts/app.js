@@ -2218,13 +2218,15 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/common/views/about-view", function(exports, require, module) {
-var AboutView, application, vent, _ref,
+var AboutView, application, settings, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
 
 vent = require('vent');
+
+settings = require('settings');
 
 module.exports = AboutView = (function(_super) {
   __extends(AboutView, _super);
@@ -2238,12 +2240,23 @@ module.exports = AboutView = (function(_super) {
 
   AboutView.prototype.template = require('./templates/about');
 
+  AboutView.prototype.events = {
+    'click .js-reset': 'onReset'
+  };
+
   AboutView.prototype.initialize = function(options) {
     return application.trigger('navigation:back:off');
   };
 
   AboutView.prototype.onShow = function() {
     return scrollTo(0, 0);
+  };
+
+  AboutView.prototype.onReset = function(e) {
+    e.preventDefault();
+    settings.destroy();
+    application.trigger('home:index');
+    return vent.trigger('resources:loaded');
   };
 
   AboutView.prototype.onClose = function() {
@@ -2448,7 +2461,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <h3>App</h3>\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.App\" target=\"_blank\">sources</a>\r\n      </p>\r\n      <ul>\r\n        <li>Backbone 1.1.0</li>\r\n        <li>Underscore 1.5.2</li>\r\n        <li>Twitter Bootstrap 3.0.0</li>\r\n        <li>MarionetteJS 1.2.2</li>\r\n        <li>MomentJS 2.2.1</li>\r\n        <li>jQuery 2.0.3</li>\r\n        <li>JQuery RateIt 1.0.19</li>\r\n        <li>Fastclick 0.6.10</li>\r\n        <li>Pace 0.4.15</li>\r\n      </ul>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      <h3>Api</h3>\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.Api\" target=\"_blank\">sources</a>\r\n      </p>\r\n      <ul>\r\n        <li>C#</li>\r\n        <li>Microsoft Web Api 2</li>\r\n        <li>Microsoft Entity Framework 6.0</li>\r\n        <li>Microsoft AspNet Identity 6.0</li>\r\n      </ul>\r\n    </div>\r\n  </div>\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <h3>Dev</h3>\r\n      <ul>\r\n        <li>\r\n          <a href=\"https://github.com/WindowsAzure\" target=\"_blank\">Windows Azure</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/joyent/node\" target=\"_blank\">Node.js</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/brunch/brunch\" target=\"_blank\">Brunch</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/jashkenas/coffee-script\" target=\"_blank\">Coffeescript</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/bower/bower\" target=\"_blank\">Bower</a>\r\n        </li>\r\n      </ul>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      <!--<img src=\"http://qrfree.kaywa.com/?l=1&s=8&d=https%3A%2F%2Feventfeedback.azurewebsites.net\" alt=\"QRCode\"/>-->\r\n      <a href=\"/\">\r\n        <img class=\"qr\" height=\"88\" width=\"88\"/>\r\n      </a>\r\n    </div>\r\n  </div>\r\n</div>";
+  return "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <h3>App</h3>\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.App\" target=\"_blank\">sources</a>\r\n      </p>\r\n      <ul>\r\n        <li>Backbone 1.1.0</li>\r\n        <li>Underscore 1.5.2</li>\r\n        <li>Twitter Bootstrap 3.0.0</li>\r\n        <li>MarionetteJS 1.2.2</li>\r\n        <li>MomentJS 2.2.1</li>\r\n        <li>jQuery 2.0.3</li>\r\n        <li>JQuery RateIt 1.0.19</li>\r\n        <li>Fastclick 0.6.10</li>\r\n        <li>Pace 0.4.15</li>\r\n      </ul>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      <h3>Api</h3>\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.Api\" target=\"_blank\">sources</a>\r\n      </p>\r\n      <ul>\r\n        <li>C#</li>\r\n        <li>Microsoft Web Api 2</li>\r\n        <li>Microsoft Entity Framework 6.0</li>\r\n        <li>Microsoft AspNet Identity 6.0</li>\r\n      </ul>\r\n    </div>\r\n  </div>\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <h3>Dev</h3>\r\n      <ul>\r\n        <li>\r\n          <a href=\"https://github.com/WindowsAzure\" target=\"_blank\">Windows Azure</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/joyent/node\" target=\"_blank\">Node.js</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/brunch/brunch\" target=\"_blank\">Brunch</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/jashkenas/coffee-script\" target=\"_blank\">Coffeescript</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/bower/bower\" target=\"_blank\">Bower</a>\r\n        </li>\r\n      </ul>\r\n    </div>\r\n  </div>\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <!--<img src=\"http://qrfree.kaywa.com/?l=1&s=8&d=https%3A%2F%2Feventfeedback.azurewebsites.net\" alt=\"QRCode\"/>-->\r\n      <p>\r\n        <a href=\"/\">\r\n          <img class=\"qr\" height=\"88\" width=\"88\"/>\r\n        </a>\r\n      </p>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success js-reset\" href=\"#\">Reset</a>\r\n      </p>\r\n    </div>\r\n  </div>\r\n</div>";
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -5117,8 +5130,12 @@ Settings = (function() {
     return this.store.has(id);
   };
 
-  Settings.prototype.clear = function(options) {
-    return this.store.clear(options);
+  Settings.prototype.destroy = function() {
+    /* removes all models from the collection and store*/
+
+    return _.chain(this.store.models).clone().each(function(model) {
+      return model.destroy();
+    });
   };
 
   return Settings;

@@ -32,9 +32,9 @@ class Settings
     ### looks through the collection for the specified id ###
     @store.has(id)
 
-  clear: (options) ->
-    @store.clear(options)
-    # if options.ready
-    #   options.ready @
+  destroy: ->
+    ### removes all models from the collection and store ###
+    _.chain(@store.models).clone().each (model) ->
+      model.destroy()
 
 module.exports = new Settings()
