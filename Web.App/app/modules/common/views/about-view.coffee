@@ -11,6 +11,11 @@ module.exports = class AboutView extends Backbone.Marionette.ItemView
   initialize: (options) ->
     vent.trigger 'navigation:back:off'
   
+  serializeData: ->
+    resources: @resources?.toJSON()
+    user: settings.get('api_username')
+    roles: settings.get('api_userroles')
+    
   onShow: ->
     scrollTo(0,0)
     
