@@ -195,14 +195,11 @@ namespace EventFeedback.Domain
                 }
             };
 
-            if (!context.FeedbackDefinitions.Any())
-            {
-                context.FeedbackDefinitions.AddOrUpdate(
-                    p => p.Title,
-                    feedbackDefinitions.ToArray()
-                    );
-                context.SaveChanges();
-            }
+            context.FeedbackDefinitions.AddOrUpdate(
+                p => p.Title,
+                feedbackDefinitions.ToArray()
+                );
+            context.SaveChanges();
 
             var events = new List<Event>
             {
