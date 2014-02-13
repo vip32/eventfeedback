@@ -12,8 +12,8 @@ module.exports = class UsersEditView extends Backbone.Marionette.ItemView
   initialize: (options) ->
     @resources = options?.resources
     @roles = options?.roles
-    vent.trigger 'navigation:back:on'
-    vent.on 'navigation:back', @onBack
+    #vent.trigger 'navigation:back:on'
+    #vent.on 'navigation:back', @onBack
 
   onShow: ->
     scrollTo(0,0)
@@ -72,5 +72,9 @@ module.exports = class UsersEditView extends Backbone.Marionette.ItemView
   onGenerate: ->
     vent.trigger 'admin:users:generator'
     
-  onBack: =>
-    vent.trigger 'admin:users:edit'
+  #onBack: =>
+    #vent.trigger 'admin:users:edit'
+    
+  onClose: ->
+    #vent.off 'navigation:back', @onBack
+    log 'user-edit view close'

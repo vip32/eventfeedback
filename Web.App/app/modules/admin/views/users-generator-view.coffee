@@ -52,5 +52,9 @@ module.exports = class UsersGeneratorView extends Backbone.Marionette.CompositeV
     vent.trigger 'save:users'
     # TODO: button > trigger event for controller to save all 'dirty' models
     
-  onBack: =>
-    vent.trigger 'admin:users:edit'
+  #onBack: =>
+  #  vent.trigger 'admin:users:edit'
+
+  onClose: ->
+    #vent.off 'navigation:back', @onBack
+    log 'user-generator view close'

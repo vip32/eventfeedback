@@ -137,7 +137,7 @@ Application = (function(_super) {
       Backbone.history.start();
       log('current route', _this.getCurrentRoute());
       return _this.on('start', function() {
-        return _this.trigger(config.startuptrigger);
+        return vent.trigger(config.startuptrigger);
       });
     });
     this.addInitializer(function(options) {
@@ -1778,7 +1778,6 @@ if (typeof define === 'function' && define.amd) {
 
 ;require.register("modules/admin/views/users-edit-view", function(exports, require, module) {
 var UsersEditView, application, vent, _ref,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1790,7 +1789,6 @@ module.exports = UsersEditView = (function(_super) {
   __extends(UsersEditView, _super);
 
   function UsersEditView() {
-    this.onBack = __bind(this.onBack, this);
     _ref = UsersEditView.__super__.constructor.apply(this, arguments);
     return _ref;
   }
@@ -1807,9 +1805,7 @@ module.exports = UsersEditView = (function(_super) {
 
   UsersEditView.prototype.initialize = function(options) {
     this.resources = options != null ? options.resources : void 0;
-    this.roles = options != null ? options.roles : void 0;
-    vent.trigger('navigation:back:on');
-    return vent.on('navigation:back', this.onBack);
+    return this.roles = options != null ? options.roles : void 0;
   };
 
   UsersEditView.prototype.onShow = function() {
@@ -1868,8 +1864,8 @@ module.exports = UsersEditView = (function(_super) {
     return vent.trigger('admin:users:generator');
   };
 
-  UsersEditView.prototype.onBack = function() {
-    return vent.trigger('admin:users:edit');
+  UsersEditView.prototype.onClose = function() {
+    return log('user-edit view close');
   };
 
   return UsersEditView;
@@ -1925,7 +1921,6 @@ module.exports = UsersGeneratorItemView = (function(_super) {
 
 ;require.register("modules/admin/views/users-generator-view", function(exports, require, module) {
 var UsersGeneratorView, application, vent, _ref,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1937,7 +1932,6 @@ module.exports = UsersGeneratorView = (function(_super) {
   __extends(UsersGeneratorView, _super);
 
   function UsersGeneratorView() {
-    this.onBack = __bind(this.onBack, this);
     _ref = UsersGeneratorView.__super__.constructor.apply(this, arguments);
     return _ref;
   }
@@ -2015,8 +2009,8 @@ module.exports = UsersGeneratorView = (function(_super) {
     return vent.trigger('save:users');
   };
 
-  UsersGeneratorView.prototype.onBack = function() {
-    return vent.trigger('admin:users:edit');
+  UsersGeneratorView.prototype.onClose = function() {
+    return log('user-generator view close');
   };
 
   return UsersGeneratorView;
@@ -2394,10 +2388,19 @@ module.exports = HomeView = (function(_super) {
   HomeView.prototype.template = require('./templates/home');
 
   HomeView.prototype.initialize = function(options) {
+    this.resources = options != null ? options.resources : void 0;
     return vent.trigger('navigation:back:off');
   };
 
+  HomeView.prototype.serializeData = function() {
+    var _ref1;
+    return {
+      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0
+    };
+  };
+
   HomeView.prototype.onShow = function() {
+    console.log('!!!!!!!!!!!!', this.resourcess);
     return scrollTo(0, 0);
   };
 
@@ -2564,10 +2567,13 @@ if (typeof define === 'function' && define.amd) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  return "<div class=\"container\">\r\n  <h3>Home</h3>\r\n</div>";
+  buffer += "<div class=\"container\">\r\n  <h3>Home</h3>\r\n  <p>\r\n    "
+    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Home_Text)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n  </p>\r\n</div>";
+  return buffer;
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {

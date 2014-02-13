@@ -6,9 +6,14 @@ module.exports = class HomeView extends Backbone.Marionette.ItemView
   template: require './templates/home'
 
   initialize: (options) ->
+    @resources = options?.resources
     vent.trigger 'navigation:back:off'
 
+  serializeData: ->
+    resources: @resources?.toJSON()
+    
   onShow: ->
+    console.log '!!!!!!!!!!!!', @resourcess
     scrollTo(0,0)
     
   onClose: ->

@@ -102,7 +102,6 @@ namespace EventFeedback.Domain
             {
                 context.ResourceTexts.AddOrUpdate(
                     p => p.Key,
-                    
                     new ResourceText { Key = "Feedback_Saved_Success", Value = "Feedback saved", Language = "en-US" },
                     new ResourceText { Key = "Feedback_Saved_Failed", Value = "Feedback NOT saved", Language = "en-US" },
                     new ResourceText { Key = "Title_Home", Value = "Home", Language = "en-US" },
@@ -115,6 +114,7 @@ namespace EventFeedback.Domain
                     new ResourceText { Key = "Title_Debug", Value = "Debug", Language = "en-US" },
                     new ResourceText { Key = "Text_Save", Value = "Save", Language = "en-US" },
                     new ResourceText { Key = "Text_Report", Value = "Report", Language = "en-US" },
+                    new ResourceText { Key = "Home_Text", Value = "", Language = "en-US" },
 
                     new ResourceText { Key = "Feedback_Saved_Success", Value = "Feedback gespeichert", Language = "de-DE" },
                     new ResourceText { Key = "Feedback_Saved_Failed", Value = "Feedback NICHT gespeichert", Language = "de-DE" },
@@ -127,7 +127,8 @@ namespace EventFeedback.Domain
                     new ResourceText { Key = "Title_SignOut", Value = "Ausloggen", Language = "de-DE" },
                     new ResourceText { Key = "Title_Debug", Value = "Debug", Language = "de-DE" },
                     new ResourceText { Key = "Text_Save", Value = "Speichern", Language = "de-DE" },
-                    new ResourceText { Key = "Text_Report", Value = "Report", Language = "de-DE" }
+                    new ResourceText { Key = "Text_Report", Value = "Report", Language = "de-DE" },
+                    new ResourceText { Key = "Home_Text", Value = "Die Event|Feedback App ist der Platz für dein Feedback zu unseren Entwicklertagen. Hier kannst du die von dir besuchten Sessions einfach und zeitnah bewerten und so den Speakern wertvolles Feedback liefern. Ein kurzer Kommentar macht deine Bewertung für die Speaker einfacher nachvollziehbar und sehr viel hilfreicher.", Language = "de-DE" }
                     );
             }
 
@@ -194,16 +195,20 @@ namespace EventFeedback.Domain
                 }
             };
 
-            context.FeedbackDefinitions.AddOrUpdate(
-                p => p.Title,
-                feedbackDefinitions.ToArray()
-                );
-            context.SaveChanges();
+            if (!context.FeedbackDefinitions.Any())
+            {
+                context.FeedbackDefinitions.AddOrUpdate(
+                    p => p.Title,
+                    feedbackDefinitions.ToArray()
+                    );
+                context.SaveChanges();
+            }
 
             var events = new List<Event>
             {
                 new Event
                 {
+                    Active = false,
                     Title = "2013 ET 1",
                     FeedbackDefinitionId = feedbackDefinitions.First().Id,
                     StartDate = new DateTime(2013, 2, 18),
@@ -271,6 +276,7 @@ namespace EventFeedback.Domain
                 },
                 new Event
                 {
+                    Active = false,
                     Title = "2013 ET 2 (Pauses)",
                     FeedbackDefinitionId = feedbackDefinitions.First().Id,
                     StartDate = new DateTime(2013, 5, 10),
@@ -334,6 +340,7 @@ namespace EventFeedback.Domain
                 },
                 new Event
                 {
+                    Active = false,
                     Title = "2013 ET 3",
                     FeedbackDefinitionId = feedbackDefinitions.First().Id,
                     StartDate = new DateTime(2013, 7, 1),
@@ -379,6 +386,7 @@ namespace EventFeedback.Domain
                 },
                 new Event
                 {
+                    Active = false,
                     Title = "2013 ET 4",
                     FeedbackDefinitionId = feedbackDefinitions.First().Id,
                     StartDate = new DateTime(2013, 10, 09),
@@ -432,7 +440,6 @@ namespace EventFeedback.Domain
                     );
             }
             context.SaveChanges();
-
 
             if (!context.Feedbacks.Any())
             {
