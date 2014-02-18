@@ -67,6 +67,6 @@ class Application extends Backbone.Marionette.Application
       log 'ERROR:', message
       if not msg?
         alert message
-        vent.trigger 'about:index'
+        vent.trigger 'about:index' # todo: maybe redirect to error view
 
 module.exports = new Application()
