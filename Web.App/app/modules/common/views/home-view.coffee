@@ -13,7 +13,6 @@ module.exports = class HomeView extends Backbone.Marionette.ItemView
     resources: @resources?.toJSON()
     
   onShow: ->
-    console.log '!!!!!!!!!!!!', @resourcess
     scrollTo(0,0)
     
   onClose: ->

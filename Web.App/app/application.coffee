@@ -63,11 +63,10 @@ class Application extends Backbone.Marionette.Application
     
   hookGlobalEvents: ->
     $(window).error (msg, url, line) ->
-      # general error handler ###
       message = "'#{msg.originalEvent.message}' at #{msg.originalEvent.filename}:#{msg.originalEvent.lineno}"
       log 'ERROR:', message
-      #vent.trigger 'message:error:show', message
-      alert message
-      vent.trigger 'about:index'
+      if not msg?
+        alert message
+        vent.trigger 'about:index'
 
 module.exports = new Application()
