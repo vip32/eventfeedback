@@ -91,6 +91,7 @@
     <Content Include="www\config.xml" />
     <Content Include="www\favicon.ico" />
     <Content Include="www\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="www\fonts\webhostinghub-glyphs.svg" />
     <Content Include="www\images\delete.gif" />
     <Content Include="www\images\icon-114x114.png" />
     <Content Include="www\images\icon-120x120.png" />
@@ -249,6 +250,8 @@
     <Content Include="www\javascripts\app.js.map" />
     <Content Include="www\javascripts\vendor.js.map" />
     <Content Include="www\stylesheets\app.css.map" />
+    <Content Include="www\fonts\webhostinghub-glyphs.eot" />
+    <Content Include="www\fonts\webhostinghub-glyphs.ttf" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">

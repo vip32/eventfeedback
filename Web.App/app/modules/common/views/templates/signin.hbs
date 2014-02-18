@@ -1,13 +1,14 @@
 <div class="container">
   <form class="form-signin">
-    <input type="text" class="form-control" placeholder="username" name="username" autofocus value="{{username}}">
-    <input type="password" class="form-control" placeholder="password" name="password">
+    <input type="text" class="form-control" placeholder="username" name="username" autofocus value="{{username}}"/>
+    <input type="password" class="form-control" placeholder="password" name="password"/>
     <div class="form-group">
       <label for="notification1">Remember me</label>
       <div class="make-switch" data-animated="false" data-on-label="yes" data-off-label="no" data-on="success">
-        <input type="radio" id="notification1" name="remember" {{#if remember}}checked{{/if}}>
+        <input type="radio" id="notification1" name="remember" {{#if remember}}checked{{/if}}/>
       </div>
     </div>
-    <button class="btn btn-lg btn-success btn-block js-signin">Sign in</button>
+    <button class="btn btn-lg btn-success btn-block js-signin">
+      <i class="icon-securityalt-shieldalt"></i>&emsp;Sign in</button>
   </form>
 </div>
