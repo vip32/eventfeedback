@@ -59,7 +59,7 @@ namespace EventFeedback.Common
             }
             Trace.CorrelationManager.ActivityId = _newActivityId;
 
-            _traceSource.TraceEvent(TraceEventType.Start, 0, _activityName);
+            _traceSource.Start(_activityName);
         }
 
         public void Dispose()
@@ -77,11 +77,11 @@ namespace EventFeedback.Common
             if (_oldActivityId != Guid.Empty)
             {
                 // transfer back from activity
-                _traceSource.TraceTransfer(0, string.Format(CultureInfo.CurrentCulture, "TRANSFER <== {0} ===", _activityName),
-                    _oldActivityId);
+                _traceSource.TraceTransfer(0, 
+                    string.Format(CultureInfo.CurrentCulture, "TRANSFER <== {0} ===", _activityName), _oldActivityId);
             }
 
-            _traceSource.TraceEvent(TraceEventType.Stop, 0, _activityName);
+            _traceSource.Stop(_activityName);
 
             Trace.CorrelationManager.ActivityId = _oldActivityId;
         }

@@ -30,7 +30,7 @@ namespace EventFeedback.Common
                 !context.Request.RequestUri.AbsoluteUri.Contains("/Content/") &&
                 !context.Request.RequestUri.AbsoluteUri.Contains("/Glimpse.axd") &&
                 !context.Request.RequestUri.AbsoluteUri.Contains("/Scripts/"))
-                _traceSource.TraceEvent(TraceEventType.Start, 0, "url: [{0}] {1}", context.Request.Method, context.Request.RequestUri.AbsoluteUri);
+                _traceSource.Start("url: [{0}] {1}", context.Request.Method, context.Request.RequestUri.AbsoluteUri);
         }
     }
 }

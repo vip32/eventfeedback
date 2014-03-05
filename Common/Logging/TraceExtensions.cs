@@ -5,6 +5,18 @@ namespace EventFeedback.Common
 {
     public static class TraceExtensions
     {
+        public static void Start(this TraceSource source, string format, params object[] args)
+        {
+            source.TraceEvent(TraceEventType.Start, 0, format, args);
+            Trace.TraceInformation(HttpUtility.HtmlEncode(string.Format(format, args))); // needed for azure logging
+        }
+
+        public static void Stop(this TraceSource source, string format, params object[] args)
+        {
+            source.TraceEvent(TraceEventType.Stop, 0, format, args);
+            Trace.TraceInformation(HttpUtility.HtmlEncode(string.Format(format, args))); // needed for azure logging
+        }
+
         public static void Info(this TraceSource source, string format, params object[] args)
         {
             source.TraceEvent(TraceEventType.Information, 0, format, args);
