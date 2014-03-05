@@ -46,7 +46,7 @@ namespace EventFeedback.Web.Api
                 defaults: new {id = RouteParameter.Optional}
                 );
 
-            config.EnableSystemDiagnosticsTracing();
+            //config.EnableSystemDiagnosticsTracing();
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Default; // Default=use the ASP.NET customErrors setting (On/Off/RemoteOnly)
             //config.Services.Replace(typeof(ITraceWriter), new TraceSourceWriter());
             //TraceSource.TraceData(TraceEventType.Information, 0, config.Routes.Dump());

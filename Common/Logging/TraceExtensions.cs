@@ -6,7 +6,8 @@ namespace EventFeedback.Common
     {
         public static void Info(this TraceSource source, string format, params object[] args)
         {
-            source.TraceEvent(TraceEventType.Information, 0, format, args);
+            //source.TraceEvent(TraceEventType.Information, 0, format, args);
+            Trace.TraceInformation(format, args);
         }
 
         public static void Info(this TraceSource source, params object[] data)
