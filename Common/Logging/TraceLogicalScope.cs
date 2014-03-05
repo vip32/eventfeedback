@@ -43,6 +43,7 @@ namespace EventFeedback.Common
 
             //            _traceSource.TraceInformation("REQUEST === {0}", _logicalName);
             _traceSource.TraceEvent(TraceEventType.Start, 0, "BEGIN === {0} (ActivityId: {1}) ===", _logicalName, Trace.CorrelationManager.ActivityId);
+            _traceSource.TraceInformation("=== {0} === ({1})", _logicalName, Trace.CorrelationManager.ActivityId);
         }
 
         public void Dispose()
