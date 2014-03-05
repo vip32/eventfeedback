@@ -35,6 +35,9 @@ namespace EventFeedback.Common
                 case TraceLevel.Warn:
                     _traceSource.TraceEvent(TraceEventType.Warning, 0, message);
                     break;
+                case TraceLevel.Debug:
+                    _traceSource.TraceEvent(TraceEventType.Verbose, 0, message);
+                    break;
                 default:
                     _traceSource.TraceEvent(TraceEventType.Information, 0, message); //record.Request
                     break;

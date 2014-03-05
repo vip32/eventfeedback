@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace EventFeedback.Common
 {
@@ -53,23 +54,31 @@ namespace EventFeedback.Common
 
             if (_oldActivityId != Guid.Empty)
             {
-                _traceSource.TraceTransfer(0, string.Format("Transferring to {0}...", _activityName), _newActivityId);
+                // transfer to activity
+                _traceSource.TraceTransfer(0, string.Format(CultureInfo.CurrentCulture, "TRANSFER ==> {0} ===", _activityName), _newActivityId);
             }
-
             Trace.CorrelationManager.ActivityId = _newActivityId;
 
             _traceSource.TraceEvent(TraceEventType.Start, 0, _activityName);
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         /// <summary>
         /// Called when the object is cleaned up, to close the scope
         /// </summary>
-        public void Dispose()
+        protected virtual void Dispose(bool disposing)
         {
+            if (!disposing) return;
             if (_oldActivityId != Guid.Empty)
             {
-                _traceSource.TraceTransfer(0, string.Format("Transferring back from {0}...", _activityName), _oldActivityId)
-                ;
+                // transfer back from activity
+                _traceSource.TraceTransfer(0, string.Format(CultureInfo.CurrentCulture, "TRANSFER <== {0} ===", _activityName),
+                    _oldActivityId);
             }
 
             _traceSource.TraceEvent(TraceEventType.Stop, 0, _activityName);

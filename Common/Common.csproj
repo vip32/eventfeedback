@@ -110,6 +110,7 @@
     <Compile Include="Guard.cs" />
     <Compile Include="Logging\ActivityTraceFilterAttribute.cs" />
     <Compile Include="Logging\ExceptionHandlingAttribute.cs" />
+    <Compile Include="Logging\TraceExtensions.cs" />
     <Compile Include="Logging\TraceLogicalScope.cs" />
     <Compile Include="Logging\TraceSourceWriter.cs" />
     <Compile Include="Logging\TraceTransferScope.cs" />

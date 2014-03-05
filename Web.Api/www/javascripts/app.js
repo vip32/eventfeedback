@@ -2606,7 +2606,7 @@ function program1(depth0,data) {
     + "\"/>\r\n    <input type=\"password\" class=\"form-control\" placeholder=\"password\" name=\"password\"/>\r\n    <div class=\"form-group\">\r\n      <label for=\"notification1\">Remember me</label>\r\n      <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n        <input type=\"radio\" id=\"notification1\" name=\"remember\" ";
   stack1 = helpers['if'].call(depth0, depth0.remember, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "/>\r\n      </div>\r\n    </div>\r\n    <button class=\"btn btn-lg btn-success btn-block js-signin\">\r\n      <i class=\"icon-securityalt-shieldalt\"></i>&emsp;Sign in</button>\r\n  </form>\r\n</div>";
+  buffer += "/>\r\n      </div>\r\n    </div>\r\n    <button class=\"btn btn-lg btn-success btn-block js-signin\">\r\n      <i class=\"icon-securityalt-shieldalt\"></i>&emsp;Sign in</button>\r\n  </form>\r\n</div> ";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {

@@ -38,19 +38,26 @@ namespace EventFeedback.Common
             _traceSource = traceSource;
             _logicalName = logicalName;
 
-            //if (Trace.CorrelationManager.ActivityId.Equals(Guid.Empty))
-            //    Trace.CorrelationManager.ActivityId = Guid.NewGuid();
+            if (Trace.CorrelationManager.ActivityId.Equals(Guid.Empty))
+                Trace.CorrelationManager.ActivityId = Guid.NewGuid();
 
-            _traceSource.TraceEvent(TraceEventType.Start, 0, "Starting {0}", _logicalName);
+            //            _traceSource.TraceInformation("REQUEST === {0}", _logicalName);
+            _traceSource.TraceEvent(TraceEventType.Start, 0, "BEGIN === {0} (ActivityId: {1}) ===", _logicalName, Trace.CorrelationManager.ActivityId);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
         /// Called when the object is cleaned up, to close the scope
         /// </summary>
-        public void Dispose()
+        protected virtual void Dispose(bool disposing)
         {
-            _traceSource.TraceEvent(TraceEventType.Stop, 0, "Finished {0}", _logicalName);
+            if (!disposing) return;
+            _traceSource.TraceEvent(TraceEventType.Stop, 0, "END === {0} ===", _logicalName);
         }
     }
-
 }
