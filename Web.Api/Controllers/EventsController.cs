@@ -32,7 +32,7 @@ namespace EventFeedback.Web.Api.Controllers
         {
             using (new TraceLogicalScope(_traceSource, "EventsController:Get"))
             {
-                _traceSource.Verbose("filter={0}", filter);
+                _traceSource.Info("filter={0}", filter);
                 IEnumerable<Event> result;
                 if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
                     result = _context.Events.OrderBy(e => e.StartDate);
@@ -54,7 +54,7 @@ namespace EventFeedback.Web.Api.Controllers
         {
             using (new TraceLogicalScope(_traceSource, "EventsController:Get"))
             {
-                _traceSource.Verbose("filter={0}", filter);
+                _traceSource.Info("filter={0}", filter);
                 Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");
 
                 Event result;
@@ -78,7 +78,7 @@ namespace EventFeedback.Web.Api.Controllers
         {
             using (new TraceLogicalScope(_traceSource, "EventsController:Post"))
             {
-                _traceSource.Verbose(entity);
+                _traceSource.Info(entity);
                 Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
                 Guard.Against<ArgumentException>(entity.Id != 0, "entity.id must be empty");
 
@@ -96,7 +96,7 @@ namespace EventFeedback.Web.Api.Controllers
         {
             using (new TraceLogicalScope(_traceSource, "EventsController:Put"))
             {
-                _traceSource.Verbose(entity);
+                _traceSource.Info(entity);
                 Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
                 Guard.Against<ArgumentException>(entity.Id == 0 && id == 0, "entity.id or id must be set");
 
@@ -122,7 +122,7 @@ namespace EventFeedback.Web.Api.Controllers
         {
             using (new TraceLogicalScope(_traceSource, "EventsController:Delete"))
             {
-                _traceSource.Verbose("id={0}", id);
+                _traceSource.Info("id={0}", id);
                 Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");
 
                 var entity = _context.Events.FirstOrDefault(x => x.Id == id);
