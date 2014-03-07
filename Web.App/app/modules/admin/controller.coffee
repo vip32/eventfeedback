@@ -27,7 +27,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       data:
         filter: 'all'
     ).done (models) ->
-      vent.trigger 'set:active:header', 'admin:events:edit', application.resources.key('Title_Events'), 'bookmark'
+      vent.trigger 'set:active:header', 'admin:events:edit', application.resources.key('Title_Events'), 'glyphicon-bookmark'
       View = require './views/events-edit-view'
       view = new View(collection: models, resources: application.resources)
       application.layout.content.show(view)
@@ -42,7 +42,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       @sessions.fetch(
         reload: true
       ).done (sessions) =>
-        vent.trigger 'set:active:header', 'admin:events:edit', application.resources.key('Title_Sessions'), 'comment'
+        vent.trigger 'set:active:header', 'admin:events:edit', application.resources.key('Title_Sessions'), 'icon-comment'
         View = require './views/sessions-edit-view'
         view = new View(model: events.get(id), collection: sessions, resources: application.resources)
         application.layout.content.show(view)
@@ -57,7 +57,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         data:
           filter: 'all'
       ).done (users) =>
-        vent.trigger 'set:active:header', 'admin:users:edit', application.resources.key('Title_Admin_Users'), 'user' #
+        vent.trigger 'set:active:header', 'admin:users:edit', application.resources.key('Title_Admin_Users'), 'glyphicon-user' #
         users.on 'change', (model) =>
           #log 'user change:', model
           model.credentials = users.credentials
@@ -65,7 +65,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         View = require './views/users-edit-view'
         view = new View(collection: users, roles: roles, resources: application.resources)
         application.layout.content.show(view)
-        
+
   showUsersGenerator: =>
     @users.reset()
     @roles.fetch(
@@ -78,7 +78,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       View = require './views/users-generator-view'
       view = new View(collection: @users, roles: roles, resources: application.resources)
       application.layout.content.show(view)
-        
+
   onSaveUsers: =>
 #    vent.trigger 'fetch:start'
     @users.each (model) ->

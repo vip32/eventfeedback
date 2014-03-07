@@ -35,28 +35,28 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
   showHome: ->
     vent.trigger 'fetch:done' # switch off block
-    vent.trigger 'set:active:header', 'home:index', '', 'home'
+    vent.trigger 'set:active:header', 'home:index', '', 'glyphicon-home'
     View = require './views/home-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)
 
   showSignin: ->
     vent.trigger 'fetch:done' # switch off block
-    vent.trigger 'set:active:header', 'signin:index', application.resources.key('Title_SignIn'), 'user'
+    vent.trigger 'set:active:header', 'signin:index', application.resources.key('Title_SignIn'), 'glyphicon-user'
     View = require './views/signin-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)
 
   showAbout: ->
     vent.trigger 'fetch:done' # switch off block
-    vent.trigger 'set:active:header', 'about:index', application.resources.key('Title_About'), 'info-sign'
+    vent.trigger 'set:active:header', 'about:index', application.resources.key('Title_About'), 'glyphicon-info-sign'
     View = require './views/about-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)
 
   showDebug: ->
     vent.trigger 'fetch:done' # switch off block
-    vent.trigger 'set:active:header', 'debug:index', application.resources.key('Title_Debug'), 'cog'
+    vent.trigger 'set:active:header', 'debug:index', application.resources.key('Title_Debug'), 'glyphicon-cog'
     View = require './views/debug-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)

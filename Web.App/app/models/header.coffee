@@ -48,7 +48,7 @@ module.exports.TestData = class TestData
     visible: true
     authenticated: false,
     resource: 'Title_Home'
-    glyphicon: 'home'
+    glyphicon: 'glyphicon-home'
     title: "Home"
     trigger: "home:index"
     intern: true
@@ -58,7 +58,7 @@ module.exports.TestData = class TestData
     title: "About"
     authenticated: false
     resource: 'Title_About'
-    glyphicon: 'info-sign'
+    glyphicon: 'glyphicon-info-sign'
     trigger: "about:index"
     intern: true
     order: 3
@@ -68,7 +68,7 @@ module.exports.TestData = class TestData
     authenticated: true
     roles: ['User', 'Administrator']
     resource: 'Title_Events'
-    glyphicon: 'bookmark'
+    glyphicon: 'glyphicon-bookmark'
     trigger: "events:index"
     intern: true
     order: 1
@@ -87,7 +87,7 @@ module.exports.TestData = class TestData
     title: "Sign-in"
     authenticated: false
     resource: 'Title_SignIn'
-    glyphicon: 'user'
+    glyphicon: 'glyphicon-user'
     trigger: "signin:index"
     intern: true
     order: 4
@@ -97,7 +97,7 @@ module.exports.TestData = class TestData
     authenticated: true
     roles: ['Administrator']
     resource: 'Title_Debug'
-    glyphicon: 'cog'
+    glyphicon: 'glyphicon-cog'
     trigger: "debug:index"
     intern: true
     order: 5
@@ -117,7 +117,7 @@ module.exports.TestData = class TestData
     authenticated: true
     roles: ['Administrator']
     resource: ''
-    glyphicon: 'bookmark'
+    glyphicon: 'glyphicon-bookmark'
     trigger: "admin:events:edit"
     intern: true
     order: 11
@@ -127,7 +127,7 @@ module.exports.TestData = class TestData
     authenticated: true
     roles: ['Administrator']
     resource: ''
-    glyphicon: 'cog'
+    glyphicon: 'glyphicon-cog'
     trigger: "admin:settings:index"
     intern: true
     order: 12
@@ -137,7 +137,7 @@ module.exports.TestData = class TestData
 #    authenticated: true
 #    roles: ['Administrator']
 #    resource: ''
-#    glyphicon: 'list'
+#    glyphicon: 'glyphicon-list'
 #    trigger: "admin:reports:index"
 #    intern: true
 #    order: 13
@@ -147,7 +147,7 @@ module.exports.TestData = class TestData
     authenticated: true
     roles: ['Administrator']
     resource: ''
-    glyphicon: 'user'
+    glyphicon: 'glyphicon-user'
     trigger: "admin:users:edit"
     intern: true
     order: 14
@@ -157,7 +157,7 @@ module.exports.TestData = class TestData
 #    authenticated: true
 #    roles: ['Administrator']
 #    resource: ''
-#    glyphicon: 'user'
+#    glyphicon: 'glyphicon-user'
 #    trigger: "admin:users:generator"
 #    intern: true
 #    order: 14

@@ -864,7 +864,7 @@ module.exports.TestData = TestData = (function() {
       visible: true,
       authenticated: false,
       resource: 'Title_Home',
-      glyphicon: 'home',
+      glyphicon: 'glyphicon-home',
       title: "Home",
       trigger: "home:index",
       intern: true,
@@ -874,7 +874,7 @@ module.exports.TestData = TestData = (function() {
       title: "About",
       authenticated: false,
       resource: 'Title_About',
-      glyphicon: 'info-sign',
+      glyphicon: 'glyphicon-info-sign',
       trigger: "about:index",
       intern: true,
       order: 3
@@ -884,7 +884,7 @@ module.exports.TestData = TestData = (function() {
       authenticated: true,
       roles: ['User', 'Administrator'],
       resource: 'Title_Events',
-      glyphicon: 'bookmark',
+      glyphicon: 'glyphicon-bookmark',
       trigger: "events:index",
       intern: true,
       order: 1
@@ -893,7 +893,7 @@ module.exports.TestData = TestData = (function() {
       title: "Sign-in",
       authenticated: false,
       resource: 'Title_SignIn',
-      glyphicon: 'user',
+      glyphicon: 'glyphicon-user',
       trigger: "signin:index",
       intern: true,
       order: 4
@@ -903,7 +903,7 @@ module.exports.TestData = TestData = (function() {
       authenticated: true,
       roles: ['Administrator'],
       resource: 'Title_Debug',
-      glyphicon: 'cog',
+      glyphicon: 'glyphicon-cog',
       trigger: "debug:index",
       intern: true,
       order: 5
@@ -923,7 +923,7 @@ module.exports.TestData = TestData = (function() {
       authenticated: true,
       roles: ['Administrator'],
       resource: '',
-      glyphicon: 'bookmark',
+      glyphicon: 'glyphicon-bookmark',
       trigger: "admin:events:edit",
       intern: true,
       order: 11
@@ -933,7 +933,7 @@ module.exports.TestData = TestData = (function() {
       authenticated: true,
       roles: ['Administrator'],
       resource: '',
-      glyphicon: 'cog',
+      glyphicon: 'glyphicon-cog',
       trigger: "admin:settings:index",
       intern: true,
       order: 12
@@ -943,7 +943,7 @@ module.exports.TestData = TestData = (function() {
       authenticated: true,
       roles: ['Administrator'],
       resource: '',
-      glyphicon: 'user',
+      glyphicon: 'glyphicon-user',
       trigger: "admin:users:edit",
       intern: true,
       order: 14
@@ -1382,7 +1382,7 @@ module.exports = Controller = (function(_super) {
       }
     }).done(function(models) {
       var View, view;
-      vent.trigger('set:active:header', 'admin:events:edit', application.resources.key('Title_Events'), 'bookmark');
+      vent.trigger('set:active:header', 'admin:events:edit', application.resources.key('Title_Events'), 'glyphicon-bookmark');
       View = require('./views/events-edit-view');
       view = new View({
         collection: models,
@@ -1404,7 +1404,7 @@ module.exports = Controller = (function(_super) {
         reload: true
       }).done(function(sessions) {
         var View, view;
-        vent.trigger('set:active:header', 'admin:events:edit', application.resources.key('Title_Sessions'), 'comment');
+        vent.trigger('set:active:header', 'admin:events:edit', application.resources.key('Title_Sessions'), 'icon-comment');
         View = require('./views/sessions-edit-view');
         view = new View({
           model: events.get(id),
@@ -1429,7 +1429,7 @@ module.exports = Controller = (function(_super) {
         }
       }).done(function(users) {
         var View, view;
-        vent.trigger('set:active:header', 'admin:users:edit', application.resources.key('Title_Admin_Users'), 'user');
+        vent.trigger('set:active:header', 'admin:users:edit', application.resources.key('Title_Admin_Users'), 'glyphicon-user');
         users.on('change', function(model) {
           model.credentials = users.credentials;
           return model.set('dirty', true, {
@@ -2079,7 +2079,7 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.showHome = function() {
     var View, view;
     vent.trigger('fetch:done');
-    vent.trigger('set:active:header', 'home:index', '', 'home');
+    vent.trigger('set:active:header', 'home:index', '', 'glyphicon-home');
     View = require('./views/home-view');
     view = new View({
       resources: application.resources
@@ -2090,7 +2090,7 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.showSignin = function() {
     var View, view;
     vent.trigger('fetch:done');
-    vent.trigger('set:active:header', 'signin:index', application.resources.key('Title_SignIn'), 'user');
+    vent.trigger('set:active:header', 'signin:index', application.resources.key('Title_SignIn'), 'glyphicon-user');
     View = require('./views/signin-view');
     view = new View({
       resources: application.resources
@@ -2101,7 +2101,7 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.showAbout = function() {
     var View, view;
     vent.trigger('fetch:done');
-    vent.trigger('set:active:header', 'about:index', application.resources.key('Title_About'), 'info-sign');
+    vent.trigger('set:active:header', 'about:index', application.resources.key('Title_About'), 'glyphicon-info-sign');
     View = require('./views/about-view');
     view = new View({
       resources: application.resources
@@ -2112,7 +2112,7 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.showDebug = function() {
     var View, view;
     vent.trigger('fetch:done');
-    vent.trigger('set:active:header', 'debug:index', application.resources.key('Title_Debug'), 'cog');
+    vent.trigger('set:active:header', 'debug:index', application.resources.key('Title_Debug'), 'glyphicon-cog');
     View = require('./views/debug-view');
     view = new View({
       resources: application.resources
@@ -2676,7 +2676,7 @@ module.exports = Controller = (function(_super) {
     }).done(function(models) {
       return _this.feedbacks.fetch().done(function(feedbacks) {
         var View, view;
-        vent.trigger('set:active:header', 'events:index', application.resources.key('Title_Events'), 'bookmark');
+        vent.trigger('set:active:header', 'events:index', application.resources.key('Title_Events'), 'glyphicon-bookmark');
         View = require('./views/events-index-view');
         view = new View({
           collection: models,
@@ -2699,7 +2699,7 @@ module.exports = Controller = (function(_super) {
       if (event == null) {
         return vent.trigger('message:error:show', 'event not found');
       } else {
-        vent.trigger('set:active:header', 'events:index', event.get('title'), 'bookmark');
+        vent.trigger('set:active:header', 'events:index', event.get('title'), 'glyphicon-bookmark');
         settings.set('active-event', id);
         return _this.eventtags.fetch({
           reload: true
@@ -2763,7 +2763,7 @@ module.exports = Controller = (function(_super) {
       if (session == null) {
         return vent.trigger('message:error:show', 'session not found');
       } else {
-        vent.trigger('set:active:header', 'events:index', session.get('title'), 'comment');
+        vent.trigger('set:active:header', 'events:index', session.get('title'), 'icon-comment');
         settings.set('active-session', id);
         feedback = _this.feedbacks.find(function(item) {
           return item.get('sessionId') === id;
@@ -3394,7 +3394,7 @@ function program1(depth0,data,depth1) {
     + escapeExpression(((stack1 = depth0.id),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\" class=\"list-group-item js-session\" style=\"page-break-after: always;\">\r\n    <div>\r\n      <strong>\r\n        <div class=\"glyphicon glyphicon-bookmark\"></div>\r\n        &emsp;&emsp;"
     + escapeExpression(((stack1 = ((stack1 = depth1.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + " <br/>\r\n        <div class=\"glyphicon glyphicon-comment\"></div>\r\n        &emsp;&emsp;"
+    + " <br/>\r\n        <div class=\"glyphicon icon-presentation\"></div>\r\n        &emsp;&emsp;"
     + escapeExpression(((stack1 = depth0.title),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n      </strong>&emsp;<span class=\"badge\">"
     + escapeExpression(((stack1 = depth0.averageRate),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
@@ -4826,7 +4826,7 @@ function program116(depth0,data) {
   return buffer;
   }
 
-  buffer += "<div class=\"container\">\r\n\r\n  <div class=\"list-group\" style=\"margin-top:39px;\">\r\n    <div id=\"session-item-view\" class=\"list-group-item\">\r\n      <div>\r\n        <div class=\"glyphicon glyphicon-comment\"></div>\r\n        &emsp;&emsp;<strong>"
+  buffer += "<div class=\"container\">\r\n\r\n  <div class=\"list-group\" style=\"margin-top:39px;\">\r\n    <div id=\"session-item-view\" class=\"list-group-item\">\r\n      <div>\r\n        <div class=\"glyphicon icon-presentation\"></div>\r\n        &emsp;&emsp;<strong>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</strong>\r\n      </div>\r\n      ";
   stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.tags), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
@@ -4905,7 +4905,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 function program1(depth0,data) {
   
   
-  return "<div class=\"commented pull-right glyphicon icon-ok\"></div>";
+  return "<div class=\"commented pull-right glyphicon icon-comment\"></div>";
   }
 
 function program3(depth0,data) {
@@ -4926,7 +4926,7 @@ function program5(depth0,data) {
   return buffer;
   }
 
-  buffer += "<div>\r\n  <div class=\"glyphicon glyphicon-comment\"></div>\r\n  &emsp;&emsp;<strong>"
+  buffer += "<div>\r\n  <div class=\"glyphicon icon-presentation\"></div>\r\n  &emsp;&emsp;<strong>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + " ";
   stack2 = helpers['if'].call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.commented), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
@@ -5147,8 +5147,8 @@ module.exports.Header = View = (function(_super) {
   View.prototype.initialize = function(options) {
     var _this = this;
     this.resources = options != null ? options.resources : void 0;
-    vent.on('set:active:header', function(trigger, title, glyphicon) {
-      return _this.setSubHeader(title, glyphicon);
+    vent.on('set:active:header', function(trigger, title, icon) {
+      return _this.setSubHeader(title, icon);
     });
     vent.on('fetch:start', function(title) {
       $('#wrapper').block({
@@ -5217,10 +5217,10 @@ module.exports.Header = View = (function(_super) {
     return vent.trigger('navigation:back');
   };
 
-  View.prototype.setSubHeader = function(title, glyphicon) {
+  View.prototype.setSubHeader = function(title, icon) {
     this.$('#js-subtitle').text(title);
     this.$('#js-subtitle-glyph').removeClass();
-    return this.$('#js-subtitle-glyph').addClass("glyphicon glyphicon-" + glyphicon);
+    return this.$('#js-subtitle-glyph').addClass("glyphicon " + icon);
   };
 
   return View;
@@ -5239,7 +5239,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   if (stack1 = helpers.href) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.href; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\">\r\n  <span class=\"glyphicon glyphicon-";
+    + "\">\r\n  <span class=\"glyphicon ";
   if (stack1 = helpers.icon) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.icon; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)

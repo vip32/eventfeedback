@@ -48,8 +48,8 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
   initialize: (options) ->
     @resources = options?.resources
 
-    vent.on 'set:active:header', (trigger, title, glyphicon) =>
-      @setSubHeader(title, glyphicon)
+    vent.on 'set:active:header', (trigger, title, icon) =>
+      @setSubHeader(title, icon)
 
     vent.on 'fetch:start', (title) =>
       $('#wrapper').block(message:null)
@@ -93,7 +93,7 @@ module.exports.Header = class View extends Backbone.Marionette.CompositeView
     e.preventDefault()
     vent.trigger 'navigation:back'
 
-  setSubHeader: (title, glyphicon) ->
+  setSubHeader: (title, icon) ->
     @$('#js-subtitle').text(title)
     @$('#js-subtitle-glyph').removeClass()
-    @$('#js-subtitle-glyph').addClass("glyphicon glyphicon-#{glyphicon}")
+    @$('#js-subtitle-glyph').addClass("glyphicon #{icon}")

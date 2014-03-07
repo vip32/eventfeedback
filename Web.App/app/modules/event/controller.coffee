@@ -36,7 +36,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       @feedbacks.fetch(
           # reload: true
       ).done (feedbacks) =>
-        vent.trigger 'set:active:header', 'events:index', application.resources.key('Title_Events'), 'bookmark'
+        vent.trigger 'set:active:header', 'events:index', application.resources.key('Title_Events'), 'glyphicon-bookmark'
         View = require './views/events-index-view'
         view = new View(collection: models, resources: application.resources)
         application.layout.content.show(view)
@@ -52,7 +52,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       if not event?
         vent.trigger 'message:error:show', 'event not found'
       else
-        vent.trigger 'set:active:header', 'events:index', event.get('title'), 'bookmark'
+        vent.trigger 'set:active:header', 'events:index', event.get('title'), 'glyphicon-bookmark'
         settings.set('active-event', id)
 
         @eventtags.fetch(
@@ -96,7 +96,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       if not session?
         vent.trigger 'message:error:show', 'session not found'
       else
-        vent.trigger 'set:active:header', 'events:index', session.get('title'), 'comment'
+        vent.trigger 'set:active:header', 'events:index', session.get('title'), 'icon-comment'
         settings.set('active-session', id)
 
         # prepare the feedback for this session, expects feedbacks to be fetched
