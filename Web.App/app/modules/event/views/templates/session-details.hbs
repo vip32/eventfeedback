@@ -24,7 +24,7 @@
       <br/><br/>
       <p>{{model.description}}</p>
     </div>
-  </div> 
+  </div>
 
   <form>
     {{#if feedbackdefinition.active0}}
@@ -45,8 +45,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title0}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="3" data-min="1"
-             name="answer0" id="answer0" class="rating" value="{{feedback.answer0}}" />-->
-        <input name="answer0" type="range" min="0" max="3" value="{{feedback.answer0}}" step="0.5" id="backing0"/>
+             name="answer0" id="answer0" class="rating" value="{{#zerowhenempty feedback.answer0}}{{/zerowhenempty}}" />-->
+        <input name="answer0" type="range" min="0" max="3" value="{{#zerowhenempty feedback.answer0}}{{/zerowhenempty}}" step="0.5" id="backing0"/>
         <div class="rateit bigstars" id="rateit0" data-rateit-backingfld="#backing0" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -54,8 +54,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title0}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="5" data-min="1"
-             name="answer0" id="answer0" class="rating" value="{{feedback.answer0}}" />-->
-        <input name="answer0" type="range" min="0" max="5" value="{{feedback.answer0}}" step="0.5" id="backing0"/>
+             name="answer0" id="answer0" class="rating" value="{{#zerowhenempty feedback.answer0}}{{/zerowhenempty}}" />-->
+        <input name="answer0" type="range" min="0" max="5" value="{{#zerowhenempty feedback.answer0}}{{/zerowhenempty}}" step="0.5" id="backing0"/>
         <div class="rateit bigstars" id="rateit0" data-rateit-backingfld="#backing0" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -63,8 +63,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title0}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="10" data-min="1"
-             name="answer0" id="answer0" class="rating" value="{{feedback.answer0}}" />-->
-        <input name="answer0" type="range" min="0" max="10" value="{{feedback.answer0}}" step="0.5" id="backing0"/>
+             name="answer0" id="answer0" class="rating" value="{{#zerowhenempty feedback.answer0}}{{/zerowhenempty}}" />-->
+        <input name="answer0" type="range" min="0" max="10" value="{{#zerowhenempty feedback.answer0}}{{/zerowhenempty}}" step="0.5" id="backing0"/>
         <div class="rateit bigstars" id="rateit0" data-rateit-backingfld="#backing0" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -89,8 +89,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title1}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="3" data-min="1"
-             name="answer1" id="answer1" class="rating" value="{{feedback.answer1}}" />-->
-        <input name="answer1" type="range" min="0" max="3" value="{{feedback.answer1}}" step="0.5" id="backing1"/>
+             name="answer1" id="answer1" class="rating" value="{{#zerowhenempty feedback.answer1}}{{/zerowhenempty}}" />-->
+        <input name="answer1" type="range" min="0" max="3" value="{{#zerowhenempty feedback.answer1}}{{/zerowhenempty}}" step="0.5" id="backing1"/>
         <div class="rateit bigstars" id="rateit1" data-rateit-backingfld="#backing1" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -98,8 +98,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title1}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="5" data-min="1"
-             name="answer1" id="answer1" class="rating" value="{{feedback.answer1}}" />-->
-        <input name="answer1" type="range" min="0" max="5" value="{{feedback.answer1}}" step="0.5" id="backing1"/>
+             name="answer1" id="answer1" class="rating" value="{{#zerowhenempty feedback.answer1}}{{/zerowhenempty}}" />-->
+        <input name="answer1" type="range" min="0" max="5" value="{{#zerowhenempty feedback.answer1}}{{/zerowhenempty}}" step="0.5" id="backing1"/>
         <div class="rateit bigstars" id="rateit1" data-rateit-backingfld="#backing1" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -107,8 +107,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title1}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="10" data-min="1"
-             name="answer1" id="answer1" class="rating" value="{{feedback.answer1}}" />-->
-        <input name="answer1" type="range" min="0" max="10" value="{{feedback.answer1}}" step="0.5" id="backing1"/>
+             name="answer1" id="answer1" class="rating" value="{{#zerowhenempty feedback.answer1}}{{/zerowhenempty}}" />-->
+        <input name="answer1" type="range" min="0" max="10" value="{{#zerowhenempty feedback.answer1}}{{/zerowhenempty}}" step="0.5" id="backing1"/>
         <div class="rateit bigstars" id="rateit1" data-rateit-backingfld="#backing1" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -133,8 +133,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title2}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="3" data-min="1"
-             name="answer2" id="answer2" class="rating" value="{{feedback.answer2}}" />-->
-        <input name="answer2" type="range" min="0" max="3" value="{{feedback.answer2}}" step="0.5" id="backing2"/>
+             name="answer2" id="answer2" class="rating" value="{{#zerowhenempty feedback.answer2}}{{/zerowhenempty}}" />-->
+        <input name="answer2" type="range" min="0" max="3" value="{{#zerowhenempty feedback.answer2}}{{/zerowhenempty}}" step="0.5" id="backing2"/>
         <div class="rateit bigstars" id="rateit2" data-rateit-backingfld="#backing2" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -142,8 +142,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title2}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="5" data-min="1"
-             name="answer2" id="answer2" class="rating" value="{{feedback.answer2}}" />-->
-        <input name="answer2" type="range" min="0" max="5" value="{{feedback.answer2}}" step="0.5" id="backing2"/>
+             name="answer2" id="answer2" class="rating" value="{{#zerowhenempty feedback.answer2}}{{/zerowhenempty}}" />-->
+        <input name="answer2" type="range" min="0" max="5" value="{{#zerowhenempty feedback.answer2}}{{/zerowhenempty}}" step="0.5" id="backing2"/>
         <div class="rateit bigstars" id="rateit2" data-rateit-backingfld="#backing2" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -151,8 +151,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title2}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="10" data-min="1"
-             name="answer2" id="answer2" class="rating" value="{{feedback.answer2}}" />-->
-        <input name="answer2" type="range" min="0" max="10" value="{{feedback.answer2}}" step="0.5" id="backing2"/>
+             name="answer2" id="answer2" class="rating" value="{{#zerowhenempty feedback.answer2}}{{/zerowhenempty}}" />-->
+        <input name="answer2" type="range" min="0" max="10" value="{{#zerowhenempty feedback.answer2}}{{/zerowhenempty}}" step="0.5" id="backing2"/>
         <div class="rateit bigstars" id="rateit2" data-rateit-backingfld="#backing2" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -177,8 +177,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title3}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="3" data-min="1"
-             name="answer3" id="answer3" class="rating" value="{{feedback.answer3}}" />-->
-        <input name="answer3" type="range" min="0" max="3" value="{{feedback.answer3}}" step="0.5" id="backing3"/>
+             name="answer3" id="answer3" class="rating" value="{{#zerowhenempty feedback.answer3}}{{/zerowhenempty}}" />-->
+        <input name="answer3" type="range" min="0" max="3" value="{{#zerowhenempty feedback.answer3}}{{/zerowhenempty}}" step="0.5" id="backing3"/>
         <div class="rateit bigstars" id="rateit3" data-rateit-backingfld="#backing3" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -186,8 +186,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title3}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="5" data-min="1"
-             name="answer3" id="answer3" class="rating" value="{{feedback.answer3}}" />-->
-        <input name="answer3" type="range" min="0" max="5" value="{{feedback.answer3}}" step="0.5" id="backing3"/>
+             name="answer3" id="answer3" class="rating" value="{{#zerowhenempty feedback.answer3}}{{/zerowhenempty}}" />-->
+        <input name="answer3" type="range" min="0" max="5" value="{{#zerowhenempty feedback.answer3}}{{/zerowhenempty}}" step="0.5" id="backing3"/>
         <div class="rateit bigstars" id="rateit3" data-rateit-backingfld="#backing3" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -195,8 +195,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title3}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="10" data-min="1"
-             name="answer3" id="answer3" class="rating" value="{{feedback.answer3}}" />-->
-        <input name="answer3" type="range" min="0" max="10" value="{{feedback.answer3}}" step="0.5" id="backing3"/>
+             name="answer3" id="answer3" class="rating" value="{{#zerowhenempty feedback.answer3}}{{/zerowhenempty}}" />-->
+        <input name="answer3" type="range" min="0" max="10" value="{{#zerowhenempty feedback.answer3}}{{/zerowhenempty}}" step="0.5" id="backing3"/>
         <div class="rateit bigstars" id="rateit3" data-rateit-backingfld="#backing3" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -221,8 +221,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title4}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="3" data-min="1"
-             name="answer4" id="answer4" class="rating" value="{{feedback.answer4}}" />-->
-        <input name="answer4" type="range" min="0" max="3" value="{{feedback.answer4}}" step="0.5" id="backing4"/>
+             name="answer4" id="answer4" class="rating" value="{{#zerowhenempty feedback.answer4}}{{/zerowhenempty}}" />-->
+        <input name="answer4" type="range" min="0" max="3" value="{{#zerowhenempty feedback.answer4}}{{/zerowhenempty}}" step="0.5" id="backing4"/>
         <div class="rateit bigstars" id="rateit4" data-rateit-backingfld="#backing4" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -230,8 +230,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title4}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="5" data-min="1"
-             name="answer4" id="answer4" class="rating" value="{{feedback.answer4}}" />-->
-        <input name="answer4" type="range" min="0" max="5" value="{{feedback.answer4}}" step="0.5" id="backing4"/>
+             name="answer4" id="answer4" class="rating" value="{{#zerowhenempty feedback.answer4}}{{/zerowhenempty}}" />-->
+        <input name="answer4" type="range" min="0" max="5" value="{{#zerowhenempty feedback.answer4}}{{/zerowhenempty}}" step="0.5" id="backing4"/>
         <div class="rateit bigstars" id="rateit4" data-rateit-backingfld="#backing4" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -239,8 +239,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title4}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="10" data-min="1"
-             name="answer4" id="answer4" class="rating" value="{{feedback.answer4}}" />-->
-        <input name="answer4" type="range" min="0" max="10" value="{{feedback.answer4}}" step="0.5" id="backing4"/>
+             name="answer4" id="answer4" class="rating" value="{{#zerowhenempty feedback.answer4}}{{/zerowhenempty}}" />-->
+        <input name="answer4" type="range" min="0" max="10" value="{{#zerowhenempty feedback.answer4}}{{/zerowhenempty}}" step="0.5" id="backing4"/>
         <div class="rateit bigstars" id="rateit4" data-rateit-backingfld="#backing4" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -265,8 +265,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title5}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="3" data-min="1"
-             name="answer5" id="answer5" class="rating" value="{{feedback.answer5}}" />-->
-        <input name="answer5" type="range" min="0" max="3" value="{{feedback.answer5}}" step="0.5" id="backing5"/>
+             name="answer5" id="answer5" class="rating" value="{{#zerowhenempty feedback.answer5}}{{/zerowhenempty}}" />-->
+        <input name="answer5" type="range" min="0" max="3" value="{{#zerowhenempty feedback.answer5}}{{/zerowhenempty}}" step="0.5" id="backing5"/>
         <div class="rateit bigstars" id="rateit5" data-rateit-backingfld="#backing5" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -274,8 +274,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title5}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="5" data-min="1"
-             name="answer5" id="answer5" class="rating" value="{{feedback.answer5}}" />-->
-        <input name="answer5" type="range" min="0" max="5" value="{{feedback.answer5}}" step="0.5" id="backing5"/>
+             name="answer5" id="answer5" class="rating" value="{{#zerowhenempty feedback.answer5}}{{/zerowhenempty}}" />-->
+        <input name="answer5" type="range" min="0" max="5" value="{{#zerowhenempty feedback.answer5}}{{/zerowhenempty}}" step="0.5" id="backing5"/>
         <div class="rateit bigstars" id="rateit5" data-rateit-backingfld="#backing5" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -283,8 +283,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title5}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="10" data-min="1"
-             name="answer5" id="answer5" class="rating" value="{{feedback.answer5}}" />-->
-        <input name="answer5" type="range" min="0" max="10" value="{{feedback.answer5}}" step="0.5" id="backing5"/>
+             name="answer5" id="answer5" class="rating" value="{{#zerowhenempty feedback.answer5}}{{/zerowhenempty}}" />-->
+        <input name="answer5" type="range" min="0" max="10" value="{{#zerowhenempty feedback.answer5}}{{/zerowhenempty}}" step="0.5" id="backing5"/>
         <div class="rateit bigstars" id="rateit5" data-rateit-backingfld="#backing5" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -309,8 +309,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title6}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="3" data-min="1"
-             name="answer6" id="answer6" class="rating" value="{{feedback.answer6}}" />-->
-        <input name="answer6" type="range" min="0" max="3" value="{{feedback.answer6}}" step="0.5" id="backing6"/>
+             name="answer6" id="answer6" class="rating" value="{{#zerowhenempty feedback.answer6}}{{/zerowhenempty}}" />-->
+        <input name="answer6" type="range" min="0" max="3" value="{{#zerowhenempty feedback.answer6}}{{/zerowhenempty}}" step="0.5" id="backing6"/>
         <div class="rateit bigstars" id="rateit6" data-rateit-backingfld="#backing6" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -318,8 +318,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title6}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="5" data-min="1"
-             name="answer6" id="answer6" class="rating" value="{{feedback.answer6}}" />-->
-        <input name="answer6" type="range" min="0" max="5" value="{{feedback.answer6}}" step="0.5" id="backing6"/>
+             name="answer6" id="answer6" class="rating" value="{{#zerowhenempty feedback.answer6}}{{/zerowhenempty}}" />-->
+        <input name="answer6" type="range" min="0" max="5" value="{{#zerowhenempty feedback.answer6}}{{/zerowhenempty}}" step="0.5" id="backing6"/>
         <div class="rateit bigstars" id="rateit6" data-rateit-backingfld="#backing6" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -327,8 +327,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title6}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="10" data-min="1"
-             name="answer6" id="answer6" class="rating" value="{{feedback.answer6}}" />-->
-        <input name="answer6" type="range" min="0" max="10" value="{{feedback.answer6}}" step="0.5" id="backing6"/>
+             name="answer6" id="answer6" class="rating" value="{{#zerowhenempty feedback.answer6}}{{/zerowhenempty}}" />-->
+        <input name="answer6" type="range" min="0" max="10" value="{{#zerowhenempty feedback.answer6}}{{/zerowhenempty}}" step="0.5" id="backing6"/>
         <div class="rateit bigstars" id="rateit6" data-rateit-backingfld="#backing6" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -353,8 +353,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title7}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="3" data-min="1"
-             name="answer7" id="answer7" class="rating" value="{{feedback.answer7}}" />-->
-        <input name="answer7" type="range" min="0" max="3" value="{{feedback.answer7}}" step="0.5" id="backing7"/>
+             name="answer7" id="answer7" class="rating" value="{{#zerowhenempty feedback.answer7}}{{/zerowhenempty}}" />-->
+        <input name="answer7" type="range" min="0" max="3" value="{{#zerowhenempty feedback.answer7}}{{/zerowhenempty}}" step="0.5" id="backing7"/>
         <div class="rateit bigstars" id="rateit7" data-rateit-backingfld="#backing7" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -362,8 +362,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title7}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="5" data-min="1"
-             name="answer7" id="answer7" class="rating" value="{{feedback.answer7}}" />-->
-        <input name="answer7" type="range" min="0" max="5" value="{{feedback.answer7}}" step="0.5" id="backing7"/>
+             name="answer7" id="answer7" class="rating" value="{{#zerowhenempty feedback.answer7}}{{/zerowhenempty}}" />-->
+        <input name="answer7" type="range" min="0" max="5" value="{{#zerowhenempty feedback.answer7}}{{/zerowhenempty}}" step="0.5" id="backing7"/>
         <div class="rateit bigstars" id="rateit7" data-rateit-backingfld="#backing7" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -371,8 +371,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title7}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="10" data-min="1"
-             name="answer7" id="answer7" class="rating" value="{{feedback.answer7}}" />-->
-        <input name="answer7" type="range" min="0" max="10" value="{{feedback.answer7}}" step="0.5" id="backing7"/>
+             name="answer7" id="answer7" class="rating" value="{{#zerowhenempty feedback.answer7}}{{/zerowhenempty}}" />-->
+        <input name="answer7" type="range" min="0" max="10" value="{{#zerowhenempty feedback.answer7}}{{/zerowhenempty}}" step="0.5" id="backing7"/>
         <div class="rateit bigstars" id="rateit7" data-rateit-backingfld="#backing7" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -397,8 +397,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title8}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="3" data-min="1"
-             name="answer8" id="answer8" class="rating" value="{{feedback.answer8}}" />-->
-        <input name="answer8" type="range" min="0" max="3" value="{{feedback.answer8}}" step="0.5" id="backing8"/>
+             name="answer8" id="answer8" class="rating" value="{{#zerowhenempty feedback.answer8}}{{/zerowhenempty}}" />-->
+        <input name="answer8" type="range" min="0" max="3" value="{{#zerowhenempty feedback.answer8}}{{/zerowhenempty}}" step="0.5" id="backing8"/>
         <div class="rateit bigstars" id="rateit8" data-rateit-backingfld="#backing8" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -406,8 +406,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title8}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="5" data-min="1"
-             name="answer8" id="answer8" class="rating" value="{{feedback.answer8}}" />-->
-        <input name="answer8" type="range" min="0" max="5" value="{{feedback.answer8}}" step="0.5" id="backing8"/>
+             name="answer8" id="answer8" class="rating" value="{{#zerowhenempty feedback.answer8}}{{/zerowhenempty}}" />-->
+        <input name="answer8" type="range" min="0" max="5" value="{{#zerowhenempty feedback.answer8}}{{/zerowhenempty}}" step="0.5" id="backing8"/>
         <div class="rateit bigstars" id="rateit8" data-rateit-backingfld="#backing8" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -415,8 +415,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title8}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="10" data-min="1"
-             name="answer8" id="answer8" class="rating" value="{{feedback.answer8}}" />-->
-        <input name="answer8" type="range" min="0" max="10" value="{{feedback.answer8}}" step="0.5" id="backing8"/>
+             name="answer8" id="answer8" class="rating" value="{{#zerowhenempty feedback.answer8}}{{/zerowhenempty}}" />-->
+        <input name="answer8" type="range" min="0" max="10" value="{{#zerowhenempty feedback.answer8}}{{/zerowhenempty}}" step="0.5" id="backing8"/>
         <div class="rateit bigstars" id="rateit8" data-rateit-backingfld="#backing8" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -441,8 +441,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title9}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="3" data-min="1"
-             name="answer9" id="answer9" class="rating" value="{{feedback.answer9}}" />-->
-        <input name="answer9" type="range" min="0" max="3" value="{{feedback.answer9}}" step="0.5" id="backing9"/>
+             name="answer9" id="answer9" class="rating" value="{{#zerowhenempty feedback.answer9}}{{/zerowhenempty}}" />-->
+        <input name="answer9" type="range" min="0" max="3" value="{{#zerowhenempty feedback.answer9}}{{/zerowhenempty}}" step="0.5" id="backing9"/>
         <div class="rateit bigstars" id="rateit9" data-rateit-backingfld="#backing9" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -450,8 +450,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title9}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="5" data-min="1"
-             name="answer9" id="answer9" class="rating" value="{{feedback.answer9}}" />-->
-        <input name="answer9" type="range" min="0" max="5" value="{{feedback.answer9}}" step="0.5" id="backing9"/>
+             name="answer9" id="answer9" class="rating" value="{{#zerowhenempty feedback.answer9}}{{/zerowhenempty}}" />-->
+        <input name="answer9" type="range" min="0" max="5" value="{{#zerowhenempty feedback.answer9}}{{/zerowhenempty}}" step="0.5" id="backing9"/>
         <div class="rateit bigstars" id="rateit9" data-rateit-backingfld="#backing9" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}
@@ -459,8 +459,8 @@
       <div class="col-xs-4 col-md-3">{{feedbackdefinition.title9}}</div>
       <div class="col-xs-8 col-md-9">
         <!--<input type="number" data-max="10" data-min="1"
-             name="answer9" id="answer9" class="rating" value="{{feedback.answer9}}" />-->
-        <input name="answer9" type="range" min="0" max="10" value="{{feedback.answer9}}" step="0.5" id="backing9"/>
+             name="answer9" id="answer9" class="rating" value="{{#zerowhenempty feedback.answer9}}{{/zerowhenempty}}" />-->
+        <input name="answer9" type="range" min="0" max="10" value="{{#zerowhenempty feedback.answer9}}{{/zerowhenempty}}" step="0.5" id="backing9"/>
         <div class="rateit bigstars" id="rateit9" data-rateit-backingfld="#backing9" data-rateit-starwidth="32" data-rateit-starheight="32" data-rateit-resetable="false"></div>
       </div>
       {{/ifCond}}

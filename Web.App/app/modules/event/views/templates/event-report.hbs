@@ -1,6 +1,6 @@
 ﻿<div class="container">
   {{#each model.sessions}}
-    <div class="list-group-item" style="page-break-after: always;">
+  <div id="{{this.id}}" class="list-group-item js-session" style="page-break-after: always;">
     <div>
       <strong>
         <div class="glyphicon glyphicon-bookmark"></div>
@@ -8,6 +8,7 @@
         <div class="glyphicon glyphicon-comment"></div>
         &emsp;&emsp;{{this.title}}
       </strong>&emsp;<span class="badge">{{this.averageRate}}</span>
+      <button class="btn btn-lg btn-success pull-right noprint js-print" data-sessionId="{{this.id}}"><div class="glyphicon glyphicon-print"></div>&emsp;Print</button>
     </div>
     {{#each this.tags}}<span class="badge pull-right">{{this}}</span>{{/each}}
     <div>
@@ -21,7 +22,7 @@
       &emsp;&emsp;{{../model.location}}/ {{this.location}}
     </div>
     {{#if this.feedbackAllowed}}
-    <div> 
+    <div>
       <hr/>
       <ol>
         <li>
@@ -105,4 +106,5 @@
   <textarea>
     {{json}}
   </textarea>
+  <iframe name="print_frame" width="0" height="0" frameborder="0" src="about:blank"></iframe>
 </div>

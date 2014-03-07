@@ -38,3 +38,8 @@ Handlebars.registerHelper "seperatelist", (text) ->
   text = Handlebars.Utils.escapeExpression(text)
   text = text.replace(/;/g, ', ') 
   new Handlebars.SafeString(text)
+  
+Handlebars.registerHelper "zerowhenempty", (text) ->
+  if _.isEmpty(text)
+    return 0
+  return text

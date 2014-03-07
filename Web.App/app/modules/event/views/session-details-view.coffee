@@ -30,16 +30,17 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
     for id in [0..9]
       $("#rateit#{id}").rateit()
     $('textarea').autosize()
-    
+
   onChange: (e) ->
     maxlength = $(e.currentTarget).attr('data-maxlength')
     if maxlength > 0 and $(e.currentTarget).val().length > maxlength
-      $(e.currentTarget).val($(e.currentTarget).val().substring(0, maxlength));  
+      $(e.currentTarget).val($(e.currentTarget).val().substring(0, maxlength));
 
   onSubmit: (e) ->
     e.preventDefault()
     data = Backbone.Syphon.serialize(@)
     # vent.trigger 'view:feedback:do', data
+    @feedback.set('active', true)
     @feedback.set('answer0', data.answer0) # TODO: optimize this with unserscore (merge 2 objects)
     @feedback.set('answer1', data.answer1)
     @feedback.set('answer2', data.answer2)

@@ -7894,6 +7894,7 @@ input.form-control {
   background-color: #fff;
   color: #fa6900;
   border: 1px solid #ddd !important;
+  margin-top: 5px;
 }
 .btn-group .badge {
   padding: 10px;
@@ -7985,6 +7986,10 @@ label.btn.btn-primary.badge.active {
 }
 .nofeedback {
   background-color: #e2e2e2;
+}
+.commented {
+  color: #b1d43f;
+  font-size: x-large;
 }
 .list-group-item strong {
   font-size: large;

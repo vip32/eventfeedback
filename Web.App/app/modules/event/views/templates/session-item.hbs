@@ -1,6 +1,6 @@
 <div>
   <div class="glyphicon glyphicon-comment"></div>
-  &emsp;&emsp;<strong>{{model.title}}</strong>
+  &emsp;&emsp;<strong>{{model.title}} {{#if model.commented}}<div class="commented pull-right glyphicon icon-ok"></div>{{/if}}</strong>
 </div>
 {{#each model.tags}}<span class="badge pull-right">{{this}}</span>{{/each}}
 <div>

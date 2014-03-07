@@ -5,6 +5,9 @@ module.exports = class EventReportView extends Backbone.Marionette.ItemView
   id: 'event-report-view'
   template: require './templates/event-report'
 
+  events:
+    'click .js-print': 'onPrintClick'
+
   initialize: (options) ->
     @resources = options?.resources
     vent.trigger 'navigation:back:on'
@@ -14,6 +17,13 @@ module.exports = class EventReportView extends Backbone.Marionette.ItemView
     resources: @resources?.toJSON()
     model: @model.toJSON()
     json: JSON.stringify(@model, null, 4)
+
+  onPrintClick: (e) ->
+    sessionId = $(e.currentTarget).attr('data-sessionId')
+    css = '<link href="stylesheets/app.css" rel="stylesheet" type="text/css">'
+    window.frames["print_frame"].document.body.innerHTML= css + document.getElementById(sessionId).innerHTML
+    window.frames["print_frame"].window.focus()
+    window.frames["print_frame"].window.print()
 
   onBack: =>
     log 'back from event-report'
