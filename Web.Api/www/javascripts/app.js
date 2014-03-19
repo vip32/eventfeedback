@@ -229,7 +229,7 @@ Config = (function() {
 
   Config.prototype.layout = 'layouts/app-layout';
 
-  Config.prototype.sidebarglyphicon = 'minus';
+  Config.prototype.sidebarglyphicon = 'glyphicon-minus';
 
   Config.prototype.spinneractive = false;
 

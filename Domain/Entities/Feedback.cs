@@ -12,7 +12,11 @@ namespace EventFeedback.Domain
         public int Id { get; set; }
         public bool? Active { get; set; }
         public DateTime? CreateDate { get; set; }
+        [StringLength(128)]
+        public string CreatedBy { get; set; }
         public DateTime? ModifyDate { get; set; }
+        [StringLength(128)]
+        public string ModifiedBy { get; set; }
         public bool? Deleted { get; set; }
         public DateTime? DeleteDate { get; set; }
         [StringLength(128)]

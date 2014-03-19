@@ -135,6 +135,10 @@
     <Compile Include="Migrations\201402091806585_DescrLenght.Designer.cs">
       <DependentUpon>201402091806585_DescrLenght.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201403190926037_CreatedByModifiedBy.cs" />
+    <Compile Include="Migrations\201403190926037_CreatedByModifiedBy.Designer.cs">
+      <DependentUpon>201403190926037_CreatedByModifiedBy.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Migrations\TestData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -188,6 +192,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201402091806585_DescrLenght.resx">
       <DependentUpon>201402091806585_DescrLenght.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201403190926037_CreatedByModifiedBy.resx">
+      <DependentUpon>201403190926037_CreatedByModifiedBy.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

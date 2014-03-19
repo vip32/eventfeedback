@@ -1,7 +1,5 @@
 ﻿using System.Web.Http;
 using EventFeedback.Common;
-using EventFeedback.Domain;
-using Microsoft.Practices.Unity;
 using Newtonsoft.Json.Serialization;
 using Owin;
 
@@ -13,7 +11,8 @@ namespace EventFeedback.Web.Api
         {
             var config = new HttpConfiguration
             {
-                DependencyResolver = new Unity.WebApi.UnityDependencyResolver(BuildUnityContainer())
+                DependencyResolver =
+                    new Unity.WebApi.UnityDependencyResolver(ContainerBuilder.Build())
             };
 
             // Web API configuration and services
@@ -63,19 +62,6 @@ namespace EventFeedback.Web.Api
             json.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 
             app.UseWebApi(config);
-        }
-
-        private static IUnityContainer BuildUnityContainer()
-        {
-            var container = new UnityContainer();
-
-            return container
-                //.RegisterType<IUserStore<User>, UserStore<User>>()
-                //.RegisterType<IRoleStore<IdentityRole>, RoleStore<IdentityRole>>()
-                //.RegisterType<UserManager<User>, UserManager<User>>()
-                //.RegisterType<RoleManager<IdentityRole>, RoleManager<IdentityRole>>()
-                .RegisterType<DataContext, DataContext>()
-                .RegisterType<UserService, UserService>();
         }
     }
 }

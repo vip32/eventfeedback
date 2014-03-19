@@ -3,5 +3,4 @@ Backbone.Marionette.Renderer.render = (templateName, data) ->
     template = templateName
   else
     template = require templateName
-
-  return template data 
+  return template data

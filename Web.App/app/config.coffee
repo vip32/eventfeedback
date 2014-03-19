@@ -8,7 +8,7 @@ class Config
   signintrigger: 'signin:index'
   brandtrigger: 'events:index'
   layout: 'layouts/app-layout'
-  sidebarglyphicon: 'minus'
+  sidebarglyphicon: 'glyphicon-minus'
   spinneractive: false
   modules:
     'header': 'modules/header/router'

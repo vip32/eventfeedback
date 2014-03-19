@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Principal;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 
@@ -14,9 +15,10 @@ namespace EventFeedback.Domain
         private readonly DataContext _context;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserService"/> class.
+        /// Initializes a new instance of the <see cref="UserService" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
+        /// <param name="user">The current user.</param>
         public UserService(DataContext context)
         {
             _context = context;

@@ -50,6 +50,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="App_Start\ContainerBuilder.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\Startup.WebApi.cs">
       <SubType>Code</SubType>
@@ -65,7 +66,6 @@
     <Compile Include="Controllers\FeedbacksController.cs" />
     <Compile Include="Controllers\SessionsController.cs" />
     <Compile Include="Controllers\EventsController.cs" />
-    <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Models\FeedbackReportModel.cs" />
     <Compile Include="Models\SessionReportModel.cs" />
