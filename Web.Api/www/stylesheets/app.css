@@ -7740,6 +7740,14 @@ td.visible-print {
   background-color: #e6e6e6 \9;
 }
 
+#js-users h2 {
+  color: #000;
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
 * {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -8033,6 +8041,9 @@ div#preload {
 @media print {
   .noprint {
     display: none !important;
+  }
+  a[href] after {
+    content: none !important;
   }
 }
 

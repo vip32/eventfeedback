@@ -19,12 +19,17 @@
   <div class="list-group js-sessions">
     <!-- sessions -->
   </div>
-  <p>{{model.description}}</p>
 
-  <div class="row">
-    <div class="col-xs-7">&nbsp;</div>
-    <div class="col-xs-5">
-      <a class="btn btn-lg btn-success js-report" href="#">
+  <div class="row pull-right">
+    <div class="col-xs-12">
+      <p>{{model.description}}</p>
+    </div>
+  </div>
+
+  <div class="row pull-right">
+    <div class="col-xs-12">
+      <br/>
+      <a class="btn btn-success btn-responsive js-report" href="#">
         <span class="glyphicon glyphicon-list"></span>&emsp;{{resources.Text_Report}}
       </a>
     </div>

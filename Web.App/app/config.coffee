@@ -10,6 +10,7 @@ class Config
   layout: 'layouts/app-layout'
   sidebarglyphicon: 'glyphicon-minus'
   spinneractive: false
+  url: 'https://eventfeedback.azurewebsites.net'
   modules:
     'header': 'modules/header/router'
     'common': 'modules/common/router'

@@ -5,11 +5,13 @@ module.exports = class UsersGeneratorView extends Backbone.Marionette.CompositeV
   id: 'users-generator-view'
   template: require './templates/users-generator'
   itemView: require './users-generator-item-view'
-  itemViewContainer: '.js-users'
+  itemViewContainer: '#js-users'
   vent.trigger 'navigation:back:on'
   vent.on 'navigation:back', @onBack
   events:
     'click #js-generate': 'onGenerate'
+    'click #js-clear': 'onClear'
+    'click #js-print': 'onPrintClick'
 
   initialize: (options) ->
     @resources = options?.resources
@@ -25,21 +27,36 @@ module.exports = class UsersGeneratorView extends Backbone.Marionette.CompositeV
   onShow: ->
     scrollTo(0,0)
     
+  onClear: (e) ->
+    e.preventDefault()
+    @collection.reset()
+    
   onGenerate: (e) ->
     e.preventDefault()
     @collection.reset()
     data = Backbone.Syphon.serialize(@)
     for i in [1..data.amount]
       @collection.add
-        userName: data.prefix + @makeid() + i
-        password: @makeid()
+        userName: data.prefix + @makeId()
+        password: @makeId()
         roles: data.roles
+        message: data.message
         active: true
         dirty: true
     log 'new users', @collection
     vent.trigger 'save:users'
     
-  makeid: ->
+  onPrintClick: (e) ->
+    e.preventDefault()
+    #  add a page-break after every 4th element
+    $('#js-users .list-group-item:nth-child(4n)').css('page-break-after', 'always')
+    # setup the user list for printing
+    css = '<link href="stylesheets/app.css" rel="stylesheet" type="text/css">'
+    window.frames["print_frame"].document.body.innerHTML= css + document.getElementById("js-users").innerHTML
+    window.frames["print_frame"].window.focus()
+    window.frames["print_frame"].window.print()
+    
+  makeId: ->
     text = ''
     possible = 'abcdefghjkmnpqrstuvwxy23456789'
     i = 0

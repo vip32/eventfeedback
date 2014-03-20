@@ -6,7 +6,7 @@ config = require 'config'
 module.exports = class Router extends Backbone.Marionette.AppRouter
 
   appRoutes:
-    'home': 'showHome'
+    '': 'showHome'
     'about': 'showAbout'
     'debug': 'showDebug'
     'signin': 'showSignin'

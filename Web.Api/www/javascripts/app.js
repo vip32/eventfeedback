@@ -230,6 +230,8 @@ Config = (function() {
 
   Config.prototype.spinneractive = false;
 
+  Config.prototype.url = 'https://eventfeedback.azurewebsites.net';
+
   Config.prototype.modules = {
     'header': 'modules/header/router',
     'common': 'modules/common/router',
@@ -1727,14 +1729,28 @@ if (typeof define === 'function' && define.amd) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, stack2, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "﻿<div>\r\n  <!--<div class=\"glyphicon glyphicon-user\"></div>-->\r\n\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-6\">\r\n      <h3 style=\"color: #000000;\">"
+  buffer += "﻿<div>\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-5\">\r\n      <h2>";
+  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h2>\r\n      <p>"
+    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.message)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</p>\r\n      <h3 style=\"color: #000000;\">"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "&emsp;/&emsp;"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.password)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</h3>\r\n    </div>\r\n    <div class=\"col-xs-6\">\r\n      <img src=\"/www/images/qr.png\" height=\"88\" width=\"88\"/>\r\n    </div>\r\n    <div class=\"col-xs-6\"></div>\r\n  </div>\r\n  <a href=\"https://eventfeedback.azurewebsites.net\">https://eventfeedback.azurewebsites.net</a>\r\n</div>\r\n";
+    + "</h3>\r\n      ";
+  if (stack2 = helpers.url) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.url; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
+    + "\r\n    </div>\r\n    <div class=\"col-xs-3\">\r\n      <div id=\"qr"
+    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\"></div>\r\n    </div>\r\n    <div class=\"col-xs-4\">\r\n      <a id=\"qrlink"
+    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" class=\"btn btn-success btn-small noprint\">signin</a>\r\n    </div>\r\n  </div>\r\n</div>\r\n";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
@@ -1765,10 +1781,10 @@ function program1(depth0,data) {
   return buffer;
   }
 
-  buffer += "﻿<div class=\"container\">\r\n  <form class=\"form-horizontal noprint\" role=\"form\">\r\n    <div class=\"form-group\">\r\n      <label for=\"amount\" class=\"col-sm-4 control-label\">Amount</label>\r\n      <div class=\"col-sm-8\">\r\n        <select name=\"amount\" id=\"amount\" class=\"form-control\">\r\n          <option value=\"1\">1</option>\r\n          <option value=\"10\">10</option>\r\n          <option value=\"25\">25</option>\r\n          <option value=\"50\">50</option>\r\n          <option value=\"100\">100</option>\r\n        </select>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"prefix\" class=\"col-sm-4 control-label\">Prefix</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"prefix\" id=\"prefix\" placeholder=\"\"></input>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"roles\" class=\"col-sm-4 control-label\">Role</label>\r\n      <div class=\"col-sm-8\">\r\n        <select name=\"roles\" id=\"roles\" class=\"form-control\">\r\n          <option value=\"\"></option>\r\n          ";
+  buffer += "﻿<div class=\"container\">\r\n  <form class=\"form-horizontal noprint\" role=\"form\">\r\n    <div class=\"form-group\">\r\n      <label for=\"message\" class=\"col-sm-4 control-label\">Message</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"message\" id=\"message\" placeholder=\"\"></input>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"amount\" class=\"col-sm-4 control-label\">Amount</label>\r\n      <div class=\"col-sm-8\">\r\n        <select name=\"amount\" id=\"amount\" class=\"form-control\">\r\n          <option value=\"1\">1</option>\r\n          <option value=\"10\">10</option>\r\n          <option value=\"25\">25</option>\r\n          <option value=\"50\">50</option>\r\n          <option value=\"100\">100</option>\r\n        </select>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"prefix\" class=\"col-sm-4 control-label\">Prefix</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"prefix\" id=\"prefix\" placeholder=\"\"></input>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"roles\" class=\"col-sm-4 control-label\">Role</label>\r\n      <div class=\"col-sm-8\">\r\n        <select name=\"roles\" id=\"roles\" class=\"form-control\">\r\n          <option value=\"\"></option>\r\n          ";
   stack1 = helpers.each.call(depth0, depth0.roles, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\r\n        </select>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <div class=\"col-sm-offset-4 col-sm-8\">\r\n        <button type=\"button\" id=\"js-generate\" class=\"btn btn-success btn-lg\">\r\n          <span class=\"glyphicon glyphicon-user\"></span>&emsp;Generate</button>\r\n      </div>\r\n    </div>\r\n  </form>\r\n  \r\n  <div class=\"list-group js-users\" style=\"margin-top:39px;\">\r\n    <!-- users -->\r\n  </div>\r\n</div>\r\n\r\n";
+  buffer += "\r\n        </select>\r\n      </div>\r\n\r\n      <div class=\"col-sm-offset-4 col-sm-8 pull-right\">\r\n        <br/>\r\n        <button type=\"button\" id=\"js-generate\" class=\"btn btn-success btn-responsive\">\r\n          <span class=\"glyphicon glyphicon-user\"></span>&emsp;Generate\r\n        </button>\r\n        <button type=\"button\" id=\"js-clear\" class=\"btn btn-success btn-responsive\">\r\n          <span class=\"glyphicon glyphicon-refresh\"></span>&emsp;Clear\r\n        </button>\r\n        <button type=\"button\" id=\"js-print\" class=\"btn btn-success btn-responsive\">\r\n          <div class=\"glyphicon glyphicon-print\"></div>&emsp;Print\r\n        </button>\r\n      </div>\r\n    </div>\r\n  </form>\r\n  <div class=\"list-group\" id=\"js-users\">\r\n    <!-- users -->\r\n  </div>\r\n  <iframe name=\"print_frame\" width=\"0\" height=\"0\" frameborder=\"0\" src=\"about:blank\"></iframe>\r\n</div>\r\n\r\n";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
@@ -1880,13 +1896,15 @@ module.exports = UsersEditView = (function(_super) {
 });
 
 ;require.register("modules/admin/views/users-generator-item-view", function(exports, require, module) {
-var ItemView, UsersGeneratorItemView, application, settings, vent, _ref,
+var ItemView, UsersGeneratorItemView, application, config, settings, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
 
 vent = require('vent');
+
+config = require('config');
 
 settings = require('settings');
 
@@ -1916,8 +1934,24 @@ module.exports = UsersGeneratorItemView = (function(_super) {
     var _ref1;
     return {
       resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
-      model: this.model.toJSON()
+      model: this.model.toJSON(),
+      title: config.apptitle,
+      url: config.url
     };
+  };
+
+  UsersGeneratorItemView.prototype.onShow = function() {
+    var url;
+    url = "" + config.url + "/index.html#signin?u=" + (this.model.get('userName')) + "&p=" + (this.model.get('password'));
+    $("#qrlink" + (this.model.get('userName'))).attr('href', url);
+    return new QRCode("qr" + (this.model.get('userName')), {
+      text: url,
+      width: 128,
+      height: 128,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
   };
 
   return UsersGeneratorItemView;
@@ -1948,14 +1982,16 @@ module.exports = UsersGeneratorView = (function(_super) {
 
   UsersGeneratorView.prototype.itemView = require('./users-generator-item-view');
 
-  UsersGeneratorView.prototype.itemViewContainer = '.js-users';
+  UsersGeneratorView.prototype.itemViewContainer = '#js-users';
 
   vent.trigger('navigation:back:on');
 
   vent.on('navigation:back', UsersGeneratorView.onBack);
 
   UsersGeneratorView.prototype.events = {
-    'click #js-generate': 'onGenerate'
+    'click #js-generate': 'onGenerate',
+    'click #js-clear': 'onClear',
+    'click #js-print': 'onPrintClick'
   };
 
   UsersGeneratorView.prototype.initialize = function(options) {
@@ -1981,6 +2017,11 @@ module.exports = UsersGeneratorView = (function(_super) {
     return scrollTo(0, 0);
   };
 
+  UsersGeneratorView.prototype.onClear = function(e) {
+    e.preventDefault();
+    return this.collection.reset();
+  };
+
   UsersGeneratorView.prototype.onGenerate = function(e) {
     var data, i, _i, _ref1;
     e.preventDefault();
@@ -1988,9 +2029,10 @@ module.exports = UsersGeneratorView = (function(_super) {
     data = Backbone.Syphon.serialize(this);
     for (i = _i = 1, _ref1 = data.amount; 1 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 1 <= _ref1 ? ++_i : --_i) {
       this.collection.add({
-        userName: data.prefix + this.makeid() + i,
-        password: this.makeid(),
+        userName: data.prefix + this.makeId(),
+        password: this.makeId(),
         roles: data.roles,
+        message: data.message,
         active: true,
         dirty: true
       });
@@ -1999,7 +2041,17 @@ module.exports = UsersGeneratorView = (function(_super) {
     return vent.trigger('save:users');
   };
 
-  UsersGeneratorView.prototype.makeid = function() {
+  UsersGeneratorView.prototype.onPrintClick = function(e) {
+    var css;
+    e.preventDefault();
+    $('#js-users .list-group-item:nth-child(4n)').css('page-break-after', 'always');
+    css = '<link href="stylesheets/app.css" rel="stylesheet" type="text/css">';
+    window.frames["print_frame"].document.body.innerHTML = css + document.getElementById("js-users").innerHTML;
+    window.frames["print_frame"].window.focus();
+    return window.frames["print_frame"].window.print();
+  };
+
+  UsersGeneratorView.prototype.makeId = function() {
     var i, possible, text;
     text = '';
     possible = 'abcdefghjkmnpqrstuvwxy23456789';
@@ -2182,7 +2234,7 @@ module.exports = Router = (function(_super) {
   }
 
   Router.prototype.appRoutes = {
-    'home': 'showHome',
+    '': 'showHome',
     'about': 'showAbout',
     'debug': 'showDebug',
     'signin': 'showSignin'
@@ -3073,6 +3125,7 @@ module.exports = EventReportView = (function(_super) {
 
   EventReportView.prototype.onPrintClick = function(e) {
     var css, sessionId;
+    e.preventDefault();
     sessionId = $(e.currentTarget).attr('data-sessionId');
     css = '<link href="stylesheets/app.css" rel="stylesheet" type="text/css">';
     window.frames["print_frame"].document.body.innerHTML = css + document.getElementById(sessionId).innerHTML;
@@ -3325,9 +3378,9 @@ function program2(depth0,data) {
   buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-12\">\r\n      <div class=\"btn-group pull-right\" data-toggle=\"buttons\">\r\n        <label class=\"btn btn-primary badge\">\r\n          <input type=\"radio\" class=\"js-tag\" name=\"tags\" value=\"\">&nbsp;&nbsp;\r\n          </input>\r\n        </label>\r\n        ";
   stack1 = helpers.each.call(depth0, depth0.tags, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\r\n      </div>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n  <p>"
+  buffer += "\r\n      </div>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n\r\n  <div class=\"row pull-right\">\r\n    <div class=\"col-xs-12\">\r\n      <p>"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</p>\r\n\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-7\">&nbsp;</div>\r\n    <div class=\"col-xs-5\">\r\n      <a class=\"btn btn-lg btn-success js-report\" href=\"#\">\r\n        <span class=\"glyphicon glyphicon-list\"></span>&emsp;"
+    + "</p>\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"row pull-right\">\r\n    <div class=\"col-xs-12\">\r\n      <br/>\r\n      <a class=\"btn btn-success btn-responsive js-report\" href=\"#\">\r\n        <span class=\"glyphicon glyphicon-list\"></span>&emsp;"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Text_Report)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n      </a>\r\n    </div>\r\n  </div>\r\n</div>";
   return buffer;
@@ -4824,7 +4877,9 @@ function program114(depth0,data) {
 function program116(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\r\n    <div class=\"row\">\r\n      <div class=\"col-xs-7\">&nbsp;</div>\r\n      <div class=\"col-xs-5\">\r\n        <button class=\"btn btn-success btn-lg pull-right js-submit\">\r\n          <span class=\"glyphicon glyphicon-save\"></span>&emsp;"
+  buffer += "\r\n    <div class=\"row pull-right\">\r\n      <div class=\"col-xs-12\">\r\n        <br/>\r\n        <button class=\"btn btn-danger btn-responsive js-remove\">\r\n          <span class=\"glyphicon glyphicon-remove\"></span>&emsp;"
+    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Text_Remove)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n        </button>\r\n        <button class=\"btn btn-success btn-responsive js-submit\">\r\n          <span class=\"glyphicon glyphicon-save\"></span>&emsp;"
     + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Text_Save)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n        </button>\r\n      </div>\r\n    </div>\r\n    ";
   return buffer;

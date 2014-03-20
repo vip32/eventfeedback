@@ -113,6 +113,7 @@ namespace EventFeedback.Domain
                     new ResourceText { Key = "Title_SignOut", Value = "Sign-out", Language = "en-US" },
                     new ResourceText { Key = "Title_Debug", Value = "Debug", Language = "en-US" },
                     new ResourceText { Key = "Text_Save", Value = "Save", Language = "en-US" },
+                    new ResourceText { Key = "Text_Remove", Value = "Remove", Language = "en-US" },
                     new ResourceText { Key = "Text_Report", Value = "Report", Language = "en-US" },
                     new ResourceText { Key = "Home_Text", Value = "", Language = "en-US" },
 
@@ -127,6 +128,7 @@ namespace EventFeedback.Domain
                     new ResourceText { Key = "Title_SignOut", Value = "Ausloggen", Language = "de-DE" },
                     new ResourceText { Key = "Title_Debug", Value = "Debug", Language = "de-DE" },
                     new ResourceText { Key = "Text_Save", Value = "Speichern", Language = "de-DE" },
+                    new ResourceText { Key = "Text_Remove", Value = "Löschen", Language = "de-DE" },
                     new ResourceText { Key = "Text_Report", Value = "Report", Language = "de-DE" },
                     new ResourceText { Key = "Home_Text", Value = "Die Event|Feedback App ist der Platz für dein Feedback zu unseren Entwicklertagen. Hier kannst du die von dir besuchten Sessions einfach und zeitnah bewerten und so den Speakern wertvolles Feedback liefern. Ein kurzer Kommentar macht deine Bewertung für die Speaker einfacher nachvollziehbar und sehr viel hilfreicher.", Language = "de-DE" }
                     );
