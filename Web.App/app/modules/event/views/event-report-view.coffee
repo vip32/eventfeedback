@@ -21,7 +21,7 @@ module.exports = class EventReportView extends Backbone.Marionette.ItemView
   onPrintClick: (e) ->
     e.preventDefault()
     sessionId = $(e.currentTarget).attr('data-sessionId')
-    css = '<link href="stylesheets/app.css" rel="stylesheet" type="text/css">'
+    css = '<link href="www/stylesheets/app.css" rel="stylesheet" type="text/css">'
     window.frames["print_frame"].document.body.innerHTML= css + document.getElementById(sessionId).innerHTML
     window.frames["print_frame"].window.focus()
     window.frames["print_frame"].window.print()

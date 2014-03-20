@@ -2045,7 +2045,7 @@ module.exports = UsersGeneratorView = (function(_super) {
     var css;
     e.preventDefault();
     $('#js-users .list-group-item:nth-child(4n)').css('page-break-after', 'always');
-    css = '<link href="stylesheets/app.css" rel="stylesheet" type="text/css">';
+    css = '<link href="www/stylesheets/app.css" rel="stylesheet" type="text/css">';
     window.frames["print_frame"].document.body.innerHTML = css + document.getElementById("js-users").innerHTML;
     window.frames["print_frame"].window.focus();
     return window.frames["print_frame"].window.print();
@@ -3127,7 +3127,7 @@ module.exports = EventReportView = (function(_super) {
     var css, sessionId;
     e.preventDefault();
     sessionId = $(e.currentTarget).attr('data-sessionId');
-    css = '<link href="stylesheets/app.css" rel="stylesheet" type="text/css">';
+    css = '<link href="www/stylesheets/app.css" rel="stylesheet" type="text/css">';
     window.frames["print_frame"].document.body.innerHTML = css + document.getElementById(sessionId).innerHTML;
     window.frames["print_frame"].window.focus();
     return window.frames["print_frame"].window.print();

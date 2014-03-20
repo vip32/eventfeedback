@@ -51,7 +51,7 @@ module.exports = class UsersGeneratorView extends Backbone.Marionette.CompositeV
     #  add a page-break after every 4th element
     $('#js-users .list-group-item:nth-child(4n)').css('page-break-after', 'always')
     # setup the user list for printing
-    css = '<link href="stylesheets/app.css" rel="stylesheet" type="text/css">'
+    css = '<link href="www/stylesheets/app.css" rel="stylesheet" type="text/css">'
     window.frames["print_frame"].document.body.innerHTML= css + document.getElementById("js-users").innerHTML
     window.frames["print_frame"].window.focus()
     window.frames["print_frame"].window.print()
