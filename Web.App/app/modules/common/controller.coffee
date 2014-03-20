@@ -40,13 +40,16 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     view = new View(resources: application.resources)
     application.layout.content.show(view)
 
-  showSignin: ->
+  showSignin: (params) ->
     vent.trigger 'fetch:done' # switch off block
     vent.trigger 'set:active:header', 'signin:index', application.resources.key('Title_SignIn'), 'glyphicon-user'
     View = require './views/signin-view'
-    view = new View(resources: application.resources)
+    view = new View
+      resources: application.resources
+      username: params?.u
+      password: params?.p
     application.layout.content.show(view)
-
+    
   showAbout: ->
     vent.trigger 'fetch:done' # switch off block
     vent.trigger 'set:active:header', 'about:index', application.resources.key('Title_About'), 'glyphicon-info-sign'

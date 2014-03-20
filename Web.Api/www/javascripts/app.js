@@ -135,10 +135,7 @@ Application = (function(_super) {
         _this.routers[name] = router;
       }
       Backbone.history.start();
-      log('current route', _this.getCurrentRoute());
-      return _this.on('start', function() {
-        return vent.trigger(config.startuptrigger);
-      });
+      return log('current route', _this.getCurrentRoute());
     });
     this.addInitializer(function(options) {
       _this.layout = new (require(config.layout));
@@ -2087,13 +2084,15 @@ module.exports = Controller = (function(_super) {
     return application.layout.content.show(view);
   };
 
-  Controller.prototype.showSignin = function() {
+  Controller.prototype.showSignin = function(params) {
     var View, view;
     vent.trigger('fetch:done');
     vent.trigger('set:active:header', 'signin:index', application.resources.key('Title_SignIn'), 'glyphicon-user');
     View = require('./views/signin-view');
     view = new View({
-      resources: application.resources
+      resources: application.resources,
+      username: params != null ? params.u : void 0,
+      password: params != null ? params.p : void 0
     });
     return application.layout.content.show(view);
   };
@@ -2456,7 +2455,8 @@ module.exports = SigninView = (function(_super) {
     var _ref1;
     return {
       resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
-      username: settings.get('api_remember') ? settings.get('api_username') : void 0,
+      username: this.options.username ? this.options.username : settings.get('api_remember') ? settings.get('api_username') : void 0,
+      password: this.options.password,
       remember: settings.get('api_remember') ? settings.get('api_remember') : void 0
     };
   };
@@ -2610,7 +2610,11 @@ function program1(depth0,data) {
   if (stack1 = helpers.username) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.username; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\"/>\r\n    <input type=\"password\" class=\"form-control\" placeholder=\"password\" name=\"password\"/>\r\n    <div class=\"form-group\">\r\n      <label for=\"notification1\">Remember me</label>\r\n      <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n        <input type=\"radio\" id=\"notification1\" name=\"remember\" ";
+    + "\"/>\r\n    <input type=\"password\" class=\"form-control\" placeholder=\"password\" name=\"password\" value=\"";
+  if (stack1 = helpers.password) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.password; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\"/>\r\n    <div class=\"form-group\">\r\n      <label for=\"notification1\">Remember me</label>\r\n      <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n        <input type=\"radio\" id=\"notification1\" name=\"remember\" ";
   stack1 = helpers['if'].call(depth0, depth0.remember, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "/>\r\n      </div>\r\n    </div>\r\n    <button class=\"btn btn-lg btn-success btn-block js-signin\">\r\n      <i class=\"icon-securityalt-shieldalt\"></i>&emsp;Sign in</button>\r\n  </form>\r\n</div> ";
