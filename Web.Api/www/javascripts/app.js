@@ -1942,7 +1942,7 @@ module.exports = UsersGeneratorItemView = (function(_super) {
 
   UsersGeneratorItemView.prototype.onShow = function() {
     var url;
-    url = "" + config.url + "/index.html#signin?u=" + (this.model.get('userName')) + "&p=" + (this.model.get('password'));
+    url = "" + config.url + "/www/index.local.html#signin?u=" + (this.model.get('userName')) + "&p=" + (this.model.get('password'));
     $("#qrlink" + (this.model.get('userName'))).attr('href', url);
     return new QRCode("qr" + (this.model.get('userName')), {
       text: url,

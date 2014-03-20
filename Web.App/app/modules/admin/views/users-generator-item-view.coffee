@@ -20,7 +20,7 @@ module.exports = class UsersGeneratorItemView extends Backbone.Marionette.ItemVi
     url: config.url
     
   onShow: ->
-    url = "#{config.url}/index.html#signin?u=#{@model.get('userName')}&p=#{@model.get('password')}"
+    url = "#{config.url}/www/index.local.html#signin?u=#{@model.get('userName')}&p=#{@model.get('password')}"
     $("#qrlink#{@model.get('userName')}").attr('href', url)
     new QRCode "qr#{@model.get('userName')}", 
       text: url
