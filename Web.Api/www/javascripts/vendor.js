@@ -90,1351 +90,7 @@
   globals.require.list = list;
   globals.require.brunch = true;
 })();
-//     Underscore.js 1.6.0
-//     http://underscorejs.org
-//     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-//     Underscore may be freely distributed under the MIT license.
-
-(function() {
-
-  // Baseline setup
-  // --------------
-
-  // Establish the root object, `window` in the browser, or `exports` on the server.
-  var root = this;
-
-  // Save the previous value of the `_` variable.
-  var previousUnderscore = root._;
-
-  // Establish the object that gets returned to break out of a loop iteration.
-  var breaker = {};
-
-  // Save bytes in the minified (but not gzipped) version:
-  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
-
-  // Create quick reference variables for speed access to core prototypes.
-  var
-    push             = ArrayProto.push,
-    slice            = ArrayProto.slice,
-    concat           = ArrayProto.concat,
-    toString         = ObjProto.toString,
-    hasOwnProperty   = ObjProto.hasOwnProperty;
-
-  // All **ECMAScript 5** native function implementations that we hope to use
-  // are declared here.
-  var
-    nativeForEach      = ArrayProto.forEach,
-    nativeMap          = ArrayProto.map,
-    nativeReduce       = ArrayProto.reduce,
-    nativeReduceRight  = ArrayProto.reduceRight,
-    nativeFilter       = ArrayProto.filter,
-    nativeEvery        = ArrayProto.every,
-    nativeSome         = ArrayProto.some,
-    nativeIndexOf      = ArrayProto.indexOf,
-    nativeLastIndexOf  = ArrayProto.lastIndexOf,
-    nativeIsArray      = Array.isArray,
-    nativeKeys         = Object.keys,
-    nativeBind         = FuncProto.bind;
-
-  // Create a safe reference to the Underscore object for use below.
-  var _ = function(obj) {
-    if (obj instanceof _) return obj;
-    if (!(this instanceof _)) return new _(obj);
-    this._wrapped = obj;
-  };
-
-  // Export the Underscore object for **Node.js**, with
-  // backwards-compatibility for the old `require()` API. If we're in
-  // the browser, add `_` as a global object via a string identifier,
-  // for Closure Compiler "advanced" mode.
-  if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = _;
-    }
-    exports._ = _;
-  } else {
-    root._ = _;
-  }
-
-  // Current version.
-  _.VERSION = '1.6.0';
-
-  // Collection Functions
-  // --------------------
-
-  // The cornerstone, an `each` implementation, aka `forEach`.
-  // Handles objects with the built-in `forEach`, arrays, and raw objects.
-  // Delegates to **ECMAScript 5**'s native `forEach` if available.
-  var each = _.each = _.forEach = function(obj, iterator, context) {
-    if (obj == null) return obj;
-    if (nativeForEach && obj.forEach === nativeForEach) {
-      obj.forEach(iterator, context);
-    } else if (obj.length === +obj.length) {
-      for (var i = 0, length = obj.length; i < length; i++) {
-        if (iterator.call(context, obj[i], i, obj) === breaker) return;
-      }
-    } else {
-      var keys = _.keys(obj);
-      for (var i = 0, length = keys.length; i < length; i++) {
-        if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
-      }
-    }
-    return obj;
-  };
-
-  // Return the results of applying the iterator to each element.
-  // Delegates to **ECMAScript 5**'s native `map` if available.
-  _.map = _.collect = function(obj, iterator, context) {
-    var results = [];
-    if (obj == null) return results;
-    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
-    each(obj, function(value, index, list) {
-      results.push(iterator.call(context, value, index, list));
-    });
-    return results;
-  };
-
-  var reduceError = 'Reduce of empty array with no initial value';
-
-  // **Reduce** builds up a single result from a list of values, aka `inject`,
-  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
-  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
-    var initial = arguments.length > 2;
-    if (obj == null) obj = [];
-    if (nativeReduce && obj.reduce === nativeReduce) {
-      if (context) iterator = _.bind(iterator, context);
-      return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
-    }
-    each(obj, function(value, index, list) {
-      if (!initial) {
-        memo = value;
-        initial = true;
-      } else {
-        memo = iterator.call(context, memo, value, index, list);
-      }
-    });
-    if (!initial) throw new TypeError(reduceError);
-    return memo;
-  };
-
-  // The right-associative version of reduce, also known as `foldr`.
-  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
-  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
-    var initial = arguments.length > 2;
-    if (obj == null) obj = [];
-    if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
-      if (context) iterator = _.bind(iterator, context);
-      return initial ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
-    }
-    var length = obj.length;
-    if (length !== +length) {
-      var keys = _.keys(obj);
-      length = keys.length;
-    }
-    each(obj, function(value, index, list) {
-      index = keys ? keys[--length] : --length;
-      if (!initial) {
-        memo = obj[index];
-        initial = true;
-      } else {
-        memo = iterator.call(context, memo, obj[index], index, list);
-      }
-    });
-    if (!initial) throw new TypeError(reduceError);
-    return memo;
-  };
-
-  // Return the first value which passes a truth test. Aliased as `detect`.
-  _.find = _.detect = function(obj, predicate, context) {
-    var result;
-    any(obj, function(value, index, list) {
-      if (predicate.call(context, value, index, list)) {
-        result = value;
-        return true;
-      }
-    });
-    return result;
-  };
-
-  // Return all the elements that pass a truth test.
-  // Delegates to **ECMAScript 5**'s native `filter` if available.
-  // Aliased as `select`.
-  _.filter = _.select = function(obj, predicate, context) {
-    var results = [];
-    if (obj == null) return results;
-    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(predicate, context);
-    each(obj, function(value, index, list) {
-      if (predicate.call(context, value, index, list)) results.push(value);
-    });
-    return results;
-  };
-
-  // Return all the elements for which a truth test fails.
-  _.reject = function(obj, predicate, context) {
-    return _.filter(obj, function(value, index, list) {
-      return !predicate.call(context, value, index, list);
-    }, context);
-  };
-
-  // Determine whether all of the elements match a truth test.
-  // Delegates to **ECMAScript 5**'s native `every` if available.
-  // Aliased as `all`.
-  _.every = _.all = function(obj, predicate, context) {
-    predicate || (predicate = _.identity);
-    var result = true;
-    if (obj == null) return result;
-    if (nativeEvery && obj.every === nativeEvery) return obj.every(predicate, context);
-    each(obj, function(value, index, list) {
-      if (!(result = result && predicate.call(context, value, index, list))) return breaker;
-    });
-    return !!result;
-  };
-
-  // Determine if at least one element in the object matches a truth test.
-  // Delegates to **ECMAScript 5**'s native `some` if available.
-  // Aliased as `any`.
-  var any = _.some = _.any = function(obj, predicate, context) {
-    predicate || (predicate = _.identity);
-    var result = false;
-    if (obj == null) return result;
-    if (nativeSome && obj.some === nativeSome) return obj.some(predicate, context);
-    each(obj, function(value, index, list) {
-      if (result || (result = predicate.call(context, value, index, list))) return breaker;
-    });
-    return !!result;
-  };
-
-  // Determine if the array or object contains a given value (using `===`).
-  // Aliased as `include`.
-  _.contains = _.include = function(obj, target) {
-    if (obj == null) return false;
-    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
-    return any(obj, function(value) {
-      return value === target;
-    });
-  };
-
-  // Invoke a method (with arguments) on every item in a collection.
-  _.invoke = function(obj, method) {
-    var args = slice.call(arguments, 2);
-    var isFunc = _.isFunction(method);
-    return _.map(obj, function(value) {
-      return (isFunc ? method : value[method]).apply(value, args);
-    });
-  };
-
-  // Convenience version of a common use case of `map`: fetching a property.
-  _.pluck = function(obj, key) {
-    return _.map(obj, _.property(key));
-  };
-
-  // Convenience version of a common use case of `filter`: selecting only objects
-  // containing specific `key:value` pairs.
-  _.where = function(obj, attrs) {
-    return _.filter(obj, _.matches(attrs));
-  };
-
-  // Convenience version of a common use case of `find`: getting the first object
-  // containing specific `key:value` pairs.
-  _.findWhere = function(obj, attrs) {
-    return _.find(obj, _.matches(attrs));
-  };
-
-  // Return the maximum element or (element-based computation).
-  // Can't optimize arrays of integers longer than 65,535 elements.
-  // See [WebKit Bug 80797](https://bugs.webkit.org/show_bug.cgi?id=80797)
-  _.max = function(obj, iterator, context) {
-    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-      return Math.max.apply(Math, obj);
-    }
-    var result = -Infinity, lastComputed = -Infinity;
-    each(obj, function(value, index, list) {
-      var computed = iterator ? iterator.call(context, value, index, list) : value;
-      if (computed > lastComputed) {
-        result = value;
-        lastComputed = computed;
-      }
-    });
-    return result;
-  };
-
-  // Return the minimum element (or element-based computation).
-  _.min = function(obj, iterator, context) {
-    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-      return Math.min.apply(Math, obj);
-    }
-    var result = Infinity, lastComputed = Infinity;
-    each(obj, function(value, index, list) {
-      var computed = iterator ? iterator.call(context, value, index, list) : value;
-      if (computed < lastComputed) {
-        result = value;
-        lastComputed = computed;
-      }
-    });
-    return result;
-  };
-
-  // Shuffle an array, using the modern version of the
-  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
-  _.shuffle = function(obj) {
-    var rand;
-    var index = 0;
-    var shuffled = [];
-    each(obj, function(value) {
-      rand = _.random(index++);
-      shuffled[index - 1] = shuffled[rand];
-      shuffled[rand] = value;
-    });
-    return shuffled;
-  };
-
-  // Sample **n** random values from a collection.
-  // If **n** is not specified, returns a single random element.
-  // The internal `guard` argument allows it to work with `map`.
-  _.sample = function(obj, n, guard) {
-    if (n == null || guard) {
-      if (obj.length !== +obj.length) obj = _.values(obj);
-      return obj[_.random(obj.length - 1)];
-    }
-    return _.shuffle(obj).slice(0, Math.max(0, n));
-  };
-
-  // An internal function to generate lookup iterators.
-  var lookupIterator = function(value) {
-    if (value == null) return _.identity;
-    if (_.isFunction(value)) return value;
-    return _.property(value);
-  };
-
-  // Sort the object's values by a criterion produced by an iterator.
-  _.sortBy = function(obj, iterator, context) {
-    iterator = lookupIterator(iterator);
-    return _.pluck(_.map(obj, function(value, index, list) {
-      return {
-        value: value,
-        index: index,
-        criteria: iterator.call(context, value, index, list)
-      };
-    }).sort(function(left, right) {
-      var a = left.criteria;
-      var b = right.criteria;
-      if (a !== b) {
-        if (a > b || a === void 0) return 1;
-        if (a < b || b === void 0) return -1;
-      }
-      return left.index - right.index;
-    }), 'value');
-  };
-
-  // An internal function used for aggregate "group by" operations.
-  var group = function(behavior) {
-    return function(obj, iterator, context) {
-      var result = {};
-      iterator = lookupIterator(iterator);
-      each(obj, function(value, index) {
-        var key = iterator.call(context, value, index, obj);
-        behavior(result, key, value);
-      });
-      return result;
-    };
-  };
-
-  // Groups the object's values by a criterion. Pass either a string attribute
-  // to group by, or a function that returns the criterion.
-  _.groupBy = group(function(result, key, value) {
-    _.has(result, key) ? result[key].push(value) : result[key] = [value];
-  });
-
-  // Indexes the object's values by a criterion, similar to `groupBy`, but for
-  // when you know that your index values will be unique.
-  _.indexBy = group(function(result, key, value) {
-    result[key] = value;
-  });
-
-  // Counts instances of an object that group by a certain criterion. Pass
-  // either a string attribute to count by, or a function that returns the
-  // criterion.
-  _.countBy = group(function(result, key) {
-    _.has(result, key) ? result[key]++ : result[key] = 1;
-  });
-
-  // Use a comparator function to figure out the smallest index at which
-  // an object should be inserted so as to maintain order. Uses binary search.
-  _.sortedIndex = function(array, obj, iterator, context) {
-    iterator = lookupIterator(iterator);
-    var value = iterator.call(context, obj);
-    var low = 0, high = array.length;
-    while (low < high) {
-      var mid = (low + high) >>> 1;
-      iterator.call(context, array[mid]) < value ? low = mid + 1 : high = mid;
-    }
-    return low;
-  };
-
-  // Safely create a real, live array from anything iterable.
-  _.toArray = function(obj) {
-    if (!obj) return [];
-    if (_.isArray(obj)) return slice.call(obj);
-    if (obj.length === +obj.length) return _.map(obj, _.identity);
-    return _.values(obj);
-  };
-
-  // Return the number of elements in an object.
-  _.size = function(obj) {
-    if (obj == null) return 0;
-    return (obj.length === +obj.length) ? obj.length : _.keys(obj).length;
-  };
-
-  // Array Functions
-  // ---------------
-
-  // Get the first element of an array. Passing **n** will return the first N
-  // values in the array. Aliased as `head` and `take`. The **guard** check
-  // allows it to work with `_.map`.
-  _.first = _.head = _.take = function(array, n, guard) {
-    if (array == null) return void 0;
-    if ((n == null) || guard) return array[0];
-    if (n < 0) return [];
-    return slice.call(array, 0, n);
-  };
-
-  // Returns everything but the last entry of the array. Especially useful on
-  // the arguments object. Passing **n** will return all the values in
-  // the array, excluding the last N. The **guard** check allows it to work with
-  // `_.map`.
-  _.initial = function(array, n, guard) {
-    return slice.call(array, 0, array.length - ((n == null) || guard ? 1 : n));
-  };
-
-  // Get the last element of an array. Passing **n** will return the last N
-  // values in the array. The **guard** check allows it to work with `_.map`.
-  _.last = function(array, n, guard) {
-    if (array == null) return void 0;
-    if ((n == null) || guard) return array[array.length - 1];
-    return slice.call(array, Math.max(array.length - n, 0));
-  };
-
-  // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
-  // Especially useful on the arguments object. Passing an **n** will return
-  // the rest N values in the array. The **guard**
-  // check allows it to work with `_.map`.
-  _.rest = _.tail = _.drop = function(array, n, guard) {
-    return slice.call(array, (n == null) || guard ? 1 : n);
-  };
-
-  // Trim out all falsy values from an array.
-  _.compact = function(array) {
-    return _.filter(array, _.identity);
-  };
-
-  // Internal implementation of a recursive `flatten` function.
-  var flatten = function(input, shallow, output) {
-    if (shallow && _.every(input, _.isArray)) {
-      return concat.apply(output, input);
-    }
-    each(input, function(value) {
-      if (_.isArray(value) || _.isArguments(value)) {
-        shallow ? push.apply(output, value) : flatten(value, shallow, output);
-      } else {
-        output.push(value);
-      }
-    });
-    return output;
-  };
-
-  // Flatten out an array, either recursively (by default), or just one level.
-  _.flatten = function(array, shallow) {
-    return flatten(array, shallow, []);
-  };
-
-  // Return a version of the array that does not contain the specified value(s).
-  _.without = function(array) {
-    return _.difference(array, slice.call(arguments, 1));
-  };
-
-  // Split an array into two arrays: one whose elements all satisfy the given
-  // predicate, and one whose elements all do not satisfy the predicate.
-  _.partition = function(array, predicate) {
-    var pass = [], fail = [];
-    each(array, function(elem) {
-      (predicate(elem) ? pass : fail).push(elem);
-    });
-    return [pass, fail];
-  };
-
-  // Produce a duplicate-free version of the array. If the array has already
-  // been sorted, you have the option of using a faster algorithm.
-  // Aliased as `unique`.
-  _.uniq = _.unique = function(array, isSorted, iterator, context) {
-    if (_.isFunction(isSorted)) {
-      context = iterator;
-      iterator = isSorted;
-      isSorted = false;
-    }
-    var initial = iterator ? _.map(array, iterator, context) : array;
-    var results = [];
-    var seen = [];
-    each(initial, function(value, index) {
-      if (isSorted ? (!index || seen[seen.length - 1] !== value) : !_.contains(seen, value)) {
-        seen.push(value);
-        results.push(array[index]);
-      }
-    });
-    return results;
-  };
-
-  // Produce an array that contains the union: each distinct element from all of
-  // the passed-in arrays.
-  _.union = function() {
-    return _.uniq(_.flatten(arguments, true));
-  };
-
-  // Produce an array that contains every item shared between all the
-  // passed-in arrays.
-  _.intersection = function(array) {
-    var rest = slice.call(arguments, 1);
-    return _.filter(_.uniq(array), function(item) {
-      return _.every(rest, function(other) {
-        return _.contains(other, item);
-      });
-    });
-  };
-
-  // Take the difference between one array and a number of other arrays.
-  // Only the elements present in just the first array will remain.
-  _.difference = function(array) {
-    var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
-    return _.filter(array, function(value){ return !_.contains(rest, value); });
-  };
-
-  // Zip together multiple lists into a single array -- elements that share
-  // an index go together.
-  _.zip = function() {
-    var length = _.max(_.pluck(arguments, 'length').concat(0));
-    var results = new Array(length);
-    for (var i = 0; i < length; i++) {
-      results[i] = _.pluck(arguments, '' + i);
-    }
-    return results;
-  };
-
-  // Converts lists into objects. Pass either a single array of `[key, value]`
-  // pairs, or two parallel arrays of the same length -- one of keys, and one of
-  // the corresponding values.
-  _.object = function(list, values) {
-    if (list == null) return {};
-    var result = {};
-    for (var i = 0, length = list.length; i < length; i++) {
-      if (values) {
-        result[list[i]] = values[i];
-      } else {
-        result[list[i][0]] = list[i][1];
-      }
-    }
-    return result;
-  };
-
-  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
-  // we need this function. Return the position of the first occurrence of an
-  // item in an array, or -1 if the item is not included in the array.
-  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
-  // If the array is large and already in sort order, pass `true`
-  // for **isSorted** to use binary search.
-  _.indexOf = function(array, item, isSorted) {
-    if (array == null) return -1;
-    var i = 0, length = array.length;
-    if (isSorted) {
-      if (typeof isSorted == 'number') {
-        i = (isSorted < 0 ? Math.max(0, length + isSorted) : isSorted);
-      } else {
-        i = _.sortedIndex(array, item);
-        return array[i] === item ? i : -1;
-      }
-    }
-    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
-    for (; i < length; i++) if (array[i] === item) return i;
-    return -1;
-  };
-
-  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
-  _.lastIndexOf = function(array, item, from) {
-    if (array == null) return -1;
-    var hasIndex = from != null;
-    if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) {
-      return hasIndex ? array.lastIndexOf(item, from) : array.lastIndexOf(item);
-    }
-    var i = (hasIndex ? from : array.length);
-    while (i--) if (array[i] === item) return i;
-    return -1;
-  };
-
-  // Generate an integer Array containing an arithmetic progression. A port of
-  // the native Python `range()` function. See
-  // [the Python documentation](http://docs.python.org/library/functions.html#range).
-  _.range = function(start, stop, step) {
-    if (arguments.length <= 1) {
-      stop = start || 0;
-      start = 0;
-    }
-    step = arguments[2] || 1;
-
-    var length = Math.max(Math.ceil((stop - start) / step), 0);
-    var idx = 0;
-    var range = new Array(length);
-
-    while(idx < length) {
-      range[idx++] = start;
-      start += step;
-    }
-
-    return range;
-  };
-
-  // Function (ahem) Functions
-  // ------------------
-
-  // Reusable constructor function for prototype setting.
-  var ctor = function(){};
-
-  // Create a function bound to a given object (assigning `this`, and arguments,
-  // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
-  // available.
-  _.bind = function(func, context) {
-    var args, bound;
-    if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
-    if (!_.isFunction(func)) throw new TypeError;
-    args = slice.call(arguments, 2);
-    return bound = function() {
-      if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
-      ctor.prototype = func.prototype;
-      var self = new ctor;
-      ctor.prototype = null;
-      var result = func.apply(self, args.concat(slice.call(arguments)));
-      if (Object(result) === result) return result;
-      return self;
-    };
-  };
-
-  // Partially apply a function by creating a version that has had some of its
-  // arguments pre-filled, without changing its dynamic `this` context. _ acts
-  // as a placeholder, allowing any combination of arguments to be pre-filled.
-  _.partial = function(func) {
-    var boundArgs = slice.call(arguments, 1);
-    return function() {
-      var position = 0;
-      var args = boundArgs.slice();
-      for (var i = 0, length = args.length; i < length; i++) {
-        if (args[i] === _) args[i] = arguments[position++];
-      }
-      while (position < arguments.length) args.push(arguments[position++]);
-      return func.apply(this, args);
-    };
-  };
-
-  // Bind a number of an object's methods to that object. Remaining arguments
-  // are the method names to be bound. Useful for ensuring that all callbacks
-  // defined on an object belong to it.
-  _.bindAll = function(obj) {
-    var funcs = slice.call(arguments, 1);
-    if (funcs.length === 0) throw new Error('bindAll must be passed function names');
-    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
-    return obj;
-  };
-
-  // Memoize an expensive function by storing its results.
-  _.memoize = function(func, hasher) {
-    var memo = {};
-    hasher || (hasher = _.identity);
-    return function() {
-      var key = hasher.apply(this, arguments);
-      return _.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
-    };
-  };
-
-  // Delays a function for the given number of milliseconds, and then calls
-  // it with the arguments supplied.
-  _.delay = function(func, wait) {
-    var args = slice.call(arguments, 2);
-    return setTimeout(function(){ return func.apply(null, args); }, wait);
-  };
-
-  // Defers a function, scheduling it to run after the current call stack has
-  // cleared.
-  _.defer = function(func) {
-    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
-  };
-
-  // Returns a function, that, when invoked, will only be triggered at most once
-  // during a given window of time. Normally, the throttled function will run
-  // as much as it can, without ever going more than once per `wait` duration;
-  // but if you'd like to disable the execution on the leading edge, pass
-  // `{leading: false}`. To disable execution on the trailing edge, ditto.
-  _.throttle = function(func, wait, options) {
-    var context, args, result;
-    var timeout = null;
-    var previous = 0;
-    options || (options = {});
-    var later = function() {
-      previous = options.leading === false ? 0 : _.now();
-      timeout = null;
-      result = func.apply(context, args);
-      context = args = null;
-    };
-    return function() {
-      var now = _.now();
-      if (!previous && options.leading === false) previous = now;
-      var remaining = wait - (now - previous);
-      context = this;
-      args = arguments;
-      if (remaining <= 0) {
-        clearTimeout(timeout);
-        timeout = null;
-        previous = now;
-        result = func.apply(context, args);
-        context = args = null;
-      } else if (!timeout && options.trailing !== false) {
-        timeout = setTimeout(later, remaining);
-      }
-      return result;
-    };
-  };
-
-  // Returns a function, that, as long as it continues to be invoked, will not
-  // be triggered. The function will be called after it stops being called for
-  // N milliseconds. If `immediate` is passed, trigger the function on the
-  // leading edge, instead of the trailing.
-  _.debounce = function(func, wait, immediate) {
-    var timeout, args, context, timestamp, result;
-
-    var later = function() {
-      var last = _.now() - timestamp;
-      if (last < wait) {
-        timeout = setTimeout(later, wait - last);
-      } else {
-        timeout = null;
-        if (!immediate) {
-          result = func.apply(context, args);
-          context = args = null;
-        }
-      }
-    };
-
-    return function() {
-      context = this;
-      args = arguments;
-      timestamp = _.now();
-      var callNow = immediate && !timeout;
-      if (!timeout) {
-        timeout = setTimeout(later, wait);
-      }
-      if (callNow) {
-        result = func.apply(context, args);
-        context = args = null;
-      }
-
-      return result;
-    };
-  };
-
-  // Returns a function that will be executed at most one time, no matter how
-  // often you call it. Useful for lazy initialization.
-  _.once = function(func) {
-    var ran = false, memo;
-    return function() {
-      if (ran) return memo;
-      ran = true;
-      memo = func.apply(this, arguments);
-      func = null;
-      return memo;
-    };
-  };
-
-  // Returns the first function passed as an argument to the second,
-  // allowing you to adjust arguments, run code before and after, and
-  // conditionally execute the original function.
-  _.wrap = function(func, wrapper) {
-    return _.partial(wrapper, func);
-  };
-
-  // Returns a function that is the composition of a list of functions, each
-  // consuming the return value of the function that follows.
-  _.compose = function() {
-    var funcs = arguments;
-    return function() {
-      var args = arguments;
-      for (var i = funcs.length - 1; i >= 0; i--) {
-        args = [funcs[i].apply(this, args)];
-      }
-      return args[0];
-    };
-  };
-
-  // Returns a function that will only be executed after being called N times.
-  _.after = function(times, func) {
-    return function() {
-      if (--times < 1) {
-        return func.apply(this, arguments);
-      }
-    };
-  };
-
-  // Object Functions
-  // ----------------
-
-  // Retrieve the names of an object's properties.
-  // Delegates to **ECMAScript 5**'s native `Object.keys`
-  _.keys = function(obj) {
-    if (!_.isObject(obj)) return [];
-    if (nativeKeys) return nativeKeys(obj);
-    var keys = [];
-    for (var key in obj) if (_.has(obj, key)) keys.push(key);
-    return keys;
-  };
-
-  // Retrieve the values of an object's properties.
-  _.values = function(obj) {
-    var keys = _.keys(obj);
-    var length = keys.length;
-    var values = new Array(length);
-    for (var i = 0; i < length; i++) {
-      values[i] = obj[keys[i]];
-    }
-    return values;
-  };
-
-  // Convert an object into a list of `[key, value]` pairs.
-  _.pairs = function(obj) {
-    var keys = _.keys(obj);
-    var length = keys.length;
-    var pairs = new Array(length);
-    for (var i = 0; i < length; i++) {
-      pairs[i] = [keys[i], obj[keys[i]]];
-    }
-    return pairs;
-  };
-
-  // Invert the keys and values of an object. The values must be serializable.
-  _.invert = function(obj) {
-    var result = {};
-    var keys = _.keys(obj);
-    for (var i = 0, length = keys.length; i < length; i++) {
-      result[obj[keys[i]]] = keys[i];
-    }
-    return result;
-  };
-
-  // Return a sorted list of the function names available on the object.
-  // Aliased as `methods`
-  _.functions = _.methods = function(obj) {
-    var names = [];
-    for (var key in obj) {
-      if (_.isFunction(obj[key])) names.push(key);
-    }
-    return names.sort();
-  };
-
-  // Extend a given object with all the properties in passed-in object(s).
-  _.extend = function(obj) {
-    each(slice.call(arguments, 1), function(source) {
-      if (source) {
-        for (var prop in source) {
-          obj[prop] = source[prop];
-        }
-      }
-    });
-    return obj;
-  };
-
-  // Return a copy of the object only containing the whitelisted properties.
-  _.pick = function(obj) {
-    var copy = {};
-    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
-    each(keys, function(key) {
-      if (key in obj) copy[key] = obj[key];
-    });
-    return copy;
-  };
-
-   // Return a copy of the object without the blacklisted properties.
-  _.omit = function(obj) {
-    var copy = {};
-    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
-    for (var key in obj) {
-      if (!_.contains(keys, key)) copy[key] = obj[key];
-    }
-    return copy;
-  };
-
-  // Fill in a given object with default properties.
-  _.defaults = function(obj) {
-    each(slice.call(arguments, 1), function(source) {
-      if (source) {
-        for (var prop in source) {
-          if (obj[prop] === void 0) obj[prop] = source[prop];
-        }
-      }
-    });
-    return obj;
-  };
-
-  // Create a (shallow-cloned) duplicate of an object.
-  _.clone = function(obj) {
-    if (!_.isObject(obj)) return obj;
-    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
-  };
-
-  // Invokes interceptor with the obj, and then returns obj.
-  // The primary purpose of this method is to "tap into" a method chain, in
-  // order to perform operations on intermediate results within the chain.
-  _.tap = function(obj, interceptor) {
-    interceptor(obj);
-    return obj;
-  };
-
-  // Internal recursive comparison function for `isEqual`.
-  var eq = function(a, b, aStack, bStack) {
-    // Identical objects are equal. `0 === -0`, but they aren't identical.
-    // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
-    if (a === b) return a !== 0 || 1 / a == 1 / b;
-    // A strict comparison is necessary because `null == undefined`.
-    if (a == null || b == null) return a === b;
-    // Unwrap any wrapped objects.
-    if (a instanceof _) a = a._wrapped;
-    if (b instanceof _) b = b._wrapped;
-    // Compare `[[Class]]` names.
-    var className = toString.call(a);
-    if (className != toString.call(b)) return false;
-    switch (className) {
-      // Strings, numbers, dates, and booleans are compared by value.
-      case '[object String]':
-        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
-        // equivalent to `new String("5")`.
-        return a == String(b);
-      case '[object Number]':
-        // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
-        // other numeric values.
-        return a != +a ? b != +b : (a == 0 ? 1 / a == 1 / b : a == +b);
-      case '[object Date]':
-      case '[object Boolean]':
-        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
-        // millisecond representations. Note that invalid dates with millisecond representations
-        // of `NaN` are not equivalent.
-        return +a == +b;
-      // RegExps are compared by their source patterns and flags.
-      case '[object RegExp]':
-        return a.source == b.source &&
-               a.global == b.global &&
-               a.multiline == b.multiline &&
-               a.ignoreCase == b.ignoreCase;
-    }
-    if (typeof a != 'object' || typeof b != 'object') return false;
-    // Assume equality for cyclic structures. The algorithm for detecting cyclic
-    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
-    var length = aStack.length;
-    while (length--) {
-      // Linear search. Performance is inversely proportional to the number of
-      // unique nested structures.
-      if (aStack[length] == a) return bStack[length] == b;
-    }
-    // Objects with different constructors are not equivalent, but `Object`s
-    // from different frames are.
-    var aCtor = a.constructor, bCtor = b.constructor;
-    if (aCtor !== bCtor && !(_.isFunction(aCtor) && (aCtor instanceof aCtor) &&
-                             _.isFunction(bCtor) && (bCtor instanceof bCtor))
-                        && ('constructor' in a && 'constructor' in b)) {
-      return false;
-    }
-    // Add the first object to the stack of traversed objects.
-    aStack.push(a);
-    bStack.push(b);
-    var size = 0, result = true;
-    // Recursively compare objects and arrays.
-    if (className == '[object Array]') {
-      // Compare array lengths to determine if a deep comparison is necessary.
-      size = a.length;
-      result = size == b.length;
-      if (result) {
-        // Deep compare the contents, ignoring non-numeric properties.
-        while (size--) {
-          if (!(result = eq(a[size], b[size], aStack, bStack))) break;
-        }
-      }
-    } else {
-      // Deep compare objects.
-      for (var key in a) {
-        if (_.has(a, key)) {
-          // Count the expected number of properties.
-          size++;
-          // Deep compare each member.
-          if (!(result = _.has(b, key) && eq(a[key], b[key], aStack, bStack))) break;
-        }
-      }
-      // Ensure that both objects contain the same number of properties.
-      if (result) {
-        for (key in b) {
-          if (_.has(b, key) && !(size--)) break;
-        }
-        result = !size;
-      }
-    }
-    // Remove the first object from the stack of traversed objects.
-    aStack.pop();
-    bStack.pop();
-    return result;
-  };
-
-  // Perform a deep comparison to check if two objects are equal.
-  _.isEqual = function(a, b) {
-    return eq(a, b, [], []);
-  };
-
-  // Is a given array, string, or object empty?
-  // An "empty" object has no enumerable own-properties.
-  _.isEmpty = function(obj) {
-    if (obj == null) return true;
-    if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
-    for (var key in obj) if (_.has(obj, key)) return false;
-    return true;
-  };
-
-  // Is a given value a DOM element?
-  _.isElement = function(obj) {
-    return !!(obj && obj.nodeType === 1);
-  };
-
-  // Is a given value an array?
-  // Delegates to ECMA5's native Array.isArray
-  _.isArray = nativeIsArray || function(obj) {
-    return toString.call(obj) == '[object Array]';
-  };
-
-  // Is a given variable an object?
-  _.isObject = function(obj) {
-    return obj === Object(obj);
-  };
-
-  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp.
-  each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function(name) {
-    _['is' + name] = function(obj) {
-      return toString.call(obj) == '[object ' + name + ']';
-    };
-  });
-
-  // Define a fallback version of the method in browsers (ahem, IE), where
-  // there isn't any inspectable "Arguments" type.
-  if (!_.isArguments(arguments)) {
-    _.isArguments = function(obj) {
-      return !!(obj && _.has(obj, 'callee'));
-    };
-  }
-
-  // Optimize `isFunction` if appropriate.
-  if (typeof (/./) !== 'function') {
-    _.isFunction = function(obj) {
-      return typeof obj === 'function';
-    };
-  }
-
-  // Is a given object a finite number?
-  _.isFinite = function(obj) {
-    return isFinite(obj) && !isNaN(parseFloat(obj));
-  };
-
-  // Is the given value `NaN`? (NaN is the only number which does not equal itself).
-  _.isNaN = function(obj) {
-    return _.isNumber(obj) && obj != +obj;
-  };
-
-  // Is a given value a boolean?
-  _.isBoolean = function(obj) {
-    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
-  };
-
-  // Is a given value equal to null?
-  _.isNull = function(obj) {
-    return obj === null;
-  };
-
-  // Is a given variable undefined?
-  _.isUndefined = function(obj) {
-    return obj === void 0;
-  };
-
-  // Shortcut function for checking if an object has a given property directly
-  // on itself (in other words, not on a prototype).
-  _.has = function(obj, key) {
-    return hasOwnProperty.call(obj, key);
-  };
-
-  // Utility Functions
-  // -----------------
-
-  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
-  // previous owner. Returns a reference to the Underscore object.
-  _.noConflict = function() {
-    root._ = previousUnderscore;
-    return this;
-  };
-
-  // Keep the identity function around for default iterators.
-  _.identity = function(value) {
-    return value;
-  };
-
-  _.constant = function(value) {
-    return function () {
-      return value;
-    };
-  };
-
-  _.property = function(key) {
-    return function(obj) {
-      return obj[key];
-    };
-  };
-
-  // Returns a predicate for checking whether an object has a given set of `key:value` pairs.
-  _.matches = function(attrs) {
-    return function(obj) {
-      if (obj === attrs) return true; //avoid comparing an object to itself.
-      for (var key in attrs) {
-        if (attrs[key] !== obj[key])
-          return false;
-      }
-      return true;
-    }
-  };
-
-  // Run a function **n** times.
-  _.times = function(n, iterator, context) {
-    var accum = Array(Math.max(0, n));
-    for (var i = 0; i < n; i++) accum[i] = iterator.call(context, i);
-    return accum;
-  };
-
-  // Return a random integer between min and max (inclusive).
-  _.random = function(min, max) {
-    if (max == null) {
-      max = min;
-      min = 0;
-    }
-    return min + Math.floor(Math.random() * (max - min + 1));
-  };
-
-  // A (possibly faster) way to get the current timestamp as an integer.
-  _.now = Date.now || function() { return new Date().getTime(); };
-
-  // List of HTML entities for escaping.
-  var entityMap = {
-    escape: {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;'
-    }
-  };
-  entityMap.unescape = _.invert(entityMap.escape);
-
-  // Regexes containing the keys and values listed immediately above.
-  var entityRegexes = {
-    escape:   new RegExp('[' + _.keys(entityMap.escape).join('') + ']', 'g'),
-    unescape: new RegExp('(' + _.keys(entityMap.unescape).join('|') + ')', 'g')
-  };
-
-  // Functions for escaping and unescaping strings to/from HTML interpolation.
-  _.each(['escape', 'unescape'], function(method) {
-    _[method] = function(string) {
-      if (string == null) return '';
-      return ('' + string).replace(entityRegexes[method], function(match) {
-        return entityMap[method][match];
-      });
-    };
-  });
-
-  // If the value of the named `property` is a function then invoke it with the
-  // `object` as context; otherwise, return it.
-  _.result = function(object, property) {
-    if (object == null) return void 0;
-    var value = object[property];
-    return _.isFunction(value) ? value.call(object) : value;
-  };
-
-  // Add your own custom functions to the Underscore object.
-  _.mixin = function(obj) {
-    each(_.functions(obj), function(name) {
-      var func = _[name] = obj[name];
-      _.prototype[name] = function() {
-        var args = [this._wrapped];
-        push.apply(args, arguments);
-        return result.call(this, func.apply(_, args));
-      };
-    });
-  };
-
-  // Generate a unique integer id (unique within the entire client session).
-  // Useful for temporary DOM ids.
-  var idCounter = 0;
-  _.uniqueId = function(prefix) {
-    var id = ++idCounter + '';
-    return prefix ? prefix + id : id;
-  };
-
-  // By default, Underscore uses ERB-style template delimiters, change the
-  // following template settings to use alternative delimiters.
-  _.templateSettings = {
-    evaluate    : /<%([\s\S]+?)%>/g,
-    interpolate : /<%=([\s\S]+?)%>/g,
-    escape      : /<%-([\s\S]+?)%>/g
-  };
-
-  // When customizing `templateSettings`, if you don't want to define an
-  // interpolation, evaluation or escaping regex, we need one that is
-  // guaranteed not to match.
-  var noMatch = /(.)^/;
-
-  // Certain characters need to be escaped so that they can be put into a
-  // string literal.
-  var escapes = {
-    "'":      "'",
-    '\\':     '\\',
-    '\r':     'r',
-    '\n':     'n',
-    '\t':     't',
-    '\u2028': 'u2028',
-    '\u2029': 'u2029'
-  };
-
-  var escaper = /\\|'|\r|\n|\t|\u2028|\u2029/g;
-
-  // JavaScript micro-templating, similar to John Resig's implementation.
-  // Underscore templating handles arbitrary delimiters, preserves whitespace,
-  // and correctly escapes quotes within interpolated code.
-  _.template = function(text, data, settings) {
-    var render;
-    settings = _.defaults({}, settings, _.templateSettings);
-
-    // Combine delimiters into one regular expression via alternation.
-    var matcher = new RegExp([
-      (settings.escape || noMatch).source,
-      (settings.interpolate || noMatch).source,
-      (settings.evaluate || noMatch).source
-    ].join('|') + '|$', 'g');
-
-    // Compile the template source, escaping string literals appropriately.
-    var index = 0;
-    var source = "__p+='";
-    text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
-      source += text.slice(index, offset)
-        .replace(escaper, function(match) { return '\\' + escapes[match]; });
-
-      if (escape) {
-        source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
-      }
-      if (interpolate) {
-        source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
-      }
-      if (evaluate) {
-        source += "';\n" + evaluate + "\n__p+='";
-      }
-      index = offset + match.length;
-      return match;
-    });
-    source += "';\n";
-
-    // If a variable is not specified, place data values in local scope.
-    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
-
-    source = "var __t,__p='',__j=Array.prototype.join," +
-      "print=function(){__p+=__j.call(arguments,'');};\n" +
-      source + "return __p;\n";
-
-    try {
-      render = new Function(settings.variable || 'obj', '_', source);
-    } catch (e) {
-      e.source = source;
-      throw e;
-    }
-
-    if (data) return render(data, _);
-    var template = function(data) {
-      return render.call(this, data, _);
-    };
-
-    // Provide the compiled function source as a convenience for precompilation.
-    template.source = 'function(' + (settings.variable || 'obj') + '){\n' + source + '}';
-
-    return template;
-  };
-
-  // Add a "chain" function, which will delegate to the wrapper.
-  _.chain = function(obj) {
-    return _(obj).chain();
-  };
-
-  // OOP
-  // ---------------
-  // If Underscore is called as a function, it returns a wrapped object that
-  // can be used OO-style. This wrapper holds altered versions of all the
-  // underscore functions. Wrapped objects may be chained.
-
-  // Helper function to continue chaining intermediate results.
-  var result = function(obj) {
-    return this._chain ? _(obj).chain() : obj;
-  };
-
-  // Add all of the Underscore functions to the wrapper object.
-  _.mixin(_);
-
-  // Add all mutator Array functions to the wrapper.
-  each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
-    var method = ArrayProto[name];
-    _.prototype[name] = function() {
-      var obj = this._wrapped;
-      method.apply(obj, arguments);
-      if ((name == 'shift' || name == 'splice') && obj.length === 0) delete obj[0];
-      return result.call(this, obj);
-    };
-  });
-
-  // Add all accessor Array functions to the wrapper.
-  each(['concat', 'join', 'slice'], function(name) {
-    var method = ArrayProto[name];
-    _.prototype[name] = function() {
-      return result.call(this, method.apply(this._wrapped, arguments));
-    };
-  });
-
-  _.extend(_.prototype, {
-
-    // Start chaining a wrapped Underscore object.
-    chain: function() {
-      this._chain = true;
-      return this;
-    },
-
-    // Extracts the result from a wrapped and chained object.
-    value: function() {
-      return this._wrapped;
-    }
-
-  });
-
-  // AMD registration happens at the end for compatibility with AMD loaders
-  // that may not enforce next-turn semantics on modules. Even though general
-  // practice for AMD registration is to be anonymous, underscore registers
-  // as a named module because, like jQuery, it is a base library that is
-  // popular enough to be bundled in a third party lib, but not be part of
-  // an AMD load request. Those cases could generate an error when an
-  // anonymous define() is called outside of a loader request.
-  if (typeof define === 'function' && define.amd) {
-    define('underscore', [], function() {
-      return _;
-    });
-  }
-}).call(this);
-
-;/*!
+/*!
  * jQuery JavaScript Library v2.0.3
  * http://jquery.com/
  *
@@ -10264,6 +8920,1350 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
 })( window );
 
+;//     Underscore.js 1.6.0
+//     http://underscorejs.org
+//     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+//     Underscore may be freely distributed under the MIT license.
+
+(function() {
+
+  // Baseline setup
+  // --------------
+
+  // Establish the root object, `window` in the browser, or `exports` on the server.
+  var root = this;
+
+  // Save the previous value of the `_` variable.
+  var previousUnderscore = root._;
+
+  // Establish the object that gets returned to break out of a loop iteration.
+  var breaker = {};
+
+  // Save bytes in the minified (but not gzipped) version:
+  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
+
+  // Create quick reference variables for speed access to core prototypes.
+  var
+    push             = ArrayProto.push,
+    slice            = ArrayProto.slice,
+    concat           = ArrayProto.concat,
+    toString         = ObjProto.toString,
+    hasOwnProperty   = ObjProto.hasOwnProperty;
+
+  // All **ECMAScript 5** native function implementations that we hope to use
+  // are declared here.
+  var
+    nativeForEach      = ArrayProto.forEach,
+    nativeMap          = ArrayProto.map,
+    nativeReduce       = ArrayProto.reduce,
+    nativeReduceRight  = ArrayProto.reduceRight,
+    nativeFilter       = ArrayProto.filter,
+    nativeEvery        = ArrayProto.every,
+    nativeSome         = ArrayProto.some,
+    nativeIndexOf      = ArrayProto.indexOf,
+    nativeLastIndexOf  = ArrayProto.lastIndexOf,
+    nativeIsArray      = Array.isArray,
+    nativeKeys         = Object.keys,
+    nativeBind         = FuncProto.bind;
+
+  // Create a safe reference to the Underscore object for use below.
+  var _ = function(obj) {
+    if (obj instanceof _) return obj;
+    if (!(this instanceof _)) return new _(obj);
+    this._wrapped = obj;
+  };
+
+  // Export the Underscore object for **Node.js**, with
+  // backwards-compatibility for the old `require()` API. If we're in
+  // the browser, add `_` as a global object via a string identifier,
+  // for Closure Compiler "advanced" mode.
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = _;
+    }
+    exports._ = _;
+  } else {
+    root._ = _;
+  }
+
+  // Current version.
+  _.VERSION = '1.6.0';
+
+  // Collection Functions
+  // --------------------
+
+  // The cornerstone, an `each` implementation, aka `forEach`.
+  // Handles objects with the built-in `forEach`, arrays, and raw objects.
+  // Delegates to **ECMAScript 5**'s native `forEach` if available.
+  var each = _.each = _.forEach = function(obj, iterator, context) {
+    if (obj == null) return obj;
+    if (nativeForEach && obj.forEach === nativeForEach) {
+      obj.forEach(iterator, context);
+    } else if (obj.length === +obj.length) {
+      for (var i = 0, length = obj.length; i < length; i++) {
+        if (iterator.call(context, obj[i], i, obj) === breaker) return;
+      }
+    } else {
+      var keys = _.keys(obj);
+      for (var i = 0, length = keys.length; i < length; i++) {
+        if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
+      }
+    }
+    return obj;
+  };
+
+  // Return the results of applying the iterator to each element.
+  // Delegates to **ECMAScript 5**'s native `map` if available.
+  _.map = _.collect = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
+    each(obj, function(value, index, list) {
+      results.push(iterator.call(context, value, index, list));
+    });
+    return results;
+  };
+
+  var reduceError = 'Reduce of empty array with no initial value';
+
+  // **Reduce** builds up a single result from a list of values, aka `inject`,
+  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
+  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
+    var initial = arguments.length > 2;
+    if (obj == null) obj = [];
+    if (nativeReduce && obj.reduce === nativeReduce) {
+      if (context) iterator = _.bind(iterator, context);
+      return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
+    }
+    each(obj, function(value, index, list) {
+      if (!initial) {
+        memo = value;
+        initial = true;
+      } else {
+        memo = iterator.call(context, memo, value, index, list);
+      }
+    });
+    if (!initial) throw new TypeError(reduceError);
+    return memo;
+  };
+
+  // The right-associative version of reduce, also known as `foldr`.
+  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
+  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
+    var initial = arguments.length > 2;
+    if (obj == null) obj = [];
+    if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
+      if (context) iterator = _.bind(iterator, context);
+      return initial ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
+    }
+    var length = obj.length;
+    if (length !== +length) {
+      var keys = _.keys(obj);
+      length = keys.length;
+    }
+    each(obj, function(value, index, list) {
+      index = keys ? keys[--length] : --length;
+      if (!initial) {
+        memo = obj[index];
+        initial = true;
+      } else {
+        memo = iterator.call(context, memo, obj[index], index, list);
+      }
+    });
+    if (!initial) throw new TypeError(reduceError);
+    return memo;
+  };
+
+  // Return the first value which passes a truth test. Aliased as `detect`.
+  _.find = _.detect = function(obj, predicate, context) {
+    var result;
+    any(obj, function(value, index, list) {
+      if (predicate.call(context, value, index, list)) {
+        result = value;
+        return true;
+      }
+    });
+    return result;
+  };
+
+  // Return all the elements that pass a truth test.
+  // Delegates to **ECMAScript 5**'s native `filter` if available.
+  // Aliased as `select`.
+  _.filter = _.select = function(obj, predicate, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(predicate, context);
+    each(obj, function(value, index, list) {
+      if (predicate.call(context, value, index, list)) results.push(value);
+    });
+    return results;
+  };
+
+  // Return all the elements for which a truth test fails.
+  _.reject = function(obj, predicate, context) {
+    return _.filter(obj, function(value, index, list) {
+      return !predicate.call(context, value, index, list);
+    }, context);
+  };
+
+  // Determine whether all of the elements match a truth test.
+  // Delegates to **ECMAScript 5**'s native `every` if available.
+  // Aliased as `all`.
+  _.every = _.all = function(obj, predicate, context) {
+    predicate || (predicate = _.identity);
+    var result = true;
+    if (obj == null) return result;
+    if (nativeEvery && obj.every === nativeEvery) return obj.every(predicate, context);
+    each(obj, function(value, index, list) {
+      if (!(result = result && predicate.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
+  };
+
+  // Determine if at least one element in the object matches a truth test.
+  // Delegates to **ECMAScript 5**'s native `some` if available.
+  // Aliased as `any`.
+  var any = _.some = _.any = function(obj, predicate, context) {
+    predicate || (predicate = _.identity);
+    var result = false;
+    if (obj == null) return result;
+    if (nativeSome && obj.some === nativeSome) return obj.some(predicate, context);
+    each(obj, function(value, index, list) {
+      if (result || (result = predicate.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
+  };
+
+  // Determine if the array or object contains a given value (using `===`).
+  // Aliased as `include`.
+  _.contains = _.include = function(obj, target) {
+    if (obj == null) return false;
+    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
+    return any(obj, function(value) {
+      return value === target;
+    });
+  };
+
+  // Invoke a method (with arguments) on every item in a collection.
+  _.invoke = function(obj, method) {
+    var args = slice.call(arguments, 2);
+    var isFunc = _.isFunction(method);
+    return _.map(obj, function(value) {
+      return (isFunc ? method : value[method]).apply(value, args);
+    });
+  };
+
+  // Convenience version of a common use case of `map`: fetching a property.
+  _.pluck = function(obj, key) {
+    return _.map(obj, _.property(key));
+  };
+
+  // Convenience version of a common use case of `filter`: selecting only objects
+  // containing specific `key:value` pairs.
+  _.where = function(obj, attrs) {
+    return _.filter(obj, _.matches(attrs));
+  };
+
+  // Convenience version of a common use case of `find`: getting the first object
+  // containing specific `key:value` pairs.
+  _.findWhere = function(obj, attrs) {
+    return _.find(obj, _.matches(attrs));
+  };
+
+  // Return the maximum element or (element-based computation).
+  // Can't optimize arrays of integers longer than 65,535 elements.
+  // See [WebKit Bug 80797](https://bugs.webkit.org/show_bug.cgi?id=80797)
+  _.max = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+      return Math.max.apply(Math, obj);
+    }
+    var result = -Infinity, lastComputed = -Infinity;
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      if (computed > lastComputed) {
+        result = value;
+        lastComputed = computed;
+      }
+    });
+    return result;
+  };
+
+  // Return the minimum element (or element-based computation).
+  _.min = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+      return Math.min.apply(Math, obj);
+    }
+    var result = Infinity, lastComputed = Infinity;
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      if (computed < lastComputed) {
+        result = value;
+        lastComputed = computed;
+      }
+    });
+    return result;
+  };
+
+  // Shuffle an array, using the modern version of the
+  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
+  _.shuffle = function(obj) {
+    var rand;
+    var index = 0;
+    var shuffled = [];
+    each(obj, function(value) {
+      rand = _.random(index++);
+      shuffled[index - 1] = shuffled[rand];
+      shuffled[rand] = value;
+    });
+    return shuffled;
+  };
+
+  // Sample **n** random values from a collection.
+  // If **n** is not specified, returns a single random element.
+  // The internal `guard` argument allows it to work with `map`.
+  _.sample = function(obj, n, guard) {
+    if (n == null || guard) {
+      if (obj.length !== +obj.length) obj = _.values(obj);
+      return obj[_.random(obj.length - 1)];
+    }
+    return _.shuffle(obj).slice(0, Math.max(0, n));
+  };
+
+  // An internal function to generate lookup iterators.
+  var lookupIterator = function(value) {
+    if (value == null) return _.identity;
+    if (_.isFunction(value)) return value;
+    return _.property(value);
+  };
+
+  // Sort the object's values by a criterion produced by an iterator.
+  _.sortBy = function(obj, iterator, context) {
+    iterator = lookupIterator(iterator);
+    return _.pluck(_.map(obj, function(value, index, list) {
+      return {
+        value: value,
+        index: index,
+        criteria: iterator.call(context, value, index, list)
+      };
+    }).sort(function(left, right) {
+      var a = left.criteria;
+      var b = right.criteria;
+      if (a !== b) {
+        if (a > b || a === void 0) return 1;
+        if (a < b || b === void 0) return -1;
+      }
+      return left.index - right.index;
+    }), 'value');
+  };
+
+  // An internal function used for aggregate "group by" operations.
+  var group = function(behavior) {
+    return function(obj, iterator, context) {
+      var result = {};
+      iterator = lookupIterator(iterator);
+      each(obj, function(value, index) {
+        var key = iterator.call(context, value, index, obj);
+        behavior(result, key, value);
+      });
+      return result;
+    };
+  };
+
+  // Groups the object's values by a criterion. Pass either a string attribute
+  // to group by, or a function that returns the criterion.
+  _.groupBy = group(function(result, key, value) {
+    _.has(result, key) ? result[key].push(value) : result[key] = [value];
+  });
+
+  // Indexes the object's values by a criterion, similar to `groupBy`, but for
+  // when you know that your index values will be unique.
+  _.indexBy = group(function(result, key, value) {
+    result[key] = value;
+  });
+
+  // Counts instances of an object that group by a certain criterion. Pass
+  // either a string attribute to count by, or a function that returns the
+  // criterion.
+  _.countBy = group(function(result, key) {
+    _.has(result, key) ? result[key]++ : result[key] = 1;
+  });
+
+  // Use a comparator function to figure out the smallest index at which
+  // an object should be inserted so as to maintain order. Uses binary search.
+  _.sortedIndex = function(array, obj, iterator, context) {
+    iterator = lookupIterator(iterator);
+    var value = iterator.call(context, obj);
+    var low = 0, high = array.length;
+    while (low < high) {
+      var mid = (low + high) >>> 1;
+      iterator.call(context, array[mid]) < value ? low = mid + 1 : high = mid;
+    }
+    return low;
+  };
+
+  // Safely create a real, live array from anything iterable.
+  _.toArray = function(obj) {
+    if (!obj) return [];
+    if (_.isArray(obj)) return slice.call(obj);
+    if (obj.length === +obj.length) return _.map(obj, _.identity);
+    return _.values(obj);
+  };
+
+  // Return the number of elements in an object.
+  _.size = function(obj) {
+    if (obj == null) return 0;
+    return (obj.length === +obj.length) ? obj.length : _.keys(obj).length;
+  };
+
+  // Array Functions
+  // ---------------
+
+  // Get the first element of an array. Passing **n** will return the first N
+  // values in the array. Aliased as `head` and `take`. The **guard** check
+  // allows it to work with `_.map`.
+  _.first = _.head = _.take = function(array, n, guard) {
+    if (array == null) return void 0;
+    if ((n == null) || guard) return array[0];
+    if (n < 0) return [];
+    return slice.call(array, 0, n);
+  };
+
+  // Returns everything but the last entry of the array. Especially useful on
+  // the arguments object. Passing **n** will return all the values in
+  // the array, excluding the last N. The **guard** check allows it to work with
+  // `_.map`.
+  _.initial = function(array, n, guard) {
+    return slice.call(array, 0, array.length - ((n == null) || guard ? 1 : n));
+  };
+
+  // Get the last element of an array. Passing **n** will return the last N
+  // values in the array. The **guard** check allows it to work with `_.map`.
+  _.last = function(array, n, guard) {
+    if (array == null) return void 0;
+    if ((n == null) || guard) return array[array.length - 1];
+    return slice.call(array, Math.max(array.length - n, 0));
+  };
+
+  // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
+  // Especially useful on the arguments object. Passing an **n** will return
+  // the rest N values in the array. The **guard**
+  // check allows it to work with `_.map`.
+  _.rest = _.tail = _.drop = function(array, n, guard) {
+    return slice.call(array, (n == null) || guard ? 1 : n);
+  };
+
+  // Trim out all falsy values from an array.
+  _.compact = function(array) {
+    return _.filter(array, _.identity);
+  };
+
+  // Internal implementation of a recursive `flatten` function.
+  var flatten = function(input, shallow, output) {
+    if (shallow && _.every(input, _.isArray)) {
+      return concat.apply(output, input);
+    }
+    each(input, function(value) {
+      if (_.isArray(value) || _.isArguments(value)) {
+        shallow ? push.apply(output, value) : flatten(value, shallow, output);
+      } else {
+        output.push(value);
+      }
+    });
+    return output;
+  };
+
+  // Flatten out an array, either recursively (by default), or just one level.
+  _.flatten = function(array, shallow) {
+    return flatten(array, shallow, []);
+  };
+
+  // Return a version of the array that does not contain the specified value(s).
+  _.without = function(array) {
+    return _.difference(array, slice.call(arguments, 1));
+  };
+
+  // Split an array into two arrays: one whose elements all satisfy the given
+  // predicate, and one whose elements all do not satisfy the predicate.
+  _.partition = function(array, predicate) {
+    var pass = [], fail = [];
+    each(array, function(elem) {
+      (predicate(elem) ? pass : fail).push(elem);
+    });
+    return [pass, fail];
+  };
+
+  // Produce a duplicate-free version of the array. If the array has already
+  // been sorted, you have the option of using a faster algorithm.
+  // Aliased as `unique`.
+  _.uniq = _.unique = function(array, isSorted, iterator, context) {
+    if (_.isFunction(isSorted)) {
+      context = iterator;
+      iterator = isSorted;
+      isSorted = false;
+    }
+    var initial = iterator ? _.map(array, iterator, context) : array;
+    var results = [];
+    var seen = [];
+    each(initial, function(value, index) {
+      if (isSorted ? (!index || seen[seen.length - 1] !== value) : !_.contains(seen, value)) {
+        seen.push(value);
+        results.push(array[index]);
+      }
+    });
+    return results;
+  };
+
+  // Produce an array that contains the union: each distinct element from all of
+  // the passed-in arrays.
+  _.union = function() {
+    return _.uniq(_.flatten(arguments, true));
+  };
+
+  // Produce an array that contains every item shared between all the
+  // passed-in arrays.
+  _.intersection = function(array) {
+    var rest = slice.call(arguments, 1);
+    return _.filter(_.uniq(array), function(item) {
+      return _.every(rest, function(other) {
+        return _.contains(other, item);
+      });
+    });
+  };
+
+  // Take the difference between one array and a number of other arrays.
+  // Only the elements present in just the first array will remain.
+  _.difference = function(array) {
+    var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
+    return _.filter(array, function(value){ return !_.contains(rest, value); });
+  };
+
+  // Zip together multiple lists into a single array -- elements that share
+  // an index go together.
+  _.zip = function() {
+    var length = _.max(_.pluck(arguments, 'length').concat(0));
+    var results = new Array(length);
+    for (var i = 0; i < length; i++) {
+      results[i] = _.pluck(arguments, '' + i);
+    }
+    return results;
+  };
+
+  // Converts lists into objects. Pass either a single array of `[key, value]`
+  // pairs, or two parallel arrays of the same length -- one of keys, and one of
+  // the corresponding values.
+  _.object = function(list, values) {
+    if (list == null) return {};
+    var result = {};
+    for (var i = 0, length = list.length; i < length; i++) {
+      if (values) {
+        result[list[i]] = values[i];
+      } else {
+        result[list[i][0]] = list[i][1];
+      }
+    }
+    return result;
+  };
+
+  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
+  // we need this function. Return the position of the first occurrence of an
+  // item in an array, or -1 if the item is not included in the array.
+  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
+  // If the array is large and already in sort order, pass `true`
+  // for **isSorted** to use binary search.
+  _.indexOf = function(array, item, isSorted) {
+    if (array == null) return -1;
+    var i = 0, length = array.length;
+    if (isSorted) {
+      if (typeof isSorted == 'number') {
+        i = (isSorted < 0 ? Math.max(0, length + isSorted) : isSorted);
+      } else {
+        i = _.sortedIndex(array, item);
+        return array[i] === item ? i : -1;
+      }
+    }
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
+    for (; i < length; i++) if (array[i] === item) return i;
+    return -1;
+  };
+
+  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
+  _.lastIndexOf = function(array, item, from) {
+    if (array == null) return -1;
+    var hasIndex = from != null;
+    if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) {
+      return hasIndex ? array.lastIndexOf(item, from) : array.lastIndexOf(item);
+    }
+    var i = (hasIndex ? from : array.length);
+    while (i--) if (array[i] === item) return i;
+    return -1;
+  };
+
+  // Generate an integer Array containing an arithmetic progression. A port of
+  // the native Python `range()` function. See
+  // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  _.range = function(start, stop, step) {
+    if (arguments.length <= 1) {
+      stop = start || 0;
+      start = 0;
+    }
+    step = arguments[2] || 1;
+
+    var length = Math.max(Math.ceil((stop - start) / step), 0);
+    var idx = 0;
+    var range = new Array(length);
+
+    while(idx < length) {
+      range[idx++] = start;
+      start += step;
+    }
+
+    return range;
+  };
+
+  // Function (ahem) Functions
+  // ------------------
+
+  // Reusable constructor function for prototype setting.
+  var ctor = function(){};
+
+  // Create a function bound to a given object (assigning `this`, and arguments,
+  // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
+  // available.
+  _.bind = function(func, context) {
+    var args, bound;
+    if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
+    if (!_.isFunction(func)) throw new TypeError;
+    args = slice.call(arguments, 2);
+    return bound = function() {
+      if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
+      ctor.prototype = func.prototype;
+      var self = new ctor;
+      ctor.prototype = null;
+      var result = func.apply(self, args.concat(slice.call(arguments)));
+      if (Object(result) === result) return result;
+      return self;
+    };
+  };
+
+  // Partially apply a function by creating a version that has had some of its
+  // arguments pre-filled, without changing its dynamic `this` context. _ acts
+  // as a placeholder, allowing any combination of arguments to be pre-filled.
+  _.partial = function(func) {
+    var boundArgs = slice.call(arguments, 1);
+    return function() {
+      var position = 0;
+      var args = boundArgs.slice();
+      for (var i = 0, length = args.length; i < length; i++) {
+        if (args[i] === _) args[i] = arguments[position++];
+      }
+      while (position < arguments.length) args.push(arguments[position++]);
+      return func.apply(this, args);
+    };
+  };
+
+  // Bind a number of an object's methods to that object. Remaining arguments
+  // are the method names to be bound. Useful for ensuring that all callbacks
+  // defined on an object belong to it.
+  _.bindAll = function(obj) {
+    var funcs = slice.call(arguments, 1);
+    if (funcs.length === 0) throw new Error('bindAll must be passed function names');
+    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
+    return obj;
+  };
+
+  // Memoize an expensive function by storing its results.
+  _.memoize = function(func, hasher) {
+    var memo = {};
+    hasher || (hasher = _.identity);
+    return function() {
+      var key = hasher.apply(this, arguments);
+      return _.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
+    };
+  };
+
+  // Delays a function for the given number of milliseconds, and then calls
+  // it with the arguments supplied.
+  _.delay = function(func, wait) {
+    var args = slice.call(arguments, 2);
+    return setTimeout(function(){ return func.apply(null, args); }, wait);
+  };
+
+  // Defers a function, scheduling it to run after the current call stack has
+  // cleared.
+  _.defer = function(func) {
+    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
+  };
+
+  // Returns a function, that, when invoked, will only be triggered at most once
+  // during a given window of time. Normally, the throttled function will run
+  // as much as it can, without ever going more than once per `wait` duration;
+  // but if you'd like to disable the execution on the leading edge, pass
+  // `{leading: false}`. To disable execution on the trailing edge, ditto.
+  _.throttle = function(func, wait, options) {
+    var context, args, result;
+    var timeout = null;
+    var previous = 0;
+    options || (options = {});
+    var later = function() {
+      previous = options.leading === false ? 0 : _.now();
+      timeout = null;
+      result = func.apply(context, args);
+      context = args = null;
+    };
+    return function() {
+      var now = _.now();
+      if (!previous && options.leading === false) previous = now;
+      var remaining = wait - (now - previous);
+      context = this;
+      args = arguments;
+      if (remaining <= 0) {
+        clearTimeout(timeout);
+        timeout = null;
+        previous = now;
+        result = func.apply(context, args);
+        context = args = null;
+      } else if (!timeout && options.trailing !== false) {
+        timeout = setTimeout(later, remaining);
+      }
+      return result;
+    };
+  };
+
+  // Returns a function, that, as long as it continues to be invoked, will not
+  // be triggered. The function will be called after it stops being called for
+  // N milliseconds. If `immediate` is passed, trigger the function on the
+  // leading edge, instead of the trailing.
+  _.debounce = function(func, wait, immediate) {
+    var timeout, args, context, timestamp, result;
+
+    var later = function() {
+      var last = _.now() - timestamp;
+      if (last < wait) {
+        timeout = setTimeout(later, wait - last);
+      } else {
+        timeout = null;
+        if (!immediate) {
+          result = func.apply(context, args);
+          context = args = null;
+        }
+      }
+    };
+
+    return function() {
+      context = this;
+      args = arguments;
+      timestamp = _.now();
+      var callNow = immediate && !timeout;
+      if (!timeout) {
+        timeout = setTimeout(later, wait);
+      }
+      if (callNow) {
+        result = func.apply(context, args);
+        context = args = null;
+      }
+
+      return result;
+    };
+  };
+
+  // Returns a function that will be executed at most one time, no matter how
+  // often you call it. Useful for lazy initialization.
+  _.once = function(func) {
+    var ran = false, memo;
+    return function() {
+      if (ran) return memo;
+      ran = true;
+      memo = func.apply(this, arguments);
+      func = null;
+      return memo;
+    };
+  };
+
+  // Returns the first function passed as an argument to the second,
+  // allowing you to adjust arguments, run code before and after, and
+  // conditionally execute the original function.
+  _.wrap = function(func, wrapper) {
+    return _.partial(wrapper, func);
+  };
+
+  // Returns a function that is the composition of a list of functions, each
+  // consuming the return value of the function that follows.
+  _.compose = function() {
+    var funcs = arguments;
+    return function() {
+      var args = arguments;
+      for (var i = funcs.length - 1; i >= 0; i--) {
+        args = [funcs[i].apply(this, args)];
+      }
+      return args[0];
+    };
+  };
+
+  // Returns a function that will only be executed after being called N times.
+  _.after = function(times, func) {
+    return function() {
+      if (--times < 1) {
+        return func.apply(this, arguments);
+      }
+    };
+  };
+
+  // Object Functions
+  // ----------------
+
+  // Retrieve the names of an object's properties.
+  // Delegates to **ECMAScript 5**'s native `Object.keys`
+  _.keys = function(obj) {
+    if (!_.isObject(obj)) return [];
+    if (nativeKeys) return nativeKeys(obj);
+    var keys = [];
+    for (var key in obj) if (_.has(obj, key)) keys.push(key);
+    return keys;
+  };
+
+  // Retrieve the values of an object's properties.
+  _.values = function(obj) {
+    var keys = _.keys(obj);
+    var length = keys.length;
+    var values = new Array(length);
+    for (var i = 0; i < length; i++) {
+      values[i] = obj[keys[i]];
+    }
+    return values;
+  };
+
+  // Convert an object into a list of `[key, value]` pairs.
+  _.pairs = function(obj) {
+    var keys = _.keys(obj);
+    var length = keys.length;
+    var pairs = new Array(length);
+    for (var i = 0; i < length; i++) {
+      pairs[i] = [keys[i], obj[keys[i]]];
+    }
+    return pairs;
+  };
+
+  // Invert the keys and values of an object. The values must be serializable.
+  _.invert = function(obj) {
+    var result = {};
+    var keys = _.keys(obj);
+    for (var i = 0, length = keys.length; i < length; i++) {
+      result[obj[keys[i]]] = keys[i];
+    }
+    return result;
+  };
+
+  // Return a sorted list of the function names available on the object.
+  // Aliased as `methods`
+  _.functions = _.methods = function(obj) {
+    var names = [];
+    for (var key in obj) {
+      if (_.isFunction(obj[key])) names.push(key);
+    }
+    return names.sort();
+  };
+
+  // Extend a given object with all the properties in passed-in object(s).
+  _.extend = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      if (source) {
+        for (var prop in source) {
+          obj[prop] = source[prop];
+        }
+      }
+    });
+    return obj;
+  };
+
+  // Return a copy of the object only containing the whitelisted properties.
+  _.pick = function(obj) {
+    var copy = {};
+    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
+    each(keys, function(key) {
+      if (key in obj) copy[key] = obj[key];
+    });
+    return copy;
+  };
+
+   // Return a copy of the object without the blacklisted properties.
+  _.omit = function(obj) {
+    var copy = {};
+    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
+    for (var key in obj) {
+      if (!_.contains(keys, key)) copy[key] = obj[key];
+    }
+    return copy;
+  };
+
+  // Fill in a given object with default properties.
+  _.defaults = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      if (source) {
+        for (var prop in source) {
+          if (obj[prop] === void 0) obj[prop] = source[prop];
+        }
+      }
+    });
+    return obj;
+  };
+
+  // Create a (shallow-cloned) duplicate of an object.
+  _.clone = function(obj) {
+    if (!_.isObject(obj)) return obj;
+    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
+  };
+
+  // Invokes interceptor with the obj, and then returns obj.
+  // The primary purpose of this method is to "tap into" a method chain, in
+  // order to perform operations on intermediate results within the chain.
+  _.tap = function(obj, interceptor) {
+    interceptor(obj);
+    return obj;
+  };
+
+  // Internal recursive comparison function for `isEqual`.
+  var eq = function(a, b, aStack, bStack) {
+    // Identical objects are equal. `0 === -0`, but they aren't identical.
+    // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
+    if (a === b) return a !== 0 || 1 / a == 1 / b;
+    // A strict comparison is necessary because `null == undefined`.
+    if (a == null || b == null) return a === b;
+    // Unwrap any wrapped objects.
+    if (a instanceof _) a = a._wrapped;
+    if (b instanceof _) b = b._wrapped;
+    // Compare `[[Class]]` names.
+    var className = toString.call(a);
+    if (className != toString.call(b)) return false;
+    switch (className) {
+      // Strings, numbers, dates, and booleans are compared by value.
+      case '[object String]':
+        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
+        // equivalent to `new String("5")`.
+        return a == String(b);
+      case '[object Number]':
+        // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
+        // other numeric values.
+        return a != +a ? b != +b : (a == 0 ? 1 / a == 1 / b : a == +b);
+      case '[object Date]':
+      case '[object Boolean]':
+        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
+        // millisecond representations. Note that invalid dates with millisecond representations
+        // of `NaN` are not equivalent.
+        return +a == +b;
+      // RegExps are compared by their source patterns and flags.
+      case '[object RegExp]':
+        return a.source == b.source &&
+               a.global == b.global &&
+               a.multiline == b.multiline &&
+               a.ignoreCase == b.ignoreCase;
+    }
+    if (typeof a != 'object' || typeof b != 'object') return false;
+    // Assume equality for cyclic structures. The algorithm for detecting cyclic
+    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+    var length = aStack.length;
+    while (length--) {
+      // Linear search. Performance is inversely proportional to the number of
+      // unique nested structures.
+      if (aStack[length] == a) return bStack[length] == b;
+    }
+    // Objects with different constructors are not equivalent, but `Object`s
+    // from different frames are.
+    var aCtor = a.constructor, bCtor = b.constructor;
+    if (aCtor !== bCtor && !(_.isFunction(aCtor) && (aCtor instanceof aCtor) &&
+                             _.isFunction(bCtor) && (bCtor instanceof bCtor))
+                        && ('constructor' in a && 'constructor' in b)) {
+      return false;
+    }
+    // Add the first object to the stack of traversed objects.
+    aStack.push(a);
+    bStack.push(b);
+    var size = 0, result = true;
+    // Recursively compare objects and arrays.
+    if (className == '[object Array]') {
+      // Compare array lengths to determine if a deep comparison is necessary.
+      size = a.length;
+      result = size == b.length;
+      if (result) {
+        // Deep compare the contents, ignoring non-numeric properties.
+        while (size--) {
+          if (!(result = eq(a[size], b[size], aStack, bStack))) break;
+        }
+      }
+    } else {
+      // Deep compare objects.
+      for (var key in a) {
+        if (_.has(a, key)) {
+          // Count the expected number of properties.
+          size++;
+          // Deep compare each member.
+          if (!(result = _.has(b, key) && eq(a[key], b[key], aStack, bStack))) break;
+        }
+      }
+      // Ensure that both objects contain the same number of properties.
+      if (result) {
+        for (key in b) {
+          if (_.has(b, key) && !(size--)) break;
+        }
+        result = !size;
+      }
+    }
+    // Remove the first object from the stack of traversed objects.
+    aStack.pop();
+    bStack.pop();
+    return result;
+  };
+
+  // Perform a deep comparison to check if two objects are equal.
+  _.isEqual = function(a, b) {
+    return eq(a, b, [], []);
+  };
+
+  // Is a given array, string, or object empty?
+  // An "empty" object has no enumerable own-properties.
+  _.isEmpty = function(obj) {
+    if (obj == null) return true;
+    if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
+    for (var key in obj) if (_.has(obj, key)) return false;
+    return true;
+  };
+
+  // Is a given value a DOM element?
+  _.isElement = function(obj) {
+    return !!(obj && obj.nodeType === 1);
+  };
+
+  // Is a given value an array?
+  // Delegates to ECMA5's native Array.isArray
+  _.isArray = nativeIsArray || function(obj) {
+    return toString.call(obj) == '[object Array]';
+  };
+
+  // Is a given variable an object?
+  _.isObject = function(obj) {
+    return obj === Object(obj);
+  };
+
+  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp.
+  each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function(name) {
+    _['is' + name] = function(obj) {
+      return toString.call(obj) == '[object ' + name + ']';
+    };
+  });
+
+  // Define a fallback version of the method in browsers (ahem, IE), where
+  // there isn't any inspectable "Arguments" type.
+  if (!_.isArguments(arguments)) {
+    _.isArguments = function(obj) {
+      return !!(obj && _.has(obj, 'callee'));
+    };
+  }
+
+  // Optimize `isFunction` if appropriate.
+  if (typeof (/./) !== 'function') {
+    _.isFunction = function(obj) {
+      return typeof obj === 'function';
+    };
+  }
+
+  // Is a given object a finite number?
+  _.isFinite = function(obj) {
+    return isFinite(obj) && !isNaN(parseFloat(obj));
+  };
+
+  // Is the given value `NaN`? (NaN is the only number which does not equal itself).
+  _.isNaN = function(obj) {
+    return _.isNumber(obj) && obj != +obj;
+  };
+
+  // Is a given value a boolean?
+  _.isBoolean = function(obj) {
+    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
+  };
+
+  // Is a given value equal to null?
+  _.isNull = function(obj) {
+    return obj === null;
+  };
+
+  // Is a given variable undefined?
+  _.isUndefined = function(obj) {
+    return obj === void 0;
+  };
+
+  // Shortcut function for checking if an object has a given property directly
+  // on itself (in other words, not on a prototype).
+  _.has = function(obj, key) {
+    return hasOwnProperty.call(obj, key);
+  };
+
+  // Utility Functions
+  // -----------------
+
+  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
+  // previous owner. Returns a reference to the Underscore object.
+  _.noConflict = function() {
+    root._ = previousUnderscore;
+    return this;
+  };
+
+  // Keep the identity function around for default iterators.
+  _.identity = function(value) {
+    return value;
+  };
+
+  _.constant = function(value) {
+    return function () {
+      return value;
+    };
+  };
+
+  _.property = function(key) {
+    return function(obj) {
+      return obj[key];
+    };
+  };
+
+  // Returns a predicate for checking whether an object has a given set of `key:value` pairs.
+  _.matches = function(attrs) {
+    return function(obj) {
+      if (obj === attrs) return true; //avoid comparing an object to itself.
+      for (var key in attrs) {
+        if (attrs[key] !== obj[key])
+          return false;
+      }
+      return true;
+    }
+  };
+
+  // Run a function **n** times.
+  _.times = function(n, iterator, context) {
+    var accum = Array(Math.max(0, n));
+    for (var i = 0; i < n; i++) accum[i] = iterator.call(context, i);
+    return accum;
+  };
+
+  // Return a random integer between min and max (inclusive).
+  _.random = function(min, max) {
+    if (max == null) {
+      max = min;
+      min = 0;
+    }
+    return min + Math.floor(Math.random() * (max - min + 1));
+  };
+
+  // A (possibly faster) way to get the current timestamp as an integer.
+  _.now = Date.now || function() { return new Date().getTime(); };
+
+  // List of HTML entities for escaping.
+  var entityMap = {
+    escape: {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;'
+    }
+  };
+  entityMap.unescape = _.invert(entityMap.escape);
+
+  // Regexes containing the keys and values listed immediately above.
+  var entityRegexes = {
+    escape:   new RegExp('[' + _.keys(entityMap.escape).join('') + ']', 'g'),
+    unescape: new RegExp('(' + _.keys(entityMap.unescape).join('|') + ')', 'g')
+  };
+
+  // Functions for escaping and unescaping strings to/from HTML interpolation.
+  _.each(['escape', 'unescape'], function(method) {
+    _[method] = function(string) {
+      if (string == null) return '';
+      return ('' + string).replace(entityRegexes[method], function(match) {
+        return entityMap[method][match];
+      });
+    };
+  });
+
+  // If the value of the named `property` is a function then invoke it with the
+  // `object` as context; otherwise, return it.
+  _.result = function(object, property) {
+    if (object == null) return void 0;
+    var value = object[property];
+    return _.isFunction(value) ? value.call(object) : value;
+  };
+
+  // Add your own custom functions to the Underscore object.
+  _.mixin = function(obj) {
+    each(_.functions(obj), function(name) {
+      var func = _[name] = obj[name];
+      _.prototype[name] = function() {
+        var args = [this._wrapped];
+        push.apply(args, arguments);
+        return result.call(this, func.apply(_, args));
+      };
+    });
+  };
+
+  // Generate a unique integer id (unique within the entire client session).
+  // Useful for temporary DOM ids.
+  var idCounter = 0;
+  _.uniqueId = function(prefix) {
+    var id = ++idCounter + '';
+    return prefix ? prefix + id : id;
+  };
+
+  // By default, Underscore uses ERB-style template delimiters, change the
+  // following template settings to use alternative delimiters.
+  _.templateSettings = {
+    evaluate    : /<%([\s\S]+?)%>/g,
+    interpolate : /<%=([\s\S]+?)%>/g,
+    escape      : /<%-([\s\S]+?)%>/g
+  };
+
+  // When customizing `templateSettings`, if you don't want to define an
+  // interpolation, evaluation or escaping regex, we need one that is
+  // guaranteed not to match.
+  var noMatch = /(.)^/;
+
+  // Certain characters need to be escaped so that they can be put into a
+  // string literal.
+  var escapes = {
+    "'":      "'",
+    '\\':     '\\',
+    '\r':     'r',
+    '\n':     'n',
+    '\t':     't',
+    '\u2028': 'u2028',
+    '\u2029': 'u2029'
+  };
+
+  var escaper = /\\|'|\r|\n|\t|\u2028|\u2029/g;
+
+  // JavaScript micro-templating, similar to John Resig's implementation.
+  // Underscore templating handles arbitrary delimiters, preserves whitespace,
+  // and correctly escapes quotes within interpolated code.
+  _.template = function(text, data, settings) {
+    var render;
+    settings = _.defaults({}, settings, _.templateSettings);
+
+    // Combine delimiters into one regular expression via alternation.
+    var matcher = new RegExp([
+      (settings.escape || noMatch).source,
+      (settings.interpolate || noMatch).source,
+      (settings.evaluate || noMatch).source
+    ].join('|') + '|$', 'g');
+
+    // Compile the template source, escaping string literals appropriately.
+    var index = 0;
+    var source = "__p+='";
+    text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
+      source += text.slice(index, offset)
+        .replace(escaper, function(match) { return '\\' + escapes[match]; });
+
+      if (escape) {
+        source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
+      }
+      if (interpolate) {
+        source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
+      }
+      if (evaluate) {
+        source += "';\n" + evaluate + "\n__p+='";
+      }
+      index = offset + match.length;
+      return match;
+    });
+    source += "';\n";
+
+    // If a variable is not specified, place data values in local scope.
+    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
+
+    source = "var __t,__p='',__j=Array.prototype.join," +
+      "print=function(){__p+=__j.call(arguments,'');};\n" +
+      source + "return __p;\n";
+
+    try {
+      render = new Function(settings.variable || 'obj', '_', source);
+    } catch (e) {
+      e.source = source;
+      throw e;
+    }
+
+    if (data) return render(data, _);
+    var template = function(data) {
+      return render.call(this, data, _);
+    };
+
+    // Provide the compiled function source as a convenience for precompilation.
+    template.source = 'function(' + (settings.variable || 'obj') + '){\n' + source + '}';
+
+    return template;
+  };
+
+  // Add a "chain" function, which will delegate to the wrapper.
+  _.chain = function(obj) {
+    return _(obj).chain();
+  };
+
+  // OOP
+  // ---------------
+  // If Underscore is called as a function, it returns a wrapped object that
+  // can be used OO-style. This wrapper holds altered versions of all the
+  // underscore functions. Wrapped objects may be chained.
+
+  // Helper function to continue chaining intermediate results.
+  var result = function(obj) {
+    return this._chain ? _(obj).chain() : obj;
+  };
+
+  // Add all of the Underscore functions to the wrapper object.
+  _.mixin(_);
+
+  // Add all mutator Array functions to the wrapper.
+  each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
+    var method = ArrayProto[name];
+    _.prototype[name] = function() {
+      var obj = this._wrapped;
+      method.apply(obj, arguments);
+      if ((name == 'shift' || name == 'splice') && obj.length === 0) delete obj[0];
+      return result.call(this, obj);
+    };
+  });
+
+  // Add all accessor Array functions to the wrapper.
+  each(['concat', 'join', 'slice'], function(name) {
+    var method = ArrayProto[name];
+    _.prototype[name] = function() {
+      return result.call(this, method.apply(this._wrapped, arguments));
+    };
+  });
+
+  _.extend(_.prototype, {
+
+    // Start chaining a wrapped Underscore object.
+    chain: function() {
+      this._chain = true;
+      return this;
+    },
+
+    // Extracts the result from a wrapped and chained object.
+    value: function() {
+      return this._wrapped;
+    }
+
+  });
+
+  // AMD registration happens at the end for compatibility with AMD loaders
+  // that may not enforce next-turn semantics on modules. Even though general
+  // practice for AMD registration is to be anonymous, underscore registers
+  // as a named module because, like jQuery, it is a base library that is
+  // popular enough to be bundled in a third party lib, but not be part of
+  // an AMD load request. Those cases could generate an error when an
+  // anonymous define() is called outside of a loader request.
+  if (typeof define === 'function' && define.amd) {
+    define('underscore', [], function() {
+      return _;
+    });
+  }
+}).call(this);
+
 ;//     Backbone.js 1.1.2
 
 //     (c) 2010-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -15223,2537 +15223,474 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
 
 }).call(this);
 
-;/*
-  backgrid
-  http://github.com/wyuenho/backgrid
-
-  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
-  Licensed under the MIT @license.
-*/
-(function (root, $, _, Backbone) {
-
-  "use strict";
-/*
-  backgrid
-  http://github.com/wyuenho/backgrid
-
-  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
-  Licensed under the MIT @license.
-*/
-
-var window = root;
-
-// Copyright 2009, 2010 Kristopher Michael Kowal
-// https://github.com/kriskowal/es5-shim
-// ES5 15.5.4.20
-// http://es5.github.com/#x15.5.4.20
-var ws = "\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003" +
-  "\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028" +
-  "\u2029\uFEFF";
-if (!String.prototype.trim || ws.trim()) {
-  // http://blog.stevenlevithan.com/archives/faster-trim-javascript
-  // http://perfectionkills.com/whitespace-deviations/
-  ws = "[" + ws + "]";
-  var trimBeginRegexp = new RegExp("^" + ws + ws + "*"),
-  trimEndRegexp = new RegExp(ws + ws + "*$");
-  String.prototype.trim = function trim() {
-    if (this === undefined || this === null) {
-      throw new TypeError("can't convert " + this + " to object");
-    }
-    return String(this)
-      .replace(trimBeginRegexp, "")
-      .replace(trimEndRegexp, "");
-  };
-}
-
-function capitalize(s) {
-  return String.fromCharCode(s.charCodeAt(0) - 32) + s.slice(1);
-}
-
-function lpad(str, length, padstr) {
-  var paddingLen = length - (str + '').length;
-  paddingLen =  paddingLen < 0 ? 0 : paddingLen;
-  var padding = '';
-  for (var i = 0; i < paddingLen; i++) {
-    padding = padding + padstr;
-  }
-  return padding + str;
-}
-
-var Backgrid = root.Backgrid = {
-
-  VERSION: "0.2.6",
-
-  Extension: {},
-
-  requireOptions: function (options, requireOptionKeys) {
-    for (var i = 0; i < requireOptionKeys.length; i++) {
-      var key = requireOptionKeys[i];
-      if (_.isUndefined(options[key])) {
-        throw new TypeError("'" + key  + "' is required");
-      }
-    }
-  },
-
-  resolveNameToClass: function (name, suffix) {
-    if (_.isString(name)) {
-      var key = _.map(name.split('-'), function (e) { return capitalize(e); }).join('') + suffix;
-      var klass = Backgrid[key] || Backgrid.Extension[key];
-      if (_.isUndefined(klass)) {
-        throw new ReferenceError("Class '" + key + "' not found");
-      }
-      return klass;
-    }
-
-    return name;
-  }
-};
-_.extend(Backgrid, Backbone.Events);
-
-/**
-   Command translates a DOM Event into commands that Backgrid
-   recognizes. Interested parties can listen on selected Backgrid events that
-   come with an instance of this class and act on the commands.
-
-   It is also possible to globally rebind the keyboard shortcuts by replacing
-   the methods in this class' prototype.
-
-   @class Backgrid.Command
-   @constructor
+;/* ========================================================================
+ * bootstrap-switch - v3.0.0
+ * http://www.bootstrap-switch.org
+ * ========================================================================
+ * Copyright 2012-2013 Mattia Larentis
+ *
+ * ========================================================================
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ========================================================================
  */
-var Command = Backgrid.Command = function (evt) {
-  _.extend(this, {
-    altKey: !!evt.altKey,
-    char: evt.char,
-    charCode: evt.charCode,
-    ctrlKey: !!evt.ctrlKey,
-    key: evt.key,
-    keyCode: evt.keyCode,
-    locale: evt.locale,
-    location: evt.location,
-    metaKey: !!evt.metaKey,
-    repeat: !!evt.repeat,
-    shiftKey: !!evt.shiftKey,
-    which: evt.which
-  });
-};
-_.extend(Command.prototype, {
-  /**
-     Up Arrow
 
-     @member Backgrid.Command
-   */
-  moveUp: function () { return this.keyCode == 38; },
-  /**
-     Down Arrow
-
-     @member Backgrid.Command
-   */
-  moveDown: function () { return this.keyCode === 40; },
-  /**
-     Shift Tab
-
-     @member Backgrid.Command
-   */
-  moveLeft: function () { return this.shiftKey && this.keyCode === 9; },
-  /**
-     Tab
-
-     @member Backgrid.Command
-   */
-  moveRight: function () { return !this.shiftKey && this.keyCode === 9; },
-  /**
-     Enter
-
-     @member Backgrid.Command
-   */
-  save: function () { return this.keyCode === 13; },
-  /**
-     Esc
-
-     @member Backgrid.Command
-   */
-  cancel: function () { return this.keyCode === 27; },
-  /**
-     None of the above.
-
-     @member Backgrid.Command
-   */
-  passThru: function () {
-    return !(this.moveUp() || this.moveDown() || this.moveLeft() ||
-             this.moveRight() || this.save() || this.cancel());
-  }
-});
-
-/*
-  backgrid
-  http://github.com/wyuenho/backgrid
-
-  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
-  Licensed under the MIT @license.
-*/
-
-/**
-   Just a convenient class for interested parties to subclass.
-
-   The default Cell classes don't require the formatter to be a subclass of
-   Formatter as long as the fromRaw(rawData) and toRaw(formattedData) methods
-   are defined.
-
-   @abstract
-   @class Backgrid.CellFormatter
-   @constructor
-*/
-var CellFormatter = Backgrid.CellFormatter = function () {};
-_.extend(CellFormatter.prototype, {
-
-  /**
-     Takes a raw value from a model and returns an optionally formatted string
-     for display. The default implementation simply returns the supplied value
-     as is without any type conversion.
-
-     @member Backgrid.CellFormatter
-     @param {*} rawData
-     @return {*}
-  */
-  fromRaw: function (rawData) {
-    return rawData;
-  },
-
-  /**
-     Takes a formatted string, usually from user input, and returns a
-     appropriately typed value for persistence in the model.
-
-     If the user input is invalid or unable to be converted to a raw value
-     suitable for persistence in the model, toRaw must return `undefined`.
-
-     @member Backgrid.CellFormatter
-     @param {string} formattedData
-     @return {*|undefined}
-  */
-  toRaw: function (formattedData) {
-    return formattedData;
-  }
-
-});
-
-/**
-   A floating point number formatter. Doesn't understand notation at the moment.
-
-   @class Backgrid.NumberFormatter
-   @extends Backgrid.CellFormatter
-   @constructor
-   @throws {RangeError} If decimals < 0 or > 20.
-*/
-var NumberFormatter = Backgrid.NumberFormatter = function (options) {
-  options = options ? _.clone(options) : {};
-  _.extend(this, this.defaults, options);
-
-  if (this.decimals < 0 || this.decimals > 20) {
-    throw new RangeError("decimals must be between 0 and 20");
-  }
-};
-NumberFormatter.prototype = new CellFormatter();
-_.extend(NumberFormatter.prototype, {
-
-  /**
-     @member Backgrid.NumberFormatter
-     @cfg {Object} options
-
-     @cfg {number} [options.decimals=2] Number of decimals to display. Must be an integer.
-
-     @cfg {string} [options.decimalSeparator='.'] The separator to use when
-     displaying decimals.
-
-     @cfg {string} [options.orderSeparator=','] The separator to use to
-     separator thousands. May be an empty string.
-   */
-  defaults: {
-    decimals: 2,
-    decimalSeparator: '.',
-    orderSeparator: ','
-  },
-
-  HUMANIZED_NUM_RE: /(\d)(?=(?:\d{3})+$)/g,
-
-  /**
-     Takes a floating point number and convert it to a formatted string where
-     every thousand is separated by `orderSeparator`, with a `decimal` number of
-     decimals separated by `decimalSeparator`. The number returned is rounded
-     the usual way.
-
-     @member Backgrid.NumberFormatter
-     @param {number} number
-     @return {string}
-  */
-  fromRaw: function (number) {
-    if (_.isNull(number) || _.isUndefined(number)) return '';
-
-    number = number.toFixed(~~this.decimals);
-
-    var parts = number.split('.');
-    var integerPart = parts[0];
-    var decimalPart = parts[1] ? (this.decimalSeparator || '.') + parts[1] : '';
-
-    return integerPart.replace(this.HUMANIZED_NUM_RE, '$1' + this.orderSeparator) + decimalPart;
-  },
-
-  /**
-     Takes a string, possibly formatted with `orderSeparator` and/or
-     `decimalSeparator`, and convert it back to a number.
-
-     @member Backgrid.NumberFormatter
-     @param {string} formattedData
-     @return {number|undefined} Undefined if the string cannot be converted to
-     a number.
-  */
-  toRaw: function (formattedData) {
-    var rawData = '';
-
-    var thousands = formattedData.trim().split(this.orderSeparator);
-    for (var i = 0; i < thousands.length; i++) {
-      rawData += thousands[i];
-    }
-
-    var decimalParts = rawData.split(this.decimalSeparator);
-    rawData = '';
-    for (var i = 0; i < decimalParts.length; i++) {
-      rawData = rawData + decimalParts[i] + '.';
-    }
-
-    if (rawData[rawData.length - 1] === '.') {
-      rawData = rawData.slice(0, rawData.length - 1);
-    }
-
-    var result = (rawData * 1).toFixed(~~this.decimals) * 1;
-    if (_.isNumber(result) && !_.isNaN(result)) return result;
-  }
-
-});
-
-/**
-   Formatter to converts between various datetime formats.
-
-   This class only understands ISO-8601 formatted datetime strings and UNIX
-   offset (number of milliseconds since UNIX Epoch). See
-   Backgrid.Extension.MomentFormatter if you need a much more flexible datetime
-   formatter.
-
-   @class Backgrid.DatetimeFormatter
-   @extends Backgrid.CellFormatter
-   @constructor
-   @throws {Error} If both `includeDate` and `includeTime` are false.
-*/
-var DatetimeFormatter = Backgrid.DatetimeFormatter = function (options) {
-  options = options ? _.clone(options) : {};
-  _.extend(this, this.defaults, options);
-
-  if (!this.includeDate && !this.includeTime) {
-    throw new Error("Either includeDate or includeTime must be true");
-  }
-};
-DatetimeFormatter.prototype = new CellFormatter();
-_.extend(DatetimeFormatter.prototype, {
-
-  /**
-     @member Backgrid.DatetimeFormatter
-
-     @cfg {Object} options
-
-     @cfg {boolean} [options.includeDate=true] Whether the values include the
-     date part.
-
-     @cfg {boolean} [options.includeTime=true] Whether the values include the
-     time part.
-
-     @cfg {boolean} [options.includeMilli=false] If `includeTime` is true,
-     whether to include the millisecond part, if it exists.
-   */
-  defaults: {
-    includeDate: true,
-    includeTime: true,
-    includeMilli: false
-  },
-
-  DATE_RE: /^([+\-]?\d{4})-(\d{2})-(\d{2})$/,
-  TIME_RE: /^(\d{2}):(\d{2}):(\d{2})(\.(\d{3}))?$/,
-  ISO_SPLITTER_RE: /T|Z| +/,
-
-  _convert: function (data, validate) {
-    var date, time = null;
-    if (_.isNumber(data)) {
-      var jsDate = new Date(data);
-      date = lpad(jsDate.getUTCFullYear(), 4, 0) + '-' + lpad(jsDate.getUTCMonth() + 1, 2, 0) + '-' + lpad(jsDate.getUTCDate(), 2, 0);
-      time = lpad(jsDate.getUTCHours(), 2, 0) + ':' + lpad(jsDate.getUTCMinutes(), 2, 0) + ':' + lpad(jsDate.getUTCSeconds(), 2, 0);
-    }
-    else {
-      data = data.trim();
-      var parts = data.split(this.ISO_SPLITTER_RE) || [];
-      date = this.DATE_RE.test(parts[0]) ? parts[0] : '';
-      time = date && parts[1] ? parts[1] : this.TIME_RE.test(parts[0]) ? parts[0] : '';
-    }
-
-    var YYYYMMDD = this.DATE_RE.exec(date) || [];
-    var HHmmssSSS = this.TIME_RE.exec(time) || [];
-
-    if (validate) {
-      if (this.includeDate && _.isUndefined(YYYYMMDD[0])) return;
-      if (this.includeTime && _.isUndefined(HHmmssSSS[0])) return;
-      if (!this.includeDate && date) return;
-      if (!this.includeTime && time) return;
-    }
-
-    var jsDate = new Date(Date.UTC(YYYYMMDD[1] * 1 || 0,
-                                   YYYYMMDD[2] * 1 - 1 || 0,
-                                   YYYYMMDD[3] * 1 || 0,
-                                   HHmmssSSS[1] * 1 || null,
-                                   HHmmssSSS[2] * 1 || null,
-                                   HHmmssSSS[3] * 1 || null,
-                                   HHmmssSSS[5] * 1 || null));
-
-    var result = '';
-
-    if (this.includeDate) {
-      result = lpad(jsDate.getUTCFullYear(), 4, 0) + '-' + lpad(jsDate.getUTCMonth() + 1, 2, 0) + '-' + lpad(jsDate.getUTCDate(), 2, 0);
-    }
-
-    if (this.includeTime) {
-      result = result + (this.includeDate ? 'T' : '') + lpad(jsDate.getUTCHours(), 2, 0) + ':' + lpad(jsDate.getUTCMinutes(), 2, 0) + ':' + lpad(jsDate.getUTCSeconds(), 2, 0);
-
-      if (this.includeMilli) {
-        result = result + '.' + lpad(jsDate.getUTCMilliseconds(), 3, 0);
-      }
-    }
-
-    if (this.includeDate && this.includeTime) {
-      result += "Z";
-    }
-
-    return result;
-  },
-
-  /**
-     Converts an ISO-8601 formatted datetime string to a datetime string, date
-     string or a time string. The timezone is ignored if supplied.
-
-     @member Backgrid.DatetimeFormatter
-     @param {string} rawData
-     @return {string|null|undefined} ISO-8601 string in UTC. Null and undefined
-     values are returned as is.
-  */
-  fromRaw: function (rawData) {
-    if (_.isNull(rawData) || _.isUndefined(rawData)) return '';
-    return this._convert(rawData);
-  },
-
-  /**
-     Converts an ISO-8601 formatted datetime string to a datetime string, date
-     string or a time string. The timezone is ignored if supplied. This method
-     parses the input values exactly the same way as
-     Backgrid.Extension.MomentFormatter#fromRaw(), in addition to doing some
-     sanity checks.
-
-     @member Backgrid.DatetimeFormatter
-     @param {string} formattedData
-     @return {string|undefined} ISO-8601 string in UTC. Undefined if a date is
-     found when `includeDate` is false, or a time is found when `includeTime` is
-     false, or if `includeDate` is true and a date is not found, or if
-     `includeTime` is true and a time is not found.
-  */
-  toRaw: function (formattedData) {
-    return this._convert(formattedData, true);
-  }
-
-});
-
-/**
-   Formatter to convert any value to string.
-
-   @class Backgrid.StringFormatter
-   @extends Backgrid.CellFormatter
-   @constructor
- */
-var StringFormatter = Backgrid.StringFormatter = function () {};
-StringFormatter.prototype = new CellFormatter();
-_.extend(StringFormatter.prototype, {
-  /**
-     Converts any value to a string using Ecmascript's implicit type
-     conversion. If the given value is `null` or `undefined`, an empty string is
-     returned instead.
-
-     @member Backgrid.StringFormatter
-     @param {*} rawValue
-     @return {string}
-   */
-  fromRaw: function (rawValue) {
-    if (_.isUndefined(rawValue) || _.isNull(rawValue)) return '';
-    return rawValue + '';
-  }
-});
-
-/**
-   Simple email validation formatter.
-
-   @class Backgrid.EmailFormatter
-   @extends Backgrid.CellFormatter
-   @constructor
- */
-var EmailFormatter = Backgrid.EmailFormatter = function () {};
-EmailFormatter.prototype = new CellFormatter();
-_.extend(EmailFormatter.prototype, {
-  /**
-     Return the input if it is a string that contains an '@' character and if
-     the strings before and after '@' are non-empty. If the input does not
-     validate, `undefined` is returned.
-
-     @member Backgrid.EmailFormatter
-     @param {*} formattedData
-     @return {string|undefined}
-   */
-  toRaw: function (formattedData) {
-    var parts = formattedData.trim().split("@");
-    if (parts.length === 2 && _.all(parts)) {
-      return formattedData;
-    }
-  }
-});
-
-/**
-   Formatter for SelectCell.
-
-   @class Backgrid.SelectFormatter
-   @extends Backgrid.CellFormatter
-   @constructor
-*/
-var SelectFormatter = Backgrid.SelectFormatter = function () {};
-SelectFormatter.prototype = new CellFormatter();
-_.extend(SelectFormatter.prototype, {
-
-  /**
-     Normalizes raw scalar or array values to an array.
-
-     @member Backgrid.SelectFormatter
-     @param {*} rawValue
-     @return {Array.<*>}
-  */
-  fromRaw: function (rawValue) {
-    return _.isArray(rawValue) ? rawValue : rawValue != null ? [rawValue] : [];
-  }
-});
-
-/*
-  backgrid
-  http://github.com/wyuenho/backgrid
-
-  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
-  Licensed under the MIT @license.
-*/
-
-/**
-   Generic cell editor base class. Only defines an initializer for a number of
-   required parameters.
-
-   @abstract
-   @class Backgrid.CellEditor
-   @extends Backbone.View
-*/
-var CellEditor = Backgrid.CellEditor = Backbone.View.extend({
-
-  /**
-     Initializer.
-
-     @param {Object} options
-     @param {Backgrid.CellFormatter} options.formatter
-     @param {Backgrid.Column} options.column
-     @param {Backbone.Model} options.model
-
-     @throws {TypeError} If `formatter` is not a formatter instance, or when
-     `model` or `column` are undefined.
-  */
-  initialize: function (options) {
-    Backgrid.requireOptions(options, ["formatter", "column", "model"]);
-    this.formatter = options.formatter;
-    this.column = options.column;
-    if (!(this.column instanceof Column)) {
-      this.column = new Column(this.column);
-    }
-
-    this.listenTo(this.model, "backgrid:editing", this.postRender);
-  },
-
-  /**
-     Post-rendering setup and initialization. Focuses the cell editor's `el` in
-     this default implementation. **Should** be called by Cell classes after
-     calling Backgrid.CellEditor#render.
-  */
-  postRender: function (model, column) {
-    if (column == null || column.get("name") == this.column.get("name")) {
-      this.$el.focus();
-    }
-    return this;
-  }
-
-});
-
-/**
-   InputCellEditor the cell editor type used by most core cell types. This cell
-   editor renders a text input box as its editor. The input will render a
-   placeholder if the value is empty on supported browsers.
-
-   @class Backgrid.InputCellEditor
-   @extends Backgrid.CellEditor
-*/
-var InputCellEditor = Backgrid.InputCellEditor = CellEditor.extend({
-
-  /** @property */
-  tagName: "input",
-
-  /** @property */
-  attributes: {
-    type: "text"
-  },
-
-  /** @property */
-  events: {
-    "blur": "saveOrCancel",
-    "keydown": "saveOrCancel"
-  },
-
-  /**
-     Initializer. Removes this `el` from the DOM when a `done` event is
-     triggered.
-
-     @param {Object} options
-     @param {Backgrid.CellFormatter} options.formatter
-     @param {Backgrid.Column} options.column
-     @param {Backbone.Model} options.model
-     @param {string} [options.placeholder]
-  */
-  initialize: function (options) {
-    CellEditor.prototype.initialize.apply(this, arguments);
-
-    if (options.placeholder) {
-      this.$el.attr("placeholder", options.placeholder);
-    }
-  },
-
-  /**
-     Renders a text input with the cell value formatted for display, if it
-     exists.
-  */
-  render: function () {
-    this.$el.val(this.formatter.fromRaw(this.model.get(this.column.get("name"))));
-    return this;
-  },
-
-  /**
-     If the key pressed is `enter`, `tab`, `up`, or `down`, converts the value
-     in the editor to a raw value for saving into the model using the formatter.
-
-     If the key pressed is `esc` the changes are undone.
-
-     If the editor goes out of focus (`blur`) but the value is invalid, the
-     event is intercepted and cancelled so the cell remains in focus pending for
-     further action. The changes are saved otherwise.
-
-     Triggers a Backbone `backgrid:edited` event from the model when successful,
-     and `backgrid:error` if the value cannot be converted. Classes listening to
-     the `error` event, usually the Cell classes, should respond appropriately,
-     usually by rendering some kind of error feedback.
-
-     @param {Event} e
-  */
-  saveOrCancel: function (e) {
-
-    var formatter = this.formatter;
-    var model = this.model;
-    var column = this.column;
-
-    var command = new Command(e);
-    var blurred = e.type === "blur";
-
-    if (command.moveUp() || command.moveDown() || command.moveLeft() || command.moveRight() ||
-        command.save() || blurred) {
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      var val = this.$el.val();
-      var newValue = formatter.toRaw(val);
-      if (_.isUndefined(newValue)) {
-        model.trigger("backgrid:error", model, column, val);
-      }
-      else {
-        model.set(column.get("name"), newValue);
-        model.trigger("backgrid:edited", model, column, command);
-      }
-    }
-    // esc
-    else if (command.cancel()) {
-      // undo
-      e.stopPropagation();
-      model.trigger("backgrid:edited", model, column, command);
-    }
-  },
-
-  postRender: function (model, column) {
-    if (column == null || column.get("name") == this.column.get("name")) {
-      // move the cursor to the end on firefox if text is right aligned
-      if (this.$el.css("text-align") === "right") {
-        var val = this.$el.val();
-        this.$el.focus().val(null).val(val);
-      }
-      else this.$el.focus();
-    }
-    return this;
-  }
-
-});
-
-/**
-   The super-class for all Cell types. By default, this class renders a plain
-   table cell with the model value converted to a string using the
-   formatter. The table cell is clickable, upon which the cell will go into
-   editor mode, which is rendered by a Backgrid.InputCellEditor instance by
-   default. Upon encountering any formatting errors, this class will add an
-   `error` CSS class to the table cell.
-
-   @abstract
-   @class Backgrid.Cell
-   @extends Backbone.View
-*/
-var Cell = Backgrid.Cell = Backbone.View.extend({
-
-  /** @property */
-  tagName: "td",
-
-  /**
-     @property {Backgrid.CellFormatter|Object|string} [formatter=new CellFormatter()]
-  */
-  formatter: new CellFormatter(),
-
-  /**
-     @property {Backgrid.CellEditor} [editor=Backgrid.InputCellEditor] The
-     default editor for all cell instances of this class. This value must be a
-     class, it will be automatically instantiated upon entering edit mode.
-
-     See Backgrid.CellEditor
-  */
-  editor: InputCellEditor,
-
-  /** @property */
-  events: {
-    "click": "enterEditMode"
-  },
-
-  /**
-     Initializer.
-
-     @param {Object} options
-     @param {Backbone.Model} options.model
-     @param {Backgrid.Column} options.column
-
-     @throws {ReferenceError} If formatter is a string but a formatter class of
-     said name cannot be found in the Backgrid module.
-  */
-  initialize: function (options) {
-    Backgrid.requireOptions(options, ["model", "column"]);
-    this.column = options.column;
-    if (!(this.column instanceof Column)) {
-      this.column = new Column(this.column);
-    }
-    this.formatter = Backgrid.resolveNameToClass(this.column.get("formatter") || this.formatter, "Formatter");
-    this.editor = Backgrid.resolveNameToClass(this.editor, "CellEditor");
-    this.listenTo(this.model, "change:" + this.column.get("name"), function () {
-      if (!this.$el.hasClass("editor")) this.render();
-    });
-    this.listenTo(this.model, "backgrid:error", this.renderError);
-  },
-
-  /**
-     Render a text string in a table cell. The text is converted from the
-     model's raw value for this cell's column.
-  */
-  render: function () {
-    this.$el.empty();
-    this.$el.text(this.formatter.fromRaw(this.model.get(this.column.get("name"))));
-    this.delegateEvents();
-    return this;
-  },
-
-  /**
-     If this column is editable, a new CellEditor instance is instantiated with
-     its required parameters. An `editor` CSS class is added to the cell upon
-     entering edit mode.
-
-     This method triggers a Backbone `backgrid:edit` event from the model when
-     the cell is entering edit mode and an editor instance has been constructed,
-     but before it is rendered and inserted into the DOM. The cell and the
-     constructed cell editor instance are sent as event parameters when this
-     event is triggered.
-
-     When this cell has finished switching to edit mode, a Backbone
-     `backgrid:editing` event is triggered from the model. The cell and the
-     constructed cell instance are also sent as parameters in the event.
-
-     When the model triggers a `backgrid:error` event, it means the editor is
-     unable to convert the current user input to an apprpriate value for the
-     model's column, and an `error` CSS class is added to the cell accordingly.
-  */
-  enterEditMode: function () {
-    var model = this.model;
-    var column = this.column;
-
-    if (column.get("editable")) {
-
-      this.currentEditor = new this.editor({
-        column: this.column,
-        model: this.model,
-        formatter: this.formatter
-      });
-
-      model.trigger("backgrid:edit", model, column, this, this.currentEditor);
-
-      // Need to redundantly undelegate events for Firefox
-      this.undelegateEvents();
-      this.$el.empty();
-      this.$el.append(this.currentEditor.$el);
-      this.currentEditor.render();
-      this.$el.addClass("editor");
-
-      model.trigger("backgrid:editing", model, column, this, this.currentEditor);
-    }
-  },
-
-  /**
-     Put an `error` CSS class on the table cell.
-  */
-  renderError: function (model, column) {
-    if (column == null || column.get("name") == this.column.get("name")) {
-      this.$el.addClass("error");
-    }
-  },
-
-  /**
-     Removes the editor and re-render in display mode.
-  */
-  exitEditMode: function () {
-    this.$el.removeClass("error");
-    this.currentEditor.remove();
-    this.stopListening(this.currentEditor);
-    delete this.currentEditor;
-    this.$el.removeClass("editor");
-    this.render();
-  },
-
-  /**
-     Clean up this cell.
-
-     @chainable
-  */
-  remove: function () {
-    if (this.currentEditor) {
-      this.currentEditor.remove.apply(this, arguments);
-      delete this.currentEditor;
-    }
-    return Backbone.View.prototype.remove.apply(this, arguments);
-  }
-
-});
-
-/**
-   StringCell displays HTML escaped strings and accepts anything typed in.
-
-   @class Backgrid.StringCell
-   @extends Backgrid.Cell
-*/
-var StringCell = Backgrid.StringCell = Cell.extend({
-
-  /** @property */
-  className: "string-cell",
-
-  formatter: new StringFormatter()
-
-});
-
-/**
-   UriCell renders an HTML `<a>` anchor for the value and accepts URIs as user
-   input values. No type conversion or URL validation is done by the formatter
-   of this cell. Users who need URL validation are encourage to subclass UriCell
-   to take advantage of the parsing capabilities of the HTMLAnchorElement
-   available on HTML5-capable browsers or using a third-party library like
-   [URI.js](https://github.com/medialize/URI.js).
-
-   @class Backgrid.UriCell
-   @extends Backgrid.Cell
-*/
-var UriCell = Backgrid.UriCell = Cell.extend({
-
-  /** @property */
-  className: "uri-cell",
-
-  render: function () {
-    this.$el.empty();
-    var formattedValue = this.formatter.fromRaw(this.model.get(this.column.get("name")));
-    this.$el.append($("<a>", {
-      tabIndex: -1,
-      href: formattedValue,
-      title: formattedValue,
-      target: "_blank"
-    }).text(formattedValue));
-    this.delegateEvents();
-    return this;
-  }
-
-});
-
-/**
-   Like Backgrid.UriCell, EmailCell renders an HTML `<a>` anchor for the
-   value. The `href` in the anchor is prefixed with `mailto:`. EmailCell will
-   complain if the user enters a string that doesn't contain the `@` sign.
-
-   @class Backgrid.EmailCell
-   @extends Backgrid.StringCell
-*/
-var EmailCell = Backgrid.EmailCell = StringCell.extend({
-
-  /** @property */
-  className: "email-cell",
-
-  formatter: new EmailFormatter(),
-
-  render: function () {
-    this.$el.empty();
-    var formattedValue = this.formatter.fromRaw(this.model.get(this.column.get("name")));
-    this.$el.append($("<a>", {
-      tabIndex: -1,
-      href: "mailto:" + formattedValue,
-      title: formattedValue
-    }).text(formattedValue));
-    this.delegateEvents();
-    return this;
-  }
-
-});
-
-/**
-   NumberCell is a generic cell that renders all numbers. Numbers are formatted
-   using a Backgrid.NumberFormatter.
-
-   @class Backgrid.NumberCell
-   @extends Backgrid.Cell
-*/
-var NumberCell = Backgrid.NumberCell = Cell.extend({
-
-  /** @property */
-  className: "number-cell",
-
-  /**
-     @property {number} [decimals=2] Must be an integer.
-  */
-  decimals: NumberFormatter.prototype.defaults.decimals,
-
-  /** @property {string} [decimalSeparator='.'] */
-  decimalSeparator: NumberFormatter.prototype.defaults.decimalSeparator,
-
-  /** @property {string} [orderSeparator=','] */
-  orderSeparator: NumberFormatter.prototype.defaults.orderSeparator,
-
-  /** @property {Backgrid.CellFormatter} [formatter=Backgrid.NumberFormatter] */
-  formatter: NumberFormatter,
-
-  /**
-     Initializes this cell and the number formatter.
-
-     @param {Object} options
-     @param {Backbone.Model} options.model
-     @param {Backgrid.Column} options.column
-  */
-  initialize: function (options) {
-    Cell.prototype.initialize.apply(this, arguments);
-    this.formatter = new this.formatter({
-      decimals: this.decimals,
-      decimalSeparator: this.decimalSeparator,
-      orderSeparator: this.orderSeparator
-    });
-  }
-
-});
-
-/**
-   An IntegerCell is just a Backgrid.NumberCell with 0 decimals. If a floating
-   point number is supplied, the number is simply rounded the usual way when
-   displayed.
-
-   @class Backgrid.IntegerCell
-   @extends Backgrid.NumberCell
-*/
-var IntegerCell = Backgrid.IntegerCell = NumberCell.extend({
-
-  /** @property */
-  className: "integer-cell",
-
-  /**
-     @property {number} decimals Must be an integer.
-  */
-  decimals: 0
-});
-
-/**
-   DatetimeCell is a basic cell that accepts datetime string values in RFC-2822
-   or W3C's subset of ISO-8601 and displays them in ISO-8601 format. For a much
-   more sophisticated date time cell with better datetime formatting, take a
-   look at the Backgrid.Extension.MomentCell extension.
-
-   @class Backgrid.DatetimeCell
-   @extends Backgrid.Cell
-
-   See:
-
-   - Backgrid.Extension.MomentCell
-   - Backgrid.DatetimeFormatter
-*/
-var DatetimeCell = Backgrid.DatetimeCell = Cell.extend({
-
-  /** @property */
-  className: "datetime-cell",
-
-  /**
-     @property {boolean} [includeDate=true]
-  */
-  includeDate: DatetimeFormatter.prototype.defaults.includeDate,
-
-  /**
-     @property {boolean} [includeTime=true]
-  */
-  includeTime: DatetimeFormatter.prototype.defaults.includeTime,
-
-  /**
-     @property {boolean} [includeMilli=false]
-  */
-  includeMilli: DatetimeFormatter.prototype.defaults.includeMilli,
-
-  /** @property {Backgrid.CellFormatter} [formatter=Backgrid.DatetimeFormatter] */
-  formatter: DatetimeFormatter,
-
-  /**
-     Initializes this cell and the datetime formatter.
-
-     @param {Object} options
-     @param {Backbone.Model} options.model
-     @param {Backgrid.Column} options.column
-  */
-  initialize: function (options) {
-    Cell.prototype.initialize.apply(this, arguments);
-    this.formatter = new this.formatter({
-      includeDate: this.includeDate,
-      includeTime: this.includeTime,
-      includeMilli: this.includeMilli
-    });
-
-    var placeholder = this.includeDate ? "YYYY-MM-DD" : "";
-    placeholder += (this.includeDate && this.includeTime) ? "T" : "";
-    placeholder += this.includeTime ? "HH:mm:ss" : "";
-    placeholder += (this.includeTime && this.includeMilli) ? ".SSS" : "";
-
-    this.editor = this.editor.extend({
-      attributes: _.extend({}, this.editor.prototype.attributes, this.editor.attributes, {
-        placeholder: placeholder
-      })
-    });
-  }
-
-});
-
-/**
-   DateCell is a Backgrid.DatetimeCell without the time part.
-
-   @class Backgrid.DateCell
-   @extends Backgrid.DatetimeCell
-*/
-var DateCell = Backgrid.DateCell = DatetimeCell.extend({
-
-  /** @property */
-  className: "date-cell",
-
-  /** @property */
-  includeTime: false
-
-});
-
-/**
-   TimeCell is a Backgrid.DatetimeCell without the date part.
-
-   @class Backgrid.TimeCell
-   @extends Backgrid.DatetimeCell
-*/
-var TimeCell = Backgrid.TimeCell = DatetimeCell.extend({
-
-  /** @property */
-  className: "time-cell",
-
-  /** @property */
-  includeDate: false
-
-});
-
-/**
-   BooleanCellEditor renders a checkbox as its editor.
-
-   @class Backgrid.BooleanCellEditor
-   @extends Backgrid.CellEditor
-*/
-var BooleanCellEditor = Backgrid.BooleanCellEditor = CellEditor.extend({
-
-  /** @property */
-  tagName: "input",
-
-  /** @property */
-  attributes: {
-    tabIndex: -1,
-    type: "checkbox"
-  },
-
-  /** @property */
-  events: {
-    "mousedown": function () {
-      this.mouseDown = true;
-    },
-    "blur": "enterOrExitEditMode",
-    "mouseup": function () {
-      this.mouseDown = false;
-    },
-    "change": "saveOrCancel",
-    "keydown": "saveOrCancel"
-  },
-
-  /**
-     Renders a checkbox and check it if the model value of this column is true,
-     uncheck otherwise.
-  */
-  render: function () {
-    var val = this.formatter.fromRaw(this.model.get(this.column.get("name")));
-    this.$el.prop("checked", val);
-    return this;
-  },
-
-  /**
-     Event handler. Hack to deal with the case where `blur` is fired before
-     `change` and `click` on a checkbox.
-  */
-  enterOrExitEditMode: function (e) {
-    if (!this.mouseDown) {
-      var model = this.model;
-      model.trigger("backgrid:edited", model, this.column, new Command(e));
-    }
-  },
-
-  /**
-     Event handler. Save the value into the model if the event is `change` or
-     one of the keyboard navigation key presses. Exit edit mode without saving
-     if `escape` was pressed.
-  */
-  saveOrCancel: function (e) {
-    var model = this.model;
-    var column = this.column;
-    var formatter = this.formatter;
-    var command = new Command(e);
-    // skip ahead to `change` when space is pressed
-    if (command.passThru() && e.type != "change") return true;
-    if (command.cancel()) {
-      e.stopPropagation();
-      model.trigger("backgrid:edited", model, column, command);
-    }
-
-    var $el = this.$el;
-    if (command.save() || command.moveLeft() || command.moveRight() || command.moveUp() ||
-        command.moveDown()) {
-      e.preventDefault();
-      e.stopPropagation();
-      var val = formatter.toRaw($el.prop("checked"));
-      model.set(column.get("name"), val);
-      model.trigger("backgrid:edited", model, column, command);
-    }
-    else if (e.type == "change") {
-      var val = formatter.toRaw($el.prop("checked"));
-      model.set(column.get("name"), val);
-      $el.focus();
-    }
-  }
-
-});
-
-/**
-   BooleanCell renders a checkbox both during display mode and edit mode. The
-   checkbox is checked if the model value is true, unchecked otherwise.
-
-   @class Backgrid.BooleanCell
-   @extends Backgrid.Cell
-*/
-var BooleanCell = Backgrid.BooleanCell = Cell.extend({
-
-  /** @property */
-  className: "boolean-cell",
-
-  /** @property */
-  editor: BooleanCellEditor,
-
-  /** @property */
-  events: {
-    "click": "enterEditMode"
-  },
-
-  /**
-     Renders a checkbox and check it if the model value of this column is true,
-     uncheck otherwise.
-  */
-  render: function () {
-    this.$el.empty();
-    this.$el.append($("<input>", {
-      tabIndex: -1,
-      type: "checkbox",
-      checked: this.formatter.fromRaw(this.model.get(this.column.get("name")))
-    }));
-    this.delegateEvents();
-    return this;
-  }
-
-});
-
-/**
-   SelectCellEditor renders an HTML `<select>` fragment as the editor.
-
-   @class Backgrid.SelectCellEditor
-   @extends Backgrid.CellEditor
-*/
-var SelectCellEditor = Backgrid.SelectCellEditor = CellEditor.extend({
-
-  /** @property */
-  tagName: "select",
-
-  /** @property */
-  events: {
-    "change": "save",
-    "blur": "close",
-    "keydown": "close"
-  },
-
-  /** @property {function(Object, ?Object=): string} template */
-  template: _.template('<option value="<%- value %>" <%= selected ? \'selected="selected"\' : "" %>><%- text %></option>'),
-
-  setOptionValues: function (optionValues) {
-    this.optionValues = optionValues;
-  },
-
-  setMultiple: function (multiple) {
-    this.multiple = multiple;
-    this.$el.prop("multiple", multiple);
-  },
-
-  _renderOptions: function (nvps, selectedValues) {
-    var options = '';
-    for (var i = 0; i < nvps.length; i++) {
-      options = options + this.template({
-        text: nvps[i][0],
-        value: nvps[i][1],
-        selected: selectedValues.indexOf(nvps[i][1]) > -1
-      });
-    }
-    return options;
-  },
-
-  /**
-     Renders the options if `optionValues` is a list of name-value pairs. The
-     options are contained inside option groups if `optionValues` is a list of
-     object hashes. The name is rendered at the option text and the value is the
-     option value. If `optionValues` is a function, it is called without a
-     parameter.
-  */
-  render: function () {
-    this.$el.empty();
-
-    var optionValues = _.result(this, "optionValues");
-    var selectedValues = this.formatter.fromRaw(this.model.get(this.column.get("name")));
-
-    if (!_.isArray(optionValues)) throw TypeError("optionValues must be an array");
-
-    var optionValue = null;
-    var optionText = null;
-    var optionValue = null;
-    var optgroupName = null;
-    var optgroup = null;
-
-    for (var i = 0; i < optionValues.length; i++) {
-      var optionValue = optionValues[i];
-
-      if (_.isArray(optionValue)) {
-        optionText  = optionValue[0];
-        optionValue = optionValue[1];
-
-        this.$el.append(this.template({
-          text: optionText,
-          value: optionValue,
-          selected: selectedValues.indexOf(optionValue) > -1
-        }));
-      }
-      else if (_.isObject(optionValue)) {
-        optgroupName = optionValue.name;
-        optgroup = $("<optgroup></optgroup>", { label: optgroupName });
-        optgroup.append(this._renderOptions(optionValue.values, selectedValues));
-        this.$el.append(optgroup);
-      }
-      else {
-        throw TypeError("optionValues elements must be a name-value pair or an object hash of { name: 'optgroup label', value: [option name-value pairs] }");
-      }
-    }
-
-    this.delegateEvents();
-
-    return this;
-  },
-
-  /**
-     Saves the value of the selected option to the model attribute. Triggers a
-     `backgrid:edited` Backbone event from the model.
-  */
-  save: function (e) {
-    var model = this.model;
-    var column = this.column;
-    model.set(column.get("name"), this.formatter.toRaw(this.$el.val()));
-    model.trigger("backgrid:edited", model, column, new Command(e));
-  },
-
-  /**
-     Triggers a `backgrid:edited` event from the model so the body can close
-     this editor.
-  */
-  close: function (e) {
-    var model = this.model;
-    var column = this.column;
-    var command = new Command(e);
-    if (command.cancel()) {
-      e.stopPropagation();
-      model.trigger("backgrid:edited", model, column, new Command(e));
-    }
-    else if (command.save() || command.moveLeft() || command.moveRight() ||
-             command.moveUp() || command.moveDown() || e.type == "blur") {
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.type == "blur" && this.$el.find("option").length === 1) {
-        model.set(column.get("name"), this.formatter.toRaw(this.$el.val()));
-      }
-      model.trigger("backgrid:edited", model, column, new Command(e));
-    }
-  }
-
-});
-
-/**
-   SelectCell is also a different kind of cell in that upon going into edit mode
-   the cell renders a list of options to pick from, as opposed to an input box.
-
-   SelectCell cannot be referenced by its string name when used in a column
-   definition because it requires an `optionValues` class attribute to be
-   defined. `optionValues` can either be a list of name-value pairs, to be
-   rendered as options, or a list of object hashes which consist of a key *name*
-   which is the option group name, and a key *values* which is a list of
-   name-value pairs to be rendered as options under that option group.
-
-   In addition, `optionValues` can also be a parameter-less function that
-   returns one of the above. If the options are static, it is recommended the
-   returned values to be memoized. `_.memoize()` is a good function to help with
-   that.
-
-   During display mode, the default formatter will normalize the raw model value
-   to an array of values whether the raw model value is a scalar or an
-   array. Each value is compared with the `optionValues` values using
-   Ecmascript's implicit type conversion rules. When exiting edit mode, no type
-   conversion is performed when saving into the model. This behavior is not
-   always desirable when the value type is anything other than string. To
-   control type conversion on the client-side, you should subclass SelectCell to
-   provide a custom formatter or provide the formatter to your column
-   definition.
-
-   See:
-     [$.fn.val()](http://api.jquery.com/val/)
-
-   @class Backgrid.SelectCell
-   @extends Backgrid.Cell
-*/
-var SelectCell = Backgrid.SelectCell = Cell.extend({
-
-  /** @property */
-  className: "select-cell",
-
-  /** @property */
-  editor: SelectCellEditor,
-
-  /** @property */
-  multiple: false,
-
-  /** @property */
-  formatter: new SelectFormatter(),
-
-  /**
-     @property {Array.<Array>|Array.<{name: string, values: Array.<Array>}>} optionValues
-  */
-  optionValues: undefined,
-
-  /** @property */
-  delimiter: ', ',
-
-  /**
-     Initializer.
-
-     @param {Object} options
-     @param {Backbone.Model} options.model
-     @param {Backgrid.Column} options.column
-
-     @throws {TypeError} If `optionsValues` is undefined.
-  */
-  initialize: function (options) {
-    Cell.prototype.initialize.apply(this, arguments);
-    Backgrid.requireOptions(this, ["optionValues"]);
-    this.listenTo(this.model, "backgrid:edit", function (model, column, cell, editor) {
-      if (column.get("name") == this.column.get("name")) {
-        editor.setOptionValues(this.optionValues);
-        editor.setMultiple(this.multiple);
-      }
-    });
-  },
-
-  /**
-     Renders the label using the raw value as key to look up from `optionValues`.
-
-     @throws {TypeError} If `optionValues` is malformed.
-  */
-  render: function () {
-    this.$el.empty();
-
-    var optionValues = this.optionValues;
-    var rawData = this.formatter.fromRaw(this.model.get(this.column.get("name")));
-
-    var selectedText = [];
-
-    try {
-      if (!_.isArray(optionValues) || _.isEmpty(optionValues)) throw new TypeError;
-
-      for (var k = 0; k < rawData.length; k++) {
-        var rawDatum = rawData[k];
-
-        for (var i = 0; i < optionValues.length; i++) {
-          var optionValue = optionValues[i];
-
-          if (_.isArray(optionValue)) {
-            var optionText  = optionValue[0];
-            var optionValue = optionValue[1];
-
-            if (optionValue == rawDatum) selectedText.push(optionText);
-          }
-          else if (_.isObject(optionValue)) {
-            var optionGroupValues = optionValue.values;
-
-            for (var j = 0; j < optionGroupValues.length; j++) {
-              var optionGroupValue = optionGroupValues[j];
-              if (optionGroupValue[1] == rawDatum) {
-                selectedText.push(optionGroupValue[0]);
-              }
+(function () {
+  var __slice = [].slice;
+
+  (function ($, window) {
+    "use strict";
+    var BootstrapSwitch;
+    BootstrapSwitch = (function () {
+      BootstrapSwitch.prototype.name = "bootstrap-switch";
+
+      function BootstrapSwitch(element, options) {
+        var addClasses;
+        if (options == null) {
+          options = {};
+        }
+        this.$element = $(element);
+        this.options = $.extend({}, $.fn.bootstrapSwitch.defaults, options, {
+          state: this.$element.is(":checked"),
+          size: this.$element.data("size"),
+          animate: this.$element.data("animate"),
+          disabled: this.$element.is(":disabled"),
+          readonly: this.$element.is("[readonly]"),
+          onColor: this.$element.data("on-color"),
+          offColor: this.$element.data("off-color"),
+          onText: this.$element.data("on-text"),
+          offText: this.$element.data("off-text"),
+          labelText: this.$element.data("label-text")
+        });
+        this.$wrapper = $("<div>");
+        this.$container = $("<div>");
+        this.$on = $("<span>", {
+          html: this.options.onText
+        });
+        this.$off = $("<span>", {
+          html: this.options.offText
+        });
+        this.$label = $("<label>", {
+          "for": this.$element.attr("id"),
+          html: this.options.labelText
+        });
+        addClasses = (function (_this) {
+          return function (cls) {
+            var c, classes, _i, _len;
+            if (!$.isArray(cls)) {
+              return "" + _this.options.baseClass + "-" + cls;
             }
-          }
-          else {
-            throw new TypeError;
-          }
+            classes = [];
+            for (_i = 0, _len = cls.length; _i < _len; _i++) {
+              c = cls[_i];
+              classes.push("" + _this.options.baseClass + "-" + c);
+            }
+            return classes.join(" ");
+          };
+        })(this);
+        this.$wrapper.addClass((function (_this) {
+          return function () {
+            var classes;
+            classes = ["" + _this.options.baseClass, "" + _this.options.baseClass + "-" + _this.options.wrapperClass];
+            classes.push(_this.options.state ? "" + _this.options.baseClass + "-" + _this.options.onModifierClass : "" + _this.options.baseClass + "-" + _this.options.offModifierClass);
+            if (_this.options.size != null) {
+              classes.push("" + _this.options.baseClass + "-" + _this.options.size);
+            }
+            if (_this.options.animate) {
+              classes.push("" + _this.options.baseClass + "-" + _this.options.animateModifierClass);
+            }
+            if (_this.options.disabled) {
+              classes.push("" + _this.options.baseClass + "-" + _this.options.disabledModifierClass);
+            }
+            if (_this.options.readonly) {
+              classes.push("" + _this.options.baseClass + "-" + _this.options.readonlyModifierClass);
+            }
+            if (_this.$element.attr("id")) {
+              classes.push("" + _this.options.baseClass + "-id-" + (_this.$element.attr("id")));
+            }
+            return classes.join(" ");
+          };
+        })(this));
+        this.$container.addClass(addClasses(this.options.containerClass));
+        this.$on.addClass("" + (addClasses(this.options.handleOnClass)) + " " + this.options.baseClass + "-" + this.options.onColor);
+        this.$off.addClass("" + (addClasses(this.options.handleOffClass)) + " " + this.options.baseClass + "-" + this.options.offColor);
+        this.$label.addClass(addClasses(this.options.labelClass));
+        this.$element.on("init.bootstrapSwitch", (function (_this) {
+          return function () {
+            return _this.options.onInit.apply(element, arguments);
+          };
+        })(this));
+        this.$element.on("switchChange.bootstrapSwitch", (function (_this) {
+          return function () {
+            return _this.options.onSwitchChange.apply(element, arguments);
+          };
+        })(this));
+        this.$container = this.$element.wrap(this.$container).parent();
+        this.$wrapper = this.$container.wrap(this.$wrapper).parent();
+        this.$element.before(this.$on).before(this.$label).before(this.$off).trigger("init.bootstrapSwitch");
+        this._elementHandlers();
+        this._handleHandlers();
+        this._labelHandlers();
+        this._formHandler();
+      }
+
+      BootstrapSwitch.prototype._constructor = BootstrapSwitch;
+
+      BootstrapSwitch.prototype.state = function (value, skip) {
+        if (typeof value === "undefined") {
+          return this.options.state;
         }
-      }
-
-      this.$el.append(selectedText.join(this.delimiter));
-    }
-    catch (ex) {
-      if (ex instanceof TypeError) {
-        throw TypeError("'optionValues' must be of type {Array.<Array>|Array.<{name: string, values: Array.<Array>}>}");
-      }
-      throw ex;
-    }
-
-    this.delegateEvents();
-
-    return this;
-  }
-
-});
-/*
-  backgrid
-  http://github.com/wyuenho/backgrid
-
-  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
-  Licensed under the MIT @license.
-*/
-
-/**
-   A Column is a placeholder for column metadata.
-
-   You usually don't need to create an instance of this class yourself as a
-   collection of column instances will be created for you from a list of column
-   attributes in the Backgrid.js view class constructors.
-
-   @class Backgrid.Column
-   @extends Backbone.Model
- */
-var Column = Backgrid.Column = Backbone.Model.extend({
-
-  defaults: {
-    name: undefined,
-    label: undefined,
-    sortable: true,
-    editable: true,
-    renderable: true,
-    formatter: undefined,
-    cell: undefined,
-    headerCell: undefined
-  },
-
-  /**
-     Initializes this Column instance.
-
-     @param {Object} attrs Column attributes.
-     @param {string} attrs.name The name of the model attribute.
-     @param {string|Backgrid.Cell} attrs.cell The cell type.
-     If this is a string, the capitalized form will be used to look up a
-     cell class in Backbone, i.e.: string => StringCell. If a Cell subclass
-     is supplied, it is initialized with a hash of parameters. If a Cell
-     instance is supplied, it is used directly.
-     @param {string|Backgrid.HeaderCell} [attrs.headerCell] The header cell type.
-     @param {string} [attrs.label] The label to show in the header.
-     @param {boolean} [attrs.sortable=true]
-     @param {boolean} [attrs.editable=true]
-     @param {boolean} [attrs.renderable=true]
-     @param {Backgrid.CellFormatter|Object|string} [attrs.formatter] The
-     formatter to use to convert between raw model values and user input.
-
-     @throws {TypeError} If attrs.cell or attrs.options are not supplied.
-     @throws {ReferenceError} If attrs.cell is a string but a cell class of
-     said name cannot be found in the Backgrid module.
-
-     See:
-
-     - Backgrid.Cell
-     - Backgrid.CellFormatter
-   */
-  initialize: function (attrs) {
-    Backgrid.requireOptions(attrs, ["cell", "name"]);
-
-    if (!this.has("label")) {
-      this.set({ label: this.get("name") }, { silent: true });
-    }
-
-    var headerCell = Backgrid.resolveNameToClass(this.get("headerCell"), "HeaderCell");
-    var cell = Backgrid.resolveNameToClass(this.get("cell"), "Cell");
-    this.set({ cell: cell, headerCell: headerCell }, { silent: true });
-  }
-
-});
-
-/**
-   A Backbone collection of Column instances.
-
-   @class Backgrid.Columns
-   @extends Backbone.Collection
- */
-var Columns = Backgrid.Columns = Backbone.Collection.extend({
-
-  /**
-     @property {Backgrid.Column} model
-   */
-  model: Column
-});
-/*
-  backgrid
-  http://github.com/wyuenho/backgrid
-
-  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
-  Licensed under the MIT @license.
-*/
-
-/**
-   Row is a simple container view that takes a model instance and a list of
-   column metadata describing how each of the model's attribute is to be
-   rendered, and apply the appropriate cell to each attribute.
-
-   @class Backgrid.Row
-   @extends Backbone.View
-*/
-var Row = Backgrid.Row = Backbone.View.extend({
-
-  /** @property */
-  tagName: "tr",
-
-  requiredOptions: ["columns", "model"],
-
-  /**
-     Initializes a row view instance.
-
-     @param {Object} options
-     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns Column metadata.
-     @param {Backbone.Model} options.model The model instance to render.
-
-     @throws {TypeError} If options.columns or options.model is undefined.
-  */
-  initialize: function (options) {
-
-    Backgrid.requireOptions(options, this.requiredOptions);
-
-    var columns = this.columns = options.columns;
-    if (!(columns instanceof Backbone.Collection)) {
-      columns = this.columns = new Columns(columns);
-    }
-
-    var cells = this.cells = [];
-    for (var i = 0; i < columns.length; i++) {
-      cells.push(this.makeCell(columns.at(i), options));
-    }
-
-    this.listenTo(columns, "change:renderable", function (column, renderable) {
-      for (var i = 0; i < cells.length; i++) {
-        var cell = cells[i];
-        if (cell.column.get("name") == column.get("name")) {
-          if (renderable) cell.$el.show(); else cell.$el.hide();
+        if (this.options.disabled || this.options.readonly) {
+          return this.$element;
         }
-      }
-    });
+        value = !!value;
+        this.$element.prop("checked", value).trigger("change.bootstrapSwitch", skip);
+        return this.$element;
+      };
 
-    this.listenTo(columns, "add", function (column, columns) {
-      var i = columns.indexOf(column);
-      var cell = this.makeCell(column, options);
-      cells.splice(i, 0, cell);
+      BootstrapSwitch.prototype.toggleState = function (skip) {
+        if (this.options.disabled || this.options.readonly) {
+          return this.$element;
+        }
+        return this.$element.prop("checked", !this.options.state).trigger("change.bootstrapSwitch", skip);
+      };
 
-      if (!cell.column.get("renderable")) cell.$el.hide();
+      BootstrapSwitch.prototype.size = function (value) {
+        if (typeof value === "undefined") {
+          return this.options.size;
+        }
+        if (this.options.size != null) {
+          this.$wrapper.removeClass("" + this.options.baseClass + "-" + this.options.size);
+        }
+        this.$wrapper.addClass("" + this.options.baseClass + "-" + value);
+        this.options.size = value;
+        return this.$element;
+      };
 
-      var $el = this.$el;
-      if (i === 0) {
-        $el.prepend(cell.render().$el);
-      }
-      else if (i === columns.length - 1) {
-        $el.append(cell.render().$el);
-      }
-      else {
-        $el.children().eq(i).before(cell.render().$el);
-      }
-    });
+      BootstrapSwitch.prototype.animate = function (value) {
+        if (typeof value === "undefined") {
+          return this.options.animate;
+        }
+        value = !!value;
+        this.$wrapper[value ? "addClass" : "removeClass"]("" + this.options.baseClass + "-" + this.options.animateModifierClass);
+        this.options.animate = value;
+        return this.$element;
+      };
 
-    this.listenTo(columns, "remove", function (column, columns, opts) {
-      cells[opts.index].remove();
-      cells.splice(opts.index, 1);
-    });
-  },
+      BootstrapSwitch.prototype.disabled = function (value) {
+        if (typeof value === "undefined") {
+          return this.options.disabled;
+        }
+        value = !!value;
+        this.$wrapper[value ? "addClass" : "removeClass"]("" + this.options.baseClass + "-" + this.options.disabledModifierClass);
+        this.$element.prop("disabled", value);
+        this.options.disabled = value;
+        return this.$element;
+      };
 
-  /**
-     Factory method for making a cell. Used by #initialize internally. Override
-     this to provide an appropriate cell instance for a custom Row subclass.
+      BootstrapSwitch.prototype.toggleDisabled = function () {
+        this.$element.prop("disabled", !this.options.disabled);
+        this.$wrapper.toggleClass("" + this.options.baseClass + "-" + this.options.disabledModifierClass);
+        this.options.disabled = !this.options.disabled;
+        return this.$element;
+      };
 
-     @protected
+      BootstrapSwitch.prototype.readonly = function (value) {
+        if (typeof value === "undefined") {
+          return this.options.readonly;
+        }
+        value = !!value;
+        this.$wrapper[value ? "addClass" : "removeClass"]("" + this.options.baseClass + "-" + this.options.readonlyModifierClass);
+        this.$element.prop("readonly", value);
+        this.options.readonly = value;
+        return this.$element;
+      };
 
-     @param {Backgrid.Column} column
-     @param {Object} options The options passed to #initialize.
+      BootstrapSwitch.prototype.toggleReadonly = function () {
+        this.$element.prop("readonly", !this.options.readonly);
+        this.$wrapper.toggleClass("" + this.options.baseClass + "-" + this.options.readonlyModifierClass);
+        this.options.readonly = !this.options.readonly;
+        return this.$element;
+      };
 
-     @return {Backgrid.Cell}
-  */
-  makeCell: function (column) {
-    return new (column.get("cell"))({
-      column: column,
-      model: this.model
-    });
-  },
+      BootstrapSwitch.prototype.onColor = function (value) {
+        var color;
+        color = this.options.onColor;
+        if (typeof value === "undefined") {
+          return color;
+        }
+        if (color != null) {
+          this.$on.removeClass("" + this.options.baseClass + "-" + color);
+        }
+        this.$on.addClass("" + this.options.baseClass + "-" + value);
+        this.options.onColor = value;
+        return this.$element;
+      };
 
-  /**
-     Renders a row of cells for this row's model.
-  */
-  render: function () {
-    this.$el.empty();
+      BootstrapSwitch.prototype.offColor = function (value) {
+        var color;
+        color = this.options.offColor;
+        if (typeof value === "undefined") {
+          return color;
+        }
+        if (color != null) {
+          this.$off.removeClass("" + this.options.baseClass + "-" + color);
+        }
+        this.$off.addClass("" + this.options.baseClass + "-" + value);
+        this.options.offColor = value;
+        return this.$element;
+      };
 
-    var fragment = document.createDocumentFragment();
+      BootstrapSwitch.prototype.onText = function (value) {
+        if (typeof value === "undefined") {
+          return this.options.onText;
+        }
+        this.$on.html(value);
+        this.options.onText = value;
+        return this.$element;
+      };
 
-    for (var i = 0; i < this.cells.length; i++) {
-      var cell = this.cells[i];
-      fragment.appendChild(cell.render().el);
-      if (!cell.column.get("renderable")) cell.$el.hide();
-    }
+      BootstrapSwitch.prototype.offText = function (value) {
+        if (typeof value === "undefined") {
+          return this.options.offText;
+        }
+        this.$off.html(value);
+        this.options.offText = value;
+        return this.$element;
+      };
 
-    this.el.appendChild(fragment);
+      BootstrapSwitch.prototype.labelText = function (value) {
+        if (typeof value === "undefined") {
+          return this.options.labelText;
+        }
+        this.$label.html(value);
+        this.options.labelText = value;
+        return this.$element;
+      };
 
-    this.delegateEvents();
+      BootstrapSwitch.prototype.destroy = function () {
+        var $form;
+        $form = this.$element.closest("form");
+        if ($form.length) {
+          $form.off("reset.bootstrapSwitch").removeData("bootstrap-switch");
+        }
+        this.$container.children().not(this.$element).remove();
+        this.$element.unwrap().unwrap().off(".bootstrapSwitch").removeData("bootstrap-switch");
+        return this.$element;
+      };
 
-    return this;
-  },
-
-  /**
-     Clean up this row and its cells.
-
-     @chainable
-  */
-  remove: function () {
-    for (var i = 0; i < this.cells.length; i++) {
-      var cell = this.cells[i];
-      cell.remove.apply(cell, arguments);
-    }
-    return Backbone.View.prototype.remove.apply(this, arguments);
-  }
-
-});
-
-/**
-   EmptyRow is a simple container view that takes a list of column and render a
-   row with a single column.
-
-   @class Backgrid.EmptyRow
-   @extends Backbone.View
-*/
-var EmptyRow = Backgrid.EmptyRow = Backbone.View.extend({
-
-  /** @property */
-  tagName: "tr",
-
-  /** @property */
-  emptyText: null,
-
-  /**
-     Initializer.
-
-     @param {Object} options
-     @param {string} options.emptyText
-     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns Column metadata.
-   */
-  initialize: function (options) {
-    Backgrid.requireOptions(options, ["emptyText", "columns"]);
-
-    this.emptyText = options.emptyText;
-    this.columns =  options.columns;
-  },
-
-  /**
-     Renders an empty row.
-  */
-  render: function () {
-    this.$el.empty();
-
-    var td = document.createElement("td");
-    td.setAttribute("colspan", this.columns.length);
-    td.textContent = this.emptyText;
-
-    this.el.setAttribute("class", "empty");
-    this.el.appendChild(td);
-
-    return this;
-  }
-});
-/*
-  backgrid
-  http://github.com/wyuenho/backgrid
-
-  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
-  Licensed under the MIT @license.
-*/
-
-/**
-   HeaderCell is a special cell class that renders a column header cell. If the
-   column is sortable, a sorter is also rendered and will trigger a table
-   refresh after sorting.
-
-   @class Backgrid.HeaderCell
-   @extends Backbone.View
- */
-var HeaderCell = Backgrid.HeaderCell = Backbone.View.extend({
-
-  /** @property */
-  tagName: "th",
-
-  /** @property */
-  events: {
-    "click a": "onClick"
-  },
-
-  /**
-    @property {null|"ascending"|"descending"} _direction The current sorting
-    direction of this column.
-  */
-  _direction: null,
-
-  /**
-     Initializer.
-
-     @param {Object} options
-     @param {Backgrid.Column|Object} options.column
-
-     @throws {TypeError} If options.column or options.collection is undefined.
-   */
-  initialize: function (options) {
-    Backgrid.requireOptions(options, ["column", "collection"]);
-    this.column = options.column;
-    if (!(this.column instanceof Column)) {
-      this.column = new Column(this.column);
-    }
-    this.listenTo(this.collection, "backgrid:sort", this._resetCellDirection);
-  },
-
-  /**
-     Gets or sets the direction of this cell. If called directly without
-     parameters, returns the current direction of this cell, otherwise sets
-     it. If a `null` is given, sets this cell back to the default order.
-
-     @param {null|"ascending"|"descending"} dir
-     @return {null|string} The current direction or the changed direction.
-   */
-  direction: function (dir) {
-    if (arguments.length) {
-      if (this._direction) this.$el.removeClass(this._direction);
-      if (dir) this.$el.addClass(dir);
-      this._direction = dir;
-    }
-
-    return this._direction;
-  },
-
-  /**
-     Event handler for the Backbone `backgrid:sort` event. Resets this cell's
-     direction to default if sorting is being done on another column.
-
-     @private
-   */
-  _resetCellDirection: function (sortByColName, direction, comparator, collection) {
-    if (collection == this.collection) {
-      if (sortByColName !== this.column.get("name")) this.direction(null);
-      else this.direction(direction);
-    }
-  },
-
-  /**
-     Event handler for the `click` event on the cell's anchor. If the column is
-     sortable, clicking on the anchor will cycle through 3 sorting orderings -
-     `ascending`, `descending`, and default.
-   */
-  onClick: function (e) {
-    e.preventDefault();
-
-    var columnName = this.column.get("name");
-
-    if (this.column.get("sortable")) {
-      if (this.direction() === "ascending") {
-        this.sort(columnName, "descending", function (left, right) {
-          var leftVal = left.get(columnName);
-          var rightVal = right.get(columnName);
-          if (leftVal === rightVal) {
-            return 0;
-          }
-          else if (leftVal > rightVal) { return -1; }
-          return 1;
+      BootstrapSwitch.prototype._elementHandlers = function () {
+        return this.$element.on({
+          "change.bootstrapSwitch": (function (_this) {
+            return function (e, skip) {
+              var checked;
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+              checked = _this.$element.is(":checked");
+              if (checked === _this.options.state) {
+                return;
+              }
+              _this.options.state = checked;
+              _this.$wrapper.removeClass(checked ? "" + _this.options.baseClass + "-" + _this.options.offModifierClass : "" + _this.options.baseClass + "-" + _this.options.onModifierClass).addClass(checked ? "" + _this.options.baseClass + "-" + _this.options.onModifierClass : "" + _this.options.baseClass + "-" + _this.options.offModifierClass);
+              if (!skip) {
+                if (_this.$element.is(":radio")) {
+                  $("[name='" + (_this.$element.attr('name')) + "']").not(_this.$element).prop("checked", false).trigger("change.bootstrapSwitch", true);
+                }
+                return _this.$element.trigger("switchChange.bootstrapSwitch", [checked]);
+              }
+            };
+          })(this),
+          "focus.bootstrapSwitch": (function (_this) {
+            return function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+              return _this.$wrapper.addClass("" + _this.options.baseClass + "-" + _this.options.focusedModifierClass);
+            };
+          })(this),
+          "blur.bootstrapSwitch": (function (_this) {
+            return function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+              return _this.$wrapper.removeClass("" + _this.options.baseClass + "-" + _this.options.focusedModifierClass);
+            };
+          })(this),
+          "keydown.bootstrapSwitch": (function (_this) {
+            return function (e) {
+              if (!e.which || _this.options.disabled || _this.options.readonly) {
+                return;
+              }
+              switch (e.which) {
+                case 32:
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.stopImmediatePropagation();
+                  return _this.toggleState();
+                case 37:
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.stopImmediatePropagation();
+                  return _this.state(false);
+                case 39:
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.stopImmediatePropagation();
+                  return _this.state(true);
+              }
+            };
+          })(this)
         });
-      }
-      else if (this.direction() === "descending") {
-        this.sort(columnName, null);
-      }
-      else {
-        this.sort(columnName, "ascending", function (left, right) {
-          var leftVal = left.get(columnName);
-          var rightVal = right.get(columnName);
-          if (leftVal === rightVal) {
-            return 0;
-          }
-          else if (leftVal < rightVal) { return -1; }
-          return 1;
+      };
+
+      BootstrapSwitch.prototype._handleHandlers = function () {
+        this.$on.on("click.bootstrapSwitch", (function (_this) {
+          return function (e) {
+            _this.state(false);
+            return _this.$element.trigger("focus.bootstrapSwitch");
+          };
+        })(this));
+        return this.$off.on("click.bootstrapSwitch", (function (_this) {
+          return function (e) {
+            _this.state(true);
+            return _this.$element.trigger("focus.bootstrapSwitch");
+          };
+        })(this));
+      };
+
+      BootstrapSwitch.prototype._labelHandlers = function () {
+        return this.$label.on({
+          "mousemove.bootstrapSwitch touchmove.bootstrapSwitch": (function (_this) {
+            return function (e) {
+              var left, percent, right;
+              if (!_this.drag) {
+                return;
+              }
+              e.preventDefault();
+              percent = (((e.pageX || e.originalEvent.touches[0].pageX) - _this.$wrapper.offset().left) / _this.$wrapper.width()) * 100;
+              left = 25;
+              right = 75;
+              if (percent < left) {
+                percent = left;
+              } else if (percent > right) {
+                percent = right;
+              }
+              _this.$container.css("margin-left", "" + (percent - right) + "%");
+              return _this.$element.trigger("focus.bootstrapSwitch");
+            };
+          })(this),
+          "mousedown.bootstrapSwitch touchstart.bootstrapSwitch": (function (_this) {
+            return function (e) {
+              if (_this.drag || _this.options.disabled || _this.options.readonly) {
+                return;
+              }
+              e.preventDefault();
+              _this.drag = true;
+              if (_this.options.animate) {
+                _this.$wrapper.removeClass("" + _this.options.baseClass + "-" + _this.options.animateModifierClass);
+              }
+              return _this.$element.trigger("focus.bootstrapSwitch");
+            };
+          })(this),
+          "mouseup.bootstrapSwitch touchend.bootstrapSwitch": (function (_this) {
+            return function (e) {
+              if (!_this.drag) {
+                return;
+              }
+              e.preventDefault();
+              _this.drag = false;
+              _this.$element.prop("checked", parseInt(_this.$container.css("margin-left"), 10) > -(_this.$container.width() / 6)).trigger("change.bootstrapSwitch");
+              _this.$container.css("margin-left", "");
+              if (_this.options.animate) {
+                return _this.$wrapper.addClass("" + _this.options.baseClass + "-" + _this.options.animateModifierClass);
+              }
+            };
+          })(this),
+          "mouseleave.bootstrapSwitch": (function (_this) {
+            return function (e) {
+              return _this.$label.trigger("mouseup.bootstrapSwitch");
+            };
+          })(this)
         });
-      }
-    }
-  },
+      };
 
-  /**
-     If the underlying collection is a Backbone.PageableCollection in
-     server-mode or infinite-mode, a page of models is fetched after sorting is
-     done on the server.
-
-     If the underlying collection is a Backbone.PageableCollection in
-     client-mode, or any
-     [Backbone.Collection](http://backbonejs.org/#Collection) instance, sorting
-     is done on the client side. If the collection is an instance of a
-     Backbone.PageableCollection, sorting will be done globally on all the pages
-     and the current page will then be returned.
-
-     Triggers a Backbone `backgrid:sort` event from the collection when done
-     with the column name, direction, comparator and a reference to the
-     collection.
-
-     @param {string} columnName
-     @param {null|"ascending"|"descending"} direction
-     @param {function(*, *): number} [comparator]
-
-     See [Backbone.Collection#comparator](http://backbonejs.org/#Collection-comparator)
-  */
-  sort: function (columnName, direction, comparator) {
-
-    comparator = comparator || this._cidComparator;
-
-    var collection = this.collection;
-
-    if (Backbone.PageableCollection && collection instanceof Backbone.PageableCollection) {
-      var order;
-      if (direction === "ascending") order = -1;
-      else if (direction === "descending") order = 1;
-      else order = null;
-
-      collection.setSorting(order ? columnName : null, order);
-
-      if (collection.mode == "client") {
-        if (!collection.fullCollection.comparator) {
-          collection.fullCollection.comparator = comparator;
+      BootstrapSwitch.prototype._formHandler = function () {
+        var $form;
+        $form = this.$element.closest("form");
+        if ($form.data("bootstrap-switch")) {
+          return;
         }
-        collection.fullCollection.sort();
-      }
-      else collection.fetch({reset: true});
-    }
-    else {
-      collection.comparator = comparator;
-      collection.sort();
-    }
-
-    this.collection.trigger("backgrid:sort", columnName, direction, comparator, this.collection);
-  },
-
-  /**
-     Default comparator for Backbone.Collections. Sorts cids in ascending
-     order. The cids of the models are assumed to be in insertion order.
-
-     @private
-     @param {*} left
-     @param {*} right
-  */
-  _cidComparator: function (left, right) {
-    var lcid = left.cid, rcid = right.cid;
-    if (!_.isUndefined(lcid) && !_.isUndefined(rcid)) {
-      lcid = lcid.slice(1) * 1, rcid = rcid.slice(1) * 1;
-      if (lcid < rcid) return -1;
-      else if (lcid > rcid) return 1;
-    }
-
-    return 0;
-  },
-
-  /**
-     Renders a header cell with a sorter and a label.
-   */
-  render: function () {
-    this.$el.empty();
-    var $label = $("<a>").text(this.column.get("label")).append("<b class='sort-caret'></b>");
-    this.$el.append($label);
-    this.delegateEvents();
-    return this;
-  }
-
-});
-
-/**
-   HeaderRow is a controller for a row of header cells.
-
-   @class Backgrid.HeaderRow
-   @extends Backgrid.Row
- */
-var HeaderRow = Backgrid.HeaderRow = Backgrid.Row.extend({
-
-  requiredOptions: ["columns", "collection"],
-
-  /**
-     Initializer.
-
-     @param {Object} options
-     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns
-     @param {Backgrid.HeaderCell} [options.headerCell] Customized default
-     HeaderCell for all the columns. Supply a HeaderCell class or instance to a
-     the `headerCell` key in a column definition for column-specific header
-     rendering.
-
-     @throws {TypeError} If options.columns or options.collection is undefined.
-   */
-  initialize: function () {
-    Backgrid.Row.prototype.initialize.apply(this, arguments);
-  },
-
-  makeCell: function (column, options) {
-    var headerCell = column.get("headerCell") || options.headerCell || HeaderCell;
-    headerCell = new headerCell({
-      column: column,
-      collection: this.collection
-    });
-    return headerCell;
-  }
-
-});
-
-/**
-   Header is a special structural view class that renders a table head with a
-   single row of header cells.
-
-   @class Backgrid.Header
-   @extends Backbone.View
- */
-var Header = Backgrid.Header = Backbone.View.extend({
-
-  /** @property */
-  tagName: "thead",
-
-  /**
-     Initializer. Initializes this table head view to contain a single header
-     row view.
-
-     @param {Object} options
-     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns Column metadata.
-     @param {Backbone.Model} options.model The model instance to render.
-
-     @throws {TypeError} If options.columns or options.model is undefined.
-   */
-  initialize: function (options) {
-    Backgrid.requireOptions(options, ["columns", "collection"]);
-
-    this.columns = options.columns;
-    if (!(this.columns instanceof Backbone.Collection)) {
-      this.columns = new Columns(this.columns);
-    }
-
-    this.row = new Backgrid.HeaderRow({
-      columns: this.columns,
-      collection: this.collection
-    });
-  },
-
-  /**
-     Renders this table head with a single row of header cells.
-   */
-  render: function () {
-    this.$el.append(this.row.render().$el);
-    this.delegateEvents();
-    return this;
-  },
-
-  /**
-     Clean up this header and its row.
-
-     @chainable
-   */
-  remove: function () {
-    this.row.remove.apply(this.row, arguments);
-    return Backbone.View.prototype.remove.apply(this, arguments);
-  }
-
-});
-/*
-  backgrid
-  http://github.com/wyuenho/backgrid
-
-  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
-  Licensed under the MIT @license.
-*/
-
-/**
-   Body is the table body which contains the rows inside a table. Body is
-   responsible for refreshing the rows after sorting, insertion and removal.
-
-   @class Backgrid.Body
-   @extends Backbone.View
-*/
-var Body = Backgrid.Body = Backbone.View.extend({
-
-  /** @property */
-  tagName: "tbody",
-
-  /**
-     Initializer.
-
-     @param {Object} options
-     @param {Backbone.Collection} options.collection
-     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns
-     Column metadata.
-     @param {Backgrid.Row} [options.row=Backgrid.Row] The Row class to use.
-     @param {string} [options.emptyText] The text to display in the empty row.
-
-     @throws {TypeError} If options.columns or options.collection is undefined.
-
-     See Backgrid.Row.
-  */
-  initialize: function (options) {
-    Backgrid.requireOptions(options, ["columns", "collection"]);
-
-    this.columns = options.columns;
-    if (!(this.columns instanceof Backbone.Collection)) {
-      this.columns = new Columns(this.columns);
-    }
-
-    this.row = options.row || Row;
-    this.rows = this.collection.map(function (model) {
-      var row = new this.row({
-        columns: this.columns,
-        model: model
-      });
-
-      return row;
-    }, this);
-
-    this.emptyText = options.emptyText;
-    this._unshiftEmptyRowMayBe();
-
-    var collection = this.collection;
-    this.listenTo(collection, "add", this.insertRow);
-    this.listenTo(collection, "remove", this.removeRow);
-    this.listenTo(collection, "sort", this.refresh);
-    this.listenTo(collection, "reset", this.refresh);
-    this.listenTo(collection, "backgrid:edited", this.moveToNextCell);
-  },
-
-  _unshiftEmptyRowMayBe: function () {
-    if (this.rows.length === 0 && this.emptyText != null) {
-      this.rows.unshift(new EmptyRow({
-        emptyText: this.emptyText,
-        columns: this.columns
-      }));
-    }
-  },
-
-  /**
-     This method can be called either directly or as a callback to a
-     [Backbone.Collecton#add](http://backbonejs.org/#Collection-add) event.
-
-     When called directly, it accepts a model or an array of models and an
-     option hash just like
-     [Backbone.Collection#add](http://backbonejs.org/#Collection-add) and
-     delegates to it. Once the model is added, a new row is inserted into the
-     body and automatically rendered.
-
-     When called as a callback of an `add` event, splices a new row into the
-     body and renders it.
-
-     @param {Backbone.Model} model The model to render as a row.
-     @param {Backbone.Collection} collection When called directly, this
-     parameter is actually the options to
-     [Backbone.Collection#add](http://backbonejs.org/#Collection-add).
-     @param {Object} options When called directly, this must be null.
-
-     See:
-
-     - [Backbone.Collection#add](http://backbonejs.org/#Collection-add)
-  */
-  insertRow: function (model, collection, options) {
-
-    if (this.rows[0] instanceof EmptyRow) this.rows.pop().remove();
-
-    // insertRow() is called directly
-    if (!(collection instanceof Backbone.Collection) && !options) {
-      this.collection.add(model, (options = collection));
-      return;
-    }
-
-    options = _.extend({render: true}, options || {});
-
-    var row = new this.row({
-      columns: this.columns,
-      model: model
-    });
-
-    var index = collection.indexOf(model);
-    this.rows.splice(index, 0, row);
-
-    var $el = this.$el;
-    var $children = $el.children();
-    var $rowEl = row.render().$el;
-
-    if (options.render) {
-      if (index >= $children.length) {
-        $el.append($rowEl);
-      }
-      else {
-        $children.eq(index).before($rowEl);
-      }
-    }
-  },
-
-  /**
-     The method can be called either directly or as a callback to a
-     [Backbone.Collection#remove](http://backbonejs.org/#Collection-remove)
-     event.
-
-     When called directly, it accepts a model or an array of models and an
-     option hash just like
-     [Backbone.Collection#remove](http://backbonejs.org/#Collection-remove) and
-     delegates to it. Once the model is removed, a corresponding row is removed
-     from the body.
-
-     When called as a callback of a `remove` event, splices into the rows and
-     removes the row responsible for rendering the model.
-
-     @param {Backbone.Model} model The model to remove from the body.
-     @param {Backbone.Collection} collection When called directly, this
-     parameter is actually the options to
-     [Backbone.Collection#remove](http://backbonejs.org/#Collection-remove).
-     @param {Object} options When called directly, this must be null.
-
-     See:
-
-     - [Backbone.Collection#remove](http://backbonejs.org/#Collection-remove)
-  */
-  removeRow: function (model, collection, options) {
-
-    // removeRow() is called directly
-    if (!options) {
-      this.collection.remove(model, (options = collection));
-      this._unshiftEmptyRowMayBe();
-      return;
-    }
-
-    if (_.isUndefined(options.render) || options.render) {
-      this.rows[options.index].remove();
-    }
-
-    this.rows.splice(options.index, 1);
-    this._unshiftEmptyRowMayBe();
-  },
-
-  /**
-     Reinitialize all the rows inside the body and re-render them. Triggers a
-     Backbone `backgrid:refresh` event from the collection along with the body
-     instance as its sole parameter when done.
-  */
-  refresh: function () {
-    for (var i = 0; i < this.rows.length; i++) {
-      this.rows[i].remove();
-    }
-
-    this.rows = this.collection.map(function (model) {
-      var row = new this.row({
-        columns: this.columns,
-        model: model
-      });
-
-      return row;
-    }, this);
-    this._unshiftEmptyRowMayBe();
-
-    this.render();
-
-    this.collection.trigger("backgrid:refresh", this);
-
-    return this;
-  },
-
-  /**
-     Renders all the rows inside this body. If the collection is empty and
-     `options.emptyText` is defined and not null in the constructor, an empty
-     row is rendered, otherwise no row is rendered.
-  */
-  render: function () {
-    this.$el.empty();
-
-    var fragment = document.createDocumentFragment();
-    for (var i = 0; i < this.rows.length; i++) {
-      var row = this.rows[i];
-      fragment.appendChild(row.render().el);
-    }
-
-    this.el.appendChild(fragment);
-
-    this.delegateEvents();
-
-    return this;
-  },
-
-  /**
-     Clean up this body and it's rows.
-
-     @chainable
-  */
-  remove: function () {
-    for (var i = 0; i < this.rows.length; i++) {
-      var row = this.rows[i];
-      row.remove.apply(row, arguments);
-    }
-    return Backbone.View.prototype.remove.apply(this, arguments);
-  },
-
-  /**
-     Moves focus to the next renderable and editable cell and return the
-     currently editing cell to display mode.
-
-     @param {Backbone.Model} model The originating model
-     @param {Backgrid.Column} column The originating model column
-     @param {Backgrid.Command} command The Command object constructed from a DOM
-     Event
-  */
-  moveToNextCell: function (model, column, command) {
-    var i = this.collection.indexOf(model);
-    var j = this.columns.indexOf(column);
-
-    if (command.moveUp() || command.moveDown() || command.moveLeft() ||
-        command.moveRight() || command.save()) {
-      var l = this.columns.length;
-      var maxOffset = l * this.collection.length;
-
-      if (command.moveUp() || command.moveDown()) {
-        var row = this.rows[i + (command.moveUp() ? -1 : 1)];
-        if (row) row.cells[j].enterEditMode();
-      }
-      else if (command.moveLeft() || command.moveRight()) {
-        var right = command.moveRight();
-        for (var offset = i * l + j + (right ? 1 : -1);
-             offset >= 0 && offset < maxOffset;
-             right ? offset++ : offset--) {
-          var m = ~~(offset / l);
-          var n = offset - m * l;
-          var cell = this.rows[m].cells[n];
-          if (cell.column.get("renderable") && cell.column.get("editable")) {
-            cell.enterEditMode();
-            break;
-          }
+        return $form.on("reset.bootstrapSwitch", function () {
+          return window.setTimeout(function () {
+            return $form.find("input").filter(function () {
+              return $(this).data("bootstrap-switch");
+            }).each(function () {
+              return $(this).bootstrapSwitch("state", false);
+            });
+          }, 1);
+        }).data("bootstrap-switch", true);
+      };
+
+      return BootstrapSwitch;
+
+    })();
+    $.fn.bootstrapSwitch = function () {
+      var args, option, ret;
+      option = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      ret = this;
+      this.each(function () {
+        var $this, data;
+        $this = $(this);
+        data = $this.data("bootstrap-switch");
+        if (!data) {
+          $this.data("bootstrap-switch", data = new BootstrapSwitch(this, option));
         }
-      }
-    }
+        if (typeof option === "string") {
+          return ret = data[option].apply(data, args);
+        }
+      });
+      return ret;
+    };
+    $.fn.bootstrapSwitch.Constructor = BootstrapSwitch;
+    return $.fn.bootstrapSwitch.defaults = {
+      state: true,
+      size: null,
+      animate: true,
+      disabled: false,
+      readonly: false,
+      onColor: "primary",
+      offColor: "default",
+      onText: "ON",
+      offText: "OFF",
+      labelText: "&nbsp;",
+      baseClass: "bootstrap-switch",
+      wrapperClass: "wrapper",
+      containerClass: "container",
+      handleOnClass: "handle-on",
+      handleOffClass: "handle-off",
+      labelClass: "label",
+      onModifierClass: "on",
+      offModifierClass: "off",
+      focusedModifierClass: "focused",
+      animateModifierClass: "animate",
+      disabledModifierClass: "disabled",
+      readonlyModifierClass: "readonly",
+      onInit: function () { },
+      onSwitchChange: function () { }
+    };
+  })(window.jQuery, window);
 
-    this.rows[i].cells[j].exitEditMode();
-  }
-});
-/*
-  backgrid
-  http://github.com/wyuenho/backgrid
-
-  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
-  Licensed under the MIT @license.
-*/
-
-/**
-   A Footer is a generic class that only defines a default tag `tfoot` and
-   number of required parameters in the initializer.
-
-   @abstract
-   @class Backgrid.Footer
-   @extends Backbone.View
- */
-var Footer = Backgrid.Footer = Backbone.View.extend({
-
-  /** @property */
-  tagName: "tfoot",
-
-  /**
-     Initializer.
-
-     @param {Object} options
-     @param {*} options.parent The parent view class of this footer.
-     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns
-     Column metadata.
-     @param {Backbone.Collection} options.collection
-
-     @throws {TypeError} If options.columns or options.collection is undefined.
-  */
-  initialize: function (options) {
-    Backgrid.requireOptions(options, ["columns", "collection"]);
-    this.columns = options.columns;
-    if (!(this.columns instanceof Backbone.Collection)) {
-      this.columns = new Backgrid.Columns(this.columns);
-    }
-  }
-
-});
-/*
-  backgrid
-  http://github.com/wyuenho/backgrid
-
-  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
-  Licensed under the MIT @license.
-*/
-
-/**
-   Grid represents a data grid that has a header, body and an optional footer.
-
-   By default, a Grid treats each model in a collection as a row, and each
-   attribute in a model as a column. To render a grid you must provide a list of
-   column metadata and a collection to the Grid constructor. Just like any
-   Backbone.View class, the grid is rendered as a DOM node fragment when you
-   call render().
-
-       var grid = Backgrid.Grid({
-         columns: [{ name: "id", label: "ID", type: "string" },
-          // ...
-         ],
-         collections: books
-       });
-
-       $("#table-container").append(grid.render().el);
-
-   Optionally, if you want to customize the rendering of the grid's header and
-   footer, you may choose to extend Backgrid.Header and Backgrid.Footer, and
-   then supply that class or an instance of that class to the Grid constructor.
-   See the documentation for Header and Footer for further details.
-
-       var grid = Backgrid.Grid({
-         columns: [{ name: "id", label: "ID", type: "string" }],
-         collections: books,
-         header: Backgrid.Header.extend({
-              //...
-         }),
-         footer: Backgrid.Paginator
-       });
-
-   Finally, if you want to override how the rows are rendered in the table body,
-   you can supply a Body subclass as the `body` attribute that uses a different
-   Row class.
-
-   @class Backgrid.Grid
-   @extends Backbone.View
-
-   See:
-
-   - Backgrid.Column
-   - Backgrid.Header
-   - Backgrid.Body
-   - Backgrid.Row
-   - Backgrid.Footer
-*/
-var Grid = Backgrid.Grid = Backbone.View.extend({
-
-  /** @property */
-  tagName: "table",
-
-  /** @property */
-  className: "backgrid",
-
-  /** @property */
-  header: Header,
-
-  /** @property */
-  body: Body,
-
-  /** @property */
-  footer: null,
-
-  /**
-     Initializes a Grid instance.
-
-     @param {Object} options
-     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns Column metadata.
-     @param {Backbone.Collection} options.collection The collection of tabular model data to display.
-     @param {Backgrid.Header} [options.header=Backgrid.Header] An optional Header class to override the default.
-     @param {Backgrid.Body} [options.body=Backgrid.Body] An optional Body class to override the default.
-     @param {Backgrid.Row} [options.row=Backgrid.Row] An optional Row class to override the default.
-     @param {Backgrid.Footer} [options.footer=Backgrid.Footer] An optional Footer class.
-   */
-  initialize: function (options) {
-    Backgrid.requireOptions(options, ["columns", "collection"]);
-
-    // Convert the list of column objects here first so the subviews don't have
-    // to.
-    if (!(options.columns instanceof Backbone.Collection)) {
-      options.columns = new Columns(options.columns);
-    }
-    this.columns = options.columns;
-
-    var passedThruOptions = _.omit(options, ["el", "id", "attributes",
-                                             "className", "tagName", "events"]);
-
-    this.header = options.header || this.header;
-    this.header = new this.header(passedThruOptions);
-
-    this.body = options.body || this.body;
-    this.body = new this.body(passedThruOptions);
-
-    this.footer = options.footer || this.footer;
-    if (this.footer) {
-      this.footer = new this.footer(passedThruOptions);
-    }
-
-    this.listenTo(this.columns, "reset", function () {
-      this.header = new (this.header.remove().constructor)(passedThruOptions);
-      this.body = new (this.body.remove().constructor)(passedThruOptions);
-      if (this.footer) {
-        this.footer = new (this.footer.remove().constructor)(passedThruOptions);
-      }
-      this.render();
-    });
-  },
-
-  /**
-     Delegates to Backgrid.Body#insertRow.
-   */
-  insertRow: function (model, collection, options) {
-    return this.body.insertRow(model, collection, options);
-  },
-
-  /**
-     Delegates to Backgrid.Body#removeRow.
-   */
-  removeRow: function (model, collection, options) {
-    return this.body.removeRow(model, collection, options);
-  },
-
-  /**
-     Delegates to Backgrid.Columns#add for adding a column. Subviews can listen
-     to the `add` event from their internal `columns` if rerendering needs to
-     happen.
-
-     @param {Object} [options] Options for `Backgrid.Columns#add`.
-     @param {boolean} [options.render=true] Whether to render the column
-     immediately after insertion.
-
-     @chainable
-   */
-  insertColumn: function (column, options) {
-    options = options || {render: true};
-    this.columns.add(column, options);
-    return this;
-  },
-
-  /**
-     Delegates to Backgrid.Columns#remove for removing a column. Subviews can
-     listen to the `remove` event from the internal `columns` if rerendering
-     needs to happen.
-
-     @param {Object} [options] Options for `Backgrid.Columns#remove`.
-
-     @chainable
-   */
-  removeColumn: function (column, options) {
-    this.columns.remove(column, options);
-    return this;
-  },
-
-  /**
-     Renders the grid's header, then footer, then finally the body. Triggers a
-     Backbone `backgrid:rendered` event along with a reference to the grid when
-     the it has successfully been rendered.
-   */
-  render: function () {
-    this.$el.empty();
-
-    this.$el.append(this.header.render().$el);
-
-    if (this.footer) {
-      this.$el.append(this.footer.render().$el);
-    }
-
-    this.$el.append(this.body.render().$el);
-
-    this.delegateEvents();
-
-    this.trigger("backgrid:rendered", this);
-
-    return this;
-  },
-
-  /**
-     Clean up this grid and its subviews.
-
-     @chainable
-   */
-  remove: function () {
-    this.header.remove.apply(this.header, arguments);
-    this.body.remove.apply(this.body, arguments);
-    this.footer && this.footer.remove.apply(this.footer, arguments);
-    return Backbone.View.prototype.remove.apply(this, arguments);
-  }
-
-});
-
-}(this, jQuery, _, Backbone));
+}).call(this);
 ;// MarionetteJS (Backbone.Marionette)
 // ----------------------------------
 // v1.6.4
@@ -20308,6 +18245,2537 @@ _.extend(Marionette.Module, {
   return Marionette;
 })(this, Backbone, _);
 
+;/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+(function (root, $, _, Backbone) {
+
+  "use strict";
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+var window = root;
+
+// Copyright 2009, 2010 Kristopher Michael Kowal
+// https://github.com/kriskowal/es5-shim
+// ES5 15.5.4.20
+// http://es5.github.com/#x15.5.4.20
+var ws = "\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003" +
+  "\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028" +
+  "\u2029\uFEFF";
+if (!String.prototype.trim || ws.trim()) {
+  // http://blog.stevenlevithan.com/archives/faster-trim-javascript
+  // http://perfectionkills.com/whitespace-deviations/
+  ws = "[" + ws + "]";
+  var trimBeginRegexp = new RegExp("^" + ws + ws + "*"),
+  trimEndRegexp = new RegExp(ws + ws + "*$");
+  String.prototype.trim = function trim() {
+    if (this === undefined || this === null) {
+      throw new TypeError("can't convert " + this + " to object");
+    }
+    return String(this)
+      .replace(trimBeginRegexp, "")
+      .replace(trimEndRegexp, "");
+  };
+}
+
+function capitalize(s) {
+  return String.fromCharCode(s.charCodeAt(0) - 32) + s.slice(1);
+}
+
+function lpad(str, length, padstr) {
+  var paddingLen = length - (str + '').length;
+  paddingLen =  paddingLen < 0 ? 0 : paddingLen;
+  var padding = '';
+  for (var i = 0; i < paddingLen; i++) {
+    padding = padding + padstr;
+  }
+  return padding + str;
+}
+
+var Backgrid = root.Backgrid = {
+
+  VERSION: "0.2.6",
+
+  Extension: {},
+
+  requireOptions: function (options, requireOptionKeys) {
+    for (var i = 0; i < requireOptionKeys.length; i++) {
+      var key = requireOptionKeys[i];
+      if (_.isUndefined(options[key])) {
+        throw new TypeError("'" + key  + "' is required");
+      }
+    }
+  },
+
+  resolveNameToClass: function (name, suffix) {
+    if (_.isString(name)) {
+      var key = _.map(name.split('-'), function (e) { return capitalize(e); }).join('') + suffix;
+      var klass = Backgrid[key] || Backgrid.Extension[key];
+      if (_.isUndefined(klass)) {
+        throw new ReferenceError("Class '" + key + "' not found");
+      }
+      return klass;
+    }
+
+    return name;
+  }
+};
+_.extend(Backgrid, Backbone.Events);
+
+/**
+   Command translates a DOM Event into commands that Backgrid
+   recognizes. Interested parties can listen on selected Backgrid events that
+   come with an instance of this class and act on the commands.
+
+   It is also possible to globally rebind the keyboard shortcuts by replacing
+   the methods in this class' prototype.
+
+   @class Backgrid.Command
+   @constructor
+ */
+var Command = Backgrid.Command = function (evt) {
+  _.extend(this, {
+    altKey: !!evt.altKey,
+    char: evt.char,
+    charCode: evt.charCode,
+    ctrlKey: !!evt.ctrlKey,
+    key: evt.key,
+    keyCode: evt.keyCode,
+    locale: evt.locale,
+    location: evt.location,
+    metaKey: !!evt.metaKey,
+    repeat: !!evt.repeat,
+    shiftKey: !!evt.shiftKey,
+    which: evt.which
+  });
+};
+_.extend(Command.prototype, {
+  /**
+     Up Arrow
+
+     @member Backgrid.Command
+   */
+  moveUp: function () { return this.keyCode == 38; },
+  /**
+     Down Arrow
+
+     @member Backgrid.Command
+   */
+  moveDown: function () { return this.keyCode === 40; },
+  /**
+     Shift Tab
+
+     @member Backgrid.Command
+   */
+  moveLeft: function () { return this.shiftKey && this.keyCode === 9; },
+  /**
+     Tab
+
+     @member Backgrid.Command
+   */
+  moveRight: function () { return !this.shiftKey && this.keyCode === 9; },
+  /**
+     Enter
+
+     @member Backgrid.Command
+   */
+  save: function () { return this.keyCode === 13; },
+  /**
+     Esc
+
+     @member Backgrid.Command
+   */
+  cancel: function () { return this.keyCode === 27; },
+  /**
+     None of the above.
+
+     @member Backgrid.Command
+   */
+  passThru: function () {
+    return !(this.moveUp() || this.moveDown() || this.moveLeft() ||
+             this.moveRight() || this.save() || this.cancel());
+  }
+});
+
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   Just a convenient class for interested parties to subclass.
+
+   The default Cell classes don't require the formatter to be a subclass of
+   Formatter as long as the fromRaw(rawData) and toRaw(formattedData) methods
+   are defined.
+
+   @abstract
+   @class Backgrid.CellFormatter
+   @constructor
+*/
+var CellFormatter = Backgrid.CellFormatter = function () {};
+_.extend(CellFormatter.prototype, {
+
+  /**
+     Takes a raw value from a model and returns an optionally formatted string
+     for display. The default implementation simply returns the supplied value
+     as is without any type conversion.
+
+     @member Backgrid.CellFormatter
+     @param {*} rawData
+     @return {*}
+  */
+  fromRaw: function (rawData) {
+    return rawData;
+  },
+
+  /**
+     Takes a formatted string, usually from user input, and returns a
+     appropriately typed value for persistence in the model.
+
+     If the user input is invalid or unable to be converted to a raw value
+     suitable for persistence in the model, toRaw must return `undefined`.
+
+     @member Backgrid.CellFormatter
+     @param {string} formattedData
+     @return {*|undefined}
+  */
+  toRaw: function (formattedData) {
+    return formattedData;
+  }
+
+});
+
+/**
+   A floating point number formatter. Doesn't understand notation at the moment.
+
+   @class Backgrid.NumberFormatter
+   @extends Backgrid.CellFormatter
+   @constructor
+   @throws {RangeError} If decimals < 0 or > 20.
+*/
+var NumberFormatter = Backgrid.NumberFormatter = function (options) {
+  options = options ? _.clone(options) : {};
+  _.extend(this, this.defaults, options);
+
+  if (this.decimals < 0 || this.decimals > 20) {
+    throw new RangeError("decimals must be between 0 and 20");
+  }
+};
+NumberFormatter.prototype = new CellFormatter();
+_.extend(NumberFormatter.prototype, {
+
+  /**
+     @member Backgrid.NumberFormatter
+     @cfg {Object} options
+
+     @cfg {number} [options.decimals=2] Number of decimals to display. Must be an integer.
+
+     @cfg {string} [options.decimalSeparator='.'] The separator to use when
+     displaying decimals.
+
+     @cfg {string} [options.orderSeparator=','] The separator to use to
+     separator thousands. May be an empty string.
+   */
+  defaults: {
+    decimals: 2,
+    decimalSeparator: '.',
+    orderSeparator: ','
+  },
+
+  HUMANIZED_NUM_RE: /(\d)(?=(?:\d{3})+$)/g,
+
+  /**
+     Takes a floating point number and convert it to a formatted string where
+     every thousand is separated by `orderSeparator`, with a `decimal` number of
+     decimals separated by `decimalSeparator`. The number returned is rounded
+     the usual way.
+
+     @member Backgrid.NumberFormatter
+     @param {number} number
+     @return {string}
+  */
+  fromRaw: function (number) {
+    if (_.isNull(number) || _.isUndefined(number)) return '';
+
+    number = number.toFixed(~~this.decimals);
+
+    var parts = number.split('.');
+    var integerPart = parts[0];
+    var decimalPart = parts[1] ? (this.decimalSeparator || '.') + parts[1] : '';
+
+    return integerPart.replace(this.HUMANIZED_NUM_RE, '$1' + this.orderSeparator) + decimalPart;
+  },
+
+  /**
+     Takes a string, possibly formatted with `orderSeparator` and/or
+     `decimalSeparator`, and convert it back to a number.
+
+     @member Backgrid.NumberFormatter
+     @param {string} formattedData
+     @return {number|undefined} Undefined if the string cannot be converted to
+     a number.
+  */
+  toRaw: function (formattedData) {
+    var rawData = '';
+
+    var thousands = formattedData.trim().split(this.orderSeparator);
+    for (var i = 0; i < thousands.length; i++) {
+      rawData += thousands[i];
+    }
+
+    var decimalParts = rawData.split(this.decimalSeparator);
+    rawData = '';
+    for (var i = 0; i < decimalParts.length; i++) {
+      rawData = rawData + decimalParts[i] + '.';
+    }
+
+    if (rawData[rawData.length - 1] === '.') {
+      rawData = rawData.slice(0, rawData.length - 1);
+    }
+
+    var result = (rawData * 1).toFixed(~~this.decimals) * 1;
+    if (_.isNumber(result) && !_.isNaN(result)) return result;
+  }
+
+});
+
+/**
+   Formatter to converts between various datetime formats.
+
+   This class only understands ISO-8601 formatted datetime strings and UNIX
+   offset (number of milliseconds since UNIX Epoch). See
+   Backgrid.Extension.MomentFormatter if you need a much more flexible datetime
+   formatter.
+
+   @class Backgrid.DatetimeFormatter
+   @extends Backgrid.CellFormatter
+   @constructor
+   @throws {Error} If both `includeDate` and `includeTime` are false.
+*/
+var DatetimeFormatter = Backgrid.DatetimeFormatter = function (options) {
+  options = options ? _.clone(options) : {};
+  _.extend(this, this.defaults, options);
+
+  if (!this.includeDate && !this.includeTime) {
+    throw new Error("Either includeDate or includeTime must be true");
+  }
+};
+DatetimeFormatter.prototype = new CellFormatter();
+_.extend(DatetimeFormatter.prototype, {
+
+  /**
+     @member Backgrid.DatetimeFormatter
+
+     @cfg {Object} options
+
+     @cfg {boolean} [options.includeDate=true] Whether the values include the
+     date part.
+
+     @cfg {boolean} [options.includeTime=true] Whether the values include the
+     time part.
+
+     @cfg {boolean} [options.includeMilli=false] If `includeTime` is true,
+     whether to include the millisecond part, if it exists.
+   */
+  defaults: {
+    includeDate: true,
+    includeTime: true,
+    includeMilli: false
+  },
+
+  DATE_RE: /^([+\-]?\d{4})-(\d{2})-(\d{2})$/,
+  TIME_RE: /^(\d{2}):(\d{2}):(\d{2})(\.(\d{3}))?$/,
+  ISO_SPLITTER_RE: /T|Z| +/,
+
+  _convert: function (data, validate) {
+    var date, time = null;
+    if (_.isNumber(data)) {
+      var jsDate = new Date(data);
+      date = lpad(jsDate.getUTCFullYear(), 4, 0) + '-' + lpad(jsDate.getUTCMonth() + 1, 2, 0) + '-' + lpad(jsDate.getUTCDate(), 2, 0);
+      time = lpad(jsDate.getUTCHours(), 2, 0) + ':' + lpad(jsDate.getUTCMinutes(), 2, 0) + ':' + lpad(jsDate.getUTCSeconds(), 2, 0);
+    }
+    else {
+      data = data.trim();
+      var parts = data.split(this.ISO_SPLITTER_RE) || [];
+      date = this.DATE_RE.test(parts[0]) ? parts[0] : '';
+      time = date && parts[1] ? parts[1] : this.TIME_RE.test(parts[0]) ? parts[0] : '';
+    }
+
+    var YYYYMMDD = this.DATE_RE.exec(date) || [];
+    var HHmmssSSS = this.TIME_RE.exec(time) || [];
+
+    if (validate) {
+      if (this.includeDate && _.isUndefined(YYYYMMDD[0])) return;
+      if (this.includeTime && _.isUndefined(HHmmssSSS[0])) return;
+      if (!this.includeDate && date) return;
+      if (!this.includeTime && time) return;
+    }
+
+    var jsDate = new Date(Date.UTC(YYYYMMDD[1] * 1 || 0,
+                                   YYYYMMDD[2] * 1 - 1 || 0,
+                                   YYYYMMDD[3] * 1 || 0,
+                                   HHmmssSSS[1] * 1 || null,
+                                   HHmmssSSS[2] * 1 || null,
+                                   HHmmssSSS[3] * 1 || null,
+                                   HHmmssSSS[5] * 1 || null));
+
+    var result = '';
+
+    if (this.includeDate) {
+      result = lpad(jsDate.getUTCFullYear(), 4, 0) + '-' + lpad(jsDate.getUTCMonth() + 1, 2, 0) + '-' + lpad(jsDate.getUTCDate(), 2, 0);
+    }
+
+    if (this.includeTime) {
+      result = result + (this.includeDate ? 'T' : '') + lpad(jsDate.getUTCHours(), 2, 0) + ':' + lpad(jsDate.getUTCMinutes(), 2, 0) + ':' + lpad(jsDate.getUTCSeconds(), 2, 0);
+
+      if (this.includeMilli) {
+        result = result + '.' + lpad(jsDate.getUTCMilliseconds(), 3, 0);
+      }
+    }
+
+    if (this.includeDate && this.includeTime) {
+      result += "Z";
+    }
+
+    return result;
+  },
+
+  /**
+     Converts an ISO-8601 formatted datetime string to a datetime string, date
+     string or a time string. The timezone is ignored if supplied.
+
+     @member Backgrid.DatetimeFormatter
+     @param {string} rawData
+     @return {string|null|undefined} ISO-8601 string in UTC. Null and undefined
+     values are returned as is.
+  */
+  fromRaw: function (rawData) {
+    if (_.isNull(rawData) || _.isUndefined(rawData)) return '';
+    return this._convert(rawData);
+  },
+
+  /**
+     Converts an ISO-8601 formatted datetime string to a datetime string, date
+     string or a time string. The timezone is ignored if supplied. This method
+     parses the input values exactly the same way as
+     Backgrid.Extension.MomentFormatter#fromRaw(), in addition to doing some
+     sanity checks.
+
+     @member Backgrid.DatetimeFormatter
+     @param {string} formattedData
+     @return {string|undefined} ISO-8601 string in UTC. Undefined if a date is
+     found when `includeDate` is false, or a time is found when `includeTime` is
+     false, or if `includeDate` is true and a date is not found, or if
+     `includeTime` is true and a time is not found.
+  */
+  toRaw: function (formattedData) {
+    return this._convert(formattedData, true);
+  }
+
+});
+
+/**
+   Formatter to convert any value to string.
+
+   @class Backgrid.StringFormatter
+   @extends Backgrid.CellFormatter
+   @constructor
+ */
+var StringFormatter = Backgrid.StringFormatter = function () {};
+StringFormatter.prototype = new CellFormatter();
+_.extend(StringFormatter.prototype, {
+  /**
+     Converts any value to a string using Ecmascript's implicit type
+     conversion. If the given value is `null` or `undefined`, an empty string is
+     returned instead.
+
+     @member Backgrid.StringFormatter
+     @param {*} rawValue
+     @return {string}
+   */
+  fromRaw: function (rawValue) {
+    if (_.isUndefined(rawValue) || _.isNull(rawValue)) return '';
+    return rawValue + '';
+  }
+});
+
+/**
+   Simple email validation formatter.
+
+   @class Backgrid.EmailFormatter
+   @extends Backgrid.CellFormatter
+   @constructor
+ */
+var EmailFormatter = Backgrid.EmailFormatter = function () {};
+EmailFormatter.prototype = new CellFormatter();
+_.extend(EmailFormatter.prototype, {
+  /**
+     Return the input if it is a string that contains an '@' character and if
+     the strings before and after '@' are non-empty. If the input does not
+     validate, `undefined` is returned.
+
+     @member Backgrid.EmailFormatter
+     @param {*} formattedData
+     @return {string|undefined}
+   */
+  toRaw: function (formattedData) {
+    var parts = formattedData.trim().split("@");
+    if (parts.length === 2 && _.all(parts)) {
+      return formattedData;
+    }
+  }
+});
+
+/**
+   Formatter for SelectCell.
+
+   @class Backgrid.SelectFormatter
+   @extends Backgrid.CellFormatter
+   @constructor
+*/
+var SelectFormatter = Backgrid.SelectFormatter = function () {};
+SelectFormatter.prototype = new CellFormatter();
+_.extend(SelectFormatter.prototype, {
+
+  /**
+     Normalizes raw scalar or array values to an array.
+
+     @member Backgrid.SelectFormatter
+     @param {*} rawValue
+     @return {Array.<*>}
+  */
+  fromRaw: function (rawValue) {
+    return _.isArray(rawValue) ? rawValue : rawValue != null ? [rawValue] : [];
+  }
+});
+
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   Generic cell editor base class. Only defines an initializer for a number of
+   required parameters.
+
+   @abstract
+   @class Backgrid.CellEditor
+   @extends Backbone.View
+*/
+var CellEditor = Backgrid.CellEditor = Backbone.View.extend({
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {Backgrid.CellFormatter} options.formatter
+     @param {Backgrid.Column} options.column
+     @param {Backbone.Model} options.model
+
+     @throws {TypeError} If `formatter` is not a formatter instance, or when
+     `model` or `column` are undefined.
+  */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["formatter", "column", "model"]);
+    this.formatter = options.formatter;
+    this.column = options.column;
+    if (!(this.column instanceof Column)) {
+      this.column = new Column(this.column);
+    }
+
+    this.listenTo(this.model, "backgrid:editing", this.postRender);
+  },
+
+  /**
+     Post-rendering setup and initialization. Focuses the cell editor's `el` in
+     this default implementation. **Should** be called by Cell classes after
+     calling Backgrid.CellEditor#render.
+  */
+  postRender: function (model, column) {
+    if (column == null || column.get("name") == this.column.get("name")) {
+      this.$el.focus();
+    }
+    return this;
+  }
+
+});
+
+/**
+   InputCellEditor the cell editor type used by most core cell types. This cell
+   editor renders a text input box as its editor. The input will render a
+   placeholder if the value is empty on supported browsers.
+
+   @class Backgrid.InputCellEditor
+   @extends Backgrid.CellEditor
+*/
+var InputCellEditor = Backgrid.InputCellEditor = CellEditor.extend({
+
+  /** @property */
+  tagName: "input",
+
+  /** @property */
+  attributes: {
+    type: "text"
+  },
+
+  /** @property */
+  events: {
+    "blur": "saveOrCancel",
+    "keydown": "saveOrCancel"
+  },
+
+  /**
+     Initializer. Removes this `el` from the DOM when a `done` event is
+     triggered.
+
+     @param {Object} options
+     @param {Backgrid.CellFormatter} options.formatter
+     @param {Backgrid.Column} options.column
+     @param {Backbone.Model} options.model
+     @param {string} [options.placeholder]
+  */
+  initialize: function (options) {
+    CellEditor.prototype.initialize.apply(this, arguments);
+
+    if (options.placeholder) {
+      this.$el.attr("placeholder", options.placeholder);
+    }
+  },
+
+  /**
+     Renders a text input with the cell value formatted for display, if it
+     exists.
+  */
+  render: function () {
+    this.$el.val(this.formatter.fromRaw(this.model.get(this.column.get("name"))));
+    return this;
+  },
+
+  /**
+     If the key pressed is `enter`, `tab`, `up`, or `down`, converts the value
+     in the editor to a raw value for saving into the model using the formatter.
+
+     If the key pressed is `esc` the changes are undone.
+
+     If the editor goes out of focus (`blur`) but the value is invalid, the
+     event is intercepted and cancelled so the cell remains in focus pending for
+     further action. The changes are saved otherwise.
+
+     Triggers a Backbone `backgrid:edited` event from the model when successful,
+     and `backgrid:error` if the value cannot be converted. Classes listening to
+     the `error` event, usually the Cell classes, should respond appropriately,
+     usually by rendering some kind of error feedback.
+
+     @param {Event} e
+  */
+  saveOrCancel: function (e) {
+
+    var formatter = this.formatter;
+    var model = this.model;
+    var column = this.column;
+
+    var command = new Command(e);
+    var blurred = e.type === "blur";
+
+    if (command.moveUp() || command.moveDown() || command.moveLeft() || command.moveRight() ||
+        command.save() || blurred) {
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      var val = this.$el.val();
+      var newValue = formatter.toRaw(val);
+      if (_.isUndefined(newValue)) {
+        model.trigger("backgrid:error", model, column, val);
+      }
+      else {
+        model.set(column.get("name"), newValue);
+        model.trigger("backgrid:edited", model, column, command);
+      }
+    }
+    // esc
+    else if (command.cancel()) {
+      // undo
+      e.stopPropagation();
+      model.trigger("backgrid:edited", model, column, command);
+    }
+  },
+
+  postRender: function (model, column) {
+    if (column == null || column.get("name") == this.column.get("name")) {
+      // move the cursor to the end on firefox if text is right aligned
+      if (this.$el.css("text-align") === "right") {
+        var val = this.$el.val();
+        this.$el.focus().val(null).val(val);
+      }
+      else this.$el.focus();
+    }
+    return this;
+  }
+
+});
+
+/**
+   The super-class for all Cell types. By default, this class renders a plain
+   table cell with the model value converted to a string using the
+   formatter. The table cell is clickable, upon which the cell will go into
+   editor mode, which is rendered by a Backgrid.InputCellEditor instance by
+   default. Upon encountering any formatting errors, this class will add an
+   `error` CSS class to the table cell.
+
+   @abstract
+   @class Backgrid.Cell
+   @extends Backbone.View
+*/
+var Cell = Backgrid.Cell = Backbone.View.extend({
+
+  /** @property */
+  tagName: "td",
+
+  /**
+     @property {Backgrid.CellFormatter|Object|string} [formatter=new CellFormatter()]
+  */
+  formatter: new CellFormatter(),
+
+  /**
+     @property {Backgrid.CellEditor} [editor=Backgrid.InputCellEditor] The
+     default editor for all cell instances of this class. This value must be a
+     class, it will be automatically instantiated upon entering edit mode.
+
+     See Backgrid.CellEditor
+  */
+  editor: InputCellEditor,
+
+  /** @property */
+  events: {
+    "click": "enterEditMode"
+  },
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {Backbone.Model} options.model
+     @param {Backgrid.Column} options.column
+
+     @throws {ReferenceError} If formatter is a string but a formatter class of
+     said name cannot be found in the Backgrid module.
+  */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["model", "column"]);
+    this.column = options.column;
+    if (!(this.column instanceof Column)) {
+      this.column = new Column(this.column);
+    }
+    this.formatter = Backgrid.resolveNameToClass(this.column.get("formatter") || this.formatter, "Formatter");
+    this.editor = Backgrid.resolveNameToClass(this.editor, "CellEditor");
+    this.listenTo(this.model, "change:" + this.column.get("name"), function () {
+      if (!this.$el.hasClass("editor")) this.render();
+    });
+    this.listenTo(this.model, "backgrid:error", this.renderError);
+  },
+
+  /**
+     Render a text string in a table cell. The text is converted from the
+     model's raw value for this cell's column.
+  */
+  render: function () {
+    this.$el.empty();
+    this.$el.text(this.formatter.fromRaw(this.model.get(this.column.get("name"))));
+    this.delegateEvents();
+    return this;
+  },
+
+  /**
+     If this column is editable, a new CellEditor instance is instantiated with
+     its required parameters. An `editor` CSS class is added to the cell upon
+     entering edit mode.
+
+     This method triggers a Backbone `backgrid:edit` event from the model when
+     the cell is entering edit mode and an editor instance has been constructed,
+     but before it is rendered and inserted into the DOM. The cell and the
+     constructed cell editor instance are sent as event parameters when this
+     event is triggered.
+
+     When this cell has finished switching to edit mode, a Backbone
+     `backgrid:editing` event is triggered from the model. The cell and the
+     constructed cell instance are also sent as parameters in the event.
+
+     When the model triggers a `backgrid:error` event, it means the editor is
+     unable to convert the current user input to an apprpriate value for the
+     model's column, and an `error` CSS class is added to the cell accordingly.
+  */
+  enterEditMode: function () {
+    var model = this.model;
+    var column = this.column;
+
+    if (column.get("editable")) {
+
+      this.currentEditor = new this.editor({
+        column: this.column,
+        model: this.model,
+        formatter: this.formatter
+      });
+
+      model.trigger("backgrid:edit", model, column, this, this.currentEditor);
+
+      // Need to redundantly undelegate events for Firefox
+      this.undelegateEvents();
+      this.$el.empty();
+      this.$el.append(this.currentEditor.$el);
+      this.currentEditor.render();
+      this.$el.addClass("editor");
+
+      model.trigger("backgrid:editing", model, column, this, this.currentEditor);
+    }
+  },
+
+  /**
+     Put an `error` CSS class on the table cell.
+  */
+  renderError: function (model, column) {
+    if (column == null || column.get("name") == this.column.get("name")) {
+      this.$el.addClass("error");
+    }
+  },
+
+  /**
+     Removes the editor and re-render in display mode.
+  */
+  exitEditMode: function () {
+    this.$el.removeClass("error");
+    this.currentEditor.remove();
+    this.stopListening(this.currentEditor);
+    delete this.currentEditor;
+    this.$el.removeClass("editor");
+    this.render();
+  },
+
+  /**
+     Clean up this cell.
+
+     @chainable
+  */
+  remove: function () {
+    if (this.currentEditor) {
+      this.currentEditor.remove.apply(this, arguments);
+      delete this.currentEditor;
+    }
+    return Backbone.View.prototype.remove.apply(this, arguments);
+  }
+
+});
+
+/**
+   StringCell displays HTML escaped strings and accepts anything typed in.
+
+   @class Backgrid.StringCell
+   @extends Backgrid.Cell
+*/
+var StringCell = Backgrid.StringCell = Cell.extend({
+
+  /** @property */
+  className: "string-cell",
+
+  formatter: new StringFormatter()
+
+});
+
+/**
+   UriCell renders an HTML `<a>` anchor for the value and accepts URIs as user
+   input values. No type conversion or URL validation is done by the formatter
+   of this cell. Users who need URL validation are encourage to subclass UriCell
+   to take advantage of the parsing capabilities of the HTMLAnchorElement
+   available on HTML5-capable browsers or using a third-party library like
+   [URI.js](https://github.com/medialize/URI.js).
+
+   @class Backgrid.UriCell
+   @extends Backgrid.Cell
+*/
+var UriCell = Backgrid.UriCell = Cell.extend({
+
+  /** @property */
+  className: "uri-cell",
+
+  render: function () {
+    this.$el.empty();
+    var formattedValue = this.formatter.fromRaw(this.model.get(this.column.get("name")));
+    this.$el.append($("<a>", {
+      tabIndex: -1,
+      href: formattedValue,
+      title: formattedValue,
+      target: "_blank"
+    }).text(formattedValue));
+    this.delegateEvents();
+    return this;
+  }
+
+});
+
+/**
+   Like Backgrid.UriCell, EmailCell renders an HTML `<a>` anchor for the
+   value. The `href` in the anchor is prefixed with `mailto:`. EmailCell will
+   complain if the user enters a string that doesn't contain the `@` sign.
+
+   @class Backgrid.EmailCell
+   @extends Backgrid.StringCell
+*/
+var EmailCell = Backgrid.EmailCell = StringCell.extend({
+
+  /** @property */
+  className: "email-cell",
+
+  formatter: new EmailFormatter(),
+
+  render: function () {
+    this.$el.empty();
+    var formattedValue = this.formatter.fromRaw(this.model.get(this.column.get("name")));
+    this.$el.append($("<a>", {
+      tabIndex: -1,
+      href: "mailto:" + formattedValue,
+      title: formattedValue
+    }).text(formattedValue));
+    this.delegateEvents();
+    return this;
+  }
+
+});
+
+/**
+   NumberCell is a generic cell that renders all numbers. Numbers are formatted
+   using a Backgrid.NumberFormatter.
+
+   @class Backgrid.NumberCell
+   @extends Backgrid.Cell
+*/
+var NumberCell = Backgrid.NumberCell = Cell.extend({
+
+  /** @property */
+  className: "number-cell",
+
+  /**
+     @property {number} [decimals=2] Must be an integer.
+  */
+  decimals: NumberFormatter.prototype.defaults.decimals,
+
+  /** @property {string} [decimalSeparator='.'] */
+  decimalSeparator: NumberFormatter.prototype.defaults.decimalSeparator,
+
+  /** @property {string} [orderSeparator=','] */
+  orderSeparator: NumberFormatter.prototype.defaults.orderSeparator,
+
+  /** @property {Backgrid.CellFormatter} [formatter=Backgrid.NumberFormatter] */
+  formatter: NumberFormatter,
+
+  /**
+     Initializes this cell and the number formatter.
+
+     @param {Object} options
+     @param {Backbone.Model} options.model
+     @param {Backgrid.Column} options.column
+  */
+  initialize: function (options) {
+    Cell.prototype.initialize.apply(this, arguments);
+    this.formatter = new this.formatter({
+      decimals: this.decimals,
+      decimalSeparator: this.decimalSeparator,
+      orderSeparator: this.orderSeparator
+    });
+  }
+
+});
+
+/**
+   An IntegerCell is just a Backgrid.NumberCell with 0 decimals. If a floating
+   point number is supplied, the number is simply rounded the usual way when
+   displayed.
+
+   @class Backgrid.IntegerCell
+   @extends Backgrid.NumberCell
+*/
+var IntegerCell = Backgrid.IntegerCell = NumberCell.extend({
+
+  /** @property */
+  className: "integer-cell",
+
+  /**
+     @property {number} decimals Must be an integer.
+  */
+  decimals: 0
+});
+
+/**
+   DatetimeCell is a basic cell that accepts datetime string values in RFC-2822
+   or W3C's subset of ISO-8601 and displays them in ISO-8601 format. For a much
+   more sophisticated date time cell with better datetime formatting, take a
+   look at the Backgrid.Extension.MomentCell extension.
+
+   @class Backgrid.DatetimeCell
+   @extends Backgrid.Cell
+
+   See:
+
+   - Backgrid.Extension.MomentCell
+   - Backgrid.DatetimeFormatter
+*/
+var DatetimeCell = Backgrid.DatetimeCell = Cell.extend({
+
+  /** @property */
+  className: "datetime-cell",
+
+  /**
+     @property {boolean} [includeDate=true]
+  */
+  includeDate: DatetimeFormatter.prototype.defaults.includeDate,
+
+  /**
+     @property {boolean} [includeTime=true]
+  */
+  includeTime: DatetimeFormatter.prototype.defaults.includeTime,
+
+  /**
+     @property {boolean} [includeMilli=false]
+  */
+  includeMilli: DatetimeFormatter.prototype.defaults.includeMilli,
+
+  /** @property {Backgrid.CellFormatter} [formatter=Backgrid.DatetimeFormatter] */
+  formatter: DatetimeFormatter,
+
+  /**
+     Initializes this cell and the datetime formatter.
+
+     @param {Object} options
+     @param {Backbone.Model} options.model
+     @param {Backgrid.Column} options.column
+  */
+  initialize: function (options) {
+    Cell.prototype.initialize.apply(this, arguments);
+    this.formatter = new this.formatter({
+      includeDate: this.includeDate,
+      includeTime: this.includeTime,
+      includeMilli: this.includeMilli
+    });
+
+    var placeholder = this.includeDate ? "YYYY-MM-DD" : "";
+    placeholder += (this.includeDate && this.includeTime) ? "T" : "";
+    placeholder += this.includeTime ? "HH:mm:ss" : "";
+    placeholder += (this.includeTime && this.includeMilli) ? ".SSS" : "";
+
+    this.editor = this.editor.extend({
+      attributes: _.extend({}, this.editor.prototype.attributes, this.editor.attributes, {
+        placeholder: placeholder
+      })
+    });
+  }
+
+});
+
+/**
+   DateCell is a Backgrid.DatetimeCell without the time part.
+
+   @class Backgrid.DateCell
+   @extends Backgrid.DatetimeCell
+*/
+var DateCell = Backgrid.DateCell = DatetimeCell.extend({
+
+  /** @property */
+  className: "date-cell",
+
+  /** @property */
+  includeTime: false
+
+});
+
+/**
+   TimeCell is a Backgrid.DatetimeCell without the date part.
+
+   @class Backgrid.TimeCell
+   @extends Backgrid.DatetimeCell
+*/
+var TimeCell = Backgrid.TimeCell = DatetimeCell.extend({
+
+  /** @property */
+  className: "time-cell",
+
+  /** @property */
+  includeDate: false
+
+});
+
+/**
+   BooleanCellEditor renders a checkbox as its editor.
+
+   @class Backgrid.BooleanCellEditor
+   @extends Backgrid.CellEditor
+*/
+var BooleanCellEditor = Backgrid.BooleanCellEditor = CellEditor.extend({
+
+  /** @property */
+  tagName: "input",
+
+  /** @property */
+  attributes: {
+    tabIndex: -1,
+    type: "checkbox"
+  },
+
+  /** @property */
+  events: {
+    "mousedown": function () {
+      this.mouseDown = true;
+    },
+    "blur": "enterOrExitEditMode",
+    "mouseup": function () {
+      this.mouseDown = false;
+    },
+    "change": "saveOrCancel",
+    "keydown": "saveOrCancel"
+  },
+
+  /**
+     Renders a checkbox and check it if the model value of this column is true,
+     uncheck otherwise.
+  */
+  render: function () {
+    var val = this.formatter.fromRaw(this.model.get(this.column.get("name")));
+    this.$el.prop("checked", val);
+    return this;
+  },
+
+  /**
+     Event handler. Hack to deal with the case where `blur` is fired before
+     `change` and `click` on a checkbox.
+  */
+  enterOrExitEditMode: function (e) {
+    if (!this.mouseDown) {
+      var model = this.model;
+      model.trigger("backgrid:edited", model, this.column, new Command(e));
+    }
+  },
+
+  /**
+     Event handler. Save the value into the model if the event is `change` or
+     one of the keyboard navigation key presses. Exit edit mode without saving
+     if `escape` was pressed.
+  */
+  saveOrCancel: function (e) {
+    var model = this.model;
+    var column = this.column;
+    var formatter = this.formatter;
+    var command = new Command(e);
+    // skip ahead to `change` when space is pressed
+    if (command.passThru() && e.type != "change") return true;
+    if (command.cancel()) {
+      e.stopPropagation();
+      model.trigger("backgrid:edited", model, column, command);
+    }
+
+    var $el = this.$el;
+    if (command.save() || command.moveLeft() || command.moveRight() || command.moveUp() ||
+        command.moveDown()) {
+      e.preventDefault();
+      e.stopPropagation();
+      var val = formatter.toRaw($el.prop("checked"));
+      model.set(column.get("name"), val);
+      model.trigger("backgrid:edited", model, column, command);
+    }
+    else if (e.type == "change") {
+      var val = formatter.toRaw($el.prop("checked"));
+      model.set(column.get("name"), val);
+      $el.focus();
+    }
+  }
+
+});
+
+/**
+   BooleanCell renders a checkbox both during display mode and edit mode. The
+   checkbox is checked if the model value is true, unchecked otherwise.
+
+   @class Backgrid.BooleanCell
+   @extends Backgrid.Cell
+*/
+var BooleanCell = Backgrid.BooleanCell = Cell.extend({
+
+  /** @property */
+  className: "boolean-cell",
+
+  /** @property */
+  editor: BooleanCellEditor,
+
+  /** @property */
+  events: {
+    "click": "enterEditMode"
+  },
+
+  /**
+     Renders a checkbox and check it if the model value of this column is true,
+     uncheck otherwise.
+  */
+  render: function () {
+    this.$el.empty();
+    this.$el.append($("<input>", {
+      tabIndex: -1,
+      type: "checkbox",
+      checked: this.formatter.fromRaw(this.model.get(this.column.get("name")))
+    }));
+    this.delegateEvents();
+    return this;
+  }
+
+});
+
+/**
+   SelectCellEditor renders an HTML `<select>` fragment as the editor.
+
+   @class Backgrid.SelectCellEditor
+   @extends Backgrid.CellEditor
+*/
+var SelectCellEditor = Backgrid.SelectCellEditor = CellEditor.extend({
+
+  /** @property */
+  tagName: "select",
+
+  /** @property */
+  events: {
+    "change": "save",
+    "blur": "close",
+    "keydown": "close"
+  },
+
+  /** @property {function(Object, ?Object=): string} template */
+  template: _.template('<option value="<%- value %>" <%= selected ? \'selected="selected"\' : "" %>><%- text %></option>'),
+
+  setOptionValues: function (optionValues) {
+    this.optionValues = optionValues;
+  },
+
+  setMultiple: function (multiple) {
+    this.multiple = multiple;
+    this.$el.prop("multiple", multiple);
+  },
+
+  _renderOptions: function (nvps, selectedValues) {
+    var options = '';
+    for (var i = 0; i < nvps.length; i++) {
+      options = options + this.template({
+        text: nvps[i][0],
+        value: nvps[i][1],
+        selected: selectedValues.indexOf(nvps[i][1]) > -1
+      });
+    }
+    return options;
+  },
+
+  /**
+     Renders the options if `optionValues` is a list of name-value pairs. The
+     options are contained inside option groups if `optionValues` is a list of
+     object hashes. The name is rendered at the option text and the value is the
+     option value. If `optionValues` is a function, it is called without a
+     parameter.
+  */
+  render: function () {
+    this.$el.empty();
+
+    var optionValues = _.result(this, "optionValues");
+    var selectedValues = this.formatter.fromRaw(this.model.get(this.column.get("name")));
+
+    if (!_.isArray(optionValues)) throw TypeError("optionValues must be an array");
+
+    var optionValue = null;
+    var optionText = null;
+    var optionValue = null;
+    var optgroupName = null;
+    var optgroup = null;
+
+    for (var i = 0; i < optionValues.length; i++) {
+      var optionValue = optionValues[i];
+
+      if (_.isArray(optionValue)) {
+        optionText  = optionValue[0];
+        optionValue = optionValue[1];
+
+        this.$el.append(this.template({
+          text: optionText,
+          value: optionValue,
+          selected: selectedValues.indexOf(optionValue) > -1
+        }));
+      }
+      else if (_.isObject(optionValue)) {
+        optgroupName = optionValue.name;
+        optgroup = $("<optgroup></optgroup>", { label: optgroupName });
+        optgroup.append(this._renderOptions(optionValue.values, selectedValues));
+        this.$el.append(optgroup);
+      }
+      else {
+        throw TypeError("optionValues elements must be a name-value pair or an object hash of { name: 'optgroup label', value: [option name-value pairs] }");
+      }
+    }
+
+    this.delegateEvents();
+
+    return this;
+  },
+
+  /**
+     Saves the value of the selected option to the model attribute. Triggers a
+     `backgrid:edited` Backbone event from the model.
+  */
+  save: function (e) {
+    var model = this.model;
+    var column = this.column;
+    model.set(column.get("name"), this.formatter.toRaw(this.$el.val()));
+    model.trigger("backgrid:edited", model, column, new Command(e));
+  },
+
+  /**
+     Triggers a `backgrid:edited` event from the model so the body can close
+     this editor.
+  */
+  close: function (e) {
+    var model = this.model;
+    var column = this.column;
+    var command = new Command(e);
+    if (command.cancel()) {
+      e.stopPropagation();
+      model.trigger("backgrid:edited", model, column, new Command(e));
+    }
+    else if (command.save() || command.moveLeft() || command.moveRight() ||
+             command.moveUp() || command.moveDown() || e.type == "blur") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.type == "blur" && this.$el.find("option").length === 1) {
+        model.set(column.get("name"), this.formatter.toRaw(this.$el.val()));
+      }
+      model.trigger("backgrid:edited", model, column, new Command(e));
+    }
+  }
+
+});
+
+/**
+   SelectCell is also a different kind of cell in that upon going into edit mode
+   the cell renders a list of options to pick from, as opposed to an input box.
+
+   SelectCell cannot be referenced by its string name when used in a column
+   definition because it requires an `optionValues` class attribute to be
+   defined. `optionValues` can either be a list of name-value pairs, to be
+   rendered as options, or a list of object hashes which consist of a key *name*
+   which is the option group name, and a key *values* which is a list of
+   name-value pairs to be rendered as options under that option group.
+
+   In addition, `optionValues` can also be a parameter-less function that
+   returns one of the above. If the options are static, it is recommended the
+   returned values to be memoized. `_.memoize()` is a good function to help with
+   that.
+
+   During display mode, the default formatter will normalize the raw model value
+   to an array of values whether the raw model value is a scalar or an
+   array. Each value is compared with the `optionValues` values using
+   Ecmascript's implicit type conversion rules. When exiting edit mode, no type
+   conversion is performed when saving into the model. This behavior is not
+   always desirable when the value type is anything other than string. To
+   control type conversion on the client-side, you should subclass SelectCell to
+   provide a custom formatter or provide the formatter to your column
+   definition.
+
+   See:
+     [$.fn.val()](http://api.jquery.com/val/)
+
+   @class Backgrid.SelectCell
+   @extends Backgrid.Cell
+*/
+var SelectCell = Backgrid.SelectCell = Cell.extend({
+
+  /** @property */
+  className: "select-cell",
+
+  /** @property */
+  editor: SelectCellEditor,
+
+  /** @property */
+  multiple: false,
+
+  /** @property */
+  formatter: new SelectFormatter(),
+
+  /**
+     @property {Array.<Array>|Array.<{name: string, values: Array.<Array>}>} optionValues
+  */
+  optionValues: undefined,
+
+  /** @property */
+  delimiter: ', ',
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {Backbone.Model} options.model
+     @param {Backgrid.Column} options.column
+
+     @throws {TypeError} If `optionsValues` is undefined.
+  */
+  initialize: function (options) {
+    Cell.prototype.initialize.apply(this, arguments);
+    Backgrid.requireOptions(this, ["optionValues"]);
+    this.listenTo(this.model, "backgrid:edit", function (model, column, cell, editor) {
+      if (column.get("name") == this.column.get("name")) {
+        editor.setOptionValues(this.optionValues);
+        editor.setMultiple(this.multiple);
+      }
+    });
+  },
+
+  /**
+     Renders the label using the raw value as key to look up from `optionValues`.
+
+     @throws {TypeError} If `optionValues` is malformed.
+  */
+  render: function () {
+    this.$el.empty();
+
+    var optionValues = this.optionValues;
+    var rawData = this.formatter.fromRaw(this.model.get(this.column.get("name")));
+
+    var selectedText = [];
+
+    try {
+      if (!_.isArray(optionValues) || _.isEmpty(optionValues)) throw new TypeError;
+
+      for (var k = 0; k < rawData.length; k++) {
+        var rawDatum = rawData[k];
+
+        for (var i = 0; i < optionValues.length; i++) {
+          var optionValue = optionValues[i];
+
+          if (_.isArray(optionValue)) {
+            var optionText  = optionValue[0];
+            var optionValue = optionValue[1];
+
+            if (optionValue == rawDatum) selectedText.push(optionText);
+          }
+          else if (_.isObject(optionValue)) {
+            var optionGroupValues = optionValue.values;
+
+            for (var j = 0; j < optionGroupValues.length; j++) {
+              var optionGroupValue = optionGroupValues[j];
+              if (optionGroupValue[1] == rawDatum) {
+                selectedText.push(optionGroupValue[0]);
+              }
+            }
+          }
+          else {
+            throw new TypeError;
+          }
+        }
+      }
+
+      this.$el.append(selectedText.join(this.delimiter));
+    }
+    catch (ex) {
+      if (ex instanceof TypeError) {
+        throw TypeError("'optionValues' must be of type {Array.<Array>|Array.<{name: string, values: Array.<Array>}>}");
+      }
+      throw ex;
+    }
+
+    this.delegateEvents();
+
+    return this;
+  }
+
+});
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   A Column is a placeholder for column metadata.
+
+   You usually don't need to create an instance of this class yourself as a
+   collection of column instances will be created for you from a list of column
+   attributes in the Backgrid.js view class constructors.
+
+   @class Backgrid.Column
+   @extends Backbone.Model
+ */
+var Column = Backgrid.Column = Backbone.Model.extend({
+
+  defaults: {
+    name: undefined,
+    label: undefined,
+    sortable: true,
+    editable: true,
+    renderable: true,
+    formatter: undefined,
+    cell: undefined,
+    headerCell: undefined
+  },
+
+  /**
+     Initializes this Column instance.
+
+     @param {Object} attrs Column attributes.
+     @param {string} attrs.name The name of the model attribute.
+     @param {string|Backgrid.Cell} attrs.cell The cell type.
+     If this is a string, the capitalized form will be used to look up a
+     cell class in Backbone, i.e.: string => StringCell. If a Cell subclass
+     is supplied, it is initialized with a hash of parameters. If a Cell
+     instance is supplied, it is used directly.
+     @param {string|Backgrid.HeaderCell} [attrs.headerCell] The header cell type.
+     @param {string} [attrs.label] The label to show in the header.
+     @param {boolean} [attrs.sortable=true]
+     @param {boolean} [attrs.editable=true]
+     @param {boolean} [attrs.renderable=true]
+     @param {Backgrid.CellFormatter|Object|string} [attrs.formatter] The
+     formatter to use to convert between raw model values and user input.
+
+     @throws {TypeError} If attrs.cell or attrs.options are not supplied.
+     @throws {ReferenceError} If attrs.cell is a string but a cell class of
+     said name cannot be found in the Backgrid module.
+
+     See:
+
+     - Backgrid.Cell
+     - Backgrid.CellFormatter
+   */
+  initialize: function (attrs) {
+    Backgrid.requireOptions(attrs, ["cell", "name"]);
+
+    if (!this.has("label")) {
+      this.set({ label: this.get("name") }, { silent: true });
+    }
+
+    var headerCell = Backgrid.resolveNameToClass(this.get("headerCell"), "HeaderCell");
+    var cell = Backgrid.resolveNameToClass(this.get("cell"), "Cell");
+    this.set({ cell: cell, headerCell: headerCell }, { silent: true });
+  }
+
+});
+
+/**
+   A Backbone collection of Column instances.
+
+   @class Backgrid.Columns
+   @extends Backbone.Collection
+ */
+var Columns = Backgrid.Columns = Backbone.Collection.extend({
+
+  /**
+     @property {Backgrid.Column} model
+   */
+  model: Column
+});
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   Row is a simple container view that takes a model instance and a list of
+   column metadata describing how each of the model's attribute is to be
+   rendered, and apply the appropriate cell to each attribute.
+
+   @class Backgrid.Row
+   @extends Backbone.View
+*/
+var Row = Backgrid.Row = Backbone.View.extend({
+
+  /** @property */
+  tagName: "tr",
+
+  requiredOptions: ["columns", "model"],
+
+  /**
+     Initializes a row view instance.
+
+     @param {Object} options
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns Column metadata.
+     @param {Backbone.Model} options.model The model instance to render.
+
+     @throws {TypeError} If options.columns or options.model is undefined.
+  */
+  initialize: function (options) {
+
+    Backgrid.requireOptions(options, this.requiredOptions);
+
+    var columns = this.columns = options.columns;
+    if (!(columns instanceof Backbone.Collection)) {
+      columns = this.columns = new Columns(columns);
+    }
+
+    var cells = this.cells = [];
+    for (var i = 0; i < columns.length; i++) {
+      cells.push(this.makeCell(columns.at(i), options));
+    }
+
+    this.listenTo(columns, "change:renderable", function (column, renderable) {
+      for (var i = 0; i < cells.length; i++) {
+        var cell = cells[i];
+        if (cell.column.get("name") == column.get("name")) {
+          if (renderable) cell.$el.show(); else cell.$el.hide();
+        }
+      }
+    });
+
+    this.listenTo(columns, "add", function (column, columns) {
+      var i = columns.indexOf(column);
+      var cell = this.makeCell(column, options);
+      cells.splice(i, 0, cell);
+
+      if (!cell.column.get("renderable")) cell.$el.hide();
+
+      var $el = this.$el;
+      if (i === 0) {
+        $el.prepend(cell.render().$el);
+      }
+      else if (i === columns.length - 1) {
+        $el.append(cell.render().$el);
+      }
+      else {
+        $el.children().eq(i).before(cell.render().$el);
+      }
+    });
+
+    this.listenTo(columns, "remove", function (column, columns, opts) {
+      cells[opts.index].remove();
+      cells.splice(opts.index, 1);
+    });
+  },
+
+  /**
+     Factory method for making a cell. Used by #initialize internally. Override
+     this to provide an appropriate cell instance for a custom Row subclass.
+
+     @protected
+
+     @param {Backgrid.Column} column
+     @param {Object} options The options passed to #initialize.
+
+     @return {Backgrid.Cell}
+  */
+  makeCell: function (column) {
+    return new (column.get("cell"))({
+      column: column,
+      model: this.model
+    });
+  },
+
+  /**
+     Renders a row of cells for this row's model.
+  */
+  render: function () {
+    this.$el.empty();
+
+    var fragment = document.createDocumentFragment();
+
+    for (var i = 0; i < this.cells.length; i++) {
+      var cell = this.cells[i];
+      fragment.appendChild(cell.render().el);
+      if (!cell.column.get("renderable")) cell.$el.hide();
+    }
+
+    this.el.appendChild(fragment);
+
+    this.delegateEvents();
+
+    return this;
+  },
+
+  /**
+     Clean up this row and its cells.
+
+     @chainable
+  */
+  remove: function () {
+    for (var i = 0; i < this.cells.length; i++) {
+      var cell = this.cells[i];
+      cell.remove.apply(cell, arguments);
+    }
+    return Backbone.View.prototype.remove.apply(this, arguments);
+  }
+
+});
+
+/**
+   EmptyRow is a simple container view that takes a list of column and render a
+   row with a single column.
+
+   @class Backgrid.EmptyRow
+   @extends Backbone.View
+*/
+var EmptyRow = Backgrid.EmptyRow = Backbone.View.extend({
+
+  /** @property */
+  tagName: "tr",
+
+  /** @property */
+  emptyText: null,
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {string} options.emptyText
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns Column metadata.
+   */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["emptyText", "columns"]);
+
+    this.emptyText = options.emptyText;
+    this.columns =  options.columns;
+  },
+
+  /**
+     Renders an empty row.
+  */
+  render: function () {
+    this.$el.empty();
+
+    var td = document.createElement("td");
+    td.setAttribute("colspan", this.columns.length);
+    td.textContent = this.emptyText;
+
+    this.el.setAttribute("class", "empty");
+    this.el.appendChild(td);
+
+    return this;
+  }
+});
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   HeaderCell is a special cell class that renders a column header cell. If the
+   column is sortable, a sorter is also rendered and will trigger a table
+   refresh after sorting.
+
+   @class Backgrid.HeaderCell
+   @extends Backbone.View
+ */
+var HeaderCell = Backgrid.HeaderCell = Backbone.View.extend({
+
+  /** @property */
+  tagName: "th",
+
+  /** @property */
+  events: {
+    "click a": "onClick"
+  },
+
+  /**
+    @property {null|"ascending"|"descending"} _direction The current sorting
+    direction of this column.
+  */
+  _direction: null,
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {Backgrid.Column|Object} options.column
+
+     @throws {TypeError} If options.column or options.collection is undefined.
+   */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["column", "collection"]);
+    this.column = options.column;
+    if (!(this.column instanceof Column)) {
+      this.column = new Column(this.column);
+    }
+    this.listenTo(this.collection, "backgrid:sort", this._resetCellDirection);
+  },
+
+  /**
+     Gets or sets the direction of this cell. If called directly without
+     parameters, returns the current direction of this cell, otherwise sets
+     it. If a `null` is given, sets this cell back to the default order.
+
+     @param {null|"ascending"|"descending"} dir
+     @return {null|string} The current direction or the changed direction.
+   */
+  direction: function (dir) {
+    if (arguments.length) {
+      if (this._direction) this.$el.removeClass(this._direction);
+      if (dir) this.$el.addClass(dir);
+      this._direction = dir;
+    }
+
+    return this._direction;
+  },
+
+  /**
+     Event handler for the Backbone `backgrid:sort` event. Resets this cell's
+     direction to default if sorting is being done on another column.
+
+     @private
+   */
+  _resetCellDirection: function (sortByColName, direction, comparator, collection) {
+    if (collection == this.collection) {
+      if (sortByColName !== this.column.get("name")) this.direction(null);
+      else this.direction(direction);
+    }
+  },
+
+  /**
+     Event handler for the `click` event on the cell's anchor. If the column is
+     sortable, clicking on the anchor will cycle through 3 sorting orderings -
+     `ascending`, `descending`, and default.
+   */
+  onClick: function (e) {
+    e.preventDefault();
+
+    var columnName = this.column.get("name");
+
+    if (this.column.get("sortable")) {
+      if (this.direction() === "ascending") {
+        this.sort(columnName, "descending", function (left, right) {
+          var leftVal = left.get(columnName);
+          var rightVal = right.get(columnName);
+          if (leftVal === rightVal) {
+            return 0;
+          }
+          else if (leftVal > rightVal) { return -1; }
+          return 1;
+        });
+      }
+      else if (this.direction() === "descending") {
+        this.sort(columnName, null);
+      }
+      else {
+        this.sort(columnName, "ascending", function (left, right) {
+          var leftVal = left.get(columnName);
+          var rightVal = right.get(columnName);
+          if (leftVal === rightVal) {
+            return 0;
+          }
+          else if (leftVal < rightVal) { return -1; }
+          return 1;
+        });
+      }
+    }
+  },
+
+  /**
+     If the underlying collection is a Backbone.PageableCollection in
+     server-mode or infinite-mode, a page of models is fetched after sorting is
+     done on the server.
+
+     If the underlying collection is a Backbone.PageableCollection in
+     client-mode, or any
+     [Backbone.Collection](http://backbonejs.org/#Collection) instance, sorting
+     is done on the client side. If the collection is an instance of a
+     Backbone.PageableCollection, sorting will be done globally on all the pages
+     and the current page will then be returned.
+
+     Triggers a Backbone `backgrid:sort` event from the collection when done
+     with the column name, direction, comparator and a reference to the
+     collection.
+
+     @param {string} columnName
+     @param {null|"ascending"|"descending"} direction
+     @param {function(*, *): number} [comparator]
+
+     See [Backbone.Collection#comparator](http://backbonejs.org/#Collection-comparator)
+  */
+  sort: function (columnName, direction, comparator) {
+
+    comparator = comparator || this._cidComparator;
+
+    var collection = this.collection;
+
+    if (Backbone.PageableCollection && collection instanceof Backbone.PageableCollection) {
+      var order;
+      if (direction === "ascending") order = -1;
+      else if (direction === "descending") order = 1;
+      else order = null;
+
+      collection.setSorting(order ? columnName : null, order);
+
+      if (collection.mode == "client") {
+        if (!collection.fullCollection.comparator) {
+          collection.fullCollection.comparator = comparator;
+        }
+        collection.fullCollection.sort();
+      }
+      else collection.fetch({reset: true});
+    }
+    else {
+      collection.comparator = comparator;
+      collection.sort();
+    }
+
+    this.collection.trigger("backgrid:sort", columnName, direction, comparator, this.collection);
+  },
+
+  /**
+     Default comparator for Backbone.Collections. Sorts cids in ascending
+     order. The cids of the models are assumed to be in insertion order.
+
+     @private
+     @param {*} left
+     @param {*} right
+  */
+  _cidComparator: function (left, right) {
+    var lcid = left.cid, rcid = right.cid;
+    if (!_.isUndefined(lcid) && !_.isUndefined(rcid)) {
+      lcid = lcid.slice(1) * 1, rcid = rcid.slice(1) * 1;
+      if (lcid < rcid) return -1;
+      else if (lcid > rcid) return 1;
+    }
+
+    return 0;
+  },
+
+  /**
+     Renders a header cell with a sorter and a label.
+   */
+  render: function () {
+    this.$el.empty();
+    var $label = $("<a>").text(this.column.get("label")).append("<b class='sort-caret'></b>");
+    this.$el.append($label);
+    this.delegateEvents();
+    return this;
+  }
+
+});
+
+/**
+   HeaderRow is a controller for a row of header cells.
+
+   @class Backgrid.HeaderRow
+   @extends Backgrid.Row
+ */
+var HeaderRow = Backgrid.HeaderRow = Backgrid.Row.extend({
+
+  requiredOptions: ["columns", "collection"],
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns
+     @param {Backgrid.HeaderCell} [options.headerCell] Customized default
+     HeaderCell for all the columns. Supply a HeaderCell class or instance to a
+     the `headerCell` key in a column definition for column-specific header
+     rendering.
+
+     @throws {TypeError} If options.columns or options.collection is undefined.
+   */
+  initialize: function () {
+    Backgrid.Row.prototype.initialize.apply(this, arguments);
+  },
+
+  makeCell: function (column, options) {
+    var headerCell = column.get("headerCell") || options.headerCell || HeaderCell;
+    headerCell = new headerCell({
+      column: column,
+      collection: this.collection
+    });
+    return headerCell;
+  }
+
+});
+
+/**
+   Header is a special structural view class that renders a table head with a
+   single row of header cells.
+
+   @class Backgrid.Header
+   @extends Backbone.View
+ */
+var Header = Backgrid.Header = Backbone.View.extend({
+
+  /** @property */
+  tagName: "thead",
+
+  /**
+     Initializer. Initializes this table head view to contain a single header
+     row view.
+
+     @param {Object} options
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns Column metadata.
+     @param {Backbone.Model} options.model The model instance to render.
+
+     @throws {TypeError} If options.columns or options.model is undefined.
+   */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["columns", "collection"]);
+
+    this.columns = options.columns;
+    if (!(this.columns instanceof Backbone.Collection)) {
+      this.columns = new Columns(this.columns);
+    }
+
+    this.row = new Backgrid.HeaderRow({
+      columns: this.columns,
+      collection: this.collection
+    });
+  },
+
+  /**
+     Renders this table head with a single row of header cells.
+   */
+  render: function () {
+    this.$el.append(this.row.render().$el);
+    this.delegateEvents();
+    return this;
+  },
+
+  /**
+     Clean up this header and its row.
+
+     @chainable
+   */
+  remove: function () {
+    this.row.remove.apply(this.row, arguments);
+    return Backbone.View.prototype.remove.apply(this, arguments);
+  }
+
+});
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   Body is the table body which contains the rows inside a table. Body is
+   responsible for refreshing the rows after sorting, insertion and removal.
+
+   @class Backgrid.Body
+   @extends Backbone.View
+*/
+var Body = Backgrid.Body = Backbone.View.extend({
+
+  /** @property */
+  tagName: "tbody",
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {Backbone.Collection} options.collection
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns
+     Column metadata.
+     @param {Backgrid.Row} [options.row=Backgrid.Row] The Row class to use.
+     @param {string} [options.emptyText] The text to display in the empty row.
+
+     @throws {TypeError} If options.columns or options.collection is undefined.
+
+     See Backgrid.Row.
+  */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["columns", "collection"]);
+
+    this.columns = options.columns;
+    if (!(this.columns instanceof Backbone.Collection)) {
+      this.columns = new Columns(this.columns);
+    }
+
+    this.row = options.row || Row;
+    this.rows = this.collection.map(function (model) {
+      var row = new this.row({
+        columns: this.columns,
+        model: model
+      });
+
+      return row;
+    }, this);
+
+    this.emptyText = options.emptyText;
+    this._unshiftEmptyRowMayBe();
+
+    var collection = this.collection;
+    this.listenTo(collection, "add", this.insertRow);
+    this.listenTo(collection, "remove", this.removeRow);
+    this.listenTo(collection, "sort", this.refresh);
+    this.listenTo(collection, "reset", this.refresh);
+    this.listenTo(collection, "backgrid:edited", this.moveToNextCell);
+  },
+
+  _unshiftEmptyRowMayBe: function () {
+    if (this.rows.length === 0 && this.emptyText != null) {
+      this.rows.unshift(new EmptyRow({
+        emptyText: this.emptyText,
+        columns: this.columns
+      }));
+    }
+  },
+
+  /**
+     This method can be called either directly or as a callback to a
+     [Backbone.Collecton#add](http://backbonejs.org/#Collection-add) event.
+
+     When called directly, it accepts a model or an array of models and an
+     option hash just like
+     [Backbone.Collection#add](http://backbonejs.org/#Collection-add) and
+     delegates to it. Once the model is added, a new row is inserted into the
+     body and automatically rendered.
+
+     When called as a callback of an `add` event, splices a new row into the
+     body and renders it.
+
+     @param {Backbone.Model} model The model to render as a row.
+     @param {Backbone.Collection} collection When called directly, this
+     parameter is actually the options to
+     [Backbone.Collection#add](http://backbonejs.org/#Collection-add).
+     @param {Object} options When called directly, this must be null.
+
+     See:
+
+     - [Backbone.Collection#add](http://backbonejs.org/#Collection-add)
+  */
+  insertRow: function (model, collection, options) {
+
+    if (this.rows[0] instanceof EmptyRow) this.rows.pop().remove();
+
+    // insertRow() is called directly
+    if (!(collection instanceof Backbone.Collection) && !options) {
+      this.collection.add(model, (options = collection));
+      return;
+    }
+
+    options = _.extend({render: true}, options || {});
+
+    var row = new this.row({
+      columns: this.columns,
+      model: model
+    });
+
+    var index = collection.indexOf(model);
+    this.rows.splice(index, 0, row);
+
+    var $el = this.$el;
+    var $children = $el.children();
+    var $rowEl = row.render().$el;
+
+    if (options.render) {
+      if (index >= $children.length) {
+        $el.append($rowEl);
+      }
+      else {
+        $children.eq(index).before($rowEl);
+      }
+    }
+  },
+
+  /**
+     The method can be called either directly or as a callback to a
+     [Backbone.Collection#remove](http://backbonejs.org/#Collection-remove)
+     event.
+
+     When called directly, it accepts a model or an array of models and an
+     option hash just like
+     [Backbone.Collection#remove](http://backbonejs.org/#Collection-remove) and
+     delegates to it. Once the model is removed, a corresponding row is removed
+     from the body.
+
+     When called as a callback of a `remove` event, splices into the rows and
+     removes the row responsible for rendering the model.
+
+     @param {Backbone.Model} model The model to remove from the body.
+     @param {Backbone.Collection} collection When called directly, this
+     parameter is actually the options to
+     [Backbone.Collection#remove](http://backbonejs.org/#Collection-remove).
+     @param {Object} options When called directly, this must be null.
+
+     See:
+
+     - [Backbone.Collection#remove](http://backbonejs.org/#Collection-remove)
+  */
+  removeRow: function (model, collection, options) {
+
+    // removeRow() is called directly
+    if (!options) {
+      this.collection.remove(model, (options = collection));
+      this._unshiftEmptyRowMayBe();
+      return;
+    }
+
+    if (_.isUndefined(options.render) || options.render) {
+      this.rows[options.index].remove();
+    }
+
+    this.rows.splice(options.index, 1);
+    this._unshiftEmptyRowMayBe();
+  },
+
+  /**
+     Reinitialize all the rows inside the body and re-render them. Triggers a
+     Backbone `backgrid:refresh` event from the collection along with the body
+     instance as its sole parameter when done.
+  */
+  refresh: function () {
+    for (var i = 0; i < this.rows.length; i++) {
+      this.rows[i].remove();
+    }
+
+    this.rows = this.collection.map(function (model) {
+      var row = new this.row({
+        columns: this.columns,
+        model: model
+      });
+
+      return row;
+    }, this);
+    this._unshiftEmptyRowMayBe();
+
+    this.render();
+
+    this.collection.trigger("backgrid:refresh", this);
+
+    return this;
+  },
+
+  /**
+     Renders all the rows inside this body. If the collection is empty and
+     `options.emptyText` is defined and not null in the constructor, an empty
+     row is rendered, otherwise no row is rendered.
+  */
+  render: function () {
+    this.$el.empty();
+
+    var fragment = document.createDocumentFragment();
+    for (var i = 0; i < this.rows.length; i++) {
+      var row = this.rows[i];
+      fragment.appendChild(row.render().el);
+    }
+
+    this.el.appendChild(fragment);
+
+    this.delegateEvents();
+
+    return this;
+  },
+
+  /**
+     Clean up this body and it's rows.
+
+     @chainable
+  */
+  remove: function () {
+    for (var i = 0; i < this.rows.length; i++) {
+      var row = this.rows[i];
+      row.remove.apply(row, arguments);
+    }
+    return Backbone.View.prototype.remove.apply(this, arguments);
+  },
+
+  /**
+     Moves focus to the next renderable and editable cell and return the
+     currently editing cell to display mode.
+
+     @param {Backbone.Model} model The originating model
+     @param {Backgrid.Column} column The originating model column
+     @param {Backgrid.Command} command The Command object constructed from a DOM
+     Event
+  */
+  moveToNextCell: function (model, column, command) {
+    var i = this.collection.indexOf(model);
+    var j = this.columns.indexOf(column);
+
+    if (command.moveUp() || command.moveDown() || command.moveLeft() ||
+        command.moveRight() || command.save()) {
+      var l = this.columns.length;
+      var maxOffset = l * this.collection.length;
+
+      if (command.moveUp() || command.moveDown()) {
+        var row = this.rows[i + (command.moveUp() ? -1 : 1)];
+        if (row) row.cells[j].enterEditMode();
+      }
+      else if (command.moveLeft() || command.moveRight()) {
+        var right = command.moveRight();
+        for (var offset = i * l + j + (right ? 1 : -1);
+             offset >= 0 && offset < maxOffset;
+             right ? offset++ : offset--) {
+          var m = ~~(offset / l);
+          var n = offset - m * l;
+          var cell = this.rows[m].cells[n];
+          if (cell.column.get("renderable") && cell.column.get("editable")) {
+            cell.enterEditMode();
+            break;
+          }
+        }
+      }
+    }
+
+    this.rows[i].cells[j].exitEditMode();
+  }
+});
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   A Footer is a generic class that only defines a default tag `tfoot` and
+   number of required parameters in the initializer.
+
+   @abstract
+   @class Backgrid.Footer
+   @extends Backbone.View
+ */
+var Footer = Backgrid.Footer = Backbone.View.extend({
+
+  /** @property */
+  tagName: "tfoot",
+
+  /**
+     Initializer.
+
+     @param {Object} options
+     @param {*} options.parent The parent view class of this footer.
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns
+     Column metadata.
+     @param {Backbone.Collection} options.collection
+
+     @throws {TypeError} If options.columns or options.collection is undefined.
+  */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["columns", "collection"]);
+    this.columns = options.columns;
+    if (!(this.columns instanceof Backbone.Collection)) {
+      this.columns = new Backgrid.Columns(this.columns);
+    }
+  }
+
+});
+/*
+  backgrid
+  http://github.com/wyuenho/backgrid
+
+  Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+  Licensed under the MIT @license.
+*/
+
+/**
+   Grid represents a data grid that has a header, body and an optional footer.
+
+   By default, a Grid treats each model in a collection as a row, and each
+   attribute in a model as a column. To render a grid you must provide a list of
+   column metadata and a collection to the Grid constructor. Just like any
+   Backbone.View class, the grid is rendered as a DOM node fragment when you
+   call render().
+
+       var grid = Backgrid.Grid({
+         columns: [{ name: "id", label: "ID", type: "string" },
+          // ...
+         ],
+         collections: books
+       });
+
+       $("#table-container").append(grid.render().el);
+
+   Optionally, if you want to customize the rendering of the grid's header and
+   footer, you may choose to extend Backgrid.Header and Backgrid.Footer, and
+   then supply that class or an instance of that class to the Grid constructor.
+   See the documentation for Header and Footer for further details.
+
+       var grid = Backgrid.Grid({
+         columns: [{ name: "id", label: "ID", type: "string" }],
+         collections: books,
+         header: Backgrid.Header.extend({
+              //...
+         }),
+         footer: Backgrid.Paginator
+       });
+
+   Finally, if you want to override how the rows are rendered in the table body,
+   you can supply a Body subclass as the `body` attribute that uses a different
+   Row class.
+
+   @class Backgrid.Grid
+   @extends Backbone.View
+
+   See:
+
+   - Backgrid.Column
+   - Backgrid.Header
+   - Backgrid.Body
+   - Backgrid.Row
+   - Backgrid.Footer
+*/
+var Grid = Backgrid.Grid = Backbone.View.extend({
+
+  /** @property */
+  tagName: "table",
+
+  /** @property */
+  className: "backgrid",
+
+  /** @property */
+  header: Header,
+
+  /** @property */
+  body: Body,
+
+  /** @property */
+  footer: null,
+
+  /**
+     Initializes a Grid instance.
+
+     @param {Object} options
+     @param {Backbone.Collection.<Backgrid.Column>|Array.<Backgrid.Column>|Array.<Object>} options.columns Column metadata.
+     @param {Backbone.Collection} options.collection The collection of tabular model data to display.
+     @param {Backgrid.Header} [options.header=Backgrid.Header] An optional Header class to override the default.
+     @param {Backgrid.Body} [options.body=Backgrid.Body] An optional Body class to override the default.
+     @param {Backgrid.Row} [options.row=Backgrid.Row] An optional Row class to override the default.
+     @param {Backgrid.Footer} [options.footer=Backgrid.Footer] An optional Footer class.
+   */
+  initialize: function (options) {
+    Backgrid.requireOptions(options, ["columns", "collection"]);
+
+    // Convert the list of column objects here first so the subviews don't have
+    // to.
+    if (!(options.columns instanceof Backbone.Collection)) {
+      options.columns = new Columns(options.columns);
+    }
+    this.columns = options.columns;
+
+    var passedThruOptions = _.omit(options, ["el", "id", "attributes",
+                                             "className", "tagName", "events"]);
+
+    this.header = options.header || this.header;
+    this.header = new this.header(passedThruOptions);
+
+    this.body = options.body || this.body;
+    this.body = new this.body(passedThruOptions);
+
+    this.footer = options.footer || this.footer;
+    if (this.footer) {
+      this.footer = new this.footer(passedThruOptions);
+    }
+
+    this.listenTo(this.columns, "reset", function () {
+      this.header = new (this.header.remove().constructor)(passedThruOptions);
+      this.body = new (this.body.remove().constructor)(passedThruOptions);
+      if (this.footer) {
+        this.footer = new (this.footer.remove().constructor)(passedThruOptions);
+      }
+      this.render();
+    });
+  },
+
+  /**
+     Delegates to Backgrid.Body#insertRow.
+   */
+  insertRow: function (model, collection, options) {
+    return this.body.insertRow(model, collection, options);
+  },
+
+  /**
+     Delegates to Backgrid.Body#removeRow.
+   */
+  removeRow: function (model, collection, options) {
+    return this.body.removeRow(model, collection, options);
+  },
+
+  /**
+     Delegates to Backgrid.Columns#add for adding a column. Subviews can listen
+     to the `add` event from their internal `columns` if rerendering needs to
+     happen.
+
+     @param {Object} [options] Options for `Backgrid.Columns#add`.
+     @param {boolean} [options.render=true] Whether to render the column
+     immediately after insertion.
+
+     @chainable
+   */
+  insertColumn: function (column, options) {
+    options = options || {render: true};
+    this.columns.add(column, options);
+    return this;
+  },
+
+  /**
+     Delegates to Backgrid.Columns#remove for removing a column. Subviews can
+     listen to the `remove` event from the internal `columns` if rerendering
+     needs to happen.
+
+     @param {Object} [options] Options for `Backgrid.Columns#remove`.
+
+     @chainable
+   */
+  removeColumn: function (column, options) {
+    this.columns.remove(column, options);
+    return this;
+  },
+
+  /**
+     Renders the grid's header, then footer, then finally the body. Triggers a
+     Backbone `backgrid:rendered` event along with a reference to the grid when
+     the it has successfully been rendered.
+   */
+  render: function () {
+    this.$el.empty();
+
+    this.$el.append(this.header.render().$el);
+
+    if (this.footer) {
+      this.$el.append(this.footer.render().$el);
+    }
+
+    this.$el.append(this.body.render().$el);
+
+    this.delegateEvents();
+
+    this.trigger("backgrid:rendered", this);
+
+    return this;
+  },
+
+  /**
+     Clean up this grid and its subviews.
+
+     @chainable
+   */
+  remove: function () {
+    this.header.remove.apply(this.header, arguments);
+    this.body.remove.apply(this.body, arguments);
+    this.footer && this.footer.remove.apply(this.footer, arguments);
+    return Backbone.View.prototype.remove.apply(this, arguments);
+  }
+
+});
+
+}(this, jQuery, _, Backbone));
 ;/**
  * Copyright (c) 2011-2013 Felix Gnass
  * Licensed under the MIT license
@@ -20661,1207 +21129,6 @@ _.extend(Marionette.Module, {
   return Spinner
 
 }));
-
-;/* ========================================================================
- * bootstrap-switch - v2.0.1
- * http://www.bootstrap-switch.org
- * ========================================================================
- * Copyright 2012-2013 Mattia Larentis
- *
- * ========================================================================
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ========================================================================
- */
-
-(function() {
-  (function($) {
-    $.fn.bootstrapSwitch = function(method) {
-      var methods;
-      methods = {
-        init: function() {
-          return this.each(function() {
-            var $div, $element, $form, $label, $switchLeft, $switchRight, $wrapper, changeState;
-            $element = $(this);
-            $switchLeft = $("<span>", {
-              "class": "switch-left",
-              html: function() {
-                var html, label;
-                html = "ON";
-                label = $element.data("on-label");
-                if (label != null) {
-                  html = label;
-                }
-                return html;
-              }
-            });
-            $switchRight = $("<span>", {
-              "class": "switch-right",
-              html: function() {
-                var html, label;
-                html = "OFF";
-                label = $element.data("off-label");
-                if (label != null) {
-                  html = label;
-                }
-                return html;
-              }
-            });
-            $label = $("<label>", {
-              "for": $element.attr("id"),
-              html: function() {
-                var html, icon, label;
-                html = "&nbsp;";
-                icon = $element.data("label-icon");
-                label = $element.data("text-label");
-                if (icon != null) {
-                  html = "<i class=\"icon " + icon + "\"></i>";
-                }
-                if (label != null) {
-                  html = label;
-                }
-                return html;
-              }
-            });
-            $div = $("<div>");
-            $wrapper = $("<div>", {
-              "class": "has-switch",
-              tabindex: 0
-            });
-            $form = $element.closest("form");
-            changeState = function() {
-              if ($label.hasClass("label-change-switch")) {
-                return;
-              }
-              return $label.trigger("mousedown").trigger("mouseup").trigger("click");
-            };
-            $element.data("bootstrap-switch", true);
-            if ($element.data("on") != null) {
-              $switchLeft.addClass("switch-" + $element.data("on"));
-            }
-            if ($element.data("off") != null) {
-              $switchRight.addClass("switch-" + $element.data("off"));
-            }
-            $wrapper.data("animated", false);
-            if ($element.data("animated") !== false) {
-              $wrapper.addClass("switch-animate").data("animated", true);
-            }
-            $div = $element.wrap($div).parent();
-            $wrapper = $div.wrap($wrapper).parent();
-            if ($element.attr("class")) {
-              $.each(["switch-mini", "switch-small", "switch-large"], function(i, cls) {
-                if ($element.attr("class").indexOf(cls) >= 0) {
-                  return $wrapper.addClass(cls);
-                }
-              });
-            }
-            $element.before($switchLeft).before($label).before($switchRight);
-            $wrapper.addClass($element.is(":checked") ? "switch-on" : "switch-off");
-            if ($element.is(":disabled") || $element.is("[readonly]")) {
-              $wrapper.addClass("disabled");
-            }
-            $element.on("keydown", function(e) {
-              if (e.keyCode !== 32) {
-                return;
-              }
-              e.stopImmediatePropagation();
-              e.preventDefault();
-              return changeState();
-            }).on("change", function(e, skip) {
-              var isChecked, state;
-              isChecked = $element.is(":checked");
-              state = $wrapper.hasClass("switch-off");
-              e.preventDefault();
-              $div.css("left", "");
-              if (state !== isChecked) {
-                return;
-              }
-              if (isChecked) {
-                $wrapper.removeClass("switch-off").addClass("switch-on");
-              } else {
-                $wrapper.removeClass("switch-on").addClass("switch-off");
-              }
-              if ($wrapper.data("animated") !== false) {
-                $wrapper.addClass("switch-animate");
-              }
-              if (typeof skip === "boolean" && skip) {
-                return;
-              }
-              return $element.trigger("switch-change", {
-                el: $element,
-                value: isChecked
-              });
-            });
-            $wrapper.on("keydown", function(e) {
-              if (!e.which || $element.is(":disabled") || $element.is("[readonly]")) {
-                return;
-              }
-              switch (e.which) {
-                case 32:
-                  e.preventDefault();
-                  return changeState();
-                case 37:
-                  e.preventDefault();
-                  if ($element.is(":checked")) {
-                    return changeState();
-                  }
-                  break;
-                case 39:
-                  e.preventDefault();
-                  if (!$element.is(":checked")) {
-                    return changeState();
-                  }
-              }
-            });
-            $switchLeft.on("click", function() {
-              return changeState();
-            });
-            $switchRight.on("click", function() {
-              return changeState();
-            });
-            $label.on("mousedown touchstart", function(e) {
-              var moving;
-              moving = false;
-              e.preventDefault();
-              e.stopImmediatePropagation();
-              $wrapper.removeClass("switch-animate");
-              if ($element.is(":disabled") || $element.is("[readonly]") || $element.hasClass("radio-no-uncheck")) {
-                return $label.unbind("click");
-              }
-              return $label.on("mousemove touchmove", function(e) {
-                var left, percent, relativeX, right;
-                relativeX = (e.pageX || e.originalEvent.targetTouches[0].pageX) - $wrapper.offset().left;
-                percent = (relativeX / $wrapper.width()) * 100;
-                left = 25;
-                right = 75;
-                moving = true;
-                if (percent < left) {
-                  percent = left;
-                } else if (percent > right) {
-                  percent = right;
-                }
-                return $div.css("left", (percent - right) + "%");
-              }).on("click touchend", function(e) {
-                e.stopImmediatePropagation();
-                e.preventDefault();
-                $label.unbind("mouseleave");
-                if (moving) {
-                  $element.prop("checked", parseInt($label.parent().css("left"), 10) > -25);
-                } else {
-                  $element.prop("checked", !$element.is(":checked"));
-                }
-                moving = false;
-                return $element.trigger("change");
-              }).on("mouseleave", function(e) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                $label.unbind("mouseleave mousemove").trigger("mouseup");
-                return $element.prop("checked", parseInt($label.parent().css("left"), 10) > -25).trigger("change");
-              }).on("mouseup", function(e) {
-                e.stopImmediatePropagation();
-                e.preventDefault();
-                return $label.trigger("mouseleave");
-              });
-            });
-            if (!$form.data("bootstrap-switch")) {
-              return $form.bind("reset", function() {
-                return window.setTimeout(function() {
-                  return $form.find(".has-switch").each(function() {
-                    var $input;
-                    $input = $(this).find("input");
-                    return $input.prop("checked", $input.is(":checked")).trigger("change");
-                  });
-                }, 1);
-              }).data("bootstrap-switch", true);
-            }
-          });
-        },
-        setDisabled: function(disabled) {
-          var $element, $wrapper;
-          $element = $(this);
-          $wrapper = $element.parents(".has-switch");
-          if (disabled) {
-            $wrapper.addClass("disabled");
-            $element.prop("disabled", true);
-          } else {
-            $wrapper.removeClass("disabled");
-            $element.prop("disabled", false);
-          }
-          return $element;
-        },
-        toggleDisabled: function() {
-          var $element;
-          $element = $(this);
-          $element.prop("disabled", !$element.is(":disabled")).parents(".has-switch").toggleClass("disabled");
-          return $element;
-        },
-        isDisabled: function() {
-          return $(this).is(":disabled");
-        },
-        setReadOnly: function(readonly) {
-          var $element, $wrapper;
-          $element = $(this);
-          $wrapper = $element.parents(".has-switch");
-          if (readonly) {
-            $wrapper.addClass("disabled");
-            $element.prop("readonly", true);
-          } else {
-            $wrapper.removeClass("disabled");
-            $element.prop("readonly", false);
-          }
-          return $element;
-        },
-        toggleReadOnly: function() {
-          var $element;
-          $element = $(this);
-          $element.prop("readonly", !$element.is("[readonly]")).parents(".has-switch").toggleClass("disabled");
-          return $element;
-        },
-        isReadOnly: function() {
-          return $(this).is("[readonly]");
-        },
-        toggleState: function(skip) {
-          var $element;
-          $element = $(this);
-          $element.prop("checked", !$element.is(":checked")).trigger("change", skip);
-          return $element;
-        },
-        toggleRadioState: function(skip) {
-          var $element;
-          $element = $(this);
-          $element.not(":checked").prop("checked", !$element.is(":checked")).trigger("change", skip);
-          return $element;
-        },
-        toggleRadioStateAllowUncheck: function(uncheck, skip) {
-          var $element;
-          $element = $(this);
-          if (uncheck) {
-            $element.not(":checked").trigger("change", skip);
-          } else {
-            $element.not(":checked").prop("checked", !$element.is(":checked")).trigger("change", skip);
-          }
-          return $element;
-        },
-        setState: function(value, skip) {
-          var $element;
-          $element = $(this);
-          $element.prop("checked", value).trigger("change", skip);
-          return $element;
-        },
-        setOnLabel: function(value) {
-          var $element;
-          $element = $(this);
-          $element.siblings(".switch-left").html(value);
-          return $element;
-        },
-        setOffLabel: function(value) {
-          var $element;
-          $element = $(this);
-          $element.siblings(".switch-right").html(value);
-          return $element;
-        },
-        setOnClass: function(value) {
-          var $element, $switchLeft, cls;
-          $element = $(this);
-          $switchLeft = $element.siblings(".switch-left");
-          cls = $element.attr("data-on");
-          if (value == null) {
-            return;
-          }
-          if (cls != null) {
-            $switchLeft.removeClass("switch-" + cls);
-          }
-          $switchLeft.addClass("switch-" + value);
-          return $element;
-        },
-        setOffClass: function(value) {
-          var $element, $switchRight, cls;
-          $element = $(this);
-          $switchRight = $element.siblings(".switch-right");
-          cls = $element.attr("data-off");
-          if (value == null) {
-            return;
-          }
-          if (cls != null) {
-            $switchRight.removeClass("switch-" + cls);
-          }
-          $switchRight.addClass("switch-" + value);
-          return $element;
-        },
-        setAnimated: function(value) {
-          var $element, $wrapper;
-          $element = $(this);
-          $wrapper = $element.parents(".has-switch");
-          if (value == null) {
-            value = false;
-          }
-          $wrapper.data("animated", value).attr("data-animated", value)[$wrapper.data("animated") !== false ? "addClass" : "removeClass"]("switch-animate");
-          return $element;
-        },
-        setSizeClass: function(value) {
-          var $element, $wrapper;
-          $element = $(this);
-          $wrapper = $element.parents(".has-switch");
-          $.each(["switch-mini", "switch-small", "switch-large"], function(i, cls) {
-            return $wrapper[cls !== value ? "removeClass" : "addClass"](cls);
-          });
-          return $element;
-        },
-        setTextLabel: function(value) {
-          var $element;
-          $element = $(this);
-          $element.siblings("label").html(value || "&nbsp");
-          return $element;
-        },
-        setTextIcon: function(value) {
-          var $element;
-          $element = $(this);
-          $element.siblings("label").html(value ? "<i class=\"icon " + value + "\"></i>" : "&nbsp;");
-          return $element;
-        },
-        state: function() {
-          return $(this).is(":checked");
-        },
-        destroy: function() {
-          var $div, $element, $form;
-          $element = $(this);
-          $div = $element.parent();
-          $form = $div.closest("form");
-          $div.children().not($element).remove();
-          $element.unwrap().unwrap().off("change");
-          if ($form.length) {
-            $form.off("reset").removeData("bootstrap-switch");
-          }
-          return $element;
-        }
-      };
-      if (methods[method]) {
-        return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-      }
-      if (typeof method === "object" || !method) {
-        return methods.init.apply(this, arguments);
-      }
-      return $.error("Method " + method + " does not exist!");
-    };
-    return this;
-  })(jQuery);
-
-}).call(this);
-
-;// Console-polyfill. MIT license.
-// https://github.com/paulmillr/console-polyfill
-// Make it safe to do console.log() always.
-(function(con) {
-  'use strict';
-  var prop, method;
-  var empty = {};
-  var dummy = function() {};
-  var properties = 'memory'.split(',');
-  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
-     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
-     'time,timeEnd,trace,warn').split(',');
-  while (prop = properties.pop()) con[prop] = con[prop] || empty;
-  while (method = methods.pop()) con[method] = con[method] || dummy;
-})(this.console = this.console || {});
-
-;/**
- * @preserve FastClick: polyfill to remove click delays on browsers with touch UIs.
- *
- * @version 0.6.12
- * @codingstandard ftlabs-jsv2
- * @copyright The Financial Times Limited [All Rights Reserved]
- * @license MIT License (see LICENSE.txt)
- */
-
-/*jslint browser:true, node:true*/
-/*global define, Event, Node*/
-
-
-/**
- * Instantiate fast-clicking listeners on the specificed layer.
- *
- * @constructor
- * @param {Element} layer The layer to listen on
- */
-function FastClick(layer) {
-	'use strict';
-	var oldOnClick, self = this;
-
-
-	/**
-	 * Whether a click is currently being tracked.
-	 *
-	 * @type boolean
-	 */
-	this.trackingClick = false;
-
-
-	/**
-	 * Timestamp for when when click tracking started.
-	 *
-	 * @type number
-	 */
-	this.trackingClickStart = 0;
-
-
-	/**
-	 * The element being tracked for a click.
-	 *
-	 * @type EventTarget
-	 */
-	this.targetElement = null;
-
-
-	/**
-	 * X-coordinate of touch start event.
-	 *
-	 * @type number
-	 */
-	this.touchStartX = 0;
-
-
-	/**
-	 * Y-coordinate of touch start event.
-	 *
-	 * @type number
-	 */
-	this.touchStartY = 0;
-
-
-	/**
-	 * ID of the last touch, retrieved from Touch.identifier.
-	 *
-	 * @type number
-	 */
-	this.lastTouchIdentifier = 0;
-
-
-	/**
-	 * Touchmove boundary, beyond which a click will be cancelled.
-	 *
-	 * @type number
-	 */
-	this.touchBoundary = 10;
-
-
-	/**
-	 * The FastClick layer.
-	 *
-	 * @type Element
-	 */
-	this.layer = layer;
-
-	if (!layer || !layer.nodeType) {
-		throw new TypeError('Layer must be a document node');
-	}
-
-	/** @type function() */
-	this.onClick = function() { return FastClick.prototype.onClick.apply(self, arguments); };
-
-	/** @type function() */
-	this.onMouse = function() { return FastClick.prototype.onMouse.apply(self, arguments); };
-
-	/** @type function() */
-	this.onTouchStart = function() { return FastClick.prototype.onTouchStart.apply(self, arguments); };
-
-	/** @type function() */
-	this.onTouchMove = function() { return FastClick.prototype.onTouchMove.apply(self, arguments); };
-
-	/** @type function() */
-	this.onTouchEnd = function() { return FastClick.prototype.onTouchEnd.apply(self, arguments); };
-
-	/** @type function() */
-	this.onTouchCancel = function() { return FastClick.prototype.onTouchCancel.apply(self, arguments); };
-
-	if (FastClick.notNeeded(layer)) {
-		return;
-	}
-
-	// Set up event handlers as required
-	if (this.deviceIsAndroid) {
-		layer.addEventListener('mouseover', this.onMouse, true);
-		layer.addEventListener('mousedown', this.onMouse, true);
-		layer.addEventListener('mouseup', this.onMouse, true);
-	}
-
-	layer.addEventListener('click', this.onClick, true);
-	layer.addEventListener('touchstart', this.onTouchStart, false);
-	layer.addEventListener('touchmove', this.onTouchMove, false);
-	layer.addEventListener('touchend', this.onTouchEnd, false);
-	layer.addEventListener('touchcancel', this.onTouchCancel, false);
-
-	// Hack is required for browsers that don't support Event#stopImmediatePropagation (e.g. Android 2)
-	// which is how FastClick normally stops click events bubbling to callbacks registered on the FastClick
-	// layer when they are cancelled.
-	if (!Event.prototype.stopImmediatePropagation) {
-		layer.removeEventListener = function(type, callback, capture) {
-			var rmv = Node.prototype.removeEventListener;
-			if (type === 'click') {
-				rmv.call(layer, type, callback.hijacked || callback, capture);
-			} else {
-				rmv.call(layer, type, callback, capture);
-			}
-		};
-
-		layer.addEventListener = function(type, callback, capture) {
-			var adv = Node.prototype.addEventListener;
-			if (type === 'click') {
-				adv.call(layer, type, callback.hijacked || (callback.hijacked = function(event) {
-					if (!event.propagationStopped) {
-						callback(event);
-					}
-				}), capture);
-			} else {
-				adv.call(layer, type, callback, capture);
-			}
-		};
-	}
-
-	// If a handler is already declared in the element's onclick attribute, it will be fired before
-	// FastClick's onClick handler. Fix this by pulling out the user-defined handler function and
-	// adding it as listener.
-	if (typeof layer.onclick === 'function') {
-
-		// Android browser on at least 3.2 requires a new reference to the function in layer.onclick
-		// - the old one won't work if passed to addEventListener directly.
-		oldOnClick = layer.onclick;
-		layer.addEventListener('click', function(event) {
-			oldOnClick(event);
-		}, false);
-		layer.onclick = null;
-	}
-}
-
-
-/**
- * Android requires exceptions.
- *
- * @type boolean
- */
-FastClick.prototype.deviceIsAndroid = navigator.userAgent.indexOf('Android') > 0;
-
-
-/**
- * iOS requires exceptions.
- *
- * @type boolean
- */
-FastClick.prototype.deviceIsIOS = /iP(ad|hone|od)/.test(navigator.userAgent);
-
-
-/**
- * iOS 4 requires an exception for select elements.
- *
- * @type boolean
- */
-FastClick.prototype.deviceIsIOS4 = FastClick.prototype.deviceIsIOS && (/OS 4_\d(_\d)?/).test(navigator.userAgent);
-
-
-/**
- * iOS 6.0(+?) requires the target element to be manually derived
- *
- * @type boolean
- */
-FastClick.prototype.deviceIsIOSWithBadTarget = FastClick.prototype.deviceIsIOS && (/OS ([6-9]|\d{2})_\d/).test(navigator.userAgent);
-
-
-/**
- * Determine whether a given element requires a native click.
- *
- * @param {EventTarget|Element} target Target DOM element
- * @returns {boolean} Returns true if the element needs a native click
- */
-FastClick.prototype.needsClick = function(target) {
-	'use strict';
-	switch (target.nodeName.toLowerCase()) {
-
-	// Don't send a synthetic click to disabled inputs (issue #62)
-	case 'button':
-	case 'select':
-	case 'textarea':
-		if (target.disabled) {
-			return true;
-		}
-
-		break;
-	case 'input':
-
-		// File inputs need real clicks on iOS 6 due to a browser bug (issue #68)
-		if ((this.deviceIsIOS && target.type === 'file') || target.disabled) {
-			return true;
-		}
-
-		break;
-	case 'label':
-	case 'video':
-		return true;
-	}
-
-	return (/\bneedsclick\b/).test(target.className);
-};
-
-
-/**
- * Determine whether a given element requires a call to focus to simulate click into element.
- *
- * @param {EventTarget|Element} target Target DOM element
- * @returns {boolean} Returns true if the element requires a call to focus to simulate native click.
- */
-FastClick.prototype.needsFocus = function(target) {
-	'use strict';
-	switch (target.nodeName.toLowerCase()) {
-	case 'textarea':
-		return true;
-	case 'select':
-		return !this.deviceIsAndroid;
-	case 'input':
-		switch (target.type) {
-		case 'button':
-		case 'checkbox':
-		case 'file':
-		case 'image':
-		case 'radio':
-		case 'submit':
-			return false;
-		}
-
-		// No point in attempting to focus disabled inputs
-		return !target.disabled && !target.readOnly;
-	default:
-		return (/\bneedsfocus\b/).test(target.className);
-	}
-};
-
-
-/**
- * Send a click event to the specified element.
- *
- * @param {EventTarget|Element} targetElement
- * @param {Event} event
- */
-FastClick.prototype.sendClick = function(targetElement, event) {
-	'use strict';
-	var clickEvent, touch;
-
-	// On some Android devices activeElement needs to be blurred otherwise the synthetic click will have no effect (#24)
-	if (document.activeElement && document.activeElement !== targetElement) {
-		document.activeElement.blur();
-	}
-
-	touch = event.changedTouches[0];
-
-	// Synthesise a click event, with an extra attribute so it can be tracked
-	clickEvent = document.createEvent('MouseEvents');
-	clickEvent.initMouseEvent(this.determineEventType(targetElement), true, true, window, 1, touch.screenX, touch.screenY, touch.clientX, touch.clientY, false, false, false, false, 0, null);
-	clickEvent.forwardedTouchEvent = true;
-	targetElement.dispatchEvent(clickEvent);
-};
-
-FastClick.prototype.determineEventType = function(targetElement) {
-	'use strict';
-
-	//Issue #159: Android Chrome Select Box does not open with a synthetic click event
-	if (this.deviceIsAndroid && targetElement.tagName.toLowerCase() === 'select') {
-		return 'mousedown';
-	}
-
-	return 'click';
-};
-
-
-/**
- * @param {EventTarget|Element} targetElement
- */
-FastClick.prototype.focus = function(targetElement) {
-	'use strict';
-	var length;
-
-	// Issue #160: on iOS 7, some input elements (e.g. date datetime) throw a vague TypeError on setSelectionRange. These elements don't have an integer value for the selectionStart and selectionEnd properties, but unfortunately that can't be used for detection because accessing the properties also throws a TypeError. Just check the type instead. Filed as Apple bug #15122724.
-	if (this.deviceIsIOS && targetElement.setSelectionRange && targetElement.type.indexOf('date') !== 0 && targetElement.type !== 'time') {
-		length = targetElement.value.length;
-		targetElement.setSelectionRange(length, length);
-	} else {
-		targetElement.focus();
-	}
-};
-
-
-/**
- * Check whether the given target element is a child of a scrollable layer and if so, set a flag on it.
- *
- * @param {EventTarget|Element} targetElement
- */
-FastClick.prototype.updateScrollParent = function(targetElement) {
-	'use strict';
-	var scrollParent, parentElement;
-
-	scrollParent = targetElement.fastClickScrollParent;
-
-	// Attempt to discover whether the target element is contained within a scrollable layer. Re-check if the
-	// target element was moved to another parent.
-	if (!scrollParent || !scrollParent.contains(targetElement)) {
-		parentElement = targetElement;
-		do {
-			if (parentElement.scrollHeight > parentElement.offsetHeight) {
-				scrollParent = parentElement;
-				targetElement.fastClickScrollParent = parentElement;
-				break;
-			}
-
-			parentElement = parentElement.parentElement;
-		} while (parentElement);
-	}
-
-	// Always update the scroll top tracker if possible.
-	if (scrollParent) {
-		scrollParent.fastClickLastScrollTop = scrollParent.scrollTop;
-	}
-};
-
-
-/**
- * @param {EventTarget} targetElement
- * @returns {Element|EventTarget}
- */
-FastClick.prototype.getTargetElementFromEventTarget = function(eventTarget) {
-	'use strict';
-
-	// On some older browsers (notably Safari on iOS 4.1 - see issue #56) the event target may be a text node.
-	if (eventTarget.nodeType === Node.TEXT_NODE) {
-		return eventTarget.parentNode;
-	}
-
-	return eventTarget;
-};
-
-
-/**
- * On touch start, record the position and scroll offset.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onTouchStart = function(event) {
-	'use strict';
-	var targetElement, touch, selection;
-
-	// Ignore multiple touches, otherwise pinch-to-zoom is prevented if both fingers are on the FastClick element (issue #111).
-	if (event.targetTouches.length > 1) {
-		return true;
-	}
-
-	targetElement = this.getTargetElementFromEventTarget(event.target);
-	touch = event.targetTouches[0];
-
-	if (this.deviceIsIOS) {
-
-		// Only trusted events will deselect text on iOS (issue #49)
-		selection = window.getSelection();
-		if (selection.rangeCount && !selection.isCollapsed) {
-			return true;
-		}
-
-		if (!this.deviceIsIOS4) {
-
-			// Weird things happen on iOS when an alert or confirm dialog is opened from a click event callback (issue #23):
-			// when the user next taps anywhere else on the page, new touchstart and touchend events are dispatched
-			// with the same identifier as the touch event that previously triggered the click that triggered the alert.
-			// Sadly, there is an issue on iOS 4 that causes some normal touch events to have the same identifier as an
-			// immediately preceeding touch event (issue #52), so this fix is unavailable on that platform.
-			if (touch.identifier === this.lastTouchIdentifier) {
-				event.preventDefault();
-				return false;
-			}
-
-			this.lastTouchIdentifier = touch.identifier;
-
-			// If the target element is a child of a scrollable layer (using -webkit-overflow-scrolling: touch) and:
-			// 1) the user does a fling scroll on the scrollable layer
-			// 2) the user stops the fling scroll with another tap
-			// then the event.target of the last 'touchend' event will be the element that was under the user's finger
-			// when the fling scroll was started, causing FastClick to send a click event to that layer - unless a check
-			// is made to ensure that a parent layer was not scrolled before sending a synthetic click (issue #42).
-			this.updateScrollParent(targetElement);
-		}
-	}
-
-	this.trackingClick = true;
-	this.trackingClickStart = event.timeStamp;
-	this.targetElement = targetElement;
-
-	this.touchStartX = touch.pageX;
-	this.touchStartY = touch.pageY;
-
-	// Prevent phantom clicks on fast double-tap (issue #36)
-	if ((event.timeStamp - this.lastClickTime) < 200) {
-		event.preventDefault();
-	}
-
-	return true;
-};
-
-
-/**
- * Based on a touchmove event object, check whether the touch has moved past a boundary since it started.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.touchHasMoved = function(event) {
-	'use strict';
-	var touch = event.changedTouches[0], boundary = this.touchBoundary;
-
-	if (Math.abs(touch.pageX - this.touchStartX) > boundary || Math.abs(touch.pageY - this.touchStartY) > boundary) {
-		return true;
-	}
-
-	return false;
-};
-
-
-/**
- * Update the last position.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onTouchMove = function(event) {
-	'use strict';
-	if (!this.trackingClick) {
-		return true;
-	}
-
-	// If the touch has moved, cancel the click tracking
-	if (this.targetElement !== this.getTargetElementFromEventTarget(event.target) || this.touchHasMoved(event)) {
-		this.trackingClick = false;
-		this.targetElement = null;
-	}
-
-	return true;
-};
-
-
-/**
- * Attempt to find the labelled control for the given label element.
- *
- * @param {EventTarget|HTMLLabelElement} labelElement
- * @returns {Element|null}
- */
-FastClick.prototype.findControl = function(labelElement) {
-	'use strict';
-
-	// Fast path for newer browsers supporting the HTML5 control attribute
-	if (labelElement.control !== undefined) {
-		return labelElement.control;
-	}
-
-	// All browsers under test that support touch events also support the HTML5 htmlFor attribute
-	if (labelElement.htmlFor) {
-		return document.getElementById(labelElement.htmlFor);
-	}
-
-	// If no for attribute exists, attempt to retrieve the first labellable descendant element
-	// the list of which is defined here: http://www.w3.org/TR/html5/forms.html#category-label
-	return labelElement.querySelector('button, input:not([type=hidden]), keygen, meter, output, progress, select, textarea');
-};
-
-
-/**
- * On touch end, determine whether to send a click event at once.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onTouchEnd = function(event) {
-	'use strict';
-	var forElement, trackingClickStart, targetTagName, scrollParent, touch, targetElement = this.targetElement;
-
-	if (!this.trackingClick) {
-		return true;
-	}
-
-	// Prevent phantom clicks on fast double-tap (issue #36)
-	if ((event.timeStamp - this.lastClickTime) < 200) {
-		this.cancelNextClick = true;
-		return true;
-	}
-
-	// Reset to prevent wrong click cancel on input (issue #156).
-	this.cancelNextClick = false;
-
-	this.lastClickTime = event.timeStamp;
-
-	trackingClickStart = this.trackingClickStart;
-	this.trackingClick = false;
-	this.trackingClickStart = 0;
-
-	// On some iOS devices, the targetElement supplied with the event is invalid if the layer
-	// is performing a transition or scroll, and has to be re-detected manually. Note that
-	// for this to function correctly, it must be called *after* the event target is checked!
-	// See issue #57; also filed as rdar://13048589 .
-	if (this.deviceIsIOSWithBadTarget) {
-		touch = event.changedTouches[0];
-
-		// In certain cases arguments of elementFromPoint can be negative, so prevent setting targetElement to null
-		targetElement = document.elementFromPoint(touch.pageX - window.pageXOffset, touch.pageY - window.pageYOffset) || targetElement;
-		targetElement.fastClickScrollParent = this.targetElement.fastClickScrollParent;
-	}
-
-	targetTagName = targetElement.tagName.toLowerCase();
-	if (targetTagName === 'label') {
-		forElement = this.findControl(targetElement);
-		if (forElement) {
-			this.focus(targetElement);
-			if (this.deviceIsAndroid) {
-				return false;
-			}
-
-			targetElement = forElement;
-		}
-	} else if (this.needsFocus(targetElement)) {
-
-		// Case 1: If the touch started a while ago (best guess is 100ms based on tests for issue #36) then focus will be triggered anyway. Return early and unset the target element reference so that the subsequent click will be allowed through.
-		// Case 2: Without this exception for input elements tapped when the document is contained in an iframe, then any inputted text won't be visible even though the value attribute is updated as the user types (issue #37).
-		if ((event.timeStamp - trackingClickStart) > 100 || (this.deviceIsIOS && window.top !== window && targetTagName === 'input')) {
-			this.targetElement = null;
-			return false;
-		}
-
-		this.focus(targetElement);
-		this.sendClick(targetElement, event);
-
-		// Select elements need the event to go through on iOS 4, otherwise the selector menu won't open.
-		if (!this.deviceIsIOS4 || targetTagName !== 'select') {
-			this.targetElement = null;
-			event.preventDefault();
-		}
-
-		return false;
-	}
-
-	if (this.deviceIsIOS && !this.deviceIsIOS4) {
-
-		// Don't send a synthetic click event if the target element is contained within a parent layer that was scrolled
-		// and this tap is being used to stop the scrolling (usually initiated by a fling - issue #42).
-		scrollParent = targetElement.fastClickScrollParent;
-		if (scrollParent && scrollParent.fastClickLastScrollTop !== scrollParent.scrollTop) {
-			return true;
-		}
-	}
-
-	// Prevent the actual click from going though - unless the target node is marked as requiring
-	// real clicks or if it is in the whitelist in which case only non-programmatic clicks are permitted.
-	if (!this.needsClick(targetElement)) {
-		event.preventDefault();
-		this.sendClick(targetElement, event);
-	}
-
-	return false;
-};
-
-
-/**
- * On touch cancel, stop tracking the click.
- *
- * @returns {void}
- */
-FastClick.prototype.onTouchCancel = function() {
-	'use strict';
-	this.trackingClick = false;
-	this.targetElement = null;
-};
-
-
-/**
- * Determine mouse events which should be permitted.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onMouse = function(event) {
-	'use strict';
-
-	// If a target element was never set (because a touch event was never fired) allow the event
-	if (!this.targetElement) {
-		return true;
-	}
-
-	if (event.forwardedTouchEvent) {
-		return true;
-	}
-
-	// Programmatically generated events targeting a specific element should be permitted
-	if (!event.cancelable) {
-		return true;
-	}
-
-	// Derive and check the target element to see whether the mouse event needs to be permitted;
-	// unless explicitly enabled, prevent non-touch click events from triggering actions,
-	// to prevent ghost/doubleclicks.
-	if (!this.needsClick(this.targetElement) || this.cancelNextClick) {
-
-		// Prevent any user-added listeners declared on FastClick element from being fired.
-		if (event.stopImmediatePropagation) {
-			event.stopImmediatePropagation();
-		} else {
-
-			// Part of the hack for browsers that don't support Event#stopImmediatePropagation (e.g. Android 2)
-			event.propagationStopped = true;
-		}
-
-		// Cancel the event
-		event.stopPropagation();
-		event.preventDefault();
-
-		return false;
-	}
-
-	// If the mouse event is permitted, return true for the action to go through.
-	return true;
-};
-
-
-/**
- * On actual clicks, determine whether this is a touch-generated click, a click action occurring
- * naturally after a delay after a touch (which needs to be cancelled to avoid duplication), or
- * an actual click which should be permitted.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onClick = function(event) {
-	'use strict';
-	var permitted;
-
-	// It's possible for another FastClick-like library delivered with third-party code to fire a click event before FastClick does (issue #44). In that case, set the click-tracking flag back to false and return early. This will cause onTouchEnd to return early.
-	if (this.trackingClick) {
-		this.targetElement = null;
-		this.trackingClick = false;
-		return true;
-	}
-
-	// Very odd behaviour on iOS (issue #18): if a submit element is present inside a form and the user hits enter in the iOS simulator or clicks the Go button on the pop-up OS keyboard the a kind of 'fake' click event will be triggered with the submit-type input element as the target.
-	if (event.target.type === 'submit' && event.detail === 0) {
-		return true;
-	}
-
-	permitted = this.onMouse(event);
-
-	// Only unset targetElement if the click is not permitted. This will ensure that the check for !targetElement in onMouse fails and the browser's click doesn't go through.
-	if (!permitted) {
-		this.targetElement = null;
-	}
-
-	// If clicks are permitted, return true for the action to go through.
-	return permitted;
-};
-
-
-/**
- * Remove all FastClick's event listeners.
- *
- * @returns {void}
- */
-FastClick.prototype.destroy = function() {
-	'use strict';
-	var layer = this.layer;
-
-	if (this.deviceIsAndroid) {
-		layer.removeEventListener('mouseover', this.onMouse, true);
-		layer.removeEventListener('mousedown', this.onMouse, true);
-		layer.removeEventListener('mouseup', this.onMouse, true);
-	}
-
-	layer.removeEventListener('click', this.onClick, true);
-	layer.removeEventListener('touchstart', this.onTouchStart, false);
-	layer.removeEventListener('touchmove', this.onTouchMove, false);
-	layer.removeEventListener('touchend', this.onTouchEnd, false);
-	layer.removeEventListener('touchcancel', this.onTouchCancel, false);
-};
-
-
-/**
- * Check whether FastClick is needed.
- *
- * @param {Element} layer The layer to listen on
- */
-FastClick.notNeeded = function(layer) {
-	'use strict';
-	var metaViewport;
-	var chromeVersion;
-
-	// Devices that don't support touch don't need FastClick
-	if (typeof window.ontouchstart === 'undefined') {
-		return true;
-	}
-
-	// Chrome version - zero for other browsers
-	chromeVersion = +(/Chrome\/([0-9]+)/.exec(navigator.userAgent) || [,0])[1];
-
-	if (chromeVersion) {
-
-		if (FastClick.prototype.deviceIsAndroid) {
-			metaViewport = document.querySelector('meta[name=viewport]');
-			
-			if (metaViewport) {
-				// Chrome on Android with user-scalable="no" doesn't need FastClick (issue #89)
-				if (metaViewport.content.indexOf('user-scalable=no') !== -1) {
-					return true;
-				}
-				// Chrome 32 and above with width=device-width or less don't need FastClick
-				if (chromeVersion > 31 && window.innerWidth <= window.screen.width) {
-					return true;
-				}
-			}
-
-		// Chrome desktop doesn't need FastClick (issue #15)
-		} else {
-			return true;
-		}
-	}
-
-	// IE10 with -ms-touch-action: none, which disables double-tap-to-zoom (issue #97)
-	if (layer.style.msTouchAction === 'none') {
-		return true;
-	}
-
-	return false;
-};
-
-
-/**
- * Factory method for creating a FastClick object
- *
- * @param {Element} layer The layer to listen on
- */
-FastClick.attach = function(layer) {
-	'use strict';
-	return new FastClick(layer);
-};
-
-
-if (typeof define !== 'undefined' && define.amd) {
-
-	// AMD. Register as an anonymous module.
-	define(function() {
-		'use strict';
-		return FastClick;
-	});
-} else if (typeof module !== 'undefined' && module.exports) {
-	module.exports = FastClick.attach;
-	module.exports.FastClick = FastClick;
-} else {
-	window.FastClick = FastClick;
-}
 
 ;//! moment.js
 //! version : 2.5.1
@@ -24964,6 +24231,812 @@ $('#el').spin('flower', 'red');
   }
 
 }));
+
+;/**
+ * @preserve FastClick: polyfill to remove click delays on browsers with touch UIs.
+ *
+ * @version 0.6.12
+ * @codingstandard ftlabs-jsv2
+ * @copyright The Financial Times Limited [All Rights Reserved]
+ * @license MIT License (see LICENSE.txt)
+ */
+
+/*jslint browser:true, node:true*/
+/*global define, Event, Node*/
+
+
+/**
+ * Instantiate fast-clicking listeners on the specificed layer.
+ *
+ * @constructor
+ * @param {Element} layer The layer to listen on
+ */
+function FastClick(layer) {
+	'use strict';
+	var oldOnClick, self = this;
+
+
+	/**
+	 * Whether a click is currently being tracked.
+	 *
+	 * @type boolean
+	 */
+	this.trackingClick = false;
+
+
+	/**
+	 * Timestamp for when when click tracking started.
+	 *
+	 * @type number
+	 */
+	this.trackingClickStart = 0;
+
+
+	/**
+	 * The element being tracked for a click.
+	 *
+	 * @type EventTarget
+	 */
+	this.targetElement = null;
+
+
+	/**
+	 * X-coordinate of touch start event.
+	 *
+	 * @type number
+	 */
+	this.touchStartX = 0;
+
+
+	/**
+	 * Y-coordinate of touch start event.
+	 *
+	 * @type number
+	 */
+	this.touchStartY = 0;
+
+
+	/**
+	 * ID of the last touch, retrieved from Touch.identifier.
+	 *
+	 * @type number
+	 */
+	this.lastTouchIdentifier = 0;
+
+
+	/**
+	 * Touchmove boundary, beyond which a click will be cancelled.
+	 *
+	 * @type number
+	 */
+	this.touchBoundary = 10;
+
+
+	/**
+	 * The FastClick layer.
+	 *
+	 * @type Element
+	 */
+	this.layer = layer;
+
+	if (!layer || !layer.nodeType) {
+		throw new TypeError('Layer must be a document node');
+	}
+
+	/** @type function() */
+	this.onClick = function() { return FastClick.prototype.onClick.apply(self, arguments); };
+
+	/** @type function() */
+	this.onMouse = function() { return FastClick.prototype.onMouse.apply(self, arguments); };
+
+	/** @type function() */
+	this.onTouchStart = function() { return FastClick.prototype.onTouchStart.apply(self, arguments); };
+
+	/** @type function() */
+	this.onTouchMove = function() { return FastClick.prototype.onTouchMove.apply(self, arguments); };
+
+	/** @type function() */
+	this.onTouchEnd = function() { return FastClick.prototype.onTouchEnd.apply(self, arguments); };
+
+	/** @type function() */
+	this.onTouchCancel = function() { return FastClick.prototype.onTouchCancel.apply(self, arguments); };
+
+	if (FastClick.notNeeded(layer)) {
+		return;
+	}
+
+	// Set up event handlers as required
+	if (this.deviceIsAndroid) {
+		layer.addEventListener('mouseover', this.onMouse, true);
+		layer.addEventListener('mousedown', this.onMouse, true);
+		layer.addEventListener('mouseup', this.onMouse, true);
+	}
+
+	layer.addEventListener('click', this.onClick, true);
+	layer.addEventListener('touchstart', this.onTouchStart, false);
+	layer.addEventListener('touchmove', this.onTouchMove, false);
+	layer.addEventListener('touchend', this.onTouchEnd, false);
+	layer.addEventListener('touchcancel', this.onTouchCancel, false);
+
+	// Hack is required for browsers that don't support Event#stopImmediatePropagation (e.g. Android 2)
+	// which is how FastClick normally stops click events bubbling to callbacks registered on the FastClick
+	// layer when they are cancelled.
+	if (!Event.prototype.stopImmediatePropagation) {
+		layer.removeEventListener = function(type, callback, capture) {
+			var rmv = Node.prototype.removeEventListener;
+			if (type === 'click') {
+				rmv.call(layer, type, callback.hijacked || callback, capture);
+			} else {
+				rmv.call(layer, type, callback, capture);
+			}
+		};
+
+		layer.addEventListener = function(type, callback, capture) {
+			var adv = Node.prototype.addEventListener;
+			if (type === 'click') {
+				adv.call(layer, type, callback.hijacked || (callback.hijacked = function(event) {
+					if (!event.propagationStopped) {
+						callback(event);
+					}
+				}), capture);
+			} else {
+				adv.call(layer, type, callback, capture);
+			}
+		};
+	}
+
+	// If a handler is already declared in the element's onclick attribute, it will be fired before
+	// FastClick's onClick handler. Fix this by pulling out the user-defined handler function and
+	// adding it as listener.
+	if (typeof layer.onclick === 'function') {
+
+		// Android browser on at least 3.2 requires a new reference to the function in layer.onclick
+		// - the old one won't work if passed to addEventListener directly.
+		oldOnClick = layer.onclick;
+		layer.addEventListener('click', function(event) {
+			oldOnClick(event);
+		}, false);
+		layer.onclick = null;
+	}
+}
+
+
+/**
+ * Android requires exceptions.
+ *
+ * @type boolean
+ */
+FastClick.prototype.deviceIsAndroid = navigator.userAgent.indexOf('Android') > 0;
+
+
+/**
+ * iOS requires exceptions.
+ *
+ * @type boolean
+ */
+FastClick.prototype.deviceIsIOS = /iP(ad|hone|od)/.test(navigator.userAgent);
+
+
+/**
+ * iOS 4 requires an exception for select elements.
+ *
+ * @type boolean
+ */
+FastClick.prototype.deviceIsIOS4 = FastClick.prototype.deviceIsIOS && (/OS 4_\d(_\d)?/).test(navigator.userAgent);
+
+
+/**
+ * iOS 6.0(+?) requires the target element to be manually derived
+ *
+ * @type boolean
+ */
+FastClick.prototype.deviceIsIOSWithBadTarget = FastClick.prototype.deviceIsIOS && (/OS ([6-9]|\d{2})_\d/).test(navigator.userAgent);
+
+
+/**
+ * Determine whether a given element requires a native click.
+ *
+ * @param {EventTarget|Element} target Target DOM element
+ * @returns {boolean} Returns true if the element needs a native click
+ */
+FastClick.prototype.needsClick = function(target) {
+	'use strict';
+	switch (target.nodeName.toLowerCase()) {
+
+	// Don't send a synthetic click to disabled inputs (issue #62)
+	case 'button':
+	case 'select':
+	case 'textarea':
+		if (target.disabled) {
+			return true;
+		}
+
+		break;
+	case 'input':
+
+		// File inputs need real clicks on iOS 6 due to a browser bug (issue #68)
+		if ((this.deviceIsIOS && target.type === 'file') || target.disabled) {
+			return true;
+		}
+
+		break;
+	case 'label':
+	case 'video':
+		return true;
+	}
+
+	return (/\bneedsclick\b/).test(target.className);
+};
+
+
+/**
+ * Determine whether a given element requires a call to focus to simulate click into element.
+ *
+ * @param {EventTarget|Element} target Target DOM element
+ * @returns {boolean} Returns true if the element requires a call to focus to simulate native click.
+ */
+FastClick.prototype.needsFocus = function(target) {
+	'use strict';
+	switch (target.nodeName.toLowerCase()) {
+	case 'textarea':
+		return true;
+	case 'select':
+		return !this.deviceIsAndroid;
+	case 'input':
+		switch (target.type) {
+		case 'button':
+		case 'checkbox':
+		case 'file':
+		case 'image':
+		case 'radio':
+		case 'submit':
+			return false;
+		}
+
+		// No point in attempting to focus disabled inputs
+		return !target.disabled && !target.readOnly;
+	default:
+		return (/\bneedsfocus\b/).test(target.className);
+	}
+};
+
+
+/**
+ * Send a click event to the specified element.
+ *
+ * @param {EventTarget|Element} targetElement
+ * @param {Event} event
+ */
+FastClick.prototype.sendClick = function(targetElement, event) {
+	'use strict';
+	var clickEvent, touch;
+
+	// On some Android devices activeElement needs to be blurred otherwise the synthetic click will have no effect (#24)
+	if (document.activeElement && document.activeElement !== targetElement) {
+		document.activeElement.blur();
+	}
+
+	touch = event.changedTouches[0];
+
+	// Synthesise a click event, with an extra attribute so it can be tracked
+	clickEvent = document.createEvent('MouseEvents');
+	clickEvent.initMouseEvent(this.determineEventType(targetElement), true, true, window, 1, touch.screenX, touch.screenY, touch.clientX, touch.clientY, false, false, false, false, 0, null);
+	clickEvent.forwardedTouchEvent = true;
+	targetElement.dispatchEvent(clickEvent);
+};
+
+FastClick.prototype.determineEventType = function(targetElement) {
+	'use strict';
+
+	//Issue #159: Android Chrome Select Box does not open with a synthetic click event
+	if (this.deviceIsAndroid && targetElement.tagName.toLowerCase() === 'select') {
+		return 'mousedown';
+	}
+
+	return 'click';
+};
+
+
+/**
+ * @param {EventTarget|Element} targetElement
+ */
+FastClick.prototype.focus = function(targetElement) {
+	'use strict';
+	var length;
+
+	// Issue #160: on iOS 7, some input elements (e.g. date datetime) throw a vague TypeError on setSelectionRange. These elements don't have an integer value for the selectionStart and selectionEnd properties, but unfortunately that can't be used for detection because accessing the properties also throws a TypeError. Just check the type instead. Filed as Apple bug #15122724.
+	if (this.deviceIsIOS && targetElement.setSelectionRange && targetElement.type.indexOf('date') !== 0 && targetElement.type !== 'time') {
+		length = targetElement.value.length;
+		targetElement.setSelectionRange(length, length);
+	} else {
+		targetElement.focus();
+	}
+};
+
+
+/**
+ * Check whether the given target element is a child of a scrollable layer and if so, set a flag on it.
+ *
+ * @param {EventTarget|Element} targetElement
+ */
+FastClick.prototype.updateScrollParent = function(targetElement) {
+	'use strict';
+	var scrollParent, parentElement;
+
+	scrollParent = targetElement.fastClickScrollParent;
+
+	// Attempt to discover whether the target element is contained within a scrollable layer. Re-check if the
+	// target element was moved to another parent.
+	if (!scrollParent || !scrollParent.contains(targetElement)) {
+		parentElement = targetElement;
+		do {
+			if (parentElement.scrollHeight > parentElement.offsetHeight) {
+				scrollParent = parentElement;
+				targetElement.fastClickScrollParent = parentElement;
+				break;
+			}
+
+			parentElement = parentElement.parentElement;
+		} while (parentElement);
+	}
+
+	// Always update the scroll top tracker if possible.
+	if (scrollParent) {
+		scrollParent.fastClickLastScrollTop = scrollParent.scrollTop;
+	}
+};
+
+
+/**
+ * @param {EventTarget} targetElement
+ * @returns {Element|EventTarget}
+ */
+FastClick.prototype.getTargetElementFromEventTarget = function(eventTarget) {
+	'use strict';
+
+	// On some older browsers (notably Safari on iOS 4.1 - see issue #56) the event target may be a text node.
+	if (eventTarget.nodeType === Node.TEXT_NODE) {
+		return eventTarget.parentNode;
+	}
+
+	return eventTarget;
+};
+
+
+/**
+ * On touch start, record the position and scroll offset.
+ *
+ * @param {Event} event
+ * @returns {boolean}
+ */
+FastClick.prototype.onTouchStart = function(event) {
+	'use strict';
+	var targetElement, touch, selection;
+
+	// Ignore multiple touches, otherwise pinch-to-zoom is prevented if both fingers are on the FastClick element (issue #111).
+	if (event.targetTouches.length > 1) {
+		return true;
+	}
+
+	targetElement = this.getTargetElementFromEventTarget(event.target);
+	touch = event.targetTouches[0];
+
+	if (this.deviceIsIOS) {
+
+		// Only trusted events will deselect text on iOS (issue #49)
+		selection = window.getSelection();
+		if (selection.rangeCount && !selection.isCollapsed) {
+			return true;
+		}
+
+		if (!this.deviceIsIOS4) {
+
+			// Weird things happen on iOS when an alert or confirm dialog is opened from a click event callback (issue #23):
+			// when the user next taps anywhere else on the page, new touchstart and touchend events are dispatched
+			// with the same identifier as the touch event that previously triggered the click that triggered the alert.
+			// Sadly, there is an issue on iOS 4 that causes some normal touch events to have the same identifier as an
+			// immediately preceeding touch event (issue #52), so this fix is unavailable on that platform.
+			if (touch.identifier === this.lastTouchIdentifier) {
+				event.preventDefault();
+				return false;
+			}
+
+			this.lastTouchIdentifier = touch.identifier;
+
+			// If the target element is a child of a scrollable layer (using -webkit-overflow-scrolling: touch) and:
+			// 1) the user does a fling scroll on the scrollable layer
+			// 2) the user stops the fling scroll with another tap
+			// then the event.target of the last 'touchend' event will be the element that was under the user's finger
+			// when the fling scroll was started, causing FastClick to send a click event to that layer - unless a check
+			// is made to ensure that a parent layer was not scrolled before sending a synthetic click (issue #42).
+			this.updateScrollParent(targetElement);
+		}
+	}
+
+	this.trackingClick = true;
+	this.trackingClickStart = event.timeStamp;
+	this.targetElement = targetElement;
+
+	this.touchStartX = touch.pageX;
+	this.touchStartY = touch.pageY;
+
+	// Prevent phantom clicks on fast double-tap (issue #36)
+	if ((event.timeStamp - this.lastClickTime) < 200) {
+		event.preventDefault();
+	}
+
+	return true;
+};
+
+
+/**
+ * Based on a touchmove event object, check whether the touch has moved past a boundary since it started.
+ *
+ * @param {Event} event
+ * @returns {boolean}
+ */
+FastClick.prototype.touchHasMoved = function(event) {
+	'use strict';
+	var touch = event.changedTouches[0], boundary = this.touchBoundary;
+
+	if (Math.abs(touch.pageX - this.touchStartX) > boundary || Math.abs(touch.pageY - this.touchStartY) > boundary) {
+		return true;
+	}
+
+	return false;
+};
+
+
+/**
+ * Update the last position.
+ *
+ * @param {Event} event
+ * @returns {boolean}
+ */
+FastClick.prototype.onTouchMove = function(event) {
+	'use strict';
+	if (!this.trackingClick) {
+		return true;
+	}
+
+	// If the touch has moved, cancel the click tracking
+	if (this.targetElement !== this.getTargetElementFromEventTarget(event.target) || this.touchHasMoved(event)) {
+		this.trackingClick = false;
+		this.targetElement = null;
+	}
+
+	return true;
+};
+
+
+/**
+ * Attempt to find the labelled control for the given label element.
+ *
+ * @param {EventTarget|HTMLLabelElement} labelElement
+ * @returns {Element|null}
+ */
+FastClick.prototype.findControl = function(labelElement) {
+	'use strict';
+
+	// Fast path for newer browsers supporting the HTML5 control attribute
+	if (labelElement.control !== undefined) {
+		return labelElement.control;
+	}
+
+	// All browsers under test that support touch events also support the HTML5 htmlFor attribute
+	if (labelElement.htmlFor) {
+		return document.getElementById(labelElement.htmlFor);
+	}
+
+	// If no for attribute exists, attempt to retrieve the first labellable descendant element
+	// the list of which is defined here: http://www.w3.org/TR/html5/forms.html#category-label
+	return labelElement.querySelector('button, input:not([type=hidden]), keygen, meter, output, progress, select, textarea');
+};
+
+
+/**
+ * On touch end, determine whether to send a click event at once.
+ *
+ * @param {Event} event
+ * @returns {boolean}
+ */
+FastClick.prototype.onTouchEnd = function(event) {
+	'use strict';
+	var forElement, trackingClickStart, targetTagName, scrollParent, touch, targetElement = this.targetElement;
+
+	if (!this.trackingClick) {
+		return true;
+	}
+
+	// Prevent phantom clicks on fast double-tap (issue #36)
+	if ((event.timeStamp - this.lastClickTime) < 200) {
+		this.cancelNextClick = true;
+		return true;
+	}
+
+	// Reset to prevent wrong click cancel on input (issue #156).
+	this.cancelNextClick = false;
+
+	this.lastClickTime = event.timeStamp;
+
+	trackingClickStart = this.trackingClickStart;
+	this.trackingClick = false;
+	this.trackingClickStart = 0;
+
+	// On some iOS devices, the targetElement supplied with the event is invalid if the layer
+	// is performing a transition or scroll, and has to be re-detected manually. Note that
+	// for this to function correctly, it must be called *after* the event target is checked!
+	// See issue #57; also filed as rdar://13048589 .
+	if (this.deviceIsIOSWithBadTarget) {
+		touch = event.changedTouches[0];
+
+		// In certain cases arguments of elementFromPoint can be negative, so prevent setting targetElement to null
+		targetElement = document.elementFromPoint(touch.pageX - window.pageXOffset, touch.pageY - window.pageYOffset) || targetElement;
+		targetElement.fastClickScrollParent = this.targetElement.fastClickScrollParent;
+	}
+
+	targetTagName = targetElement.tagName.toLowerCase();
+	if (targetTagName === 'label') {
+		forElement = this.findControl(targetElement);
+		if (forElement) {
+			this.focus(targetElement);
+			if (this.deviceIsAndroid) {
+				return false;
+			}
+
+			targetElement = forElement;
+		}
+	} else if (this.needsFocus(targetElement)) {
+
+		// Case 1: If the touch started a while ago (best guess is 100ms based on tests for issue #36) then focus will be triggered anyway. Return early and unset the target element reference so that the subsequent click will be allowed through.
+		// Case 2: Without this exception for input elements tapped when the document is contained in an iframe, then any inputted text won't be visible even though the value attribute is updated as the user types (issue #37).
+		if ((event.timeStamp - trackingClickStart) > 100 || (this.deviceIsIOS && window.top !== window && targetTagName === 'input')) {
+			this.targetElement = null;
+			return false;
+		}
+
+		this.focus(targetElement);
+		this.sendClick(targetElement, event);
+
+		// Select elements need the event to go through on iOS 4, otherwise the selector menu won't open.
+		if (!this.deviceIsIOS4 || targetTagName !== 'select') {
+			this.targetElement = null;
+			event.preventDefault();
+		}
+
+		return false;
+	}
+
+	if (this.deviceIsIOS && !this.deviceIsIOS4) {
+
+		// Don't send a synthetic click event if the target element is contained within a parent layer that was scrolled
+		// and this tap is being used to stop the scrolling (usually initiated by a fling - issue #42).
+		scrollParent = targetElement.fastClickScrollParent;
+		if (scrollParent && scrollParent.fastClickLastScrollTop !== scrollParent.scrollTop) {
+			return true;
+		}
+	}
+
+	// Prevent the actual click from going though - unless the target node is marked as requiring
+	// real clicks or if it is in the whitelist in which case only non-programmatic clicks are permitted.
+	if (!this.needsClick(targetElement)) {
+		event.preventDefault();
+		this.sendClick(targetElement, event);
+	}
+
+	return false;
+};
+
+
+/**
+ * On touch cancel, stop tracking the click.
+ *
+ * @returns {void}
+ */
+FastClick.prototype.onTouchCancel = function() {
+	'use strict';
+	this.trackingClick = false;
+	this.targetElement = null;
+};
+
+
+/**
+ * Determine mouse events which should be permitted.
+ *
+ * @param {Event} event
+ * @returns {boolean}
+ */
+FastClick.prototype.onMouse = function(event) {
+	'use strict';
+
+	// If a target element was never set (because a touch event was never fired) allow the event
+	if (!this.targetElement) {
+		return true;
+	}
+
+	if (event.forwardedTouchEvent) {
+		return true;
+	}
+
+	// Programmatically generated events targeting a specific element should be permitted
+	if (!event.cancelable) {
+		return true;
+	}
+
+	// Derive and check the target element to see whether the mouse event needs to be permitted;
+	// unless explicitly enabled, prevent non-touch click events from triggering actions,
+	// to prevent ghost/doubleclicks.
+	if (!this.needsClick(this.targetElement) || this.cancelNextClick) {
+
+		// Prevent any user-added listeners declared on FastClick element from being fired.
+		if (event.stopImmediatePropagation) {
+			event.stopImmediatePropagation();
+		} else {
+
+			// Part of the hack for browsers that don't support Event#stopImmediatePropagation (e.g. Android 2)
+			event.propagationStopped = true;
+		}
+
+		// Cancel the event
+		event.stopPropagation();
+		event.preventDefault();
+
+		return false;
+	}
+
+	// If the mouse event is permitted, return true for the action to go through.
+	return true;
+};
+
+
+/**
+ * On actual clicks, determine whether this is a touch-generated click, a click action occurring
+ * naturally after a delay after a touch (which needs to be cancelled to avoid duplication), or
+ * an actual click which should be permitted.
+ *
+ * @param {Event} event
+ * @returns {boolean}
+ */
+FastClick.prototype.onClick = function(event) {
+	'use strict';
+	var permitted;
+
+	// It's possible for another FastClick-like library delivered with third-party code to fire a click event before FastClick does (issue #44). In that case, set the click-tracking flag back to false and return early. This will cause onTouchEnd to return early.
+	if (this.trackingClick) {
+		this.targetElement = null;
+		this.trackingClick = false;
+		return true;
+	}
+
+	// Very odd behaviour on iOS (issue #18): if a submit element is present inside a form and the user hits enter in the iOS simulator or clicks the Go button on the pop-up OS keyboard the a kind of 'fake' click event will be triggered with the submit-type input element as the target.
+	if (event.target.type === 'submit' && event.detail === 0) {
+		return true;
+	}
+
+	permitted = this.onMouse(event);
+
+	// Only unset targetElement if the click is not permitted. This will ensure that the check for !targetElement in onMouse fails and the browser's click doesn't go through.
+	if (!permitted) {
+		this.targetElement = null;
+	}
+
+	// If clicks are permitted, return true for the action to go through.
+	return permitted;
+};
+
+
+/**
+ * Remove all FastClick's event listeners.
+ *
+ * @returns {void}
+ */
+FastClick.prototype.destroy = function() {
+	'use strict';
+	var layer = this.layer;
+
+	if (this.deviceIsAndroid) {
+		layer.removeEventListener('mouseover', this.onMouse, true);
+		layer.removeEventListener('mousedown', this.onMouse, true);
+		layer.removeEventListener('mouseup', this.onMouse, true);
+	}
+
+	layer.removeEventListener('click', this.onClick, true);
+	layer.removeEventListener('touchstart', this.onTouchStart, false);
+	layer.removeEventListener('touchmove', this.onTouchMove, false);
+	layer.removeEventListener('touchend', this.onTouchEnd, false);
+	layer.removeEventListener('touchcancel', this.onTouchCancel, false);
+};
+
+
+/**
+ * Check whether FastClick is needed.
+ *
+ * @param {Element} layer The layer to listen on
+ */
+FastClick.notNeeded = function(layer) {
+	'use strict';
+	var metaViewport;
+	var chromeVersion;
+
+	// Devices that don't support touch don't need FastClick
+	if (typeof window.ontouchstart === 'undefined') {
+		return true;
+	}
+
+	// Chrome version - zero for other browsers
+	chromeVersion = +(/Chrome\/([0-9]+)/.exec(navigator.userAgent) || [,0])[1];
+
+	if (chromeVersion) {
+
+		if (FastClick.prototype.deviceIsAndroid) {
+			metaViewport = document.querySelector('meta[name=viewport]');
+			
+			if (metaViewport) {
+				// Chrome on Android with user-scalable="no" doesn't need FastClick (issue #89)
+				if (metaViewport.content.indexOf('user-scalable=no') !== -1) {
+					return true;
+				}
+				// Chrome 32 and above with width=device-width or less don't need FastClick
+				if (chromeVersion > 31 && window.innerWidth <= window.screen.width) {
+					return true;
+				}
+			}
+
+		// Chrome desktop doesn't need FastClick (issue #15)
+		} else {
+			return true;
+		}
+	}
+
+	// IE10 with -ms-touch-action: none, which disables double-tap-to-zoom (issue #97)
+	if (layer.style.msTouchAction === 'none') {
+		return true;
+	}
+
+	return false;
+};
+
+
+/**
+ * Factory method for creating a FastClick object
+ *
+ * @param {Element} layer The layer to listen on
+ */
+FastClick.attach = function(layer) {
+	'use strict';
+	return new FastClick(layer);
+};
+
+
+if (typeof define !== 'undefined' && define.amd) {
+
+	// AMD. Register as an anonymous module.
+	define(function() {
+		'use strict';
+		return FastClick;
+	});
+} else if (typeof module !== 'undefined' && module.exports) {
+	module.exports = FastClick.attach;
+	module.exports.FastClick = FastClick;
+} else {
+	window.FastClick = FastClick;
+}
+
+;// Console-polyfill. MIT license.
+// https://github.com/paulmillr/console-polyfill
+// Make it safe to do console.log() always.
+(function(con) {
+  'use strict';
+  var prop, method;
+  var empty = {};
+  var dummy = function() {};
+  var properties = 'memory'.split(',');
+  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
+     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
+     'time,timeEnd,trace,warn').split(',');
+  while (prop = properties.pop()) con[prop] = con[prop] || empty;
+  while (method = methods.pop()) con[method] = con[method] || dummy;
+})(this.console = this.console || {});
 
 ;/**
  * Backbone localStorage Adapter

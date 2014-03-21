@@ -2522,7 +2522,7 @@ module.exports = SigninView = (function(_super) {
 
   SigninView.prototype.onShow = function() {
     scrollTo(0, 0);
-    return $('.make-switch').bootstrapSwitch();
+    return $('#make-switch').bootstrapSwitch('size', 'small');
   };
 
   SigninView.prototype.onClose = function() {
@@ -2666,10 +2666,10 @@ function program1(depth0,data) {
   if (stack1 = helpers.password) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.password; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\"/>\r\n    <div class=\"form-group\">\r\n      <label for=\"notification1\">Remember me</label>\r\n      <div class=\"make-switch\" data-animated=\"false\" data-on-label=\"yes\" data-off-label=\"no\" data-on=\"success\">\r\n        <input type=\"radio\" id=\"notification1\" name=\"remember\" ";
+    + "\"/>\r\n    <p><!-- <button type=\"button\" class=\"btn btn-default\" data-toggle=\"button\">Remember me</button> -->\r\n\r\n    </p>\r\n    <div class=\"form-group pull-right\">\r\n      <label for=\"notification1\">Remember me</label>&emsp;\r\n      <input type=\"checkbox\"\r\n             id=\"make-switch\"\r\n             data-animate=\"false\"\r\n             data-on-text=\"yes\" data-off-text=\"no\"\r\n             data-on-color=\"success\" data-off-color=\"default\"\r\n             name=\"remember\" ";
   stack1 = helpers['if'].call(depth0, depth0.remember, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "/>\r\n      </div>\r\n    </div>\r\n    <button class=\"btn btn-lg btn-success btn-block js-signin\">\r\n      <i class=\"icon-securityalt-shieldalt\"></i>&emsp;Sign in</button>\r\n  </form>\r\n</div> ";
+  buffer += "/>\r\n    </div>\r\n    <button class=\"btn btn-lg btn-success btn-block js-signin\">\r\n      <i class=\"icon-securityalt-shieldalt\"></i>&emsp;Sign in</button>\r\n  </form>\r\n</div>";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {

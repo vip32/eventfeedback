@@ -2,13 +2,19 @@
   <form class="form-signin">
     <input type="text" class="form-control" placeholder="username" name="username" autofocus value="{{username}}"/>
     <input type="password" class="form-control" placeholder="password" name="password" value="{{password}}"/>
-    <div class="form-group">
-      <label for="notification1">Remember me</label>
-      <div class="make-switch" data-animated="false" data-on-label="yes" data-off-label="no" data-on="success">
-        <input type="radio" id="notification1" name="remember" {{#if remember}}checked{{/if}}/>
-      </div>
+    <p><!-- <button type="button" class="btn btn-default" data-toggle="button">Remember me</button> -->
+
+    </p>
+    <div class="form-group pull-right">
+      <label for="notification1">Remember me</label>&emsp;
+      <input type="checkbox"
+             id="make-switch"
+             data-animate="false"
+             data-on-text="yes" data-off-text="no"
+             data-on-color="success" data-off-color="default"
+             name="remember" {{#if remember}}checked{{/if}}/>
     </div>
     <button class="btn btn-lg btn-success btn-block js-signin">
       <i class="icon-securityalt-shieldalt"></i>&emsp;Sign in</button>
   </form>
-</div> 
+</div>
