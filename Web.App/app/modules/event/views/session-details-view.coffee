@@ -6,6 +6,7 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
   template: require './templates/session-details'
   events:
     'click .js-submit': 'onSubmit'
+    'click .js-remove': 'onRemove'
     'change textarea': 'onChange'
     'input textarea': 'onChange'
 
@@ -36,6 +37,10 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
     if maxlength > 0 and $(e.currentTarget).val().length > maxlength
       $(e.currentTarget).val($(e.currentTarget).val().substring(0, maxlength));
 
+  onRemove: (e) ->
+    e.preventDefault()
+    # TODO: remove feedback from api
+    
   onSubmit: (e) ->
     e.preventDefault()
     data = Backbone.Syphon.serialize(@)
