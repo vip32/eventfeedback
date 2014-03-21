@@ -55,11 +55,7 @@
     "bootstrap-switch": {
       "dependencies": {
         "jquery": "*"
-      },
-      "main": [
-        "static/js/bootstrap-switch.js",
-        "static/stylesheets/bootstrap-switch.css"
-      ]
+      }
     },
     "backgrid": {
       "dependencies": {
