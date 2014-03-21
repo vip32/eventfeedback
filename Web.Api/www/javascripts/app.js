@@ -3214,6 +3214,7 @@ module.exports = EventDetailsView = (function(_super) {
 
   EventDetailsView.prototype.events = {
     'click .js-submit': 'onSubmit',
+    'click .js-remove': 'onRemove',
     'change textarea': 'onChange',
     'input textarea': 'onChange'
   };
@@ -3255,6 +3256,10 @@ module.exports = EventDetailsView = (function(_super) {
     if (maxlength > 0 && $(e.currentTarget).val().length > maxlength) {
       return $(e.currentTarget).val($(e.currentTarget).val().substring(0, maxlength));
     }
+  };
+
+  EventDetailsView.prototype.onRemove = function(e) {
+    return e.preventDefault();
   };
 
   EventDetailsView.prototype.onSubmit = function(e) {
