@@ -81,8 +81,8 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         # get the userprofile
         profile = new UserProfile.Model()
         profile.fetch
-          success:  (model, response, options) =>
-            settings.set('api_userroles', _.map(model.get('profile').roles, (role) -> role.role.name))
+          success: (model, response, options) =>
+            settings.set('api_userroles', model.get('roles'))
             vent.trigger 'message:success:show', 'signed in ' + username
             vent.trigger 'navigation:signin'
           error: (model, xhr, options) ->

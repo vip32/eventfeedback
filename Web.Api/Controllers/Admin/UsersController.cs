@@ -9,11 +9,12 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using EventFeedback.Common;
 using EventFeedback.Domain;
+using EventFeedback.Domain.Identity;
 using EventFeedback.Web.Api.Models;
 
 namespace EventFeedback.Web.Api.Controllers.Admin
 {
-    [Authorize(Roles = "Administrator")]
+    //[Authorize(Roles = "Administrator")]
     [RoutePrefix("api/v1/admin/users")]
     public class UsersController : ApiController
     {
@@ -35,15 +36,10 @@ namespace EventFeedback.Web.Api.Controllers.Admin
         [ResponseType(typeof(IEnumerable<User>))]
         public IHttpActionResult Get([FromUri] string filter = "")
         {
-//            Thread.Sleep(1500);
-
             _traceSource.TraceInformation("usersscontroller get all");
-            IEnumerable<User> users;
-            
             return filter.Equals("all", StringComparison.CurrentCultureIgnoreCase)
                 ? Ok(Map(_context.Users.OrderBy(u => u.UserName)))
                 : Ok(Map(_context.Users.OrderBy(u => u.UserName)
-                    .Include(u => u.Roles)
                     .Where(u => !(u.Active != null && !(bool) u.Active))
                     .Where(u => !(u.Deleted != null && (bool) u.Deleted))));
         }
@@ -60,13 +56,12 @@ namespace EventFeedback.Web.Api.Controllers.Admin
             Guard.Against<ArgumentException>(string.IsNullOrEmpty(entity.Password), "entity.password cannot be empty");
             
             var user = Map(entity);
-            user.Id = Guid.NewGuid().ToString();
             var result = _userService.CreateUser(user, entity.Password);
 
             // add the roles
             if(result.Succeeded && !string.IsNullOrEmpty(entity.Roles))
                 foreach(var role in entity.Roles.Split(' '))
-                    _userService.AddUserToRole(user.Id, role);
+                    _userService.AddUserToRole(user, role);
             return Created("http://acme.com/users/" + user.Id, user);
         }
 
@@ -97,9 +92,9 @@ namespace EventFeedback.Web.Api.Controllers.Admin
                 _userService.UpdatePassword(user.Id, entity.Password);
 
             // update the roles
-            _userService.ClearUserRoles(user.Id);
+            _userService.ClearUserRoles(user);
             foreach (var role in entity.Roles.NullToEmpty().Split(' '))
-                _userService.AddUserToRole(user.Id, role);
+                _userService.AddUserToRole(user, role);
             return Ok(user);
         }
 
@@ -125,15 +120,18 @@ namespace EventFeedback.Web.Api.Controllers.Admin
             {
                     yield return new UserAdminBindingModel
                     {
-                        Id = user.Id,
+                        Id = user.Id.ToString(),
                         UserName = user.UserName,
                         Password = string.Empty,
                         Active = !user.Active.HasValue || user.Active.Value,
                         Organization = user.Organization,
                         Email = user.Email,
-                        Roles = user.Roles != null && user.Roles.Any() 
-                                ? user.Roles.OrderBy(r => r.Role.Name).Select(r => r.Role.Name).ToString(" ")
+                        Roles = user.Roles != null && user.Roles.Any()
+                                ? user.Roles.OrderBy(r => r.RoleId).Select(r => r.RoleId).ToString(" ")
                                 : null
+                        //Roles = user.Roles != null && user.Roles.Any() 
+                        //        ? user.Roles.OrderBy(r => r.Role.Name).Select(r => r.Role.Name).ToString(" ")
+                        //        : null
                     };
             }
         }
@@ -142,7 +140,7 @@ namespace EventFeedback.Web.Api.Controllers.Admin
         {
             return new User
             {
-                Id = source.Id,
+                Id = !string.IsNullOrEmpty(source.Id) ? new Guid(source.Id) : Guid.Empty,
                 UserName = source.UserName,
                 Organization = source.Organization,
                 Email = source.Email,

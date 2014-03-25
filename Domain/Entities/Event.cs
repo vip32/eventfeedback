@@ -26,7 +26,8 @@ namespace EventFeedback.Domain
         [StringLength(2048)]
         public string Description { get; set; }
         [StringLength(128)]
-        public string Key { get; set; } // 101 (EventID)
+        [Index]
+        public string Key { get; set; } // ET01-2014 (EventID)
         [StringLength(512)]
         public string Link { get; set; }
         public bool? FeedbackAllowed { get; set; }

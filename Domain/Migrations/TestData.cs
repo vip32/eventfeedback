@@ -6,6 +6,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using EventFeedback.Domain.Identity;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace EventFeedback.Domain
 {
@@ -63,7 +66,11 @@ namespace EventFeedback.Domain
 
             if (!context.Users.Any())
             {
-                var userService = new UserService(context);
+                var userService = new UserService(context,
+                    new UserManager<User, Guid>(
+                        new UserStore<User, Role, Guid, UserLogin, UserRole, UserClaim>(context)),
+                    new RoleManager<Role, Guid>(
+                        new RoleStore<Role, Guid, UserRole>(context)));
 
                 userService.CreateRole(new Role { Name = "Administrator"});
                 userService.CreateRole(new Role { Name = "User" });
@@ -80,12 +87,12 @@ namespace EventFeedback.Domain
 
                 if (user1 != null)
                 {
-                    userService.AddUserToRole(user1.Id, "Administrator");
+                    userService.AddUserToRole(user1, "Administrator");
                     //userService.AddUserToRole(user1.Id, "User");
                 }
-                if (user2 != null) userService.AddUserToRole(user2.Id, "User");
-                if (user3 != null) userService.AddUserToRole(user3.Id, "User");
-                if (user4 != null) userService.AddUserToRole(user4.Id, "Guest");
+                if (user2 != null) userService.AddUserToRole(user2, "User");
+                if (user3 != null) userService.AddUserToRole(user3, "User");
+                if (user4 != null) userService.AddUserToRole(user4, "Guest");
 
                 foreach (var user in users.Where(u => u.UserName.StartsWith("acme")))
                 {
@@ -94,7 +101,7 @@ namespace EventFeedback.Domain
                 context.SaveChanges();
                 foreach (var user in users.Where(u => u.UserName.StartsWith("acme")))
                 {
-                    userService.AddUserToRole(user.Id, "User");
+                    userService.AddUserToRole(user, "User");
                 }
             }
 

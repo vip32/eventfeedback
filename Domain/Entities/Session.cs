@@ -38,6 +38,7 @@ namespace EventFeedback.Domain
         [StringLength(128)]
         public string Track { get; set; } // C#/java/sap
         [StringLength(128)]
+        [Index]
         public string Key { get; set; } // 101 (SessionID)
         [StringLength(512)]
         public string Link { get; set; }

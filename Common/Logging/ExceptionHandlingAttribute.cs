@@ -22,7 +22,6 @@ namespace EventFeedback.Common
             _traceSource.TraceEvent(TraceEventType.Error, 0, context.Exception.Message);
             _traceSource.TraceData(TraceEventType.Error, 0, context.Exception);
 
-
             if (context.Exception is ArgumentException)
             {
                 throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.BadRequest)

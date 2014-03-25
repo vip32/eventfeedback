@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Security.Claims;
-using System.Threading;
 using System.Web.Http;
 using EventFeedback.Common;
 using EventFeedback.Domain;
@@ -33,12 +33,10 @@ namespace EventFeedback.Web.Api.Controllers
         {
             Guard.Against<ArgumentException>(login == null, "login cannot be empty be null");
 
-            //Thread.Sleep(1500);
-
             var user = _userService.FindUser(login.UserName, login.Password);
             if (user != null && user.IsActive())
             {
-                _userService.HideSensitiveData(user);
+                //_userService.HideSensitiveData(user);
                 var identity = _userService.CreateIdentity(user, Startup.OAuthBearerOptions.AuthenticationType);
                 identity.AddClaim(new Claim(ClaimTypes.Name, login.UserName));
                 var ticket = new AuthenticationTicket(identity, new AuthenticationProperties());
@@ -64,17 +62,17 @@ namespace EventFeedback.Web.Api.Controllers
         [Authorize]
         public HttpResponseMessage Profile()
         {
-//            Thread.Sleep(1500);
-
             var user = _userService.FindUserByName(User.Identity.Name);
             if (user == null || !user.IsActive()) return new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            var roles = _userService.UserRoles(user);
             _userService.HideSensitiveData(user);
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new ObjectContent<object>(new
                 {
                     UserName = User.Identity.Name,
-                    Profile = user
+                    Profile = user,
+                    Roles = roles
                 }, Configuration.Formatters.JsonFormatter)
             };
         }

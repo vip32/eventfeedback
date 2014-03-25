@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
 using EventFeedback.Common;
@@ -22,13 +23,15 @@ namespace EventFeedback.Domain
         [StringLength(128)]
         public string DeletedBy { get; set; }
 
-        [StringLength(256)]
-        public string UserId { get; set; }
+        [Index]
+        public Guid UserId { get; set; }
 
         public int FeedbackDefinitionId { get; set; }
         public FeedbackDefinition FeedbackDefinition { get; set; }
 
+        [Index]
         public int? SessionId { get; set; }
+        [Index]
         public int? EventId { get; set; }
 
         [StringLength(2048)]

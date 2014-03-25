@@ -24,15 +24,6 @@ module.exports.Collection = class HeadersCollection extends Collection
       return true if visible and _.isEmpty(item.get('roles'))
       return true if visible and not _.isEmpty(roles) and _.intersection(roles, item.get('roles')).length > 0
 
-      # return _.intersection(settings.get('api_userroles'), item.get('roles')).length > 0
-      # itemAuthenticated = item.get("authenticated") ? false
-      # if itemAuthenticated is true and authenticated is true
-      #   return true
-      # if itemAuthenticated is false and authenticated is true
-      #   return true
-      # if itemAuthenticated is false and authenticated is false
-      #   return true
-
     log 'header:filtered', filtered
     new HeadersCollection(filtered)
 

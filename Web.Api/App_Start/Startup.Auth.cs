@@ -16,3 +16,4 @@ namespace EventFeedback.Web.Api
         }
     }
 }
+// http://stackoverflow.com/questions/20895057/asp-net-identity-ioc-and-sharing-dbcontext

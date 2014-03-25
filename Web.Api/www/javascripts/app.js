@@ -2188,9 +2188,7 @@ module.exports = Controller = (function(_super) {
         profile = new UserProfile.Model();
         return profile.fetch({
           success: function(model, response, options) {
-            settings.set('api_userroles', _.map(model.get('profile').roles, function(role) {
-              return role.role.name;
-            }));
+            settings.set('api_userroles', model.get('roles'));
             vent.trigger('message:success:show', 'signed in ' + username);
             return vent.trigger('navigation:signin');
           },

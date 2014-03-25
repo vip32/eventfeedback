@@ -1,22 +1,19 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
-using System.Data.Entity.Core.Objects;
-using System.Data.Entity.Infrastructure;
 using System.Diagnostics;
 using System.Reflection;
-using Microsoft.AspNet.Identity.EntityFramework;
+using EventFeedback.Domain.Identity;
 
 namespace EventFeedback.Domain
 {
-    public class DataContext : IdentityDbContext<User>
+    public class DataContext : IdentityDataContext
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
 
         public DataContext()
             : base("DefaultConnection")
-        {
-            //_traceSource.TraceInformation("datacontext ctor ");    
-        }
+        { }
 
         public DbSet<ResourceText> ResourceTexts { get; set; }
         public DbSet<Event> Events { get; set; }
@@ -27,14 +24,12 @@ namespace EventFeedback.Domain
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<IdentityUser>()
-                .ToTable("Users");
-            modelBuilder.Entity<User>()
-                .ToTable("Users");
-            modelBuilder.Entity<IdentityRole>()
-                .ToTable("Roles");
-            modelBuilder.Entity<Role>()
-                .ToTable("Roles");
+
+            modelBuilder
+                .Properties<Guid>()
+                .Where(info => info.Name.ToLower() == "id")
+                .Configure(configuration => 
+                    configuration.HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity));
         }
 
         //public ObjectContext ObjectContext()

@@ -9,7 +9,7 @@ namespace EventFeedback.Web.Api
     {
         public void Configuration(IAppBuilder app)
         {
-            SystemTime.Now = () => new DateTime(2013, 10, 9);
+            //SystemTime.Now = () => new DateTime(2013, 10, 9);
 
             AreaRegistration.RegisterAllAreas();
 
