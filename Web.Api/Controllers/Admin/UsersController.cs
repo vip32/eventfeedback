@@ -14,7 +14,7 @@ using EventFeedback.Web.Api.Models;
 
 namespace EventFeedback.Web.Api.Controllers.Admin
 {
-    //[Authorize(Roles = "Administrator")]
+    [Authorize(Roles = "Administrator")]
     [RoutePrefix("api/v1/admin/users")]
     public class UsersController : ApiController
     {
