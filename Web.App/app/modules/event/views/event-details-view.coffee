@@ -1,6 +1,7 @@
 application = require 'application'
 vent = require 'vent'
 settings = require 'settings'
+user = require 'user'
 
 module.exports = class EventDetailsView extends Backbone.Marionette.CompositeView
   id: 'event-details-view'
@@ -35,7 +36,7 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
     # ^^ replace with bootstrap api: set the correct radio    
     @filterByTag(tag)
     # hide some administrator only elements
-    roles = settings.get('api_userroles') ? []
+    roles = user.roles()
     if not _.contains(roles, 'Administrator')
       $('.js-report').hide()
 

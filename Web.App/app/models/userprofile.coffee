@@ -1,9 +1,10 @@
 config = require '../config'
 Model = require '../lib/base/model'
 settings = require '../settings'
+user = require 'user'
 
 module.exports.Model = class UserProfile extends Model
   urlRoot: ->
     "#{config.apiroot}/user/profile"
   credentials: ->
-    token: settings.get('api_token')
+    token: user.token()

@@ -31,10 +31,9 @@ class Settings
   has: (id) ->
     ### looks through the collection for the specified id ###
     @store.has(id)
-
-  destroy: ->
-    ### removes all models from the collection and store ###
-    _.chain(@store.models).clone().each (model) ->
-      model.destroy()
+    
+  destroy: (id) ->
+    ### removes all (or by id) models from the collection and store ###
+    @store.destroy(id)
 
 module.exports = new Settings()

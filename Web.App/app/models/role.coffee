@@ -2,6 +2,7 @@ config = require '../config'
 Model = require '../lib/base/model'
 Collection = require '../lib/base/collection'
 settings = require 'settings'
+user = require 'user'
 
 module.exports.Model = class Role extends Model
 
@@ -10,7 +11,7 @@ module.exports.Collection = class RolesCollection extends Collection
 
   url: "#{config.apiroot}/admin/roles"
   credentials: ->
-    token: settings.get('api_token')
+    token: user.token()
   model: module.exports.Model
   comparator: 'name' 
 

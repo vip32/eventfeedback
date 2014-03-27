@@ -17,7 +17,6 @@ module.exports.Collection = class HeadersCollection extends Collection
   comparator: 'order'
 
   active: (roles) ->
-    # authenticated = settings.getValueOrDefault('api_authenticated', false)
     filtered = @filter (item) =>
       log 'header:item', item.get('title'), item.get('roles'), '>', roles
       visible = item.get('visible') ? true

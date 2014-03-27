@@ -1,6 +1,7 @@
 application = require 'application'
 vent = require 'vent'
 settings = require 'settings'
+user = require 'user'
 
 module.exports = class AboutView extends Backbone.Marionette.ItemView
   id: 'about-view'
@@ -13,14 +14,17 @@ module.exports = class AboutView extends Backbone.Marionette.ItemView
   
   serializeData: ->
     resources: @resources?.toJSON()
-    user: settings.get('api_username')
-    roles: settings.get('api_userroles')
+    user: user.name()
+    roles: user.roles()
+    admin: user.isAdministrator()
+    auth: user.isAuthenticated()
     
   onShow: ->
     scrollTo(0,0)
     
   onReset: (e) ->
     e.preventDefault()
+    user.reset()
     settings.destroy()
     vent.trigger 'home:index'
     vent.trigger 'resources:loaded' # resets the header + nav

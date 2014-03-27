@@ -2,6 +2,7 @@ config = require '../config'
 Model = require '../lib/base/model'
 Collection = require '../lib/base/collection'
 settings = require 'settings'
+user = require 'user'
 
 module.exports.Model = class FeedbackDefinition extends Model
 
@@ -10,6 +11,6 @@ module.exports.Collection = class FeedbackDefinitionsCollection extends Collecti
 
   url: "#{config.apiroot}/feedbackdefinitions"
   credentials: ->
-    token: settings.get('api_token')
+    token: user.token()
   model: module.exports.Model
   comparator: 'title'

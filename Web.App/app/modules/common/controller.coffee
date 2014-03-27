@@ -3,6 +3,7 @@ UserProfile = require '../../models/userprofile'
 UserToken = require '../../models/usertoken'
 vent = require 'vent'
 settings = require 'settings'
+user = require 'user'
 
 module.exports = class Controller extends Backbone.Marionette.Controller
 
@@ -13,12 +14,9 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
       vent.on 'view:signin:do', (data) =>
         if not _.isEmpty(data.username) and not _.isEmpty(data.password)
-          settings.set('api_token', '')
-          settings.set('api_token_expires', '')
-          settings.set('api_authenticated', false)
-          settings.set('api_username', data.username)
-          settings.set('api_remember', data.remember is 'on')
-          settings.set('api_userroles', [])
+          user.reset()
+          user.name(data.username) if data.remember
+          user.remember(data.remember)
           @doSignin(data.username, data.password)
 
       vent.on 'message:success:show', (data) =>
@@ -73,24 +71,19 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       password: password
     userToken.save null, # POST
       success:  (model, response, options) =>
-        settings.set('api_token', userToken.get('accessToken'))
-        settings.set('api_token_expires', userToken.get('expires'))
-        settings.set('api_authenticated', true)
-        # vent.trigger 'message:success:show', 'token received ' + username
-        # vent.trigger 'fetch:done' # stop save() spinner
+        user.token(userToken.get('accessToken'))
+        user.tokenexpires(userToken.get('expires'))
         # get the userprofile
         profile = new UserProfile.Model()
         profile.fetch
           success: (model, response, options) =>
-            settings.set('api_userroles', model.get('roles'))
+            user.set('api_userroles', model.get('roles'))
             vent.trigger 'message:success:show', 'signed in ' + username
             vent.trigger 'navigation:signin'
           error: (model, xhr, options) ->
-            # alert('profile fetch failed')
             # vent.trigger 'message:error:show', 'profile fetch failed'
             vent.trigger 'navigation:signout'
       error: (model, xhr, options) ->
-        # alert('signin failed')
         vent.trigger 'message:error:show', 'sign in failed'
         vent.trigger 'navigation:signout'
         vent.trigger 'fetch:fail' # stop save() spinner

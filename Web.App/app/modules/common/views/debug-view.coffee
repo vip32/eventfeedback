@@ -1,6 +1,7 @@
 application = require 'application'
 vent = require 'vent'
 settings = require 'settings'
+user = require 'user'
 
 module.exports = class DebugView extends Backbone.Marionette.ItemView
   id: 'debug-view'
@@ -14,8 +15,8 @@ module.exports = class DebugView extends Backbone.Marionette.ItemView
 
   serializeData: ->
     resources: @resources?.toJSON()
-    user: settings.get('api_username')
-    roles: settings.get('api_userroles')
+    user: user.name()
+    roles: user.roles()
 
   onTriggerEvent: (e) ->
     model = Backbone.Syphon.serialize(@)

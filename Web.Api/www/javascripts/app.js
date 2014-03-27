@@ -435,11 +435,13 @@ module.exports = ItemView = (function(_super) {
 });
 
 ;require.register("lib/base/model", function(exports, require, module) {
-var Model, vent, _ref,
+var Model, config, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 vent = require('vent');
+
+config = require('config');
 
 module.exports = Model = (function(_super) {
   __extends(Model, _super);
@@ -463,7 +465,8 @@ module.exports = Model = (function(_super) {
       return vent.trigger('sync:fail:servererror', error);
     } else if (error.status === 401 || error.status === 403) {
       console.warn('UNAUTHORIZED', error);
-      return vent.trigger('sync:fail:unauthorized', error);
+      vent.trigger('sync:fail:unauthorized', error);
+      return vent.trigger(config.signintrigger);
     } else {
       console.warn('UNKNOWN', error);
       return vent.trigger('sync:fail:unknown', error);
@@ -539,7 +542,7 @@ Handlebars.registerHelper("zerowhenempty", function(text) {
 });
 
 ;require.register("models/event", function(exports, require, module) {
-var Collection, Event, EventsCollection, Model, config, settings, _ref, _ref1,
+var Collection, Event, EventsCollection, Model, config, settings, user, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -550,6 +553,8 @@ Model = require('../lib/base/model');
 Collection = require('../lib/base/collection');
 
 settings = require('settings');
+
+user = require('user');
 
 module.exports.Model = Event = (function(_super) {
   __extends(Event, _super);
@@ -575,7 +580,7 @@ module.exports.Collection = EventsCollection = (function(_super) {
 
   EventsCollection.prototype.credentials = function() {
     return {
-      token: settings.get('api_token')
+      token: user.token()
     };
   };
 
@@ -587,7 +592,7 @@ module.exports.Collection = EventsCollection = (function(_super) {
 });
 
 ;require.register("models/eventreport", function(exports, require, module) {
-var Collection, EventReport, EventReportsCollection, Model, config, settings, _ref, _ref1,
+var Collection, EventReport, EventReportsCollection, Model, config, settings, user, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -598,6 +603,8 @@ Model = require('../lib/base/model');
 Collection = require('../lib/base/collection');
 
 settings = require('../settings');
+
+user = require('user');
 
 module.exports.Model = EventReport = (function(_super) {
   __extends(EventReport, _super);
@@ -625,7 +632,7 @@ module.exports.Collection = EventReportsCollection = (function(_super) {
 
   EventReportsCollection.prototype.credentials = function() {
     return {
-      token: settings.get('api_token')
+      token: user.token()
     };
   };
 
@@ -639,7 +646,7 @@ module.exports.Collection = EventReportsCollection = (function(_super) {
 });
 
 ;require.register("models/eventtag", function(exports, require, module) {
-var Collection, EventTag, EventTagsCollection, Model, config, settings, _ref, _ref1,
+var Collection, EventTag, EventTagsCollection, Model, config, settings, user, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -650,6 +657,8 @@ Model = require('../lib/base/model');
 Collection = require('../lib/base/collection');
 
 settings = require('../settings');
+
+user = require('user');
 
 module.exports.Model = EventTag = (function(_super) {
   __extends(EventTag, _super);
@@ -677,7 +686,7 @@ module.exports.Collection = EventTagsCollection = (function(_super) {
 
   EventTagsCollection.prototype.credentials = function() {
     return {
-      token: settings.get('api_token')
+      token: user.token()
     };
   };
 
@@ -689,7 +698,7 @@ module.exports.Collection = EventTagsCollection = (function(_super) {
 });
 
 ;require.register("models/feedback", function(exports, require, module) {
-var Collection, Feedback, FeedbacksCollection, Model, config, settings, _ref, _ref1,
+var Collection, Feedback, FeedbacksCollection, Model, config, settings, user, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -700,6 +709,8 @@ Model = require('../lib/base/model');
 Collection = require('../lib/base/collection');
 
 settings = require('settings');
+
+user = require('user');
 
 module.exports.Model = Feedback = (function(_super) {
   __extends(Feedback, _super);
@@ -725,7 +736,7 @@ module.exports.Collection = FeedbacksCollection = (function(_super) {
 
   FeedbacksCollection.prototype.credentials = function() {
     return {
-      token: settings.get('api_token')
+      token: user.token()
     };
   };
 
@@ -737,7 +748,7 @@ module.exports.Collection = FeedbacksCollection = (function(_super) {
 });
 
 ;require.register("models/feedbackdefinition", function(exports, require, module) {
-var Collection, FeedbackDefinition, FeedbackDefinitionsCollection, Model, config, settings, _ref, _ref1,
+var Collection, FeedbackDefinition, FeedbackDefinitionsCollection, Model, config, settings, user, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -748,6 +759,8 @@ Model = require('../lib/base/model');
 Collection = require('../lib/base/collection');
 
 settings = require('settings');
+
+user = require('user');
 
 module.exports.Model = FeedbackDefinition = (function(_super) {
   __extends(FeedbackDefinition, _super);
@@ -773,7 +786,7 @@ module.exports.Collection = FeedbackDefinitionsCollection = (function(_super) {
 
   FeedbackDefinitionsCollection.prototype.credentials = function() {
     return {
-      token: settings.get('api_token')
+      token: user.token()
     };
   };
 
@@ -1020,7 +1033,7 @@ module.exports.Collection = ResourceCollection = (function(_super) {
 });
 
 ;require.register("models/role", function(exports, require, module) {
-var Collection, Model, Role, RolesCollection, config, settings, _ref, _ref1,
+var Collection, Model, Role, RolesCollection, config, settings, user, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1031,6 +1044,8 @@ Model = require('../lib/base/model');
 Collection = require('../lib/base/collection');
 
 settings = require('settings');
+
+user = require('user');
 
 module.exports.Model = Role = (function(_super) {
   __extends(Role, _super);
@@ -1056,7 +1071,7 @@ module.exports.Collection = RolesCollection = (function(_super) {
 
   RolesCollection.prototype.credentials = function() {
     return {
-      token: settings.get('api_token')
+      token: user.token()
     };
   };
 
@@ -1080,7 +1095,7 @@ module.exports.Collection = RolesCollection = (function(_super) {
 });
 
 ;require.register("models/session", function(exports, require, module) {
-var Collection, Model, Session, SessionsCollection, config, settings, _ref, _ref1,
+var Collection, Model, Session, SessionsCollection, config, settings, user, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1091,6 +1106,8 @@ Model = require('../lib/base/model');
 Collection = require('../lib/base/collection');
 
 settings = require('../settings');
+
+user = require('user');
 
 module.exports.Model = Session = (function(_super) {
   __extends(Session, _super);
@@ -1118,7 +1135,7 @@ module.exports.Collection = SessionsCollection = (function(_super) {
 
   SessionsCollection.prototype.credentials = function() {
     return {
-      token: settings.get('api_token')
+      token: user.token()
     };
   };
 
@@ -1206,17 +1223,21 @@ module.exports.Collection = StoreCollection = (function(_super) {
     return (item != null) === true;
   };
 
-  StoreCollection.prototype.clear = function(options) {
+  StoreCollection.prototype.destroy = function(id) {
+    /* removes all models from the collection and store*/
+
     var _this = this;
-    return this.fetch({
-      success: function(collection, response) {
-        return _this.each(function(item) {
-          return item.destroy({
-            wait: true
-          });
-        });
-      }
-    });
+    if (_.isEmpty(id)) {
+      return _.chain(this.models).clone().each(function(model) {
+        return model.destroy();
+      });
+    } else {
+      return _.chain(this.models).clone().each(function(model) {
+        if (("" + _this.name + "-" + id) === model.get('id')) {
+          return model.destroy();
+        }
+      });
+    }
   };
 
   return StoreCollection;
@@ -1225,7 +1246,7 @@ module.exports.Collection = StoreCollection = (function(_super) {
 });
 
 ;require.register("models/user", function(exports, require, module) {
-var Collection, Model, User, UsersCollection, config, settings, _ref, _ref1,
+var Collection, Model, User, UsersCollection, config, settings, user, _ref, _ref1,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1236,6 +1257,8 @@ Model = require('../lib/base/model');
 Collection = require('../lib/base/collection');
 
 settings = require('settings');
+
+user = require('user');
 
 module.exports.Model = User = (function(_super) {
   __extends(User, _super);
@@ -1261,7 +1284,7 @@ module.exports.Collection = UsersCollection = (function(_super) {
 
   UsersCollection.prototype.credentials = function() {
     return {
-      token: settings.get('api_token')
+      token: user.token()
     };
   };
 
@@ -1275,7 +1298,7 @@ module.exports.Collection = UsersCollection = (function(_super) {
 });
 
 ;require.register("models/userprofile", function(exports, require, module) {
-var Model, UserProfile, config, settings, _ref,
+var Model, UserProfile, config, settings, user, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1284,6 +1307,8 @@ config = require('../config');
 Model = require('../lib/base/model');
 
 settings = require('../settings');
+
+user = require('user');
 
 module.exports.Model = UserProfile = (function(_super) {
   __extends(UserProfile, _super);
@@ -1299,7 +1324,7 @@ module.exports.Model = UserProfile = (function(_super) {
 
   UserProfile.prototype.credentials = function() {
     return {
-      token: settings.get('api_token')
+      token: user.token()
     };
   };
 
@@ -1971,7 +1996,7 @@ module.exports = UsersGeneratorView = (function(_super) {
 });
 
 ;require.register("modules/common/controller", function(exports, require, module) {
-var Controller, UserProfile, UserToken, application, settings, vent,
+var Controller, UserProfile, UserToken, application, settings, user, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1985,6 +2010,8 @@ vent = require('vent');
 
 settings = require('settings');
 
+user = require('user');
+
 module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
 
@@ -1994,12 +2021,11 @@ module.exports = Controller = (function(_super) {
     application.addInitializer(function(options) {
       vent.on('view:signin:do', function(data) {
         if (!_.isEmpty(data.username) && !_.isEmpty(data.password)) {
-          settings.set('api_token', '');
-          settings.set('api_token_expires', '');
-          settings.set('api_authenticated', false);
-          settings.set('api_username', data.username);
-          settings.set('api_remember', data.remember === 'on');
-          settings.set('api_userroles', []);
+          user.reset();
+          if (data.remember) {
+            user.name(data.username);
+          }
+          user.remember(data.remember);
           return _this.doSignin(data.username, data.password);
         }
       });
@@ -2076,13 +2102,12 @@ module.exports = Controller = (function(_super) {
     return userToken.save(null, {
       success: function(model, response, options) {
         var profile;
-        settings.set('api_token', userToken.get('accessToken'));
-        settings.set('api_token_expires', userToken.get('expires'));
-        settings.set('api_authenticated', true);
+        user.token(userToken.get('accessToken'));
+        user.tokenexpires(userToken.get('expires'));
         profile = new UserProfile.Model();
         return profile.fetch({
           success: function(model, response, options) {
-            settings.set('api_userroles', model.get('roles'));
+            user.set('api_userroles', model.get('roles'));
             vent.trigger('message:success:show', 'signed in ' + username);
             return vent.trigger('navigation:signin');
           },
@@ -2172,7 +2197,7 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/common/views/about-view", function(exports, require, module) {
-var AboutView, application, settings, vent, _ref,
+var AboutView, application, settings, user, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2181,6 +2206,8 @@ application = require('application');
 vent = require('vent');
 
 settings = require('settings');
+
+user = require('user');
 
 module.exports = AboutView = (function(_super) {
   __extends(AboutView, _super);
@@ -2206,8 +2233,10 @@ module.exports = AboutView = (function(_super) {
     var _ref1;
     return {
       resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
-      user: settings.get('api_username'),
-      roles: settings.get('api_userroles')
+      user: user.name(),
+      roles: user.roles(),
+      admin: user.isAdministrator(),
+      auth: user.isAuthenticated()
     };
   };
 
@@ -2217,6 +2246,7 @@ module.exports = AboutView = (function(_super) {
 
   AboutView.prototype.onReset = function(e) {
     e.preventDefault();
+    user.reset();
     settings.destroy();
     vent.trigger('home:index');
     return vent.trigger('resources:loaded');
@@ -2232,7 +2262,7 @@ module.exports = AboutView = (function(_super) {
 });
 
 ;require.register("modules/common/views/debug-view", function(exports, require, module) {
-var DebugView, application, settings, vent, _ref,
+var DebugView, application, settings, user, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2241,6 +2271,8 @@ application = require('application');
 vent = require('vent');
 
 settings = require('settings');
+
+user = require('user');
 
 module.exports = DebugView = (function(_super) {
   __extends(DebugView, _super);
@@ -2267,8 +2299,8 @@ module.exports = DebugView = (function(_super) {
     var _ref1;
     return {
       resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
-      user: settings.get('api_username'),
-      roles: settings.get('api_userroles')
+      user: user.name(),
+      roles: user.roles()
     };
   };
 
@@ -2365,7 +2397,7 @@ module.exports = HomeView = (function(_super) {
 });
 
 ;require.register("modules/common/views/signin-view", function(exports, require, module) {
-var SigninView, application, settings, vent, _ref,
+var SigninView, application, settings, user, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2374,6 +2406,8 @@ application = require('application');
 vent = require('vent');
 
 settings = require('settings');
+
+user = require('user');
 
 module.exports = SigninView = (function(_super) {
   __extends(SigninView, _super);
@@ -2399,9 +2433,9 @@ module.exports = SigninView = (function(_super) {
     var _ref1;
     return {
       resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
-      username: this.options.username ? this.options.username : settings.get('api_remember') ? settings.get('api_username') : void 0,
+      username: this.options.username ? this.options.username : user.remember() ? user.name() : void 0,
       password: this.options.password,
-      remember: settings.get('api_remember') ? settings.get('api_remember') : void 0
+      remember: user.remember()
     };
   };
 
@@ -2440,6 +2474,14 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     + "/ role: ";
   if (stack1 = helpers.roles) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.roles; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "/ admin: ";
+  if (stack1 = helpers.admin) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.admin; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "/ auth: ";
+  if (stack1 = helpers.auth) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.auth; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
     + "</span>\r\n      </p>\r\n    </div>\r\n  </div>\r\n</div>";
   return buffer;
@@ -2824,7 +2866,7 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/event/views/event-details-view", function(exports, require, module) {
-var EventDetailsView, application, settings, vent, _ref,
+var EventDetailsView, application, settings, user, vent, _ref,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2834,6 +2876,8 @@ application = require('application');
 vent = require('vent');
 
 settings = require('settings');
+
+user = require('user');
 
 module.exports = EventDetailsView = (function(_super) {
   __extends(EventDetailsView, _super);
@@ -2881,12 +2925,12 @@ module.exports = EventDetailsView = (function(_super) {
   };
 
   EventDetailsView.prototype.onShow = function() {
-    var roles, tag, _ref1;
+    var roles, tag;
     scrollTo(0, 0);
     tag = settings.get('active-eventtag');
     this.$("input:radio[name='tags'][value='" + tag + "']").attr('checked', 'checked').parent().addClass('active');
     this.filterByTag(tag);
-    roles = (_ref1 = settings.get('api_userroles')) != null ? _ref1 : [];
+    roles = user.roles();
     if (!_.contains(roles, 'Administrator')) {
       return $('.js-report').hide();
     }
@@ -4920,7 +4964,7 @@ if (typeof define === 'function' && define.amd) {
 });
 
 ;require.register("modules/header/controller", function(exports, require, module) {
-var Controller, Header, application, settings, vent,
+var Controller, Header, application, settings, user, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -4931,6 +4975,8 @@ Header = require('../../models/header');
 vent = require('vent');
 
 settings = require('settings');
+
+user = require('user');
 
 module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
@@ -4951,7 +4997,7 @@ module.exports = Controller = (function(_super) {
     var View, view;
     View = require('./views/header-view');
     view = new View.Header({
-      collection: this.headers.active(settings.get('api_userroles')),
+      collection: this.headers.active(user.roles()),
       resources: application.resources
     });
     return application.layout.header.show(view);
@@ -5287,12 +5333,10 @@ Settings = (function() {
     return this.store.has(id);
   };
 
-  Settings.prototype.destroy = function() {
-    /* removes all models from the collection and store*/
+  Settings.prototype.destroy = function(id) {
+    /* removes all (or by id) models from the collection and store*/
 
-    return _.chain(this.store.models).clone().each(function(model) {
-      return model.destroy();
-    });
+    return this.store.destroy(id);
   };
 
   return Settings;
@@ -5300,6 +5344,96 @@ Settings = (function() {
 })();
 
 module.exports = new Settings();
+});
+
+;require.register("user", function(exports, require, module) {
+var User, settings;
+
+settings = require('settings');
+
+User = (function() {
+  /*
+    encapsulates the current user
+  */
+
+  function User() {
+    /* initializes this instance*/
+
+    log('user init');
+  }
+
+  User.prototype.set = function(key, value) {
+    return settings.set(key, value);
+  };
+
+  User.prototype.get = function(key) {
+    return settings.get(key);
+  };
+
+  User.prototype.isAuthenticated = function() {
+    return !(_.isEmpty(this.token()) || _.isEmpty(this.tokenexpires()));
+  };
+
+  User.prototype.isAdministrator = function() {
+    return _.intersection(['Administrator'], this.roles).length > 0;
+  };
+
+  User.prototype.reset = function() {
+    settings.destroy('api_token');
+    settings.destroy('api_token_expires');
+    settings.destroy('api_authenticated');
+    settings.destroy('api_username');
+    settings.destroy('api_remember');
+    return settings.destroy('api_userroles');
+  };
+
+  User.prototype.token = function(value) {
+    if (!_.isEmpty(value)) {
+      return settings.set('api_token', value);
+    } else {
+      return settings.get('api_token');
+    }
+  };
+
+  User.prototype.tokenexpires = function(value) {
+    if (!_.isEmpty(value)) {
+      return settings.set('api_token_expires', value);
+    } else {
+      return settings.get('api_token_expires');
+    }
+  };
+
+  User.prototype.roles = function(values) {
+    var _ref;
+    if (!_.isEmpty(values)) {
+      return settings.set('api_userroles', values);
+    } else {
+      return (_ref = settings.get('api_userroles')) != null ? _ref : [];
+    }
+  };
+
+  User.prototype.name = function(value) {
+    if (!_.isEmpty(value)) {
+      return settings.set('api_username', value);
+    } else {
+      return settings.get('api_username');
+    }
+  };
+
+  User.prototype.remember = function(value) {
+    var _ref;
+    if (_.isBoolean(value)) {
+      return settings.set('api_remember', value);
+    } else {
+      return (_ref = settings.get('api_remember')) != null ? _ref : false;
+    }
+  };
+
+  return User;
+
+})();
+
+module.exports = new User();
 });
 
 ;require.register("vent", function(exports, require, module) {

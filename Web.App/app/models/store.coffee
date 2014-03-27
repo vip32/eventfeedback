@@ -38,10 +38,13 @@ module.exports.Collection = class StoreCollection extends Collection
     ### looks through the collection for the specified id ###
     item = @get("#{@name}-#{id}")
     item? == true
-
-  clear: (options) ->
-    @fetch
-      success: (collection, response) =>
-        @each (item) =>
-          item.destroy
-            wait: true # options
+    
+  destroy: (id) ->
+    ### removes all models from the collection and store ###
+    if _.isEmpty(id)
+      _.chain(@models).clone().each (model) ->
+        model.destroy()
+    else
+      _.chain(@models).clone().each (model) =>
+        if "#{@name}-#{id}" is model.get('id')
+          model.destroy()
