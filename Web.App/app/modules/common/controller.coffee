@@ -46,6 +46,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       resources: application.resources
       username: params?.u
       password: params?.p
+      returnroute: params?.returnroute
     application.layout.content.show(view)
     
   showAbout: ->
