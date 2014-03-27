@@ -98,6 +98,8 @@ var Application, Resource, config, settings, vent, _ref,
 
 require('lib/marionette-renderer');
 
+require('lib/string-helper');
+
 require('lib/view-helper');
 
 config = require('config');
@@ -501,22 +503,6 @@ if (typeof String.prototype.startsWith !== 'function') {
 if (typeof String.prototype.endsWith !== 'function') {
   String.prototype.endsWith = function(str) {
     return this.slice(-str.length) === str;
-  };
-}
-
-if (typeof String.prototype.addCommas !== 'function') {
-  String.prototype.addCommas = function() {
-    var rgx, str, x, x1, x2;
-    str = this;
-    str += '';
-    x = str.split('.');
-    x1 = x[0];
-    x2 = x.length > 1 ? '.' + x[1] : '';
-    rgx = /(\d+)(\d{3})/;
-    while (rgx.test(x1)) {
-      x1 = x1.replace(rgx, '$1' + ',' + '$2');
-    }
-    return x1 + x2;
   };
 }
 
@@ -2236,7 +2222,7 @@ module.exports = Router = (function(_super) {
       });
       vent.on('signin:index', function() {
         console.log(application.getCurrentRoute());
-        if (application.getCurrentRoute() !== 'signin') {
+        if (!application.getCurrentRoute().startsWith('signin')) {
           application.navigate('signin', {
             returnroute: application.getCurrentRoute()
           });

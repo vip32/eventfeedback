@@ -1,4 +1,5 @@
 require 'lib/marionette-renderer'
+require 'lib/string-helper'
 require 'lib/view-helper'
 config = require 'config'
 settings = require 'settings'

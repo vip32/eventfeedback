@@ -31,7 +31,7 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
 
       vent.on 'signin:index', =>
         console.log application.getCurrentRoute()
-        if application.getCurrentRoute() isnt 'signin' # startsWith
+        if not application.getCurrentRoute().startsWith('signin') # startsWith
           application.navigate 'signin',
             returnroute: application.getCurrentRoute()
           @controller.showSignin()
