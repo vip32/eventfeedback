@@ -25,7 +25,7 @@ module.exports = class SigninView extends Backbone.Marionette.ItemView
 
   onShow: ->
     scrollTo(0,0)
-    $('#make-switch').bootstrapSwitch('size', 'small')
+#    $('#make-switch').bootstrapSwitch('size', 'small')
 
   onClose: ->
     log 'signin view close'
