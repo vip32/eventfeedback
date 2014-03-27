@@ -42,6 +42,8 @@ namespace EventFeedback.Domain
         public string Key { get; set; } // 101 (SessionID)
         [StringLength(512)]
         public string Link { get; set; }
+        public DateTime? ActiveFromDate { get; set; }
+        public DateTime? ActiveTillDate { get; set; }
         public bool? FeedbackAllowed { get; set; }
         public int? FeedbackDefinitionId { get; set; }
         public FeedbackDefinition FeedbackDefinition { get; set; }
@@ -110,7 +112,11 @@ namespace EventFeedback.Domain
         /// <returns></returns>
         public bool IsActive()
         {
-            return !(Active != null && !(bool)Active) && !IsDeleted();
+            return !(Active != null && 
+                !(bool)Active) &&
+                !IsDeleted() &&
+                SystemTime.Now().IsInRange(ActiveFromDate, ActiveTillDate);
+
         }
 
         /// <summary>

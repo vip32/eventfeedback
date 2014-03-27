@@ -36,17 +36,17 @@ namespace EventFeedback.Web.Api.Controllers
             var ev = _context.Events
                 .Include("FeedbackDefinition")
                 .Include("Sessions").Include("Sessions.FeedbackDefinition")
-                .Where(d => !(d.Active != null && !(bool) d.Active))
-                .Where(d => !(d.Deleted != null && (bool) d.Deleted))
+                //.Where(d => !(d.Active != null && !(bool) d.Active))
+                .Where(e => !(e.Deleted != null && (bool) e.Deleted))
                 .FirstOrDefault(e => e.Id == eventId);
             if (ev == null) return StatusCode(HttpStatusCode.NotFound);
             var sIds = ev.Sessions.Select(s => s.Id);
             var eventFeedbacks = _context.Feedbacks.Where(f => f.EventId == eventId)
-                .Where(d => !(d.Active != null && !(bool) d.Active))
-                .Where(d => !(d.Deleted != null && (bool) d.Deleted)).ToList();
+                //.Where(d => !(d.Active != null && !(bool) d.Active))
+                .Where(f => !(f.Deleted != null && (bool) f.Deleted)).ToList();
             var sessionFeedbacks = _context.Feedbacks.Where(f => sIds.Contains(f.SessionId.Value))
-                .Where(d => !(d.Active != null && !(bool) d.Active))
-                .Where(d => !(d.Deleted != null && (bool) d.Deleted)).ToList();
+                //.Where(d => !(d.Active != null && !(bool) d.Active))
+                .Where(f => !(f.Deleted != null && (bool) f.Deleted)).ToList();
 
             var result = new EventReportModel
             {
@@ -84,7 +84,9 @@ namespace EventFeedback.Web.Api.Controllers
                     MaxRateQuestion8 = MaxRate(ev.FeedbackDefinition.QuestionType8).ToString(CultureInfo.InvariantCulture),
                     MaxRateQuestion9 = MaxRate(ev.FeedbackDefinition.QuestionType9).ToString(CultureInfo.InvariantCulture),
                 }),
-                Sessions = ev.Sessions.Select(s => new SessionReportModel
+                Sessions = ev.Sessions
+                    .Where(s => !(s.Deleted != null && (bool)s.Deleted))
+                    .Select(s => new SessionReportModel
                 {
                     Id = s.Id,
                     Title = s.Title,

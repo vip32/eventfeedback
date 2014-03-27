@@ -1,4 +1,5 @@
 vent = require 'vent'
+config = require 'config'
 
 # Base class for all collections.
 module.exports = class Collection extends Backbone.Collection
@@ -16,6 +17,7 @@ module.exports = class Collection extends Backbone.Collection
     else if error.status is 401 or error.status is 403
       console.warn 'UNAUTHORIZED', error
       vent.trigger 'sync:fail:unauthorized', error
+      vent.trigger config.signintrigger
     else
       console.warn 'UNKNOWN', error
       vent.trigger 'sync:fail:unknown', error

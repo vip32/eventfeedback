@@ -8,8 +8,8 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
   appRoutes:
     'admin/events': 'showEventsEdit'
     'admin/events/:id': 'showSessionsEdit'
-    'admin/users': 'showUsersEdit'
-    'admin/usersgenerator': 'showUsersGenerator'
+    'admin/users': 'showUsersGenerator'
+#    'admin/usersgenerator': 'showUsersGenerator'
 
   initialize: (options)  ->
     log 'admin router init'
@@ -24,9 +24,9 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
         application.navigate 'admin/events/' + id
         @controller.showSessionsEdit(id)
 
-      vent.on 'admin:users:edit', =>
-        application.navigate 'admin/users'
-        @controller.showUsersEdit()
+#      vent.on 'admin:users:edit', =>
+#        application.navigate 'admin/users'
+#        @controller.showUsersEdit()
         
       vent.on 'admin:users:generator', =>
         application.navigate 'admin/usersgenerator'

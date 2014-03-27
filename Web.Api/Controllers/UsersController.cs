@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
@@ -39,6 +38,7 @@ namespace EventFeedback.Web.Api.Controllers
                 //_userService.HideSensitiveData(user);
                 var identity = _userService.CreateIdentity(user, Startup.OAuthBearerOptions.AuthenticationType);
                 identity.AddClaim(new Claim(ClaimTypes.Name, login.UserName));
+                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
                 var ticket = new AuthenticationTicket(identity, new AuthenticationProperties());
                 var currentUtc = new SystemClock().UtcNow;
                 ticket.Properties.IssuedUtc = currentUtc;
@@ -56,7 +56,6 @@ namespace EventFeedback.Web.Api.Controllers
             }
             return new HttpResponseMessage(HttpStatusCode.Unauthorized);
         }
-
         [HttpGet]
         [Route("profile")]
         [Authorize]

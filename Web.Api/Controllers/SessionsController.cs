@@ -47,8 +47,9 @@ namespace EventFeedback.Web.Api.Controllers
                         .Include(s => s.FeedbackDefinition)
                         .OrderBy(e => e.StartDate)
                         .Where(s => s.EventId == eventId)
-                        .Where(d => !(d.Active != null && !(bool) d.Active))
-                        .Where(d => !(d.Deleted != null && (bool) d.Deleted));
+                        .ToList().Where(e => e.IsActive());
+                        //.Where(d => !(d.Active != null && !(bool) d.Active))
+                        //.Where(d => !(d.Deleted != null && (bool) d.Deleted));
 
                 if (filter.Equals("current", StringComparison.CurrentCultureIgnoreCase))
                     result = result.ToList().Where(e => e.IsCurrent());

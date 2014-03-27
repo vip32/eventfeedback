@@ -1,31 +1,13 @@
 ﻿<div class="container">
   <form class="form-horizontal noprint" role="form">
     <div class="form-group">
-      <label for="message" class="col-sm-4 control-label">Message</label>
+      <label for="amount" class="col-sm-4 control-label">Organization</label>
       <div class="col-sm-8">
-        <input type="text" class="form-control" name="message" id="message" placeholder=""></input>
+        <input type="text" class="form-control" name="organization" id="organization" disabled placeholder=""></input>
       </div>
     </div>
     <div class="form-group">
-      <label for="amount" class="col-sm-4 control-label">Amount</label>
-      <div class="col-sm-8">
-        <select name="amount" id="amount" class="form-control">
-          <option value="1">1</option>
-          <option value="10">10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="prefix" class="col-sm-4 control-label">Prefix</label>
-      <div class="col-sm-8">
-        <input type="text" class="form-control" name="prefix" id="prefix" placeholder=""></input>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="roles" class="col-sm-4 control-label">Role</label>
+      <label for="roles" class="col-sm-4 control-label">Account role</label>
       <div class="col-sm-8">
         <select name="roles" id="roles" class="form-control">
           <option value=""></option>
@@ -34,6 +16,59 @@
           {{/each}}
         </select>
       </div>
+    </div>
+    <div class="form-group">
+      <label for="amount" class="col-sm-4 control-label">Account names</label>
+      <div class="col-sm-8">
+        <input type="text" class="form-control" name="accountnames" id="accountnames" placeholder="user1; user2; ..."></input>
+        <!--<span class="help-block">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="amount" class="col-sm-4 control-label">Random accounts amount</label>
+      <div class="col-sm-8">
+        <select name="amount" id="amount" class="form-control">
+          <option value=""></option>
+          <option value="1">1</option>
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+        <!--<span class="help-block">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="message" class="col-sm-4 control-label">Active</label>
+      <div class="col-sm-8">
+        <div class="row">
+          <div class="col-xs-6">
+            <input type="date" class="form-control" name="activefrom" id="activefrom" placeholder="from"></input>
+          </div>
+          <div class="col-xs-6">
+            <input type="date" class="form-control" name="activetill" id="activetill" placeholder="till"></input>
+          </div>
+        </div>
+        <!--<span class="help-block">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="prefix" class="col-sm-4 control-label">Account prefix</label>
+      <div class="col-sm-8">
+        <input type="text" class="form-control" name="prefix" id="prefix" placeholder=""></input>
+        <!--<span class="help-block">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="message" class="col-sm-4 control-label">Additional message</label>
+      <div class="col-sm-8">
+        <input type="text" class="form-control" name="message" id="message" placeholder=""></input>
+        <!--<span class="help-block">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->
+      </div>
+    </div>
+    
+    <div class="form-group">
+      
 
       <div class="col-sm-offset-4 col-sm-8 pull-right">
         <br/>

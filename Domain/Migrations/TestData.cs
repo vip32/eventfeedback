@@ -122,7 +122,7 @@ namespace EventFeedback.Domain
                     new ResourceText { Key = "Text_Save", Value = "Save", Language = "en-US" },
                     new ResourceText { Key = "Text_Remove", Value = "Remove", Language = "en-US" },
                     new ResourceText { Key = "Text_Report", Value = "Report", Language = "en-US" },
-                    new ResourceText { Key = "Home_Text", Value = "", Language = "en-US" },
+                    new ResourceText { Key = "Home_Text", Value = "Home_Text", Language = "en-US" },
 
                     new ResourceText { Key = "Feedback_Saved_Success", Value = "Feedback gespeichert", Language = "de-DE" },
                     new ResourceText { Key = "Feedback_Saved_Failed", Value = "Feedback NICHT gespeichert", Language = "de-DE" },

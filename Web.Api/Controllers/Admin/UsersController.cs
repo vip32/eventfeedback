@@ -39,9 +39,9 @@ namespace EventFeedback.Web.Api.Controllers.Admin
             _traceSource.TraceInformation("usersscontroller get all");
             return filter.Equals("all", StringComparison.CurrentCultureIgnoreCase)
                 ? Ok(Map(_context.Users.OrderBy(u => u.UserName)))
-                : Ok(Map(_context.Users.OrderBy(u => u.UserName)
-                    .Where(u => !(u.Active != null && !(bool) u.Active))
-                    .Where(u => !(u.Deleted != null && (bool) u.Deleted))));
+                : Ok(Map(_context.Users.OrderBy(u => u.UserName).ToList().Where(u => u.IsActive())));
+            //.Where(u => !(u.Active != null && !(bool) u.Active))
+            //.Where(u => !(u.Deleted != null && (bool) u.Deleted))));
         }
 
         [HttpPost]
@@ -56,12 +56,22 @@ namespace EventFeedback.Web.Api.Controllers.Admin
             Guard.Against<ArgumentException>(string.IsNullOrEmpty(entity.Password), "entity.password cannot be empty");
             
             var user = Map(entity);
+            if (_userService.Exists(user.UserName))
+                return BadRequest(string.Format("user with name {0} already exists", user.UserName));
+
             var result = _userService.CreateUser(user, entity.Password);
 
             // add the roles
             if(result.Succeeded && !string.IsNullOrEmpty(entity.Roles))
                 foreach(var role in entity.Roles.Split(' '))
                     _userService.AddUserToRole(user, role);
+
+            // set the other properties
+            if (entity.ActiveFrom != null) user.ActiveFromDate = entity.ActiveFrom.Value;
+            if (entity.ActiveTill != null) user.ActiveTillDate = entity.ActiveTill.Value;
+            if (!string.IsNullOrEmpty(entity.Organization)) user.Organization = entity.Organization;
+            _userService.UpdateUser(user);
+
             return Created("http://acme.com/users/" + user.Id, user);
         }
 
@@ -95,6 +105,19 @@ namespace EventFeedback.Web.Api.Controllers.Admin
             _userService.ClearUserRoles(user);
             foreach (var role in entity.Roles.NullToEmpty().Split(' '))
                 _userService.AddUserToRole(user, role);
+
+            // update the other properties
+            if (entity.ActiveFrom != null) 
+                user.ActiveFromDate = entity.ActiveFrom.Value;
+            else
+                user.ActiveFromDate = null;
+            if (entity.ActiveTill != null)
+                user.ActiveTillDate = entity.ActiveTill.Value;
+            else
+                user.ActiveTillDate = null;
+            user.Organization = entity.Organization;
+            _userService.UpdateUser(user);
+
             return Ok(user);
         }
 
@@ -126,12 +149,6 @@ namespace EventFeedback.Web.Api.Controllers.Admin
                         Active = !user.Active.HasValue || user.Active.Value,
                         Organization = user.Organization,
                         Email = user.Email,
-                        Roles = user.Roles != null && user.Roles.Any()
-                                ? user.Roles.OrderBy(r => r.RoleId).Select(r => r.RoleId).ToString(" ")
-                                : null
-                        //Roles = user.Roles != null && user.Roles.Any() 
-                        //        ? user.Roles.OrderBy(r => r.Role.Name).Select(r => r.Role.Name).ToString(" ")
-                        //        : null
                     };
             }
         }
@@ -145,7 +162,6 @@ namespace EventFeedback.Web.Api.Controllers.Admin
                 Organization = source.Organization,
                 Email = source.Email,
                 Active = source.Active
-                // todo ROLES
             };
         }
     }

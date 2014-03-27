@@ -335,11 +335,13 @@ if (typeof define === 'function' && define.amd) {
 });
 
 ;require.register("lib/base/collection", function(exports, require, module) {
-var Collection, vent, _ref,
+var Collection, config, vent, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 vent = require('vent');
+
+config = require('config');
 
 module.exports = Collection = (function(_super) {
   __extends(Collection, _super);
@@ -363,7 +365,8 @@ module.exports = Collection = (function(_super) {
       return vent.trigger('sync:fail:servererror', error);
     } else if (error.status === 401 || error.status === 403) {
       console.warn('UNAUTHORIZED', error);
-      return vent.trigger('sync:fail:unauthorized', error);
+      vent.trigger('sync:fail:unauthorized', error);
+      return vent.trigger(config.signintrigger);
     } else {
       console.warn('UNKNOWN', error);
       return vent.trigger('sync:fail:unknown', error);
@@ -943,7 +946,7 @@ module.exports.TestData = TestData = (function() {
       roles: ['Administrator'],
       resource: '',
       glyphicon: 'glyphicon-user',
-      trigger: "admin:users:edit",
+      trigger: "admin:users:generator",
       intern: true,
       order: 14
     }
@@ -1359,7 +1362,6 @@ module.exports = Controller = (function(_super) {
   function Controller(options) {
     this.onSaveUsers = __bind(this.onSaveUsers, this);
     this.showUsersGenerator = __bind(this.showUsersGenerator, this);
-    this.showUsersEdit = __bind(this.showUsersEdit, this);
     var _this = this;
     log('admin controller init');
     application.addInitializer(function(options) {
@@ -1415,37 +1417,6 @@ module.exports = Controller = (function(_super) {
     });
   };
 
-  Controller.prototype.showUsersEdit = function() {
-    var _this = this;
-    this.users.reset();
-    return this.roles.fetch({
-      reload: true
-    }).done(function(roles) {
-      return _this.users.fetch({
-        reload: true,
-        data: {
-          filter: 'all'
-        }
-      }).done(function(users) {
-        var View, view;
-        vent.trigger('set:active:header', 'admin:users:edit', application.resources.key('Title_Admin_Users'), 'glyphicon-user');
-        users.on('change', function(model) {
-          model.credentials = users.credentials;
-          return model.set('dirty', true, {
-            silent: true
-          });
-        });
-        View = require('./views/users-edit-view');
-        view = new View({
-          collection: users,
-          roles: roles,
-          resources: application.resources
-        });
-        return application.layout.content.show(view);
-      });
-    });
-  };
-
   Controller.prototype.showUsersGenerator = function() {
     var _this = this;
     this.users.reset();
@@ -1453,6 +1424,7 @@ module.exports = Controller = (function(_super) {
       reload: true
     }).done(function(roles) {
       var View, view;
+      vent.trigger('set:active:header', 'admin:users:generator', application.resources.key('Title_Admin_Users'), 'glyphicon-user');
       _this.users.on('add', function(model) {
         model.credentials = _this.users.credentials;
         return model.set('dirty', true, {
@@ -1470,6 +1442,7 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.onSaveUsers = function() {
+    var _this = this;
     return this.users.each(function(model) {
       if (model.get('dirty') && model.get('userName') !== '') {
         return model.save(null, {
@@ -1479,7 +1452,9 @@ module.exports = Controller = (function(_super) {
             });
           },
           error: function(model, xhr, options) {
-            return console.warn('user save error', model);
+            _this.users.remove(model);
+            vent.trigger('message:error:show', JSON.parse(xhr.responseText).message);
+            return console.warn('user save error');
           }
         });
       }
@@ -1519,8 +1494,7 @@ module.exports = Router = (function(_super) {
   Router.prototype.appRoutes = {
     'admin/events': 'showEventsEdit',
     'admin/events/:id': 'showSessionsEdit',
-    'admin/users': 'showUsersEdit',
-    'admin/usersgenerator': 'showUsersGenerator'
+    'admin/users': 'showUsersGenerator'
   };
 
   Router.prototype.initialize = function(options) {
@@ -1534,10 +1508,6 @@ module.exports = Router = (function(_super) {
       vent.on('admin:sessions:edit', function(id) {
         application.navigate('admin/events/' + id);
         return _this.controller.showSessionsEdit(id);
-      });
-      vent.on('admin:users:edit', function() {
-        application.navigate('admin/users');
-        return _this.controller.showUsersEdit();
       });
       return vent.on('admin:users:generator', function() {
         application.navigate('admin/usersgenerator');
@@ -1742,7 +1712,9 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "&emsp;/&emsp;"
     + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.password)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</h3>\r\n      ";
+    + "</h3>\r\n      "
+    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.roles)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "<br/>\r\n      ";
   if (stack2 = helpers.url) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
   else { stack2 = depth0.url; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
   buffer += escapeExpression(stack2)
@@ -1781,10 +1753,10 @@ function program1(depth0,data) {
   return buffer;
   }
 
-  buffer += "﻿<div class=\"container\">\r\n  <form class=\"form-horizontal noprint\" role=\"form\">\r\n    <div class=\"form-group\">\r\n      <label for=\"message\" class=\"col-sm-4 control-label\">Message</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"message\" id=\"message\" placeholder=\"\"></input>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"amount\" class=\"col-sm-4 control-label\">Amount</label>\r\n      <div class=\"col-sm-8\">\r\n        <select name=\"amount\" id=\"amount\" class=\"form-control\">\r\n          <option value=\"1\">1</option>\r\n          <option value=\"10\">10</option>\r\n          <option value=\"25\">25</option>\r\n          <option value=\"50\">50</option>\r\n          <option value=\"100\">100</option>\r\n        </select>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"prefix\" class=\"col-sm-4 control-label\">Prefix</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"prefix\" id=\"prefix\" placeholder=\"\"></input>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"roles\" class=\"col-sm-4 control-label\">Role</label>\r\n      <div class=\"col-sm-8\">\r\n        <select name=\"roles\" id=\"roles\" class=\"form-control\">\r\n          <option value=\"\"></option>\r\n          ";
+  buffer += "﻿<div class=\"container\">\r\n  <form class=\"form-horizontal noprint\" role=\"form\">\r\n    <div class=\"form-group\">\r\n      <label for=\"amount\" class=\"col-sm-4 control-label\">Organization</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"organization\" id=\"organization\" disabled placeholder=\"\"></input>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"roles\" class=\"col-sm-4 control-label\">Account role</label>\r\n      <div class=\"col-sm-8\">\r\n        <select name=\"roles\" id=\"roles\" class=\"form-control\">\r\n          <option value=\"\"></option>\r\n          ";
   stack1 = helpers.each.call(depth0, depth0.roles, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\r\n        </select>\r\n      </div>\r\n\r\n      <div class=\"col-sm-offset-4 col-sm-8 pull-right\">\r\n        <br/>\r\n        <button type=\"button\" id=\"js-generate\" class=\"btn btn-success btn-responsive\">\r\n          <span class=\"glyphicon glyphicon-user\"></span>&emsp;Generate\r\n        </button>\r\n        <button type=\"button\" id=\"js-clear\" class=\"btn btn-default btn-responsive\">\r\n          <span class=\"glyphicon glyphicon-refresh\"></span>&emsp;Clear\r\n        </button>\r\n        <button type=\"button\" id=\"js-print\" class=\"btn btn-default btn-responsive\">\r\n          <div class=\"glyphicon glyphicon-print\"></div>&emsp;Print\r\n        </button>\r\n      </div>\r\n    </div>\r\n  </form>\r\n  <div class=\"list-group\" id=\"js-users\">\r\n    <!-- users -->\r\n  </div>\r\n  <iframe name=\"print_frame\" width=\"0\" height=\"0\" frameborder=\"0\" src=\"about:blank\"></iframe>\r\n</div>\r\n\r\n";
+  buffer += "\r\n        </select>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"amount\" class=\"col-sm-4 control-label\">Account names</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"accountnames\" id=\"accountnames\" placeholder=\"user1; user2; ...\"></input>\r\n        <!--<span class=\"help-block\">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"amount\" class=\"col-sm-4 control-label\">Random accounts amount</label>\r\n      <div class=\"col-sm-8\">\r\n        <select name=\"amount\" id=\"amount\" class=\"form-control\">\r\n          <option value=\"\"></option>\r\n          <option value=\"1\">1</option>\r\n          <option value=\"10\">10</option>\r\n          <option value=\"25\">25</option>\r\n          <option value=\"50\">50</option>\r\n          <option value=\"100\">100</option>\r\n        </select>\r\n        <!--<span class=\"help-block\">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"message\" class=\"col-sm-4 control-label\">Active</label>\r\n      <div class=\"col-sm-8\">\r\n        <div class=\"row\">\r\n          <div class=\"col-xs-6\">\r\n            <input type=\"date\" class=\"form-control\" name=\"activefrom\" id=\"activefrom\" placeholder=\"from\"></input>\r\n          </div>\r\n          <div class=\"col-xs-6\">\r\n            <input type=\"date\" class=\"form-control\" name=\"activetill\" id=\"activetill\" placeholder=\"till\"></input>\r\n          </div>\r\n        </div>\r\n        <!--<span class=\"help-block\">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"prefix\" class=\"col-sm-4 control-label\">Account prefix</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"prefix\" id=\"prefix\" placeholder=\"\"></input>\r\n        <!--<span class=\"help-block\">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"message\" class=\"col-sm-4 control-label\">Additional message</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"message\" id=\"message\" placeholder=\"\"></input>\r\n        <!--<span class=\"help-block\">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->\r\n      </div>\r\n    </div>\r\n    \r\n    <div class=\"form-group\">\r\n      \r\n\r\n      <div class=\"col-sm-offset-4 col-sm-8 pull-right\">\r\n        <br/>\r\n        <button type=\"button\" id=\"js-generate\" class=\"btn btn-success btn-responsive\">\r\n          <span class=\"glyphicon glyphicon-user\"></span>&emsp;Generate\r\n        </button>\r\n        <button type=\"button\" id=\"js-clear\" class=\"btn btn-default btn-responsive\">\r\n          <span class=\"glyphicon glyphicon-refresh\"></span>&emsp;Clear\r\n        </button>\r\n        <button type=\"button\" id=\"js-print\" class=\"btn btn-default btn-responsive\">\r\n          <div class=\"glyphicon glyphicon-print\"></div>&emsp;Print\r\n        </button>\r\n      </div>\r\n    </div>\r\n  </form>\r\n  <div class=\"list-group\" id=\"js-users\">\r\n    <!-- users -->\r\n  </div>\r\n  <iframe name=\"print_frame\" width=\"0\" height=\"0\" frameborder=\"0\" src=\"about:blank\"></iframe>\r\n</div>\r\n\r\n";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
@@ -1799,100 +1771,7 @@ if (typeof define === 'function' && define.amd) {
 });
 
 ;require.register("modules/admin/views/users-edit-view", function(exports, require, module) {
-var UsersEditView, application, vent, _ref,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-application = require('application');
-
-vent = require('vent');
-
-module.exports = UsersEditView = (function(_super) {
-  __extends(UsersEditView, _super);
-
-  function UsersEditView() {
-    _ref = UsersEditView.__super__.constructor.apply(this, arguments);
-    return _ref;
-  }
-
-  UsersEditView.prototype.id = 'users-edit-view';
-
-  UsersEditView.prototype.template = require('./templates/users-edit');
-
-  UsersEditView.prototype.events = {
-    'click #js-add': 'onAdd',
-    'click #js-save': 'onSave',
-    'click #js-generate': 'onGenerate'
-  };
-
-  UsersEditView.prototype.initialize = function(options) {
-    this.resources = options != null ? options.resources : void 0;
-    return this.roles = options != null ? options.roles : void 0;
-  };
-
-  UsersEditView.prototype.onShow = function() {
-    var columns, grid, _ref1;
-    scrollTo(0, 0);
-    columns = [
-      {
-        name: "active",
-        label: "Active",
-        cell: "boolean"
-      }, {
-        name: "userName",
-        label: "userName",
-        editable: true,
-        cell: "string"
-      }, {
-        name: "password",
-        label: "Password",
-        editable: true,
-        cell: "string"
-      }, {
-        name: "roles",
-        label: "Role",
-        cell: Backgrid.SelectCell.extend({
-          optionValues: (_ref1 = this.roles) != null ? _ref1.toArray() : void 0
-        })
-      }, {
-        name: "organization",
-        label: "Organization",
-        cell: "string"
-      }, {
-        name: "email",
-        label: "Email",
-        cell: "string"
-      }
-    ];
-    grid = new Backgrid.Grid({
-      columns: columns,
-      collection: this.collection
-    });
-    return $("#js-table").append(grid.render().$el);
-  };
-
-  UsersEditView.prototype.onAdd = function() {
-    return this.collection.add({
-      dirty: true,
-      silent: true
-    });
-  };
-
-  UsersEditView.prototype.onSave = function() {
-    return vent.trigger('save:users');
-  };
-
-  UsersEditView.prototype.onGenerate = function() {
-    return vent.trigger('admin:users:generator');
-  };
-
-  UsersEditView.prototype.onClose = function() {
-    return log('user-edit view close');
-  };
-
-  return UsersEditView;
-
-})(Backbone.Marionette.ItemView);
 });
 
 ;require.register("modules/admin/views/users-generator-item-view", function(exports, require, module) {
@@ -1984,10 +1863,6 @@ module.exports = UsersGeneratorView = (function(_super) {
 
   UsersGeneratorView.prototype.itemViewContainer = '#js-users';
 
-  vent.trigger('navigation:back:on');
-
-  vent.on('navigation:back', UsersGeneratorView.onBack);
-
   UsersGeneratorView.prototype.events = {
     'click #js-generate': 'onGenerate',
     'click #js-clear': 'onClear',
@@ -2023,21 +1898,40 @@ module.exports = UsersGeneratorView = (function(_super) {
   };
 
   UsersGeneratorView.prototype.onGenerate = function(e) {
-    var data, i, _i, _ref1;
+    var data, i, _i, _j, _len, _ref1, _ref2;
     e.preventDefault();
     this.collection.reset();
     data = Backbone.Syphon.serialize(this);
-    for (i = _i = 1, _ref1 = data.amount; 1 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 1 <= _ref1 ? ++_i : --_i) {
-      this.collection.add({
-        userName: data.prefix + this.makeId(),
-        password: this.makeId(),
-        roles: data.roles,
-        message: data.message,
-        active: true,
-        dirty: true
-      });
+    _ref1 = data.accountnames.split(';');
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+      i = _ref1[_i];
+      if (i.trim() !== "") {
+        this.collection.add({
+          userName: data.prefix + i.trim(),
+          password: this.makeId(),
+          roles: data.roles,
+          message: data.message,
+          activefrom: data.activefrom,
+          activetill: data.activetill,
+          active: true,
+          dirty: true
+        });
+      }
     }
-    log('new users', this.collection);
+    if (data.amount > 0) {
+      for (i = _j = 1, _ref2 = data.amount; 1 <= _ref2 ? _j <= _ref2 : _j >= _ref2; i = 1 <= _ref2 ? ++_j : --_j) {
+        this.collection.add({
+          userName: data.prefix + this.makeId(),
+          password: this.makeId(),
+          roles: data.roles,
+          message: data.message,
+          activefrom: data.activefrom,
+          activetill: data.activetill,
+          active: true,
+          dirty: true
+        });
+      }
+    }
     return vent.trigger('save:users');
   };
 

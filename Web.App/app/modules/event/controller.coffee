@@ -40,8 +40,6 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         View = require './views/events-index-view'
         view = new View(collection: models, resources: application.resources)
         application.layout.content.show(view)
-    # .fail ->
-    #   vent.trigger config.signintrigger
 
   showEventDetails: (id) ->
     @events.fetch(

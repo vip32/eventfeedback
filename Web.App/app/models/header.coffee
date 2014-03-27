@@ -139,7 +139,7 @@ module.exports.TestData = class TestData
     roles: ['Administrator']
     resource: ''
     glyphicon: 'glyphicon-user'
-    trigger: "admin:users:edit"
+    trigger: "admin:users:generator"
     intern: true
     order: 14
 #  ,

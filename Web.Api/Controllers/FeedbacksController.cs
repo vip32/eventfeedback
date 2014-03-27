@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Security.Principal;
 using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -28,10 +27,6 @@ namespace EventFeedback.Web.Api.Controllers
             _context = context;
             _userService = userService;
         }
-
-//        public IEnumerable<Feedback> GetForEvent() { throw new NotImplementedException(); }
-//
-//        public IEnumerable<Feedback> GetForSession() { throw new NotImplementedException(); }
 
         [HttpGet]
         [Route("")]

@@ -36,9 +36,11 @@ namespace EventFeedback.Web.Api.Controllers
                 if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
                     result = _context.Events.OrderBy(e => e.StartDate);
                 else
-                    result = _context.Events.OrderBy(e => e.StartDate) //.Include("Sessions")
-                        .Where(d => !(d.Active != null && !(bool) d.Active))
-                        .Where(d => !(d.Deleted != null && (bool) d.Deleted));
+                    result = _context.Events
+                        .OrderBy(e => e.StartDate)
+                        .ToList().Where(e => e.IsActive()); //.Include("Sessions")
+                        //.Where(d => !(d.Active != null && !(bool) d.Active))
+                        //.Where(d => !(d.Deleted != null && (bool) d.Deleted));
 
                 if (filter.Equals("current", StringComparison.CurrentCultureIgnoreCase))
                     result = result.ToList().Where(e => e.IsCurrent());

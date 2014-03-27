@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using EventFeedback.Common;
 using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace EventFeedback.Domain.Identity
@@ -28,6 +29,8 @@ namespace EventFeedback.Domain.Identity
         public string DeletedBy { get; set; }
         [StringLength(128)]
         public string Organization { get; set; }
+        public DateTime? ActiveFromDate { get; set; }
+        public DateTime? ActiveTillDate { get; set; }
 
         /// <summary>
         /// Determines whether this instance is active.
@@ -35,7 +38,9 @@ namespace EventFeedback.Domain.Identity
         /// <returns></returns>
         public bool IsActive()
         {
-            return !(Active != null && !(bool)Active) && !IsDeleted();
+            return !(Active != null && !(bool)Active) && 
+                !IsDeleted() &&
+                SystemTime.Now().IsInRange(ActiveFromDate, ActiveTillDate);
         }
 
         /// <summary>

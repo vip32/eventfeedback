@@ -56,7 +56,9 @@ namespace EventFeedback.Domain
         /// <returns></returns>
         public IdentityResult CreateUser(User user, string password)
         {
-            if (user == null || string.IsNullOrEmpty(user.UserName) || string.IsNullOrEmpty(password)) return null;
+            if (user == null || 
+                string.IsNullOrEmpty(user.UserName) || 
+                string.IsNullOrEmpty(password)) return null;
             try
             {
                 return _userManager.Create(user, password);
@@ -67,6 +69,11 @@ namespace EventFeedback.Domain
                 _traceSource.Error(_context.GetValidationErrors());
                 throw;
             }
+        }
+
+        public void UpdateUser(User user)
+        {
+            _userManager.Update(user);
         }
 
         /// <summary>
@@ -106,6 +113,12 @@ namespace EventFeedback.Domain
         {
             if (string.IsNullOrEmpty(userName)) return null;
             return _userManager.FindByName(userName);
+        }
+
+        public bool Exists(string userName)
+        {
+            if (string.IsNullOrEmpty(userName)) return false;
+            return _userManager.FindByName(userName) != null;
         }
 
         public IEnumerable<string> AllRoles()

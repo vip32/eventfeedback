@@ -6,8 +6,6 @@ module.exports = class UsersGeneratorView extends Backbone.Marionette.CompositeV
   template: require './templates/users-generator'
   itemView: require './users-generator-item-view'
   itemViewContainer: '#js-users'
-  vent.trigger 'navigation:back:on'
-  vent.on 'navigation:back', @onBack
   events:
     'click #js-generate': 'onGenerate'
     'click #js-clear': 'onClear'
@@ -35,15 +33,32 @@ module.exports = class UsersGeneratorView extends Backbone.Marionette.CompositeV
     e.preventDefault()
     @collection.reset()
     data = Backbone.Syphon.serialize(@)
-    for i in [1..data.amount]
-      @collection.add
-        userName: data.prefix + @makeId()
-        password: @makeId()
-        roles: data.roles
-        message: data.message
-        active: true
-        dirty: true
-    log 'new users', @collection
+    
+    # add by names
+    for i in data.accountnames.split(';')
+      if i.trim() isnt ""
+        @collection.add
+          userName: data.prefix + i.trim()
+          password: @makeId()
+          roles: data.roles
+          message: data.message
+          activefrom: data.activefrom
+          activetill: data.activetill
+          active: true
+          dirty: true
+    
+    # add by amount
+    if data.amount > 0
+      for i in [1..data.amount]
+        @collection.add
+          userName: data.prefix + @makeId()
+          password: @makeId()
+          roles: data.roles
+          message: data.message
+          activefrom: data.activefrom
+          activetill: data.activetill
+          active: true
+          dirty: true
     vent.trigger 'save:users'
     
   onPrintClick: (e) ->

@@ -28,7 +28,6 @@ namespace EventFeedback.Web.Api.Controllers
         [ResponseType(typeof(IEnumerable<ResourceText>))]
         public IHttpActionResult Get([FromUri] string filter = "", [FromUri] string language = "en-US")
         {
-//            Thread.Sleep(500);
             IEnumerable<ResourceText> result;
 
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))

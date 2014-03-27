@@ -39,6 +39,8 @@ namespace EventFeedback.Domain
         public string Location { get; set; }
         [StringLength(128)]
         public string Organization { get; set; }
+        public DateTime? ActiveFromDate { get; set; }
+        public DateTime? ActiveTillDate { get; set; }
         public ICollection<string> Tags { get; set; }
         [StringLength(512)]
         public string TagList
@@ -85,7 +87,10 @@ namespace EventFeedback.Domain
         /// <returns></returns>
         public bool IsActive()
         {
-            return !(Active != null && !(bool)Active) && !IsDeleted();
+            return !(Active != null && 
+                !(bool)Active) && 
+                !IsDeleted() &&
+                SystemTime.Now().IsInRange(ActiveFromDate, ActiveTillDate);
         }
 
         /// <summary>

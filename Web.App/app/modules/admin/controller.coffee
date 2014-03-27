@@ -47,30 +47,31 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         view = new View(model: events.get(id), collection: sessions, resources: application.resources)
         application.layout.content.show(view)
 
-  showUsersEdit: =>
-    @users.reset()
-    @roles.fetch(
-      reload: true
-    ).done (roles) =>
-      @users.fetch(
-        reload: true
-        data:
-          filter: 'all'
-      ).done (users) =>
-        vent.trigger 'set:active:header', 'admin:users:edit', application.resources.key('Title_Admin_Users'), 'glyphicon-user' #
-        users.on 'change', (model) =>
-          #log 'user change:', model
-          model.credentials = users.credentials
-          model.set('dirty', true, silent: true)
-        View = require './views/users-edit-view'
-        view = new View(collection: users, roles: roles, resources: application.resources)
-        application.layout.content.show(view)
+#  showUsersEdit: =>
+#    @users.reset()
+#    @roles.fetch(
+#      reload: true
+#    ).done (roles) =>
+#      @users.fetch(
+#        reload: true
+#        data:
+#          filter: 'all'
+#      ).done (users) =>
+#        vent.trigger 'set:active:header', 'admin:users:edit', application.resources.key('Title_Admin_Users'), 'glyphicon-user' #
+#        users.on 'change', (model) =>
+#          #log 'user change:', model
+#          model.credentials = users.credentials
+#          model.set('dirty', true, silent: true)
+#        View = require './views/users-edit-view'
+#        view = new View(collection: users, roles: roles, resources: application.resources)
+#        application.layout.content.show(view)
 
   showUsersGenerator: =>
     @users.reset()
     @roles.fetch(
       reload: true
     ).done (roles) =>
+      vent.trigger 'set:active:header', 'admin:users:generator', application.resources.key('Title_Admin_Users'), 'glyphicon-user' 
       @users.on 'add', (model) =>
         #log 'user add:', model
         model.credentials = @users.credentials
@@ -81,13 +82,15 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
   onSaveUsers: =>
 #    vent.trigger 'fetch:start'
-    @users.each (model) ->
+    @users.each (model) =>
       if model.get('dirty') and model.get('userName') isnt ''
         model.save null,
           success: (model, response, options) ->
             model.set('dirty', false, silent: true)
-          error: (model, xhr, options) ->
-            console.warn 'user save error', model
+          error: (model, xhr, options) =>
+            @users.remove(model)
+            vent.trigger 'message:error:show', JSON.parse(xhr.responseText).message
+            console.warn 'user save error'
 #    vent.trigger 'fetch:done'
 
   onClose: ->
