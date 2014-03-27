@@ -45,8 +45,10 @@ class Application extends Backbone.Marionette.Application
     # TODO possible trigger config.signintrigger + add return url
 
   navigate: (route, options) ->
-    log 'navigate', route
+    log 'navigate', route, options
     options = options or {}
+    if not _.isEmpty(options?.returnroute)
+      route = "#{route}?returnroute=#{options.returnroute}"
     Backbone.history.navigate(route, options)
 
   getCurrentRoute: ->
