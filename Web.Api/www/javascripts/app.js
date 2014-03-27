@@ -91,7 +91,7 @@
   globals.require.brunch = true;
 })();
 require.register("application", function(exports, require, module) {
-var Application, Resource, config, settings, vent, _ref,
+var Application, Resource, config, settings, vent,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -115,42 +115,46 @@ Application = (function(_super) {
 
   function Application() {
     this.initialize = __bind(this.initialize, this);
-    _ref = Application.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Application.__super__.constructor.apply(this, arguments);
   }
 
   Application.prototype.routers = {};
 
   Application.prototype.initialize = function() {
-    var _this = this;
     log('application:initialize');
     vent.setup();
     this.hookGlobalEvents();
-    this.on("initialize:after", function(options) {
-      var module, name, router, _ref1;
-      log('application init after');
-      _ref1 = config.modules;
-      for (name in _ref1) {
-        module = _ref1[name];
-        log('module', name);
-        router = new (require(module));
-        _this.routers[name] = router;
-      }
-      Backbone.history.start();
-      return log('current route', _this.getCurrentRoute());
-    });
-    this.addInitializer(function(options) {
-      _this.layout = new (require(config.layout));
-      return _this.layout.render();
-    });
+    this.on("initialize:after", (function(_this) {
+      return function(options) {
+        var module, name, router, _ref;
+        log('application init after');
+        _ref = config.modules;
+        for (name in _ref) {
+          module = _ref[name];
+          log('module', name);
+          router = new (require(module));
+          _this.routers[name] = router;
+        }
+        Backbone.history.start();
+        return log('current route', _this.getCurrentRoute());
+      };
+    })(this));
+    this.addInitializer((function(_this) {
+      return function(options) {
+        _this.layout = new (require(config.layout));
+        return _this.layout.render();
+      };
+    })(this));
     this.resources = new Resource.Collection();
     this.resources.fetch({
       data: {
         language: 'de-DE'
       }
-    }).done(function(resources) {
-      return vent.trigger('resources:loaded');
-    });
+    }).done((function(_this) {
+      return function(resources) {
+        return vent.trigger('resources:loaded');
+      };
+    })(this));
     settings.set('last-visit', moment());
     return this.start();
   };
@@ -270,7 +274,7 @@ $(function() {
 });
 
 ;require.register("layouts/app-layout", function(exports, require, module) {
-var AppLayout, application, vent, _ref,
+var AppLayout, application, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -282,8 +286,7 @@ module.exports = AppLayout = (function(_super) {
   __extends(AppLayout, _super);
 
   function AppLayout() {
-    _ref = AppLayout.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return AppLayout.__super__.constructor.apply(this, arguments);
   }
 
   AppLayout.prototype.template = 'layouts/templates/app-layout';
@@ -340,7 +343,7 @@ if (typeof define === 'function' && define.amd) {
 });
 
 ;require.register("lib/base/collection", function(exports, require, module) {
-var Collection, config, vent, _ref,
+var Collection, config, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -352,8 +355,7 @@ module.exports = Collection = (function(_super) {
   __extends(Collection, _super);
 
   function Collection() {
-    _ref = Collection.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Collection.__super__.constructor.apply(this, arguments);
   }
 
   Collection.prototype.initialize = function(attributes, options) {
@@ -408,7 +410,7 @@ module.exports = Collection = (function(_super) {
 });
 
 ;require.register("lib/base/item-view", function(exports, require, module) {
-var ItemView, vent, _ref,
+var ItemView, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -418,8 +420,7 @@ module.exports = ItemView = (function(_super) {
   __extends(ItemView, _super);
 
   function ItemView() {
-    _ref = ItemView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return ItemView.__super__.constructor.apply(this, arguments);
   }
 
   ItemView.prototype.onShow = function() {
@@ -439,7 +440,7 @@ module.exports = ItemView = (function(_super) {
 });
 
 ;require.register("lib/base/model", function(exports, require, module) {
-var Model, config, vent, _ref,
+var Model, config, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -451,8 +452,7 @@ module.exports = Model = (function(_super) {
   __extends(Model, _super);
 
   function Model() {
-    _ref = Model.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Model.__super__.constructor.apply(this, arguments);
   }
 
   Model.prototype.initialize = function(attributes, options) {
@@ -587,7 +587,7 @@ Handlebars.registerHelper("zerowhenempty", function(text) {
 });
 
 ;require.register("models/event", function(exports, require, module) {
-var Collection, Event, EventsCollection, Model, config, settings, user, _ref, _ref1,
+var Collection, Event, EventsCollection, Model, config, settings, user,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -605,8 +605,7 @@ module.exports.Model = Event = (function(_super) {
   __extends(Event, _super);
 
   function Event() {
-    _ref = Event.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Event.__super__.constructor.apply(this, arguments);
   }
 
   return Event;
@@ -617,8 +616,7 @@ module.exports.Collection = EventsCollection = (function(_super) {
   __extends(EventsCollection, _super);
 
   function EventsCollection() {
-    _ref1 = EventsCollection.__super__.constructor.apply(this, arguments);
-    return _ref1;
+    return EventsCollection.__super__.constructor.apply(this, arguments);
   }
 
   EventsCollection.prototype.url = "" + config.apiroot + "/events";
@@ -637,7 +635,7 @@ module.exports.Collection = EventsCollection = (function(_super) {
 });
 
 ;require.register("models/eventreport", function(exports, require, module) {
-var Collection, EventReport, EventReportsCollection, Model, config, settings, user, _ref, _ref1,
+var Collection, EventReport, EventReportsCollection, Model, config, settings, user,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -655,8 +653,7 @@ module.exports.Model = EventReport = (function(_super) {
   __extends(EventReport, _super);
 
   function EventReport() {
-    _ref = EventReport.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return EventReport.__super__.constructor.apply(this, arguments);
   }
 
   return EventReport;
@@ -667,8 +664,7 @@ module.exports.Collection = EventReportsCollection = (function(_super) {
   __extends(EventReportsCollection, _super);
 
   function EventReportsCollection() {
-    _ref1 = EventReportsCollection.__super__.constructor.apply(this, arguments);
-    return _ref1;
+    return EventReportsCollection.__super__.constructor.apply(this, arguments);
   }
 
   EventReportsCollection.prototype.url = function() {
@@ -691,7 +687,7 @@ module.exports.Collection = EventReportsCollection = (function(_super) {
 });
 
 ;require.register("models/eventtag", function(exports, require, module) {
-var Collection, EventTag, EventTagsCollection, Model, config, settings, user, _ref, _ref1,
+var Collection, EventTag, EventTagsCollection, Model, config, settings, user,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -709,8 +705,7 @@ module.exports.Model = EventTag = (function(_super) {
   __extends(EventTag, _super);
 
   function EventTag() {
-    _ref = EventTag.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return EventTag.__super__.constructor.apply(this, arguments);
   }
 
   return EventTag;
@@ -721,8 +716,7 @@ module.exports.Collection = EventTagsCollection = (function(_super) {
   __extends(EventTagsCollection, _super);
 
   function EventTagsCollection() {
-    _ref1 = EventTagsCollection.__super__.constructor.apply(this, arguments);
-    return _ref1;
+    return EventTagsCollection.__super__.constructor.apply(this, arguments);
   }
 
   EventTagsCollection.prototype.url = function() {
@@ -743,7 +737,7 @@ module.exports.Collection = EventTagsCollection = (function(_super) {
 });
 
 ;require.register("models/feedback", function(exports, require, module) {
-var Collection, Feedback, FeedbacksCollection, Model, config, settings, user, _ref, _ref1,
+var Collection, Feedback, FeedbacksCollection, Model, config, settings, user,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -761,8 +755,7 @@ module.exports.Model = Feedback = (function(_super) {
   __extends(Feedback, _super);
 
   function Feedback() {
-    _ref = Feedback.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Feedback.__super__.constructor.apply(this, arguments);
   }
 
   return Feedback;
@@ -773,8 +766,7 @@ module.exports.Collection = FeedbacksCollection = (function(_super) {
   __extends(FeedbacksCollection, _super);
 
   function FeedbacksCollection() {
-    _ref1 = FeedbacksCollection.__super__.constructor.apply(this, arguments);
-    return _ref1;
+    return FeedbacksCollection.__super__.constructor.apply(this, arguments);
   }
 
   FeedbacksCollection.prototype.url = "" + config.apiroot + "/feedbacks";
@@ -793,7 +785,7 @@ module.exports.Collection = FeedbacksCollection = (function(_super) {
 });
 
 ;require.register("models/feedbackdefinition", function(exports, require, module) {
-var Collection, FeedbackDefinition, FeedbackDefinitionsCollection, Model, config, settings, user, _ref, _ref1,
+var Collection, FeedbackDefinition, FeedbackDefinitionsCollection, Model, config, settings, user,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -811,8 +803,7 @@ module.exports.Model = FeedbackDefinition = (function(_super) {
   __extends(FeedbackDefinition, _super);
 
   function FeedbackDefinition() {
-    _ref = FeedbackDefinition.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return FeedbackDefinition.__super__.constructor.apply(this, arguments);
   }
 
   return FeedbackDefinition;
@@ -823,8 +814,7 @@ module.exports.Collection = FeedbackDefinitionsCollection = (function(_super) {
   __extends(FeedbackDefinitionsCollection, _super);
 
   function FeedbackDefinitionsCollection() {
-    _ref1 = FeedbackDefinitionsCollection.__super__.constructor.apply(this, arguments);
-    return _ref1;
+    return FeedbackDefinitionsCollection.__super__.constructor.apply(this, arguments);
   }
 
   FeedbackDefinitionsCollection.prototype.url = "" + config.apiroot + "/feedbackdefinitions";
@@ -845,7 +835,7 @@ module.exports.Collection = FeedbackDefinitionsCollection = (function(_super) {
 });
 
 ;require.register("models/header", function(exports, require, module) {
-var Collection, Header, HeadersCollection, Model, TestData, settings, _ref, _ref1,
+var Collection, Header, HeadersCollection, Model, TestData, settings,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -859,8 +849,7 @@ module.exports.Model = Header = (function(_super) {
   __extends(Header, _super);
 
   function Header() {
-    _ref = Header.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Header.__super__.constructor.apply(this, arguments);
   }
 
   Header.prototype.defaults = {
@@ -877,8 +866,7 @@ module.exports.Collection = HeadersCollection = (function(_super) {
   __extends(HeadersCollection, _super);
 
   function HeadersCollection() {
-    _ref1 = HeadersCollection.__super__.constructor.apply(this, arguments);
-    return _ref1;
+    return HeadersCollection.__super__.constructor.apply(this, arguments);
   }
 
   HeadersCollection.prototype.url = 'headers';
@@ -888,19 +876,20 @@ module.exports.Collection = HeadersCollection = (function(_super) {
   HeadersCollection.prototype.comparator = 'order';
 
   HeadersCollection.prototype.active = function(roles) {
-    var filtered,
-      _this = this;
-    filtered = this.filter(function(item) {
-      var visible, _ref2;
-      log('header:item', item.get('title'), item.get('roles'), '>', roles);
-      visible = (_ref2 = item.get('visible')) != null ? _ref2 : true;
-      if (visible && _.isEmpty(item.get('roles'))) {
-        return true;
-      }
-      if (visible && !_.isEmpty(roles) && _.intersection(roles, item.get('roles')).length > 0) {
-        return true;
-      }
-    });
+    var filtered;
+    filtered = this.filter((function(_this) {
+      return function(item) {
+        var visible, _ref;
+        log('header:item', item.get('title'), item.get('roles'), '>', roles);
+        visible = (_ref = item.get('visible')) != null ? _ref : true;
+        if (visible && _.isEmpty(item.get('roles'))) {
+          return true;
+        }
+        if (visible && !_.isEmpty(roles) && _.intersection(roles, item.get('roles')).length > 0) {
+          return true;
+        }
+      };
+    })(this));
     log('header:filtered', filtered);
     return new HeadersCollection(filtered);
   };
@@ -1016,7 +1005,7 @@ module.exports.TestData = TestData = (function() {
 });
 
 ;require.register("models/resource", function(exports, require, module) {
-var Collection, Model, Resource, ResourceCollection, config, settings, _ref, _ref1,
+var Collection, Model, Resource, ResourceCollection, config, settings,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1032,8 +1021,7 @@ module.exports.Model = Resource = (function(_super) {
   __extends(Resource, _super);
 
   function Resource() {
-    _ref = Resource.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Resource.__super__.constructor.apply(this, arguments);
   }
 
   return Resource;
@@ -1044,8 +1032,7 @@ module.exports.Collection = ResourceCollection = (function(_super) {
   __extends(ResourceCollection, _super);
 
   function ResourceCollection() {
-    _ref1 = ResourceCollection.__super__.constructor.apply(this, arguments);
-    return _ref1;
+    return ResourceCollection.__super__.constructor.apply(this, arguments);
   }
 
   ResourceCollection.prototype.url = "" + config.apiroot + "/resources";
@@ -1055,12 +1042,13 @@ module.exports.Collection = ResourceCollection = (function(_super) {
   ResourceCollection.prototype.comparator = 'key';
 
   ResourceCollection.prototype.key = function(key) {
-    var result, _ref2,
-      _this = this;
-    result = this.find(function(model) {
-      return model.get('key') === key;
-    });
-    return (_ref2 = result != null ? result.get('value') : void 0) != null ? _ref2 : '';
+    var result, _ref;
+    result = this.find((function(_this) {
+      return function(model) {
+        return model.get('key') === key;
+      };
+    })(this));
+    return (_ref = result != null ? result.get('value') : void 0) != null ? _ref : '';
   };
 
   ResourceCollection.prototype.toJSON = function() {
@@ -1078,7 +1066,7 @@ module.exports.Collection = ResourceCollection = (function(_super) {
 });
 
 ;require.register("models/role", function(exports, require, module) {
-var Collection, Model, Role, RolesCollection, config, settings, user, _ref, _ref1,
+var Collection, Model, Role, RolesCollection, config, settings, user,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1096,8 +1084,7 @@ module.exports.Model = Role = (function(_super) {
   __extends(Role, _super);
 
   function Role() {
-    _ref = Role.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Role.__super__.constructor.apply(this, arguments);
   }
 
   return Role;
@@ -1108,8 +1095,7 @@ module.exports.Collection = RolesCollection = (function(_super) {
   __extends(RolesCollection, _super);
 
   function RolesCollection() {
-    _ref1 = RolesCollection.__super__.constructor.apply(this, arguments);
-    return _ref1;
+    return RolesCollection.__super__.constructor.apply(this, arguments);
   }
 
   RolesCollection.prototype.url = "" + config.apiroot + "/admin/roles";
@@ -1125,12 +1111,13 @@ module.exports.Collection = RolesCollection = (function(_super) {
   RolesCollection.prototype.comparator = 'name';
 
   RolesCollection.prototype.toArray = function() {
-    var roles,
-      _this = this;
+    var roles;
     roles = [["", ""]];
-    this.each(function(role) {
-      return roles.push([role.get('name'), role.get('name')]);
-    });
+    this.each((function(_this) {
+      return function(role) {
+        return roles.push([role.get('name'), role.get('name')]);
+      };
+    })(this));
     return roles;
   };
 
@@ -1140,7 +1127,7 @@ module.exports.Collection = RolesCollection = (function(_super) {
 });
 
 ;require.register("models/session", function(exports, require, module) {
-var Collection, Model, Session, SessionsCollection, config, settings, user, _ref, _ref1,
+var Collection, Model, Session, SessionsCollection, config, settings, user,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1158,8 +1145,7 @@ module.exports.Model = Session = (function(_super) {
   __extends(Session, _super);
 
   function Session() {
-    _ref = Session.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Session.__super__.constructor.apply(this, arguments);
   }
 
   return Session;
@@ -1170,8 +1156,7 @@ module.exports.Collection = SessionsCollection = (function(_super) {
   __extends(SessionsCollection, _super);
 
   function SessionsCollection() {
-    _ref1 = SessionsCollection.__super__.constructor.apply(this, arguments);
-    return _ref1;
+    return SessionsCollection.__super__.constructor.apply(this, arguments);
   }
 
   SessionsCollection.prototype.url = function() {
@@ -1198,7 +1183,7 @@ module.exports.Collection = SessionsCollection = (function(_super) {
 });
 
 ;require.register("models/store", function(exports, require, module) {
-var Collection, StoreCollection, _ref,
+var Collection, StoreCollection,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1208,8 +1193,7 @@ module.exports.Collection = StoreCollection = (function(_super) {
   __extends(StoreCollection, _super);
 
   function StoreCollection() {
-    _ref = StoreCollection.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return StoreCollection.__super__.constructor.apply(this, arguments);
   }
 
   StoreCollection.prototype.url = 'store';
@@ -1221,11 +1205,11 @@ module.exports.Collection = StoreCollection = (function(_super) {
   };
 
   StoreCollection.prototype.setValue = function(id, value) {
+
     /*
       add or opdate an item in the collection with the specified id and value.
       if the item exists the value will be updated
-    */
-
+     */
     var item;
     item = this.get("" + this.name + "-" + id);
     if (item != null) {
@@ -1243,14 +1227,14 @@ module.exports.Collection = StoreCollection = (function(_super) {
   };
 
   StoreCollection.prototype.getValue = function(id) {
-    /* get the value attribute for an item*/
 
+    /* get the value attribute for an item */
     return this.getValueOrDefault(id, '');
   };
 
   StoreCollection.prototype.getValueOrDefault = function(id, val) {
-    /* get the value attribute for an item*/
 
+    /* get the value attribute for an item */
     var item;
     item = this.get("" + this.name + "-" + id);
     if (item != null) {
@@ -1261,27 +1245,28 @@ module.exports.Collection = StoreCollection = (function(_super) {
   };
 
   StoreCollection.prototype.has = function(id) {
-    /* looks through the collection for the specified id*/
 
+    /* looks through the collection for the specified id */
     var item;
     item = this.get("" + this.name + "-" + id);
     return (item != null) === true;
   };
 
   StoreCollection.prototype.destroy = function(id) {
-    /* removes all models from the collection and store*/
 
-    var _this = this;
+    /* removes all models from the collection and store */
     if (_.isEmpty(id)) {
       return _.chain(this.models).clone().each(function(model) {
         return model.destroy();
       });
     } else {
-      return _.chain(this.models).clone().each(function(model) {
-        if (("" + _this.name + "-" + id) === model.get('id')) {
-          return model.destroy();
-        }
-      });
+      return _.chain(this.models).clone().each((function(_this) {
+        return function(model) {
+          if (("" + _this.name + "-" + id) === model.get('id')) {
+            return model.destroy();
+          }
+        };
+      })(this));
     }
   };
 
@@ -1291,7 +1276,7 @@ module.exports.Collection = StoreCollection = (function(_super) {
 });
 
 ;require.register("models/user", function(exports, require, module) {
-var Collection, Model, User, UsersCollection, config, settings, user, _ref, _ref1,
+var Collection, Model, User, UsersCollection, config, settings, user,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1309,8 +1294,7 @@ module.exports.Model = User = (function(_super) {
   __extends(User, _super);
 
   function User() {
-    _ref = User.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return User.__super__.constructor.apply(this, arguments);
   }
 
   return User;
@@ -1321,8 +1305,7 @@ module.exports.Collection = UsersCollection = (function(_super) {
   __extends(UsersCollection, _super);
 
   function UsersCollection() {
-    _ref1 = UsersCollection.__super__.constructor.apply(this, arguments);
-    return _ref1;
+    return UsersCollection.__super__.constructor.apply(this, arguments);
   }
 
   UsersCollection.prototype.url = "" + config.apiroot + "/admin/users";
@@ -1343,7 +1326,7 @@ module.exports.Collection = UsersCollection = (function(_super) {
 });
 
 ;require.register("models/userprofile", function(exports, require, module) {
-var Model, UserProfile, config, settings, user, _ref,
+var Model, UserProfile, config, settings, user,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1359,8 +1342,7 @@ module.exports.Model = UserProfile = (function(_super) {
   __extends(UserProfile, _super);
 
   function UserProfile() {
-    _ref = UserProfile.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return UserProfile.__super__.constructor.apply(this, arguments);
   }
 
   UserProfile.prototype.urlRoot = function() {
@@ -1379,7 +1361,7 @@ module.exports.Model = UserProfile = (function(_super) {
 });
 
 ;require.register("models/usertoken", function(exports, require, module) {
-var Model, UserToken, config, settings, _ref,
+var Model, UserToken, config, settings,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1393,8 +1375,7 @@ module.exports.Model = UserToken = (function(_super) {
   __extends(UserToken, _super);
 
   function UserToken() {
-    _ref = UserToken.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return UserToken.__super__.constructor.apply(this, arguments);
   }
 
   UserToken.prototype.urlRoot = function() {
@@ -1432,17 +1413,18 @@ module.exports = Controller = (function(_super) {
   function Controller(options) {
     this.onSaveUsers = __bind(this.onSaveUsers, this);
     this.showUsersGenerator = __bind(this.showUsersGenerator, this);
-    var _this = this;
     log('admin controller init');
-    application.addInitializer(function(options) {
-      _this.events = new Event.Collection();
-      _this.sessions = new Session.Collection();
-      _this.users = new User.Collection();
-      _this.roles = new Role.Collection();
-      return vent.on('save:users', function() {
-        return _this.onSaveUsers();
-      });
-    });
+    application.addInitializer((function(_this) {
+      return function(options) {
+        _this.events = new Event.Collection();
+        _this.sessions = new Session.Collection();
+        _this.users = new User.Collection();
+        _this.roles = new Role.Collection();
+        return vent.on('save:users', function() {
+          return _this.onSaveUsers();
+        });
+      };
+    })(this));
   }
 
   Controller.prototype.showEventsEdit = function() {
@@ -1464,71 +1446,74 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showSessionsEdit = function(id) {
-    var _this = this;
     return this.events.fetch({
       data: {
         filter: 'all'
       }
-    }).done(function(events) {
-      settings.set('active-event', id);
-      return _this.sessions.fetch({
-        reload: true
-      }).done(function(sessions) {
-        var View, view;
-        vent.trigger('set:active:header', 'admin:events:edit', application.resources.key('Title_Sessions'), 'icon-comment');
-        View = require('./views/sessions-edit-view');
-        view = new View({
-          model: events.get(id),
-          collection: sessions,
-          resources: application.resources
+    }).done((function(_this) {
+      return function(events) {
+        settings.set('active-event', id);
+        return _this.sessions.fetch({
+          reload: true
+        }).done(function(sessions) {
+          var View, view;
+          vent.trigger('set:active:header', 'admin:events:edit', application.resources.key('Title_Sessions'), 'icon-comment');
+          View = require('./views/sessions-edit-view');
+          view = new View({
+            model: events.get(id),
+            collection: sessions,
+            resources: application.resources
+          });
+          return application.layout.content.show(view);
         });
-        return application.layout.content.show(view);
-      });
-    });
+      };
+    })(this));
   };
 
   Controller.prototype.showUsersGenerator = function() {
-    var _this = this;
     this.users.reset();
     return this.roles.fetch({
       reload: true
-    }).done(function(roles) {
-      var View, view;
-      vent.trigger('set:active:header', 'admin:users:generator', application.resources.key('Title_Admin_Users'), 'glyphicon-user');
-      _this.users.on('add', function(model) {
-        model.credentials = _this.users.credentials;
-        return model.set('dirty', true, {
-          silent: true
+    }).done((function(_this) {
+      return function(roles) {
+        var View, view;
+        vent.trigger('set:active:header', 'admin:users:generator', application.resources.key('Title_Admin_Users'), 'glyphicon-user');
+        _this.users.on('add', function(model) {
+          model.credentials = _this.users.credentials;
+          return model.set('dirty', true, {
+            silent: true
+          });
         });
-      });
-      View = require('./views/users-generator-view');
-      view = new View({
-        collection: _this.users,
-        roles: roles,
-        resources: application.resources
-      });
-      return application.layout.content.show(view);
-    });
+        View = require('./views/users-generator-view');
+        view = new View({
+          collection: _this.users,
+          roles: roles,
+          resources: application.resources
+        });
+        return application.layout.content.show(view);
+      };
+    })(this));
   };
 
   Controller.prototype.onSaveUsers = function() {
-    var _this = this;
-    return this.users.each(function(model) {
-      if (model.get('dirty') && model.get('userName') !== '') {
-        return model.save(null, {
-          success: function(model, response, options) {
-            return model.set('dirty', false, {
-              silent: true
-            });
-          },
-          error: function(model, xhr, options) {
-            _this.users.remove(model);
-            vent.trigger('message:error:show', JSON.parse(xhr.responseText).message);
-            return console.warn('user save error');
-          }
-        });
-      }
-    });
+    return this.users.each((function(_this) {
+      return function(model) {
+        if (model.get('dirty') && model.get('userName') !== '') {
+          return model.save(null, {
+            success: function(model, response, options) {
+              return model.set('dirty', false, {
+                silent: true
+              });
+            },
+            error: function(model, xhr, options) {
+              _this.users.remove(model);
+              vent.trigger('message:error:show', JSON.parse(xhr.responseText).message);
+              return console.warn('user save error');
+            }
+          });
+        }
+      };
+    })(this));
   };
 
   Controller.prototype.onClose = function() {
@@ -1541,7 +1526,7 @@ module.exports = Controller = (function(_super) {
 });
 
 ;require.register("modules/admin/router", function(exports, require, module) {
-var Controller, Router, application, settings, vent, _ref,
+var Controller, Router, application, settings, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1557,8 +1542,7 @@ module.exports = Router = (function(_super) {
   __extends(Router, _super);
 
   function Router() {
-    _ref = Router.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Router.__super__.constructor.apply(this, arguments);
   }
 
   Router.prototype.appRoutes = {
@@ -1568,22 +1552,23 @@ module.exports = Router = (function(_super) {
   };
 
   Router.prototype.initialize = function(options) {
-    var _this = this;
     log('admin router init');
-    return application.addInitializer(function(options) {
-      vent.on('admin:events:edit', function() {
-        application.navigate('admin/events');
-        return _this.controller.showEventsEdit();
-      });
-      vent.on('admin:sessions:edit', function(id) {
-        application.navigate('admin/events/' + id);
-        return _this.controller.showSessionsEdit(id);
-      });
-      return vent.on('admin:users:generator', function() {
-        application.navigate('admin/usersgenerator');
-        return _this.controller.showUsersGenerator();
-      });
-    });
+    return application.addInitializer((function(_this) {
+      return function(options) {
+        vent.on('admin:events:edit', function() {
+          application.navigate('admin/events');
+          return _this.controller.showEventsEdit();
+        });
+        vent.on('admin:sessions:edit', function(id) {
+          application.navigate('admin/events/' + id);
+          return _this.controller.showSessionsEdit(id);
+        });
+        return vent.on('admin:users:generator', function() {
+          application.navigate('admin/usersgenerator');
+          return _this.controller.showUsersGenerator();
+        });
+      };
+    })(this));
   };
 
   Router.prototype.controller = new Controller();
@@ -1594,7 +1579,7 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/admin/views/events-edit-view", function(exports, require, module) {
-var EventsEditView, application, vent, _ref,
+var EventsEditView, application, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1606,8 +1591,7 @@ module.exports = EventsEditView = (function(_super) {
   __extends(EventsEditView, _super);
 
   function EventsEditView() {
-    _ref = EventsEditView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return EventsEditView.__super__.constructor.apply(this, arguments);
   }
 
   EventsEditView.prototype.id = 'events-edit-view';
@@ -1650,7 +1634,7 @@ module.exports = EventsEditView = (function(_super) {
 });
 
 ;require.register("modules/admin/views/sessions-edit-view", function(exports, require, module) {
-var SessionsEditView, application, vent, _ref,
+var SessionsEditView, application, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1662,8 +1646,7 @@ module.exports = SessionsEditView = (function(_super) {
   __extends(SessionsEditView, _super);
 
   function SessionsEditView() {
-    _ref = SessionsEditView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return SessionsEditView.__super__.constructor.apply(this, arguments);
   }
 
   SessionsEditView.prototype.id = 'sessions-edit-view';
@@ -1769,29 +1752,29 @@ if (typeof define === 'function' && define.amd) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, stack2, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, helper, functionType="function", escapeExpression=this.escapeExpression;
 
 
   buffer += "﻿<div>\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-5\">\r\n      <h2>";
-  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.title) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.title); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + "</h2>\r\n      <p>"
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.message)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.message)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</p>\r\n      <h3 style=\"color: #000000;\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "&emsp;/&emsp;"
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.password)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.password)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</h3>\r\n      "
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.roles)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.roles)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "<br/>\r\n      ";
-  if (stack2 = helpers.url) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
-  else { stack2 = depth0.url; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
-  buffer += escapeExpression(stack2)
+  if (helper = helpers.url) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.url); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
+  buffer += escapeExpression(stack1)
     + "\r\n    </div>\r\n    <div class=\"col-xs-3\">\r\n      <div id=\"qr"
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\"></div>\r\n    </div>\r\n    <div class=\"col-xs-4\">\r\n      <a id=\"qrlink"
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.userName)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\" class=\"btn btn-success btn-small noprint\">signin</a>\r\n    </div>\r\n  </div>\r\n</div>\r\n";
   return buffer;
   });
@@ -1824,7 +1807,7 @@ function program1(depth0,data) {
   }
 
   buffer += "﻿<div class=\"container\">\r\n  <form class=\"form-horizontal noprint\" role=\"form\">\r\n    <div class=\"form-group\">\r\n      <label for=\"amount\" class=\"col-sm-4 control-label\">Organization</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"organization\" id=\"organization\" disabled placeholder=\"\"></input>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"roles\" class=\"col-sm-4 control-label\">Account role</label>\r\n      <div class=\"col-sm-8\">\r\n        <select name=\"roles\" id=\"roles\" class=\"form-control\">\r\n          <option value=\"\"></option>\r\n          ";
-  stack1 = helpers.each.call(depth0, depth0.roles, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  stack1 = helpers.each.call(depth0, (depth0 && depth0.roles), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </select>\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"amount\" class=\"col-sm-4 control-label\">Account names</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"accountnames\" id=\"accountnames\" placeholder=\"user1; user2; ...\"></input>\r\n        <!--<span class=\"help-block\">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"amount\" class=\"col-sm-4 control-label\">Random accounts amount</label>\r\n      <div class=\"col-sm-8\">\r\n        <select name=\"amount\" id=\"amount\" class=\"form-control\">\r\n          <option value=\"\"></option>\r\n          <option value=\"1\">1</option>\r\n          <option value=\"10\">10</option>\r\n          <option value=\"25\">25</option>\r\n          <option value=\"50\">50</option>\r\n          <option value=\"100\">100</option>\r\n        </select>\r\n        <!--<span class=\"help-block\">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"message\" class=\"col-sm-4 control-label\">Active</label>\r\n      <div class=\"col-sm-8\">\r\n        <div class=\"row\">\r\n          <div class=\"col-xs-6\">\r\n            <input type=\"date\" class=\"form-control\" name=\"activefrom\" id=\"activefrom\" placeholder=\"from\"></input>\r\n          </div>\r\n          <div class=\"col-xs-6\">\r\n            <input type=\"date\" class=\"form-control\" name=\"activetill\" id=\"activetill\" placeholder=\"till\"></input>\r\n          </div>\r\n        </div>\r\n        <!--<span class=\"help-block\">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"prefix\" class=\"col-sm-4 control-label\">Account prefix</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"prefix\" id=\"prefix\" placeholder=\"\"></input>\r\n        <!--<span class=\"help-block\">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->\r\n      </div>\r\n    </div>\r\n    <div class=\"form-group\">\r\n      <label for=\"message\" class=\"col-sm-4 control-label\">Additional message</label>\r\n      <div class=\"col-sm-8\">\r\n        <input type=\"text\" class=\"form-control\" name=\"message\" id=\"message\" placeholder=\"\"></input>\r\n        <!--<span class=\"help-block\">A block of help text that breaks onto a new line and may extend beyond one line.</span>-->\r\n      </div>\r\n    </div>\r\n    \r\n    <div class=\"form-group\">\r\n      \r\n\r\n      <div class=\"col-sm-offset-4 col-sm-8 pull-right\">\r\n        <br/>\r\n        <button type=\"button\" id=\"js-generate\" class=\"btn btn-success btn-responsive\">\r\n          <span class=\"glyphicon glyphicon-user\"></span>&emsp;Generate\r\n        </button>\r\n        <button type=\"button\" id=\"js-clear\" class=\"btn btn-default btn-responsive\">\r\n          <span class=\"glyphicon glyphicon-refresh\"></span>&emsp;Clear\r\n        </button>\r\n        <button type=\"button\" id=\"js-print\" class=\"btn btn-default btn-responsive\">\r\n          <div class=\"glyphicon glyphicon-print\"></div>&emsp;Print\r\n        </button>\r\n      </div>\r\n    </div>\r\n  </form>\r\n  <div class=\"list-group\" id=\"js-users\">\r\n    <!-- users -->\r\n  </div>\r\n  <iframe name=\"print_frame\" width=\"0\" height=\"0\" frameborder=\"0\" src=\"about:blank\"></iframe>\r\n</div>\r\n\r\n";
   return buffer;
@@ -1845,7 +1828,7 @@ if (typeof define === 'function' && define.amd) {
 });
 
 ;require.register("modules/admin/views/users-generator-item-view", function(exports, require, module) {
-var ItemView, UsersGeneratorItemView, application, config, settings, vent, _ref,
+var ItemView, UsersGeneratorItemView, application, config, settings, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1863,8 +1846,7 @@ module.exports = UsersGeneratorItemView = (function(_super) {
   __extends(UsersGeneratorItemView, _super);
 
   function UsersGeneratorItemView() {
-    _ref = UsersGeneratorItemView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return UsersGeneratorItemView.__super__.constructor.apply(this, arguments);
   }
 
   UsersGeneratorItemView.prototype.id = 'users-generator-item-view';
@@ -1880,9 +1862,9 @@ module.exports = UsersGeneratorItemView = (function(_super) {
   };
 
   UsersGeneratorItemView.prototype.serializeData = function() {
-    var _ref1;
+    var _ref;
     return {
-      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0,
       model: this.model.toJSON(),
       title: config.apptitle,
       url: config.url
@@ -1909,7 +1891,7 @@ module.exports = UsersGeneratorItemView = (function(_super) {
 });
 
 ;require.register("modules/admin/views/users-generator-view", function(exports, require, module) {
-var UsersGeneratorView, application, vent, _ref,
+var UsersGeneratorView, application, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -1921,8 +1903,7 @@ module.exports = UsersGeneratorView = (function(_super) {
   __extends(UsersGeneratorView, _super);
 
   function UsersGeneratorView() {
-    _ref = UsersGeneratorView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return UsersGeneratorView.__super__.constructor.apply(this, arguments);
   }
 
   UsersGeneratorView.prototype.id = 'users-generator-view';
@@ -1945,10 +1926,10 @@ module.exports = UsersGeneratorView = (function(_super) {
   };
 
   UsersGeneratorView.prototype.serializeData = function() {
-    var _ref1, _ref2;
+    var _ref, _ref1;
     return {
-      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
-      roles: (_ref2 = this.roles) != null ? _ref2.pluck('name') : void 0
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0,
+      roles: (_ref1 = this.roles) != null ? _ref1.pluck('name') : void 0
     };
   };
 
@@ -1968,13 +1949,13 @@ module.exports = UsersGeneratorView = (function(_super) {
   };
 
   UsersGeneratorView.prototype.onGenerate = function(e) {
-    var data, i, _i, _j, _len, _ref1, _ref2;
+    var data, i, _i, _j, _len, _ref, _ref1;
     e.preventDefault();
     this.collection.reset();
     data = Backbone.Syphon.serialize(this);
-    _ref1 = data.accountnames.split(';');
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      i = _ref1[_i];
+    _ref = data.accountnames.split(';');
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      i = _ref[_i];
       if (i.trim() !== "") {
         this.collection.add({
           userName: data.prefix + i.trim(),
@@ -1989,7 +1970,7 @@ module.exports = UsersGeneratorView = (function(_super) {
       }
     }
     if (data.amount > 0) {
-      for (i = _j = 1, _ref2 = data.amount; 1 <= _ref2 ? _j <= _ref2 : _j >= _ref2; i = 1 <= _ref2 ? ++_j : --_j) {
+      for (i = _j = 1, _ref1 = data.amount; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 1 <= _ref1 ? ++_j : --_j) {
         this.collection.add({
           userName: data.prefix + this.makeId(),
           password: this.makeId(),
@@ -2061,26 +2042,27 @@ module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
 
   function Controller(options) {
-    var _this = this;
     log('about controller init');
-    application.addInitializer(function(options) {
-      vent.on('view:signin:do', function(data) {
-        if (!_.isEmpty(data.username) && !_.isEmpty(data.password)) {
-          user.reset();
-          if (data.remember) {
-            user.name(data.username);
+    application.addInitializer((function(_this) {
+      return function(options) {
+        vent.on('view:signin:do', function(data) {
+          if (!_.isEmpty(data.username) && !_.isEmpty(data.password)) {
+            user.reset();
+            if (data.remember) {
+              user.name(data.username);
+            }
+            user.remember(data.remember);
+            return _this.doSignin(data.username, data.password);
           }
-          user.remember(data.remember);
-          return _this.doSignin(data.username, data.password);
-        }
-      });
-      vent.on('message:success:show', function(data) {
-        return _this.showMessage(data, 'success');
-      });
-      return vent.on('message:error:show', function(data) {
-        return _this.showMessage(data, 'danger');
-      });
-    });
+        });
+        vent.on('message:success:show', function(data) {
+          return _this.showMessage(data, 'success');
+        });
+        return vent.on('message:error:show', function(data) {
+          return _this.showMessage(data, 'danger');
+        });
+      };
+    })(this));
   }
 
   Controller.prototype.showMessage = function(data, type) {
@@ -2138,30 +2120,31 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.doSignin = function(username, password) {
-    var userToken,
-      _this = this;
+    var userToken;
     vent.trigger('fetch:start');
     userToken = new UserToken.Model({
       userName: username,
       password: password
     });
     return userToken.save(null, {
-      success: function(model, response, options) {
-        var profile;
-        user.token(userToken.get('accessToken'));
-        user.tokenexpires(userToken.get('expires'));
-        profile = new UserProfile.Model();
-        return profile.fetch({
-          success: function(model, response, options) {
-            user.set('api_userroles', model.get('roles'));
-            vent.trigger('message:success:show', 'signed in ' + username);
-            return vent.trigger('navigation:signin');
-          },
-          error: function(model, xhr, options) {
-            return vent.trigger('navigation:signout');
-          }
-        });
-      },
+      success: (function(_this) {
+        return function(model, response, options) {
+          var profile;
+          user.token(userToken.get('accessToken'));
+          user.tokenexpires(userToken.get('expires'));
+          profile = new UserProfile.Model();
+          return profile.fetch({
+            success: function(model, response, options) {
+              user.set('api_userroles', model.get('roles'));
+              vent.trigger('message:success:show', 'signed in ' + username);
+              return vent.trigger('navigation:signin');
+            },
+            error: function(model, xhr, options) {
+              return vent.trigger('navigation:signout');
+            }
+          });
+        };
+      })(this),
       error: function(model, xhr, options) {
         vent.trigger('message:error:show', 'sign in failed');
         vent.trigger('navigation:signout');
@@ -2176,7 +2159,7 @@ module.exports = Controller = (function(_super) {
 });
 
 ;require.register("modules/common/router", function(exports, require, module) {
-var Controller, Router, application, config, vent, _ref,
+var Controller, Router, application, config, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2192,8 +2175,7 @@ module.exports = Router = (function(_super) {
   __extends(Router, _super);
 
   function Router() {
-    _ref = Router.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Router.__super__.constructor.apply(this, arguments);
   }
 
   Router.prototype.appRoutes = {
@@ -2204,40 +2186,41 @@ module.exports = Router = (function(_super) {
   };
 
   Router.prototype.initialize = function(options) {
-    var _this = this;
     log('about router init');
-    return application.addInitializer(function(options) {
-      vent.on('sync:fail:unauthorized', function() {
-        return vent.trigger(config.signintrigger);
-      });
-      vent.on('sync:fail:servererror', function() {
-        return console.warn('sync:server error');
-      });
-      vent.on('sync:fail:unknown', function() {
-        return console.warn('sync:unknown error');
-      });
-      vent.on('home:index', function() {
-        application.navigate('home');
-        return _this.controller.showHome();
-      });
-      vent.on('signin:index', function() {
-        console.log(application.getCurrentRoute());
-        if (!application.getCurrentRoute().startsWith('signin')) {
-          application.navigate('signin', {
-            returnroute: application.getCurrentRoute()
-          });
-          return _this.controller.showSignin();
-        }
-      });
-      vent.on('about:index', function() {
-        application.navigate('about');
-        return _this.controller.showAbout();
-      });
-      return vent.on('debug:index', function() {
-        application.navigate('debug');
-        return _this.controller.showDebug();
-      });
-    });
+    return application.addInitializer((function(_this) {
+      return function(options) {
+        vent.on('sync:fail:unauthorized', function() {
+          return vent.trigger(config.signintrigger);
+        });
+        vent.on('sync:fail:servererror', function() {
+          return console.warn('sync:server error');
+        });
+        vent.on('sync:fail:unknown', function() {
+          return console.warn('sync:unknown error');
+        });
+        vent.on('home:index', function() {
+          application.navigate('home');
+          return _this.controller.showHome();
+        });
+        vent.on('signin:index', function() {
+          console.log(application.getCurrentRoute());
+          if (!application.getCurrentRoute().startsWith('signin')) {
+            application.navigate('signin', {
+              returnroute: application.getCurrentRoute()
+            });
+            return _this.controller.showSignin();
+          }
+        });
+        vent.on('about:index', function() {
+          application.navigate('about');
+          return _this.controller.showAbout();
+        });
+        return vent.on('debug:index', function() {
+          application.navigate('debug');
+          return _this.controller.showDebug();
+        });
+      };
+    })(this));
   };
 
   Router.prototype.controller = new Controller();
@@ -2248,7 +2231,7 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/common/views/about-view", function(exports, require, module) {
-var AboutView, application, settings, user, vent, _ref,
+var AboutView, application, settings, user, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2264,8 +2247,7 @@ module.exports = AboutView = (function(_super) {
   __extends(AboutView, _super);
 
   function AboutView() {
-    _ref = AboutView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return AboutView.__super__.constructor.apply(this, arguments);
   }
 
   AboutView.prototype.id = 'about-view';
@@ -2281,9 +2263,9 @@ module.exports = AboutView = (function(_super) {
   };
 
   AboutView.prototype.serializeData = function() {
-    var _ref1;
+    var _ref;
     return {
-      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0,
       user: user.name(),
       roles: user.roles(),
       admin: user.isAdministrator(),
@@ -2313,7 +2295,7 @@ module.exports = AboutView = (function(_super) {
 });
 
 ;require.register("modules/common/views/debug-view", function(exports, require, module) {
-var DebugView, application, settings, user, vent, _ref,
+var DebugView, application, settings, user, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2329,8 +2311,7 @@ module.exports = DebugView = (function(_super) {
   __extends(DebugView, _super);
 
   function DebugView() {
-    _ref = DebugView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return DebugView.__super__.constructor.apply(this, arguments);
   }
 
   DebugView.prototype.id = 'debug-view';
@@ -2347,9 +2328,9 @@ module.exports = DebugView = (function(_super) {
   };
 
   DebugView.prototype.serializeData = function() {
-    var _ref1;
+    var _ref;
     return {
-      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0,
       user: user.name(),
       roles: user.roles()
     };
@@ -2378,7 +2359,7 @@ module.exports = DebugView = (function(_super) {
 });
 
 ;require.register("modules/common/views/footer-view", function(exports, require, module) {
-var FooterView, vent, _ref,
+var FooterView, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2388,8 +2369,7 @@ module.exports = FooterView = (function(_super) {
   __extends(FooterView, _super);
 
   function FooterView() {
-    _ref = FooterView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return FooterView.__super__.constructor.apply(this, arguments);
   }
 
   FooterView.prototype.id = 'footer-view';
@@ -2402,7 +2382,7 @@ module.exports = FooterView = (function(_super) {
 });
 
 ;require.register("modules/common/views/home-view", function(exports, require, module) {
-var HomeView, application, vent, _ref,
+var HomeView, application, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2414,8 +2394,7 @@ module.exports = HomeView = (function(_super) {
   __extends(HomeView, _super);
 
   function HomeView() {
-    _ref = HomeView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return HomeView.__super__.constructor.apply(this, arguments);
   }
 
   HomeView.prototype.id = 'home-view';
@@ -2428,9 +2407,9 @@ module.exports = HomeView = (function(_super) {
   };
 
   HomeView.prototype.serializeData = function() {
-    var _ref1;
+    var _ref;
     return {
-      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0
     };
   };
 
@@ -2448,7 +2427,7 @@ module.exports = HomeView = (function(_super) {
 });
 
 ;require.register("modules/common/views/signin-view", function(exports, require, module) {
-var SigninView, application, settings, user, vent, _ref,
+var SigninView, application, settings, user, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2464,8 +2443,7 @@ module.exports = SigninView = (function(_super) {
   __extends(SigninView, _super);
 
   function SigninView() {
-    _ref = SigninView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return SigninView.__super__.constructor.apply(this, arguments);
   }
 
   SigninView.prototype.id = 'signin-view';
@@ -2481,9 +2459,9 @@ module.exports = SigninView = (function(_super) {
   };
 
   SigninView.prototype.serializeData = function() {
-    var _ref1;
+    var _ref;
     return {
-      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0,
       username: this.options.username ? this.options.username : user.remember() ? user.name() : void 0,
       password: this.options.password,
       remember: user.remember()
@@ -2514,24 +2492,24 @@ module.exports = SigninView = (function(_super) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, helper, functionType="function", escapeExpression=this.escapeExpression;
 
 
   buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <h3>App</h3>\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.App\" target=\"_blank\">\r\n          <i class=\"icon-circlegithub\"></i>\r\n          &emsp;Sources\r\n        </a>\r\n      </p>\r\n      <ul>\r\n        <li>Backbone 1.1.0</li>\r\n        <li>Underscore 1.5.2</li>\r\n        <li>Twitter Bootstrap 3.0.0</li>\r\n        <li>MarionetteJS 1.2.2</li>\r\n        <!--<li>MomentJS 2.2.1</li>-->\r\n        <li>jQuery 2.0.3</li>\r\n        <li>JQuery RateIt 1.0.19</li>\r\n        <li>Fastclick 0.6.10</li>\r\n        <li>Pace 0.4.15</li>\r\n      </ul>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      <h3>Api</h3>\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.Api\" target=\"_blank\">\r\n          <i class=\"icon-circlegithub\"></i>\r\n          &emsp;Sources\r\n        </a>\r\n      </p>\r\n      <ul>\r\n        <li>Microsoft .Net 4.5, C#</li>\r\n        <li>Microsoft ASP.NET Web API 2</li>\r\n        <li>Microsoft Entity Framework 6.0</li>\r\n        <li>Microsoft ASP.NET Identity 1.0</li>\r\n      </ul>\r\n    </div>\r\n  </div>\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <h3>Dev</h3>\r\n      <ul>\r\n        <li>\r\n          <a href=\"https://github.com/WindowsAzure\" target=\"_blank\">Windows Azure</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/joyent/node\" target=\"_blank\">Node.js</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/brunch/brunch\" target=\"_blank\">Brunch</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/jashkenas/coffee-script\" target=\"_blank\">Coffeescript</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/bower/bower\" target=\"_blank\">Bower</a>\r\n        </li>\r\n      </ul>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      &nbsp;\r\n    </div>\r\n  </div>\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <!--<img src=\"http://qrfree.kaywa.com/?l=1&s=8&d=https%3A%2F%2Feventfeedback.azurewebsites.net\" alt=\"QRCode\"/>-->\r\n      <p>\r\n        <a href=\"/\">\r\n          <img class=\"qr\" height=\"88\" width=\"88\"/>\r\n        </a>\r\n      </p>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success js-reset\" href=\"#\">\r\n          <i class=\"icon-bomb\"></i>\r\n          &emsp;Reset</a>\r\n      </p>\r\n      <p>\r\n        <span class=\"glyphicon glyphicon-user\">&emsp;user: ";
-  if (stack1 = helpers.user) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.user; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.user) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.user); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + "/ role: ";
-  if (stack1 = helpers.roles) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.roles; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.roles) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.roles); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + "/ admin: ";
-  if (stack1 = helpers.admin) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.admin; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.admin) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.admin); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + "/ auth: ";
-  if (stack1 = helpers.auth) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.auth; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.auth) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.auth); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + "</span>\r\n      </p>\r\n    </div>\r\n  </div>\r\n</div>";
   return buffer;
@@ -2551,19 +2529,19 @@ if (typeof define === 'function' && define.amd) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, helper, functionType="function", escapeExpression=this.escapeExpression;
 
 
   buffer += "<div class=\"container\">\r\n  <h3>Debug</h3>\r\n  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n  cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n  proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n  <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n  <form>\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n    <textarea></textarea>\r\n\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n    <textarea></textarea>\r\n    <br/>\r\n    <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n    <button class=\"js-triggerevent\">trigger</button>\r\n    <br/>user: ";
-  if (stack1 = helpers.user) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.user; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.user) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.user); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + " \r\n    <br/>roles: ";
-  if (stack1 = helpers.roles) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.roles; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.roles) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.roles); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + "\r\n    <br/>resources: "
-    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.TestKey1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.TestKey1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n  </form>\r\n</div>";
   return buffer;
   });
@@ -2582,16 +2560,16 @@ if (typeof define === 'function' && define.amd) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, helper, functionType="function", escapeExpression=this.escapeExpression;
 
 
   buffer += "<p>© Company 2013 - ";
-  if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.name) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.name); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + " [";
-  if (stack1 = helpers.time) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.time; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.time) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.time); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + "]</p>";
   return buffer;
@@ -2615,7 +2593,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
 
   buffer += "<div class=\"container\">\r\n  <h3>Home</h3>\r\n  <p>\r\n    "
-    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Home_Text)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Home_Text)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n  </p>\r\n</div>";
   return buffer;
   });
@@ -2634,7 +2612,7 @@ if (typeof define === 'function' && define.amd) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
+  var buffer = "", stack1, helper, functionType="function", escapeExpression=this.escapeExpression, self=this;
 
 function program1(depth0,data) {
   
@@ -2643,15 +2621,15 @@ function program1(depth0,data) {
   }
 
   buffer += "<div class=\"container\">\r\n  <form class=\"form-signin\">\r\n    <input type=\"text\" class=\"form-control\" placeholder=\"username\" name=\"username\" autofocus value=\"";
-  if (stack1 = helpers.username) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.username; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.username) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.username); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + "\"/>\r\n    <input type=\"password\" class=\"form-control\" placeholder=\"password\" name=\"password\" value=\"";
-  if (stack1 = helpers.password) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.password; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.password) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.password); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + "\"/>\r\n    <p><!-- <button type=\"button\" class=\"btn btn-default\" data-toggle=\"button\">Remember me</button> -->\r\n\r\n    </p>\r\n    <div class=\"form-group pull-right\">\r\n      <label for=\"notification1\">Remember me</label>&emsp;\r\n      <input type=\"checkbox\"\r\n             id=\"make-switch\"\r\n             data-animate=\"false\"\r\n             data-on-text=\"yes\" data-off-text=\"no\"\r\n             data-on-color=\"success\" data-off-color=\"default\"\r\n             name=\"remember\" ";
-  stack1 = helpers['if'].call(depth0, depth0.remember, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  stack1 = helpers['if'].call(depth0, (depth0 && depth0.remember), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "/>\r\n    </div>\r\n    <button class=\"btn btn-lg btn-success btn-block js-signin\">\r\n      <i class=\"icon-securityalt-shieldalt\"></i>&emsp;Sign in</button>\r\n  </form>\r\n</div>";
   return buffer;
@@ -2694,153 +2672,161 @@ module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
 
   function Controller(options) {
-    var _this = this;
     log('event controller init');
-    application.addInitializer(function(options) {
-      _this.events = new Event.Collection();
-      _this.feedbacks = new Feedback.Collection();
-      _this.sessions = new Session.Collection();
-      _this.eventreports = new EventReport.Collection();
-      _this.eventtags = new EventTag.Collection();
-      return vent.on('feedback:save', function(feedback) {
-        return _this.saveFeedback(feedback);
-      });
-    });
+    application.addInitializer((function(_this) {
+      return function(options) {
+        _this.events = new Event.Collection();
+        _this.feedbacks = new Feedback.Collection();
+        _this.sessions = new Session.Collection();
+        _this.eventreports = new EventReport.Collection();
+        _this.eventtags = new EventTag.Collection();
+        return vent.on('feedback:save', function(feedback) {
+          return _this.saveFeedback(feedback);
+        });
+      };
+    })(this));
   }
 
   Controller.prototype.showEventsIndex = function() {
-    var _this = this;
     vent.trigger('fetch:done');
     return this.events.fetch({
       reload: true
-    }).done(function(models) {
-      return _this.feedbacks.fetch().done(function(feedbacks) {
-        var View, view;
-        vent.trigger('set:active:header', 'events:index', application.resources.key('Title_Events'), 'glyphicon-bookmark');
-        View = require('./views/events-index-view');
-        view = new View({
-          collection: models,
-          resources: application.resources
+    }).done((function(_this) {
+      return function(models) {
+        return _this.feedbacks.fetch().done(function(feedbacks) {
+          var View, view;
+          vent.trigger('set:active:header', 'events:index', application.resources.key('Title_Events'), 'glyphicon-bookmark');
+          View = require('./views/events-index-view');
+          view = new View({
+            collection: models,
+            resources: application.resources
+          });
+          return application.layout.content.show(view);
         });
-        return application.layout.content.show(view);
-      });
-    });
+      };
+    })(this));
   };
 
   Controller.prototype.showEventDetails = function(id) {
-    var _this = this;
     return this.events.fetch({
       data: {
         filter: 'all'
       }
-    }).done(function(models) {
-      var event;
-      event = models.get(id);
-      if (event == null) {
-        return vent.trigger('message:error:show', 'event not found');
-      } else {
-        vent.trigger('set:active:header', 'events:index', event.get('title'), 'glyphicon-bookmark');
-        settings.set('active-event', id);
-        return _this.eventtags.fetch({
-          reload: true
-        }).done(function(tags) {
-          return _this.sessions.fetch({
+    }).done((function(_this) {
+      return function(models) {
+        var event;
+        event = models.get(id);
+        if (event == null) {
+          return vent.trigger('message:error:show', 'event not found');
+        } else {
+          vent.trigger('set:active:header', 'events:index', event.get('title'), 'glyphicon-bookmark');
+          settings.set('active-event', id);
+          return _this.eventtags.fetch({
             reload: true
-          }).done(function(sessions) {
-            var View, view;
-            _this.sessions.each(function(session) {
-              var commented;
-              commented = _this.feedbacks.find(function(item) {
-                return (session.get('id') === item.get('sessionId')) && item.get('active');
+          }).done(function(tags) {
+            return _this.sessions.fetch({
+              reload: true
+            }).done(function(sessions) {
+              var View, view;
+              _this.sessions.each(function(session) {
+                var commented;
+                commented = _this.feedbacks.find(function(item) {
+                  return (session.get('id') === item.get('sessionId')) && item.get('active');
+                });
+                return session.set('commented', commented != null);
               });
-              return session.set('commented', commented != null);
+              console.log('==========>', _this.sessions);
+              View = require('./views/event-details-view');
+              view = new View({
+                model: event,
+                collection: sessions,
+                tags: tags,
+                resources: application.resources
+              });
+              return application.layout.content.show(view);
             });
-            console.log('==========>', _this.sessions);
-            View = require('./views/event-details-view');
-            view = new View({
-              model: event,
-              collection: sessions,
-              tags: tags,
-              resources: application.resources
-            });
-            return application.layout.content.show(view);
           });
-        });
-      }
-    });
+        }
+      };
+    })(this));
   };
 
   Controller.prototype.showEventReport = function(id) {
-    var _this = this;
     settings.set('active-event', id);
     return this.eventreports.fetch({
       reload: true,
       data: {
         filter: 'all'
       }
-    }).done(function(models) {
-      var View, event, view;
-      event = models.first();
-      if (event == null) {
-        vent.trigger('message:error:show', 'event not found');
-      } else {
-        vent.trigger('set:active:header', 'events:index', event.get('title'), 'bookmark');
-      }
-      View = require('./views/event-report-view');
-      view = new View({
-        model: event,
-        resources: application.resources
-      });
-      return application.layout.content.show(view);
-    });
-  };
-
-  Controller.prototype.showSessionDetails = function(id) {
-    var _this = this;
-    return this.sessions.fetch().done(function(models) {
-      var View, feedback, session, view;
-      session = models.get(id);
-      if (session == null) {
-        return vent.trigger('message:error:show', 'session not found');
-      } else {
-        vent.trigger('set:active:header', 'events:index', session.get('title'), 'icon-comment');
-        settings.set('active-session', id);
-        feedback = _this.feedbacks.find(function(item) {
-          return item.get('sessionId') === id;
-        });
-        if (feedback == null) {
-          feedback = new Feedback.Model({
-            sessionId: id,
-            feedbackDefinitionId: session.get('feedbackDefinitionId')
-          });
-          feedback.set('active', false);
-          _this.feedbacks.add(feedback);
+    }).done((function(_this) {
+      return function(models) {
+        var View, event, view;
+        event = models.first();
+        if (event == null) {
+          vent.trigger('message:error:show', 'event not found');
+        } else {
+          vent.trigger('set:active:header', 'events:index', event.get('title'), 'bookmark');
         }
-        View = require('./views/session-details-view');
+        View = require('./views/event-report-view');
         view = new View({
-          model: session,
-          feedback: feedback,
+          model: event,
           resources: application.resources
         });
         return application.layout.content.show(view);
-      }
-    });
+      };
+    })(this));
+  };
+
+  Controller.prototype.showSessionDetails = function(id) {
+    return this.sessions.fetch().done((function(_this) {
+      return function(models) {
+        var View, feedback, session, view;
+        session = models.get(id);
+        if (session == null) {
+          return vent.trigger('message:error:show', 'session not found');
+        } else {
+          vent.trigger('set:active:header', 'events:index', session.get('title'), 'icon-comment');
+          settings.set('active-session', id);
+          feedback = _this.feedbacks.find(function(item) {
+            return item.get('sessionId') === id;
+          });
+          if (feedback == null) {
+            feedback = new Feedback.Model({
+              sessionId: id,
+              feedbackDefinitionId: session.get('feedbackDefinitionId')
+            });
+            feedback.set('active', false);
+            _this.feedbacks.add(feedback);
+          }
+          View = require('./views/session-details-view');
+          view = new View({
+            model: session,
+            feedback: feedback,
+            resources: application.resources
+          });
+          return application.layout.content.show(view);
+        }
+      };
+    })(this));
   };
 
   Controller.prototype.saveFeedback = function(feedback) {
-    var _this = this;
     feedback.credentials = this.feedbacks.credentials;
     vent.trigger('fetch:start');
     return feedback.save(null, {
-      success: function(model, response, options) {
-        vent.trigger('message:success:show', application.resources.key('Feedback_Saved_Success'));
-        vent.trigger('fetch:done');
-        return vent.trigger('event:details', settings.get('active-event'));
-      },
-      error: function(model, xhr, options) {
-        vent.trigger('message:error:show', application.resources.key('Feedback_Saved_Failed'));
-        return vent.trigger('fetch:fail');
-      }
+      success: (function(_this) {
+        return function(model, response, options) {
+          vent.trigger('message:success:show', application.resources.key('Feedback_Saved_Success'));
+          vent.trigger('fetch:done');
+          return vent.trigger('event:details', settings.get('active-event'));
+        };
+      })(this),
+      error: (function(_this) {
+        return function(model, xhr, options) {
+          vent.trigger('message:error:show', application.resources.key('Feedback_Saved_Failed'));
+          return vent.trigger('fetch:fail');
+        };
+      })(this)
     });
   };
 
@@ -2854,7 +2840,7 @@ module.exports = Controller = (function(_super) {
 });
 
 ;require.register("modules/event/router", function(exports, require, module) {
-var Controller, Router, application, settings, vent, _ref,
+var Controller, Router, application, settings, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2870,8 +2856,7 @@ module.exports = Router = (function(_super) {
   __extends(Router, _super);
 
   function Router() {
-    _ref = Router.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Router.__super__.constructor.apply(this, arguments);
   }
 
   Router.prototype.appRoutes = {
@@ -2882,30 +2867,31 @@ module.exports = Router = (function(_super) {
   };
 
   Router.prototype.initialize = function(options) {
-    var _this = this;
     log('event router init');
-    return application.addInitializer(function(options) {
-      vent.on('navigation:signin', function() {
-        application.navigate('events');
-        return _this.controller.showEventsIndex();
-      });
-      vent.on('events:index', function() {
-        application.navigate('events');
-        return _this.controller.showEventsIndex();
-      });
-      vent.on('event:details', function(id) {
-        application.navigate('events/' + id);
-        return _this.controller.showEventDetails(id);
-      });
-      vent.on('session:details', function(id) {
-        application.navigate('sessions/' + id);
-        return _this.controller.showSessionDetails(id);
-      });
-      return vent.on('event:report', function(id) {
-        application.navigate('eventreport/' + id);
-        return _this.controller.showEventReport(id);
-      });
-    });
+    return application.addInitializer((function(_this) {
+      return function(options) {
+        vent.on('navigation:signin', function() {
+          application.navigate('events');
+          return _this.controller.showEventsIndex();
+        });
+        vent.on('events:index', function() {
+          application.navigate('events');
+          return _this.controller.showEventsIndex();
+        });
+        vent.on('event:details', function(id) {
+          application.navigate('events/' + id);
+          return _this.controller.showEventDetails(id);
+        });
+        vent.on('session:details', function(id) {
+          application.navigate('sessions/' + id);
+          return _this.controller.showSessionDetails(id);
+        });
+        return vent.on('event:report', function(id) {
+          application.navigate('eventreport/' + id);
+          return _this.controller.showEventReport(id);
+        });
+      };
+    })(this));
   };
 
   Router.prototype.controller = new Controller();
@@ -2916,7 +2902,7 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/event/views/event-details-view", function(exports, require, module) {
-var EventDetailsView, application, settings, user, vent, _ref,
+var EventDetailsView, application, settings, user, vent,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2934,8 +2920,7 @@ module.exports = EventDetailsView = (function(_super) {
 
   function EventDetailsView() {
     this.onBack = __bind(this.onBack, this);
-    _ref = EventDetailsView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return EventDetailsView.__super__.constructor.apply(this, arguments);
   }
 
   EventDetailsView.prototype.id = 'event-details-view';
@@ -2960,10 +2945,10 @@ module.exports = EventDetailsView = (function(_super) {
   };
 
   EventDetailsView.prototype.serializeData = function() {
-    var _ref1, _ref2;
+    var _ref, _ref1;
     return {
-      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
-      tags: (_ref2 = this.tags) != null ? _ref2.toJSON() : void 0,
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0,
+      tags: (_ref1 = this.tags) != null ? _ref1.toJSON() : void 0,
       model: this.model.toJSON()
     };
   };
@@ -3023,7 +3008,7 @@ module.exports = EventDetailsView = (function(_super) {
 });
 
 ;require.register("modules/event/views/event-item-view", function(exports, require, module) {
-var EventItemView, ItemView, application, settings, vent, _ref,
+var EventItemView, ItemView, application, settings, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -3039,8 +3024,7 @@ module.exports = EventItemView = (function(_super) {
   __extends(EventItemView, _super);
 
   function EventItemView() {
-    _ref = EventItemView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return EventItemView.__super__.constructor.apply(this, arguments);
   }
 
   EventItemView.prototype.id = 'event-item-view';
@@ -3068,7 +3052,7 @@ module.exports = EventItemView = (function(_super) {
 });
 
 ;require.register("modules/event/views/event-report-view", function(exports, require, module) {
-var EventReportView, application, vent, _ref,
+var EventReportView, application, vent,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3082,8 +3066,7 @@ module.exports = EventReportView = (function(_super) {
 
   function EventReportView() {
     this.onBack = __bind(this.onBack, this);
-    _ref = EventReportView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return EventReportView.__super__.constructor.apply(this, arguments);
   }
 
   EventReportView.prototype.id = 'event-report-view';
@@ -3101,9 +3084,9 @@ module.exports = EventReportView = (function(_super) {
   };
 
   EventReportView.prototype.serializeData = function() {
-    var _ref1;
+    var _ref;
     return {
-      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0,
       model: this.model.toJSON(),
       json: JSON.stringify(this.model, null, 4)
     };
@@ -3120,9 +3103,9 @@ module.exports = EventReportView = (function(_super) {
   };
 
   EventReportView.prototype.onBack = function() {
-    var _ref1;
+    var _ref;
     log('back from event-report');
-    return vent.trigger('event:details', (_ref1 = this.model) != null ? _ref1.id : void 0);
+    return vent.trigger('event:details', (_ref = this.model) != null ? _ref.id : void 0);
   };
 
   EventReportView.prototype.onClose = function() {
@@ -3136,7 +3119,7 @@ module.exports = EventReportView = (function(_super) {
 });
 
 ;require.register("modules/event/views/events-index-view", function(exports, require, module) {
-var Event, EventIndexView, application, vent, _ref,
+var Event, EventIndexView, application, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -3150,8 +3133,7 @@ module.exports = EventIndexView = (function(_super) {
   __extends(EventIndexView, _super);
 
   function EventIndexView() {
-    _ref = EventIndexView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return EventIndexView.__super__.constructor.apply(this, arguments);
   }
 
   EventIndexView.prototype.id = 'event-index-view';
@@ -3176,7 +3158,7 @@ module.exports = EventIndexView = (function(_super) {
 });
 
 ;require.register("modules/event/views/session-details-view", function(exports, require, module) {
-var EventDetailsView, application, vent, _ref,
+var EventDetailsView, application, vent,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3190,8 +3172,7 @@ module.exports = EventDetailsView = (function(_super) {
 
   function EventDetailsView() {
     this.onBack = __bind(this.onBack, this);
-    _ref = EventDetailsView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return EventDetailsView.__super__.constructor.apply(this, arguments);
   }
 
   EventDetailsView.prototype.id = 'session-details-view';
@@ -3213,11 +3194,11 @@ module.exports = EventDetailsView = (function(_super) {
   };
 
   EventDetailsView.prototype.serializeData = function() {
-    var _ref1, _ref2;
+    var _ref, _ref1;
     return {
-      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0,
       model: this.model.toJSON(),
-      feedback: (_ref2 = this.feedback) != null ? _ref2.toJSON() : void 0,
+      feedback: (_ref1 = this.feedback) != null ? _ref1.toJSON() : void 0,
       feedbackdefinition: this.model.get('feedbackDefinition')
     };
   };
@@ -3277,7 +3258,7 @@ module.exports = EventDetailsView = (function(_super) {
 });
 
 ;require.register("modules/event/views/session-item-view", function(exports, require, module) {
-var ItemView, SessionItemView, application, settings, vent, _ref,
+var ItemView, SessionItemView, application, settings, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -3293,8 +3274,7 @@ module.exports = SessionItemView = (function(_super) {
   __extends(SessionItemView, _super);
 
   function SessionItemView() {
-    _ref = SessionItemView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return SessionItemView.__super__.constructor.apply(this, arguments);
   }
 
   SessionItemView.prototype.id = 'session-item-view';
@@ -3321,9 +3301,9 @@ module.exports = SessionItemView = (function(_super) {
   };
 
   SessionItemView.prototype.serializeData = function() {
-    var _ref1;
+    var _ref;
     return {
-      resources: (_ref1 = this.resources) != null ? _ref1.toJSON() : void 0,
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0,
       model: this.model.toJSON()
     };
   };
@@ -3350,7 +3330,7 @@ function program1(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n        ";
-  stack1 = helpers['if'].call(depth0, depth0.name, {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
+  stack1 = helpers['if'].call(depth0, (depth0 && depth0.name), {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        ";
   return buffer;
@@ -3359,20 +3339,20 @@ function program2(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n        <label class=\"btn badge\">\r\n          <input type=\"radio\" class=\"js-tag\" name=\"tags\" value=\""
-    + escapeExpression(((stack1 = depth0.name),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.name)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">"
-    + escapeExpression(((stack1 = depth0.name),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.name)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</input>\r\n        </label>\r\n        ";
   return buffer;
   }
 
   buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-12\">\r\n      <div class=\"btn-group pull-right\" data-toggle=\"buttons\">\r\n        <label class=\"btn btn-primary badge\">\r\n          <input type=\"radio\" class=\"js-tag\" name=\"tags\" value=\"\">&nbsp;&nbsp;\r\n          </input>\r\n        </label>\r\n        ";
-  stack1 = helpers.each.call(depth0, depth0.tags, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  stack1 = helpers.each.call(depth0, (depth0 && depth0.tags), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      </div>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n\r\n  <div class=\"row pull-right\">\r\n    <div class=\"col-xs-12\">\r\n      <p>"
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</p>\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"row pull-right\">\r\n    <div class=\"col-xs-12\">\r\n      <br/>\r\n      <a class=\"btn btn-success btn-responsive js-report\" href=\"#\">\r\n        <span class=\"glyphicon glyphicon-list\"></span>&emsp;"
-    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Text_Report)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_Report)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n      </a>\r\n    </div>\r\n  </div>\r\n</div>";
   return buffer;
   });
@@ -3391,31 +3371,30 @@ if (typeof define === 'function' && define.amd) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, stack2, options, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
+  var buffer = "", stack1, helper, options, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
 
 function program1(depth0,data) {
   
-  var buffer = "", stack1;
+  var buffer = "", stack1, helper;
   buffer += "\r\n<div>\r\n<div class=\"glyphicon glyphicon-map-marker\"></div>\r\n  &emsp;&emsp;";
-  if (stack1 = helpers.location) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.location; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.location) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.location); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + "\r\n</div>\r\n";
   return buffer;
   }
 
   buffer += "<div>\r\n  <div class=\"glyphicon glyphicon-bookmark\"></div>\r\n    &emsp;&emsp;<strong>";
-  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.title) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.title); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
-    + "</strong>\r\n</div>\r\n<div>\r\n<div class=\"glyphicon glyphicon-time\"></div>\r\n  &emsp;&emsp;";
-  options = {hash:{
+    + "</strong>\r\n</div>\r\n<div>\r\n<div class=\"glyphicon glyphicon-time\"></div>\r\n  &emsp;&emsp;"
+    + escapeExpression((helper = helpers.dateFormat || (depth0 && depth0.dateFormat),options={hash:{
     'format': ("DD.MM.YYYY")
-  },data:data};
-  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.startDate, options) : helperMissing.call(depth0, "dateFormat", depth0.startDate, options)))
+  },data:data},helper ? helper.call(depth0, (depth0 && depth0.startDate), options) : helperMissing.call(depth0, "dateFormat", (depth0 && depth0.startDate), options)))
     + "\r\n</div>\r\n";
-  stack2 = helpers['if'].call(depth0, depth0.location, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, (depth0 && depth0.location), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
@@ -3433,44 +3412,41 @@ if (typeof define === 'function' && define.amd) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, stack2, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
+  var buffer = "", stack1, helper, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
 
 function program1(depth0,data,depth1) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n  <div id=\""
-    + escapeExpression(((stack1 = depth0.id),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.id)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\" class=\"list-group-item js-session\" style=\"page-break-after: always;\">\r\n    <div>\r\n      <strong>\r\n        <div class=\"glyphicon glyphicon-bookmark\"></div>\r\n        &emsp;&emsp;"
-    + escapeExpression(((stack1 = ((stack1 = depth1.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth1 && depth1.model)),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + " <br/>\r\n        <div class=\"glyphicon icon-presentation\"></div>\r\n        &emsp;&emsp;"
-    + escapeExpression(((stack1 = depth0.title),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n      </strong>&emsp;<span class=\"badge\">"
-    + escapeExpression(((stack1 = depth0.averageRate),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.averageRate)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</span>\r\n      <button class=\"btn btn-lg btn-success pull-right noprint js-print\" data-sessionId=\""
-    + escapeExpression(((stack1 = depth0.id),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.id)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\"><div class=\"glyphicon glyphicon-print\"></div>&emsp;Print</button>\r\n    </div>\r\n    ";
-  stack2 = helpers.each.call(depth0, depth0.tags, {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\r\n    <div>\r\n      <div class=\"glyphicon glyphicon-user\"></div>\r\n      &emsp;&emsp;";
-  options = {hash:{},data:data};
-  buffer += escapeExpression(((stack1 = helpers.seperatelist || depth0.seperatelist),stack1 ? stack1.call(depth0, depth0.speakerList, options) : helperMissing.call(depth0, "seperatelist", depth0.speakerList, options)))
-    + "\r\n    </div>\r\n    <div>\r\n      <div class=\"glyphicon glyphicon-time\"></div>\r\n      &emsp;&emsp;";
-  options = {hash:{
+  stack1 = helpers.each.call(depth0, (depth0 && depth0.tags), {hash:{},inverse:self.noop,fn:self.program(2, program2, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\r\n    <div>\r\n      <div class=\"glyphicon glyphicon-user\"></div>\r\n      &emsp;&emsp;"
+    + escapeExpression((helper = helpers.seperatelist || (depth0 && depth0.seperatelist),options={hash:{},data:data},helper ? helper.call(depth0, (depth0 && depth0.speakerList), options) : helperMissing.call(depth0, "seperatelist", (depth0 && depth0.speakerList), options)))
+    + "\r\n    </div>\r\n    <div>\r\n      <div class=\"glyphicon glyphicon-time\"></div>\r\n      &emsp;&emsp;"
+    + escapeExpression((helper = helpers.dateFormat || (depth0 && depth0.dateFormat),options={hash:{
     'format': ("HH:mm")
-  },data:data};
-  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.startDate, options) : helperMissing.call(depth0, "dateFormat", depth0.startDate, options)))
-    + "-";
-  options = {hash:{
+  },data:data},helper ? helper.call(depth0, (depth0 && depth0.startDate), options) : helperMissing.call(depth0, "dateFormat", (depth0 && depth0.startDate), options)))
+    + "-"
+    + escapeExpression((helper = helpers.dateFormat || (depth0 && depth0.dateFormat),options={hash:{
     'format': ("HH:mm")
-  },data:data};
-  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.endDate, options) : helperMissing.call(depth0, "dateFormat", depth0.endDate, options)))
+  },data:data},helper ? helper.call(depth0, (depth0 && depth0.endDate), options) : helperMissing.call(depth0, "dateFormat", (depth0 && depth0.endDate), options)))
     + "\r\n      &emsp;&emsp;<div class=\"glyphicon glyphicon-map-marker\"></div>\r\n      &emsp;&emsp;"
-    + escapeExpression(((stack1 = ((stack1 = depth1.model),stack1 == null || stack1 === false ? stack1 : stack1.location)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth1 && depth1.model)),stack1 == null || stack1 === false ? stack1 : stack1.location)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "/ "
-    + escapeExpression(((stack1 = depth0.location),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.location)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n    </div>\r\n    ";
-  stack2 = helpers['if'].call(depth0, depth0.feedbackAllowed, {hash:{},inverse:self.noop,fn:self.program(4, program4, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, (depth0 && depth0.feedbackAllowed), {hash:{},inverse:self.noop,fn:self.program(4, program4, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n  </div>\r\n  ";
   return buffer;
   }
@@ -3485,243 +3461,222 @@ function program2(depth0,data) {
 
 function program4(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n    <div>\r\n      <hr/>\r\n      <ol>\r\n        <li>\r\n          "
-    + escapeExpression(((stack1 = depth0.quesstionTitle0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.quesstionTitle0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + ":&emsp;";
-  options = {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion0, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion0, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion0), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion0), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li>\r\n          "
-    + escapeExpression(((stack1 = depth0.quesstionTitle1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.quesstionTitle1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + ":&emsp;";
-  options = {hash:{},inverse:self.noop,fn:self.program(7, program7, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion1, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion1, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(7, program7, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion1), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion1), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li>\r\n          "
-    + escapeExpression(((stack1 = depth0.quesstionTitle2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.quesstionTitle2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + ":&emsp;";
-  options = {hash:{},inverse:self.noop,fn:self.program(9, program9, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion2, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion2, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(9, program9, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion2), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion2), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li>\r\n          "
-    + escapeExpression(((stack1 = depth0.quesstionTitle3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.quesstionTitle3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + ":&emsp;";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion3, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion3, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion3), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion3), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li>\r\n          "
-    + escapeExpression(((stack1 = depth0.quesstionTitle4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.quesstionTitle4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + ":&emsp;";
-  options = {hash:{},inverse:self.noop,fn:self.program(13, program13, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion4, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion4, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(13, program13, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion4), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion4), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li>\r\n          "
-    + escapeExpression(((stack1 = depth0.quesstionTitle5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.quesstionTitle5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + ":&emsp;";
-  options = {hash:{},inverse:self.noop,fn:self.program(15, program15, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion5, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion5, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(15, program15, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion5), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion5), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li>\r\n          "
-    + escapeExpression(((stack1 = depth0.quesstionTitle6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.quesstionTitle6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + ":&emsp;";
-  options = {hash:{},inverse:self.noop,fn:self.program(17, program17, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion6, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion6, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(17, program17, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion6), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion6), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li>\r\n          "
-    + escapeExpression(((stack1 = depth0.quesstionTitle7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.quesstionTitle7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + ":&emsp;";
-  options = {hash:{},inverse:self.noop,fn:self.program(19, program19, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion7, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion7, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(19, program19, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion7), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion7), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li>\r\n          "
-    + escapeExpression(((stack1 = depth0.quesstionTitle8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.quesstionTitle8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + ":&emsp;";
-  options = {hash:{},inverse:self.noop,fn:self.program(21, program21, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion8, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion8, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(21, program21, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion8), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion8), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li>\r\n          "
-    + escapeExpression(((stack1 = depth0.quesstionTitle9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.quesstionTitle9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + ":&emsp;";
-  options = {hash:{},inverse:self.noop,fn:self.program(23, program23, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion9, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion9, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(23, program23, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion9), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion9), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n      </ol>\r\n    </div>\r\n    ";
-  stack2 = helpers.each.call(depth0, depth0.feedbacks, {hash:{},inverse:self.noop,fn:self.programWithDepth(25, program25, data, depth0),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers.each.call(depth0, (depth0 && depth0.feedbacks), {hash:{},inverse:self.noop,fn:self.programWithDepth(25, program25, data, depth0),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n    ";
   return buffer;
   }
 function program5(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+  buffer += escapeExpression(((stack1 = (depth0 && depth0.averageRateAnswer0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
 function program7(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+  buffer += escapeExpression(((stack1 = (depth0 && depth0.averageRateAnswer1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
 function program9(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+  buffer += escapeExpression(((stack1 = (depth0 && depth0.averageRateAnswer2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
 function program11(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+  buffer += escapeExpression(((stack1 = (depth0 && depth0.averageRateAnswer3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
 function program13(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+  buffer += escapeExpression(((stack1 = (depth0 && depth0.averageRateAnswer4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
 function program15(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+  buffer += escapeExpression(((stack1 = (depth0 && depth0.averageRateAnswer5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
 function program17(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+  buffer += escapeExpression(((stack1 = (depth0 && depth0.averageRateAnswer6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
 function program19(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+  buffer += escapeExpression(((stack1 = (depth0 && depth0.averageRateAnswer7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
 function program21(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+  buffer += escapeExpression(((stack1 = (depth0 && depth0.averageRateAnswer8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
 function program23(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += escapeExpression(((stack1 = depth0.averageRateAnswer9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+  buffer += escapeExpression(((stack1 = (depth0 && depth0.averageRateAnswer9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
 function program25(depth0,data,depth1) {
   
-  var buffer = "", stack1, stack2, options;
-  buffer += "\r\n    <div>\r\n      <h4>\r\n        <span class=\"label label-default\">\r\n          Feedback ";
-  options = {hash:{
+  var buffer = "", stack1, helper, options;
+  buffer += "\r\n    <div>\r\n      <h4>\r\n        <span class=\"label label-default\">\r\n          Feedback "
+    + escapeExpression((helper = helpers.dateFormat || (depth0 && depth0.dateFormat),options={hash:{
     'format': ("MM.DD.YYYY hh:mm")
-  },data:data};
-  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, depth0.createDate, options) : helperMissing.call(depth0, "dateFormat", depth0.createDate, options)))
+  },data:data},helper ? helper.call(depth0, (depth0 && depth0.createDate), options) : helperMissing.call(depth0, "dateFormat", (depth0 && depth0.createDate), options)))
     + "\r\n        </span>\r\n        &emsp;<span class=\"badge\">"
-    + escapeExpression(((stack1 = depth0.averageRate),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth0 && depth0.averageRate)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</span>\r\n      </h4>\r\n      <ol>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
-    + escapeExpression(((stack1 = depth1.quesstionTitle0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth1 && depth1.quesstionTitle0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
-  options = {hash:{},inverse:self.noop,fn:self.program(26, program26, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion0, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion0, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+    + escapeExpression(((stack1 = (depth0 && depth0.answer0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(26, program26, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion0), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion0), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
-    + escapeExpression(((stack1 = depth1.quesstionTitle1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth1 && depth1.quesstionTitle1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
-  options = {hash:{},inverse:self.noop,fn:self.program(28, program28, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion1, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion1, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+    + escapeExpression(((stack1 = (depth0 && depth0.answer1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(28, program28, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion1), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion1), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
-    + escapeExpression(((stack1 = depth1.quesstionTitle2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth1 && depth1.quesstionTitle2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
-  options = {hash:{},inverse:self.noop,fn:self.program(30, program30, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion2, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion2, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+    + escapeExpression(((stack1 = (depth0 && depth0.answer2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(30, program30, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion2), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion2), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
-    + escapeExpression(((stack1 = depth1.quesstionTitle3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth1 && depth1.quesstionTitle3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
-  options = {hash:{},inverse:self.noop,fn:self.program(32, program32, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion3, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion3, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+    + escapeExpression(((stack1 = (depth0 && depth0.answer3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(32, program32, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion3), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion3), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
-    + escapeExpression(((stack1 = depth1.quesstionTitle4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth1 && depth1.quesstionTitle4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
-  options = {hash:{},inverse:self.noop,fn:self.program(34, program34, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion4, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion4, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+    + escapeExpression(((stack1 = (depth0 && depth0.answer4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(34, program34, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion4), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion4), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
-    + escapeExpression(((stack1 = depth1.quesstionTitle5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth1 && depth1.quesstionTitle5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
-  options = {hash:{},inverse:self.noop,fn:self.program(36, program36, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion5, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion5, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+    + escapeExpression(((stack1 = (depth0 && depth0.answer5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(36, program36, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion5), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion5), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
-    + escapeExpression(((stack1 = depth1.quesstionTitle6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth1 && depth1.quesstionTitle6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
-  options = {hash:{},inverse:self.noop,fn:self.program(38, program38, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion6, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion6, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+    + escapeExpression(((stack1 = (depth0 && depth0.answer6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(38, program38, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion6), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion6), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
-    + escapeExpression(((stack1 = depth1.quesstionTitle7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth1 && depth1.quesstionTitle7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
-  options = {hash:{},inverse:self.noop,fn:self.program(40, program40, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion7, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion7, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+    + escapeExpression(((stack1 = (depth0 && depth0.answer7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(40, program40, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion7), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion7), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
-    + escapeExpression(((stack1 = depth1.quesstionTitle8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth1 && depth1.quesstionTitle8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
-  options = {hash:{},inverse:self.noop,fn:self.program(42, program42, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion8, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion8, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+    + escapeExpression(((stack1 = (depth0 && depth0.answer8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(42, program42, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion8), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion8), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n        <li data-toggle=\"tooltip\" data-placement=\"bottom\" title=\""
-    + escapeExpression(((stack1 = depth1.quesstionTitle9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = (depth1 && depth1.quesstionTitle9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\">\r\n          "
-    + escapeExpression(((stack1 = depth0.answer9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
-  options = {hash:{},inverse:self.noop,fn:self.program(44, program44, data),data:data};
-  stack2 = ((stack1 = helpers.unlessCond || depth0.unlessCond),stack1 ? stack1.call(depth0, depth0.maxRateQuestion9, "0", options) : helperMissing.call(depth0, "unlessCond", depth0.maxRateQuestion9, "0", options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+    + escapeExpression(((stack1 = (depth0 && depth0.answer9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+  stack1 = (helper = helpers.unlessCond || (depth0 && depth0.unlessCond),options={hash:{},inverse:self.noop,fn:self.program(44, program44, data),data:data},helper ? helper.call(depth0, (depth0 && depth0.maxRateQuestion9), "0", options) : helperMissing.call(depth0, "unlessCond", (depth0 && depth0.maxRateQuestion9), "0", options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n        </li>\r\n      </ol>\r\n    </div>\r\n    ";
   return buffer;
   }
@@ -3729,7 +3684,7 @@ function program26(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion0),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
@@ -3737,7 +3692,7 @@ function program28(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion1),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
@@ -3745,7 +3700,7 @@ function program30(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion2),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
@@ -3753,7 +3708,7 @@ function program32(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion3),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
@@ -3761,7 +3716,7 @@ function program34(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion4),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
@@ -3769,7 +3724,7 @@ function program36(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion5),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
@@ -3777,7 +3732,7 @@ function program38(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion6),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
@@ -3785,7 +3740,7 @@ function program40(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion7),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
@@ -3793,7 +3748,7 @@ function program42(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion8),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
@@ -3801,17 +3756,17 @@ function program44(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "/ "
-    + escapeExpression(((stack1 = depth0.maxRateQuestion9),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+    + escapeExpression(((stack1 = (depth0 && depth0.maxRateQuestion9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
   return buffer;
   }
 
   buffer += "﻿<div class=\"container\">\r\n  ";
-  stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.sessions), {hash:{},inverse:self.noop,fn:self.programWithDepth(1, program1, data, depth0),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers.each.call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.sessions), {hash:{},inverse:self.noop,fn:self.programWithDepth(1, program1, data, depth0),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n\r\n  <textarea>\r\n    ";
-  if (stack2 = helpers.json) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
-  else { stack2 = depth0.json; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
-  buffer += escapeExpression(stack2)
+  if (helper = helpers.json) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.json); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
+  buffer += escapeExpression(stack1)
     + "\r\n  </textarea>\r\n  <iframe name=\"print_frame\" width=\"0\" height=\"0\" frameborder=\"0\" src=\"about:blank\"></iframe>\r\n</div>";
   return buffer;
   });
@@ -3850,7 +3805,7 @@ if (typeof define === 'function' && define.amd) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, stack2, options, functionType="function", escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
+  var buffer = "", stack1, helper, options, functionType="function", escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
 
 function program1(depth0,data) {
   
@@ -3865,34 +3820,29 @@ function program3(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div>\r\n        <div class=\"glyphicon glyphicon-map-marker\"></div>\r\n        &emsp;&emsp;"
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.location)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.location)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program5(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n    <div class=\"row\">\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(6, program6, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 0, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(6, program6, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 0, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(8, program8, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 1, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(8, program8, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 1, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(10, program10, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 10, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(10, program10, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 10, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(13, program13, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 11, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(13, program13, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 11, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(15, program15, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 12, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(15, program15, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType0), 12, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n    </div>\r\n    ";
   return buffer;
   }
@@ -3900,9 +3850,9 @@ function program6(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + " </div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer0\" data-maxlength=\"2048\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
   }
@@ -3911,26 +3861,24 @@ function program8(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <input type=\"text\" name=\"answer0\" maxlength=\"2048\" value=\""
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\"/>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program10(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer0\" id=\"answer0\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer0\" type=\"range\" min=\"0\" max=\"3\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing0\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit0\" data-rateit-backingfld=\"#backing0\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
@@ -3942,61 +3890,52 @@ function program11(depth0,data) {
 
 function program13(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer0\" id=\"answer0\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer0\" type=\"range\" min=\"0\" max=\"5\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing0\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit0\" data-rateit-backingfld=\"#backing0\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program15(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title0)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer0\" id=\"answer0\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer0\" type=\"range\" min=\"0\" max=\"10\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer0), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing0\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit0\" data-rateit-backingfld=\"#backing0\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program17(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n    <div class=\"row\">\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(18, program18, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 0, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(18, program18, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 0, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(20, program20, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 1, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(20, program20, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 1, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(22, program22, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 10, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(22, program22, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 10, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(24, program24, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 11, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(24, program24, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 11, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(26, program26, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 12, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(26, program26, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType1), 12, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n    </div>\r\n    ";
   return buffer;
   }
@@ -4004,9 +3943,9 @@ function program18(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer1\" data-maxlength=\"2048\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
   }
@@ -4015,87 +3954,76 @@ function program20(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <input type=\"text\" name=\"answer1\" maxlength=\"2048\" value=\""
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\"/>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program22(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer1\" id=\"answer1\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer1\" type=\"range\" min=\"0\" max=\"3\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing1\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit1\" data-rateit-backingfld=\"#backing1\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program24(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer1\" id=\"answer1\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer1\" type=\"range\" min=\"0\" max=\"5\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing1\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit1\" data-rateit-backingfld=\"#backing1\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program26(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer1\" id=\"answer1\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer1\" type=\"range\" min=\"0\" max=\"10\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer1), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing1\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit1\" data-rateit-backingfld=\"#backing1\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program28(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n    <div class=\"row\">\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(29, program29, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 0, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(29, program29, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 0, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(31, program31, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 1, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(31, program31, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 1, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(33, program33, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 10, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(33, program33, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 10, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(35, program35, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 11, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(35, program35, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 11, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(37, program37, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 12, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(37, program37, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType2), 12, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n    </div>\r\n    ";
   return buffer;
   }
@@ -4103,9 +4031,9 @@ function program29(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer2\" data-maxlength=\"2048\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
   }
@@ -4114,87 +4042,76 @@ function program31(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <input type=\"text\" name=\"answer2\" maxlength=\"2048\" value=\""
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\"/>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program33(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer2\" id=\"answer2\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer2\" type=\"range\" min=\"0\" max=\"3\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing2\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit2\" data-rateit-backingfld=\"#backing2\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program35(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer2\" id=\"answer2\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer2\" type=\"range\" min=\"0\" max=\"5\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing2\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit2\" data-rateit-backingfld=\"#backing2\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program37(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title2)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer2\" id=\"answer2\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer2\" type=\"range\" min=\"0\" max=\"10\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer2), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing2\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit2\" data-rateit-backingfld=\"#backing2\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program39(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n    <div class=\"row\">\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(40, program40, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 0, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(40, program40, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 0, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(42, program42, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 1, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(42, program42, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 1, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(44, program44, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 10, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(44, program44, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 10, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(46, program46, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 11, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(46, program46, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 11, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(48, program48, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 12, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(48, program48, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType3), 12, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n    </div>\r\n    ";
   return buffer;
   }
@@ -4202,9 +4119,9 @@ function program40(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer3\" maxlength=\"2048\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
   }
@@ -4213,87 +4130,76 @@ function program42(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <input type=\"text\" name=\"answer3\" maxlength=\"2048\" value=\""
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\"/>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program44(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer3\" id=\"answer3\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer3\" type=\"range\" min=\"0\" max=\"3\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing3\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit3\" data-rateit-backingfld=\"#backing3\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program46(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer3\" id=\"answer3\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer3\" type=\"range\" min=\"0\" max=\"5\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing3\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit3\" data-rateit-backingfld=\"#backing3\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program48(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title3)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer3\" id=\"answer3\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer3\" type=\"range\" min=\"0\" max=\"10\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer3), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing3\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit3\" data-rateit-backingfld=\"#backing3\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program50(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n    <div class=\"row\">\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(51, program51, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 0, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(51, program51, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 0, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(53, program53, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 1, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(53, program53, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 1, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(55, program55, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 10, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(55, program55, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 10, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(57, program57, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 11, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(57, program57, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 11, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(59, program59, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 12, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(59, program59, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType4), 12, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n    </div>\r\n    ";
   return buffer;
   }
@@ -4301,9 +4207,9 @@ function program51(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer4\" id=\"answer4\" data-maxlength=\"2048\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
   }
@@ -4312,87 +4218,76 @@ function program53(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <input type=\"text\" name=\"answer4\" maxlength=\"2048\" value=\""
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\"/>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program55(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer4\" id=\"answer4\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer4\" type=\"range\" min=\"0\" max=\"3\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing4\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit4\" data-rateit-backingfld=\"#backing4\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program57(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer4\" id=\"answer4\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer4\" type=\"range\" min=\"0\" max=\"5\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing4\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit4\" data-rateit-backingfld=\"#backing4\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program59(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title4)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer4\" id=\"answer4\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer4\" type=\"range\" min=\"0\" max=\"10\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer4), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing4\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit4\" data-rateit-backingfld=\"#backing4\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program61(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n    <div class=\"row\">\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(62, program62, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 0, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(62, program62, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 0, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(64, program64, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 1, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(64, program64, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 1, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(66, program66, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 10, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(66, program66, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 10, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(68, program68, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 11, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(68, program68, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 11, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(70, program70, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 12, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(70, program70, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType5), 12, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n    </div>\r\n    ";
   return buffer;
   }
@@ -4400,9 +4295,9 @@ function program62(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer5\" data-maxlength=\"2048\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
   }
@@ -4411,87 +4306,76 @@ function program64(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <input type=\"text\" name=\"answer5\" maxlength=\"2048\" value=\""
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\"/>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program66(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer5\" id=\"answer5\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer5\" type=\"range\" min=\"0\" max=\"3\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing5\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit5\" data-rateit-backingfld=\"#backing5\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program68(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer5\" id=\"answer5\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer5\" type=\"range\" min=\"0\" max=\"5\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing5\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit5\" data-rateit-backingfld=\"#backing5\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program70(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title5)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer5\" id=\"answer5\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer5\" type=\"range\" min=\"0\" max=\"10\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer5), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing5\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit5\" data-rateit-backingfld=\"#backing5\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program72(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n    <div class=\"row\">\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(73, program73, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 0, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(73, program73, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 0, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(75, program75, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 1, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(75, program75, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 1, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(77, program77, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 10, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(77, program77, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 10, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(79, program79, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 11, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(79, program79, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 11, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(81, program81, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 12, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(81, program81, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType6), 12, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n    </div>\r\n    ";
   return buffer;
   }
@@ -4499,9 +4383,9 @@ function program73(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer6\" data-maxlength=\"2048\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
   }
@@ -4510,87 +4394,76 @@ function program75(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <input type=\"text\" name=\"answer6\" maxlength=\"2048\" value=\""
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\"/>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program77(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer6\" id=\"answer6\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer6\" type=\"range\" min=\"0\" max=\"3\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing6\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit6\" data-rateit-backingfld=\"#backing6\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program79(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer6\" id=\"answer6\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer6\" type=\"range\" min=\"0\" max=\"5\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing6\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit6\" data-rateit-backingfld=\"#backing6\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program81(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title6)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer6\" id=\"answer6\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer6\" type=\"range\" min=\"0\" max=\"10\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer6), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing6\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit6\" data-rateit-backingfld=\"#backing6\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program83(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n    <div class=\"row\">\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(84, program84, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 0, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(84, program84, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 0, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(86, program86, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 1, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(86, program86, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 1, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(88, program88, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 10, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(88, program88, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 10, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(90, program90, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 11, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(90, program90, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 11, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(92, program92, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 12, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(92, program92, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType7), 12, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n    </div>\r\n    ";
   return buffer;
   }
@@ -4598,9 +4471,9 @@ function program84(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer7\" data-maxlength=\"2048\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
   }
@@ -4609,87 +4482,76 @@ function program86(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <input type=\"text\" name=\"answer7\" maxlength=\"2048\" value=\""
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\"/>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program88(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer7\" id=\"answer7\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer7\" type=\"range\" min=\"0\" max=\"3\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing7\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit7\" data-rateit-backingfld=\"#backing7\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program90(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer7\" id=\"answer7\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer7\" type=\"range\" min=\"0\" max=\"5\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing7\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit7\" data-rateit-backingfld=\"#backing7\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program92(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title7)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer7\" id=\"answer7\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer7\" type=\"range\" min=\"0\" max=\"10\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer7), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing7\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit7\" data-rateit-backingfld=\"#backing7\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program94(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n    <div class=\"row\">\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(95, program95, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 0, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(95, program95, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 0, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(97, program97, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 1, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(97, program97, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 1, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(99, program99, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 10, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(99, program99, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 10, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(101, program101, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 11, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(101, program101, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 11, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(103, program103, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 12, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(103, program103, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType8), 12, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n    </div>\r\n    ";
   return buffer;
   }
@@ -4697,9 +4559,9 @@ function program95(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer8\" data-maxlength=\"2048\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
   }
@@ -4708,87 +4570,76 @@ function program97(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <input type=\"text\" name=\"answer8\" maxlength=\"2048\" value=\""
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\"/>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program99(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer8\" id=\"answer8\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer8\" type=\"range\" min=\"0\" max=\"3\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing8\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit8\" data-rateit-backingfld=\"#backing8\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program101(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer8\" id=\"answer8\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer8\" type=\"range\" min=\"0\" max=\"5\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing8\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit8\" data-rateit-backingfld=\"#backing8\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program103(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title8)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer8\" id=\"answer8\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer8\" type=\"range\" min=\"0\" max=\"10\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer8), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing8\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit8\" data-rateit-backingfld=\"#backing8\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program105(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n    <div class=\"row\">\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(106, program106, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 0, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(106, program106, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 0, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 0, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(108, program108, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 1, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(108, program108, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 1, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 1, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(110, program110, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 10, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(110, program110, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 10, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 10, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(112, program112, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 11, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(112, program112, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 11, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 11, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      ";
-  options = {hash:{},inverse:self.noop,fn:self.program(114, program114, data),data:data};
-  stack2 = ((stack1 = helpers.ifCond || depth0.ifCond),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 12, options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.ifCond || (depth0 && depth0.ifCond),options={hash:{},inverse:self.noop,fn:self.program(114, program114, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 12, options) : helperMissing.call(depth0, "ifCond", ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.questionType9), 12, options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n    </div>\r\n    ";
   return buffer;
   }
@@ -4796,9 +4647,9 @@ function program106(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <textarea name=\"answer9\" data-maxlength=\"2048\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</textarea>\r\n      </div>\r\n      ";
   return buffer;
   }
@@ -4807,60 +4658,54 @@ function program108(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n      <div class=\"col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-md-9\">\r\n        <input type=\"text\" name=\"answer9\" maxlength=\"2048\" value=\""
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\"/>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program110(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"3\" data-min=\"1\"\r\n             name=\"answer9\" id=\"answer9\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer9\" type=\"range\" min=\"0\" max=\"3\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing9\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit9\" data-rateit-backingfld=\"#backing9\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program112(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n             name=\"answer9\" id=\"answer9\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer9\" type=\"range\" min=\"0\" max=\"5\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing9\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit9\" data-rateit-backingfld=\"#backing9\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
 
 function program114(depth0,data) {
   
-  var buffer = "", stack1, stack2, options;
+  var buffer = "", stack1, helper, options;
   buffer += "\r\n      <div class=\"col-xs-4 col-md-3\">"
-    + escapeExpression(((stack1 = ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.title9)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</div>\r\n      <div class=\"col-xs-8 col-md-9\">\r\n        <!--<input type=\"number\" data-max=\"10\" data-min=\"1\"\r\n             name=\"answer9\" id=\"answer9\" class=\"rating\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" />-->\r\n        <input name=\"answer9\" type=\"range\" min=\"0\" max=\"10\" value=\"";
-  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
-  stack2 = ((stack1 = helpers.zerowhenempty || depth0.zerowhenempty),stack1 ? stack1.call(depth0, ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = depth0.feedback),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options));
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = (helper = helpers.zerowhenempty || (depth0 && depth0.zerowhenempty),options={hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options) : helperMissing.call(depth0, "zerowhenempty", ((stack1 = (depth0 && depth0.feedback)),stack1 == null || stack1 === false ? stack1 : stack1.answer9), options));
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\" step=\"0.5\" id=\"backing9\"/>\r\n        <div class=\"rateit bigstars\" id=\"rateit9\" data-rateit-backingfld=\"#backing9\" data-rateit-starwidth=\"32\" data-rateit-starheight=\"32\" data-rateit-resetable=\"false\"></div>\r\n      </div>\r\n      ";
   return buffer;
   }
@@ -4869,69 +4714,66 @@ function program116(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n    <div class=\"row pull-right\">\r\n      <div class=\"col-xs-12\">\r\n        <br/>\r\n        <button class=\"btn btn-danger btn-responsive js-remove\">\r\n          <span class=\"glyphicon glyphicon-remove\"></span>&emsp;"
-    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Text_Remove)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_Remove)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n        </button>\r\n        <button class=\"btn btn-success btn-responsive js-submit\">\r\n          <span class=\"glyphicon glyphicon-save\"></span>&emsp;"
-    + escapeExpression(((stack1 = ((stack1 = depth0.resources),stack1 == null || stack1 === false ? stack1 : stack1.Text_Save)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_Save)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n        </button>\r\n      </div>\r\n    </div>\r\n    ";
   return buffer;
   }
 
   buffer += "<div class=\"container\">\r\n\r\n  <div class=\"list-group\" style=\"margin-top:39px;\">\r\n    <div id=\"session-item-view\" class=\"list-group-item\">\r\n      <div>\r\n        <div class=\"glyphicon icon-presentation\"></div>\r\n        &emsp;&emsp;<strong>"
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</strong>\r\n      </div>\r\n      ";
-  stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.tags), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\r\n      <div>\r\n      <div>\r\n        <div class=\"glyphicon glyphicon-user\"></div>\r\n        &emsp;&emsp;";
-  options = {hash:{},data:data};
-  buffer += escapeExpression(((stack1 = helpers.seperatelist || depth0.seperatelist),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.speakerList), options) : helperMissing.call(depth0, "seperatelist", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.speakerList), options)))
-    + "\r\n      </div>\r\n      <div class=\"glyphicon glyphicon-time\"></div>\r\n        &emsp;&emsp;";
-  options = {hash:{
+  stack1 = helpers.each.call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.tags), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\r\n      <div>\r\n      <div>\r\n        <div class=\"glyphicon glyphicon-user\"></div>\r\n        &emsp;&emsp;"
+    + escapeExpression((helper = helpers.seperatelist || (depth0 && depth0.seperatelist),options={hash:{},data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.speakerList), options) : helperMissing.call(depth0, "seperatelist", ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.speakerList), options)))
+    + "\r\n      </div>\r\n      <div class=\"glyphicon glyphicon-time\"></div>\r\n        &emsp;&emsp;"
+    + escapeExpression((helper = helpers.dateFormat || (depth0 && depth0.dateFormat),options={hash:{
     'format': ("HH:mm")
-  },data:data};
-  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.startDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.startDate), options)))
-    + "-";
-  options = {hash:{
+  },data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.startDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.startDate), options)))
+    + "-"
+    + escapeExpression((helper = helpers.dateFormat || (depth0 && depth0.dateFormat),options={hash:{
     'format': ("HH:mm")
-  },data:data};
-  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options)))
+  },data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options)))
     + "\r\n      </div>\r\n      ";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.location), {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.location), {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      <br/><br/>\r\n      <p>"
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "</p>\r\n    </div>\r\n  </div>\r\n\r\n  <form>\r\n    ";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.active0), {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.active0), {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n\r\n    ";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.active1), {hash:{},inverse:self.noop,fn:self.program(17, program17, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.active1), {hash:{},inverse:self.noop,fn:self.program(17, program17, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n\r\n    ";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.active2), {hash:{},inverse:self.noop,fn:self.program(28, program28, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.active2), {hash:{},inverse:self.noop,fn:self.program(28, program28, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n\r\n    ";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.active3), {hash:{},inverse:self.noop,fn:self.program(39, program39, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.active3), {hash:{},inverse:self.noop,fn:self.program(39, program39, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n\r\n    ";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.active4), {hash:{},inverse:self.noop,fn:self.program(50, program50, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.active4), {hash:{},inverse:self.noop,fn:self.program(50, program50, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n\r\n    ";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.active5), {hash:{},inverse:self.noop,fn:self.program(61, program61, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.active5), {hash:{},inverse:self.noop,fn:self.program(61, program61, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n\r\n    ";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.active6), {hash:{},inverse:self.noop,fn:self.program(72, program72, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.active6), {hash:{},inverse:self.noop,fn:self.program(72, program72, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n\r\n    ";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.active7), {hash:{},inverse:self.noop,fn:self.program(83, program83, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.active7), {hash:{},inverse:self.noop,fn:self.program(83, program83, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n\r\n    ";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.active8), {hash:{},inverse:self.noop,fn:self.program(94, program94, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.active8), {hash:{},inverse:self.noop,fn:self.program(94, program94, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n\r\n    ";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.feedbackdefinition),stack1 == null || stack1 === false ? stack1 : stack1.active9), {hash:{},inverse:self.noop,fn:self.program(105, program105, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.active9), {hash:{},inverse:self.noop,fn:self.program(105, program105, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n\r\n    ";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.feedbackAllowed), {hash:{},inverse:self.noop,fn:self.program(116, program116, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.feedbackAllowed), {hash:{},inverse:self.noop,fn:self.program(116, program116, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n  </form>\r\n\r\n</div>";
   return buffer;
   });
@@ -4950,7 +4792,7 @@ if (typeof define === 'function' && define.amd) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, stack2, options, functionType="function", escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
+  var buffer = "", stack1, helper, options, functionType="function", escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
 
 function program1(depth0,data) {
   
@@ -4971,35 +4813,32 @@ function program5(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\r\n<div>\r\n  <div class=\"glyphicon glyphicon-map-marker\"></div>\r\n  &emsp;&emsp;"
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.location)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.location)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n</div>\r\n";
   return buffer;
   }
 
   buffer += "<div>\r\n  <div class=\"glyphicon icon-presentation\"></div>\r\n  &emsp;&emsp;<strong>"
-    + escapeExpression(((stack1 = ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.title)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + " ";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.commented), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.commented), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "</strong>\r\n</div>\r\n";
-  stack2 = helpers.each.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.tags), {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
-  buffer += "\r\n<div>\r\n<div>\r\n  <div class=\"glyphicon glyphicon-user\"></div>\r\n  &emsp;&emsp;";
-  options = {hash:{},data:data};
-  buffer += escapeExpression(((stack1 = helpers.seperatelist || depth0.seperatelist),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.speakerList), options) : helperMissing.call(depth0, "seperatelist", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.speakerList), options)))
-    + "\r\n</div>\r\n<div class=\"glyphicon glyphicon-time\"></div>\r\n  &emsp;&emsp;";
-  options = {hash:{
+  stack1 = helpers.each.call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.tags), {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\r\n<div>\r\n<div>\r\n  <div class=\"glyphicon glyphicon-user\"></div>\r\n  &emsp;&emsp;"
+    + escapeExpression((helper = helpers.seperatelist || (depth0 && depth0.seperatelist),options={hash:{},data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.speakerList), options) : helperMissing.call(depth0, "seperatelist", ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.speakerList), options)))
+    + "\r\n</div>\r\n<div class=\"glyphicon glyphicon-time\"></div>\r\n  &emsp;&emsp;"
+    + escapeExpression((helper = helpers.dateFormat || (depth0 && depth0.dateFormat),options={hash:{
     'format': ("HH:mm")
-  },data:data};
-  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.startDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.startDate), options)))
-    + "-";
-  options = {hash:{
+  },data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.startDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.startDate), options)))
+    + "-"
+    + escapeExpression((helper = helpers.dateFormat || (depth0 && depth0.dateFormat),options={hash:{
     'format': ("HH:mm")
-  },data:data};
-  buffer += escapeExpression(((stack1 = helpers.dateFormat || depth0.dateFormat),stack1 ? stack1.call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options)))
+  },data:data},helper ? helper.call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options) : helperMissing.call(depth0, "dateFormat", ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.endDate), options)))
     + "\r\n</div>\r\n";
-  stack2 = helpers['if'].call(depth0, ((stack1 = depth0.model),stack1 == null || stack1 === false ? stack1 : stack1.location), {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data});
-  if(stack2 || stack2 === 0) { buffer += stack2; }
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.location), {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
@@ -5032,15 +4871,16 @@ module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
 
   function Controller(options) {
-    var _this = this;
     log('about controller init');
-    application.addInitializer(function(options) {
-      _this.headers = new Header.Collection();
-      new Header.TestData().addTo(_this.headers);
-      return vent.on('resources:loaded', function() {
-        return _this.showHeader();
-      });
-    });
+    application.addInitializer((function(_this) {
+      return function(options) {
+        _this.headers = new Header.Collection();
+        new Header.TestData().addTo(_this.headers);
+        return vent.on('resources:loaded', function() {
+          return _this.showHeader();
+        });
+      };
+    })(this));
   }
 
   Controller.prototype.showHeader = function() {
@@ -5063,7 +4903,7 @@ module.exports = Controller = (function(_super) {
 });
 
 ;require.register("modules/header/router", function(exports, require, module) {
-var Controller, Router, application, vent, _ref,
+var Controller, Router, application, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -5077,24 +4917,24 @@ module.exports = Router = (function(_super) {
   __extends(Router, _super);
 
   function Router() {
-    _ref = Router.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Router.__super__.constructor.apply(this, arguments);
   }
 
   Router.prototype.initialize = function(options) {
-    var _this = this;
     log('header router init');
-    return application.addInitializer(function(options) {
-      application.on('start', function() {
-        return _this.controller.showHeader();
-      });
-      vent.on('navigation:signin', function() {
-        return _this.controller.showHeader();
-      });
-      return vent.on('navigation:signout', function() {
-        return _this.controller.showHeader();
-      });
-    });
+    return application.addInitializer((function(_this) {
+      return function(options) {
+        application.on('start', function() {
+          return _this.controller.showHeader();
+        });
+        vent.on('navigation:signin', function() {
+          return _this.controller.showHeader();
+        });
+        return vent.on('navigation:signout', function() {
+          return _this.controller.showHeader();
+        });
+      };
+    })(this));
   };
 
   Router.prototype.controller = new Controller();
@@ -5105,7 +4945,7 @@ module.exports = Router = (function(_super) {
 });
 
 ;require.register("modules/header/views/header-view", function(exports, require, module) {
-var ItemView, View, application, config, vent, _ref, _ref1,
+var ItemView, View, application, config, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -5119,8 +4959,7 @@ module.exports.HeaderItem = ItemView = (function(_super) {
   __extends(ItemView, _super);
 
   function ItemView() {
-    _ref = ItemView.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return ItemView.__super__.constructor.apply(this, arguments);
   }
 
   ItemView.prototype.id = 'header-item-view';
@@ -5134,26 +4973,28 @@ module.exports.HeaderItem = ItemView = (function(_super) {
   };
 
   ItemView.prototype.initialize = function(options) {
-    var _this = this;
     this.resources = options != null ? options.resources : void 0;
-    return vent.on('set:active:header', function(trigger, title, glyphicon) {
-      if (trigger === _this.model.get('trigger')) {
-        return _this.setActive();
-      } else {
-        return _this.setInactive();
-      }
-    });
+    return vent.on('set:active:header', (function(_this) {
+      return function(trigger, title, glyphicon) {
+        if (trigger === _this.model.get('trigger')) {
+          return _this.setActive();
+        } else {
+          return _this.setInactive();
+        }
+      };
+    })(this));
   };
 
   ItemView.prototype.serializeData = function() {
-    var _ref1, _ref2, _ref3,
-      _this = this;
+    var _ref, _ref1, _ref2;
     return {
-      title: (_ref1 = (_ref2 = this.resources.find((function(resource) {
-        return resource.get('key') === _this.model.get('resource');
-      }))) != null ? _ref2.get('value') : void 0) != null ? _ref1 : this.model.get('title'),
+      title: (_ref = (_ref1 = this.resources.find(((function(_this) {
+        return function(resource) {
+          return resource.get('key') === _this.model.get('resource');
+        };
+      })(this)))) != null ? _ref1.get('value') : void 0) != null ? _ref : this.model.get('title'),
       href: this.model.get('href'),
-      icon: (_ref3 = this.model.get('glyphicon')) != null ? _ref3 : config.sidebarglyphicon
+      icon: (_ref2 = this.model.get('glyphicon')) != null ? _ref2 : config.sidebarglyphicon
     };
   };
 
@@ -5179,8 +5020,7 @@ module.exports.Header = View = (function(_super) {
   __extends(View, _super);
 
   function View() {
-    _ref1 = View.__super__.constructor.apply(this, arguments);
-    return _ref1;
+    return View.__super__.constructor.apply(this, arguments);
   }
 
   View.prototype.id = 'header-view';
@@ -5197,42 +5037,49 @@ module.exports.Header = View = (function(_super) {
   };
 
   View.prototype.initialize = function(options) {
-    var _this = this;
     this.resources = options != null ? options.resources : void 0;
-    vent.on('set:active:header', function(trigger, title, icon) {
-      return _this.setSubHeader(title, icon);
-    });
-    vent.on('fetch:start', function(title) {
-      $('#wrapper').block({
-        message: null
-      });
-      if (config.spinneractive) {
-        return $('#spinner').spin({
-          lines: 5,
-          length: 8,
-          width: 5,
-          radius: 4,
-          corners: 0,
-          rotate: 56,
-          trail: 40,
-          speed: 1.5,
-          direction: 1,
-          color: '#64b92a'
+    vent.on('set:active:header', (function(_this) {
+      return function(trigger, title, icon) {
+        return _this.setSubHeader(title, icon);
+      };
+    })(this));
+    vent.on('fetch:start', (function(_this) {
+      return function(title) {
+        $('#wrapper').block({
+          message: null
         });
-      }
-    });
-    vent.on('fetch:done', function() {
-      if (config.spinneractive) {
-        $('#spinner').spin(false);
-      }
-      return $('#wrapper').unblock();
-    });
-    vent.on('fetch:fail', function() {
-      if (config.spinneractive) {
-        $('#spinner').spin(false);
-      }
-      return $('#wrapper').unblock();
-    });
+        if (config.spinneractive) {
+          return $('#spinner').spin({
+            lines: 5,
+            length: 8,
+            width: 5,
+            radius: 4,
+            corners: 0,
+            rotate: 56,
+            trail: 40,
+            speed: 1.5,
+            direction: 1,
+            color: '#64b92a'
+          });
+        }
+      };
+    })(this));
+    vent.on('fetch:done', (function(_this) {
+      return function() {
+        if (config.spinneractive) {
+          $('#spinner').spin(false);
+        }
+        return $('#wrapper').unblock();
+      };
+    })(this));
+    vent.on('fetch:fail', (function(_this) {
+      return function() {
+        if (config.spinneractive) {
+          $('#spinner').spin(false);
+        }
+        return $('#wrapper').unblock();
+      };
+    })(this));
     vent.on('navigation:back:on', function() {
       return $('#menu-back').show();
     });
@@ -5242,9 +5089,9 @@ module.exports.Header = View = (function(_super) {
   };
 
   View.prototype.serializeData = function() {
-    var _ref2;
+    var _ref;
     return {
-      resources: (_ref2 = this.resources) != null ? _ref2.toJSON() : void 0
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0
     };
   };
 
@@ -5284,20 +5131,20 @@ module.exports.Header = View = (function(_super) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, helper, functionType="function", escapeExpression=this.escapeExpression;
 
 
   buffer += "<a href=\"#";
-  if (stack1 = helpers.href) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.href; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.href) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.href); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + "\">\r\n  <span class=\"glyphicon ";
-  if (stack1 = helpers.icon) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.icon; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.icon) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.icon); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + "\"></span>\r\n  &nbsp;&nbsp;&nbsp;";
-  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (helper = helpers.title) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.title); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
     + "\r\n</a>";
   return buffer;
@@ -5339,13 +5186,13 @@ var Settings, Store;
 Store = require('models/store');
 
 Settings = (function() {
+
   /*
     encapsulates local storage (persistent)
-  */
-
+   */
   function Settings() {
-    /* initializes this instance*/
 
+    /* initializes this instance */
     log('settings store init');
     this.store = new Store.Collection({
       name: 'settings'
@@ -5357,35 +5204,35 @@ Settings = (function() {
   }
 
   Settings.prototype.set = function(id, value) {
+
     /*
       add or opdate an item in the collection with the specified id and value.
       if the item exists the value will be updated
-    */
-
+     */
     return this.store.setValue(id, value);
   };
 
   Settings.prototype.get = function(id) {
-    /* get the value attribute for an item*/
 
+    /* get the value attribute for an item */
     return this.store.getValue(id);
   };
 
   Settings.prototype.getValueOrDefault = function(id, val) {
-    /* get the value attribute for an item*/
 
+    /* get the value attribute for an item */
     return this.store.getValueOrDefault(id, val);
   };
 
   Settings.prototype.has = function(id) {
-    /* looks through the collection for the specified id*/
 
+    /* looks through the collection for the specified id */
     return this.store.has(id);
   };
 
   Settings.prototype.destroy = function(id) {
-    /* removes all (or by id) models from the collection and store*/
 
+    /* removes all (or by id) models from the collection and store */
     return this.store.destroy(id);
   };
 
@@ -5402,13 +5249,13 @@ var User, settings;
 settings = require('settings');
 
 User = (function() {
+
   /*
     encapsulates the current user
-  */
-
+   */
   function User() {
-    /* initializes this instance*/
 
+    /* initializes this instance */
     log('user init');
   }
 
@@ -5487,7 +5334,7 @@ module.exports = new User();
 });
 
 ;require.register("vent", function(exports, require, module) {
-var Vent, _ref,
+var Vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -5495,8 +5342,7 @@ Vent = (function(_super) {
   __extends(Vent, _super);
 
   function Vent() {
-    _ref = Vent.__super__.constructor.apply(this, arguments);
-    return _ref;
+    return Vent.__super__.constructor.apply(this, arguments);
   }
 
   Vent.setup = function() {
