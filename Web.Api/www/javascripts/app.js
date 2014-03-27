@@ -158,8 +158,11 @@ Application = (function(_super) {
   };
 
   Application.prototype.navigate = function(route, options) {
-    log('navigate', route);
+    log('navigate', route, options);
     options = options || {};
+    if (!_.isEmpty(options != null ? options.returnroute : void 0)) {
+      route = "" + route + "?returnroute=" + options.returnroute;
+    }
     return Backbone.history.navigate(route, options);
   };
 
@@ -365,8 +368,7 @@ module.exports = Collection = (function(_super) {
       return vent.trigger('sync:fail:servererror', error);
     } else if (error.status === 401 || error.status === 403) {
       console.warn('UNAUTHORIZED', error);
-      vent.trigger('sync:fail:unauthorized', error);
-      return vent.trigger(config.signintrigger);
+      return vent.trigger('sync:fail:unauthorized', error);
     } else {
       console.warn('UNKNOWN', error);
       return vent.trigger('sync:fail:unknown', error);
@@ -465,8 +467,7 @@ module.exports = Model = (function(_super) {
       return vent.trigger('sync:fail:servererror', error);
     } else if (error.status === 401 || error.status === 403) {
       console.warn('UNAUTHORIZED', error);
-      vent.trigger('sync:fail:unauthorized', error);
-      return vent.trigger(config.signintrigger);
+      return vent.trigger('sync:fail:unauthorized', error);
     } else {
       console.warn('UNKNOWN', error);
       return vent.trigger('sync:fail:unknown', error);
@@ -2064,7 +2065,8 @@ module.exports = Controller = (function(_super) {
     view = new View({
       resources: application.resources,
       username: params != null ? params.u : void 0,
-      password: params != null ? params.p : void 0
+      password: params != null ? params.p : void 0,
+      returnroute: params != null ? params.returnroute : void 0
     });
     return application.layout.content.show(view);
   };
@@ -2175,8 +2177,13 @@ module.exports = Router = (function(_super) {
         return _this.controller.showHome();
       });
       vent.on('signin:index', function() {
-        application.navigate('signin');
-        return _this.controller.showSignin();
+        console.log(application.getCurrentRoute());
+        if (application.getCurrentRoute() !== 'signin') {
+          application.navigate('signin', {
+            returnroute: application.getCurrentRoute()
+          });
+          return _this.controller.showSignin();
+        }
       });
       vent.on('about:index', function() {
         application.navigate('about');
