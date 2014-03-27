@@ -14,6 +14,7 @@
     "backbone.babysitter": "~0.1.0",
     "Backbone.localStorage": "~1.1.7",
     "underscore": "~1.6.0",
+    "underscore.string": "~2.3.3",
     "bootstrap": "~3.0.3",
     "console-polyfill": "~0.1.0",
     "jquery": "~2.0.3",
@@ -78,6 +79,12 @@
     },
     "underscore": {
       "main": "underscore.js"
+    },
+    "underscore.string": {
+      "dependencies": {
+        "underscore": "*"
+      },
+      "main": "lib/underscore.string.js"
     },
     "spin.js": {
       "main": [
