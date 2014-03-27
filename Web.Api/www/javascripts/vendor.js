@@ -29398,7 +29398,6 @@ Backbone.Syphon.KeyJoiner = function(parentKey, childKey){
     }
   }
 
-
   if (Function.prototype.bind) {
     window.log = Function.prototype.bind.call(console.log, console);
   }
