@@ -1,14 +1,16 @@
 application = require 'application'
+Controller = require '../../lib/base/controller'
 UserProfile = require '../../models/userprofile'
 UserToken = require '../../models/usertoken'
 vent = require 'vent'
 settings = require 'settings'
 user = require 'user'
+config = require 'config'
 
-module.exports = class Controller extends Backbone.Marionette.Controller
+module.exports = class Controller extends Controller
 
   constructor: (options) ->
-    log 'about controller init'
+    log 'common controller init'
 
     application.addInitializer (options) =>
 
@@ -17,7 +19,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
           user.reset()
           user.name(data.username) if data.remember
           user.remember(data.remember)
-          @doSignin(data.username, data.password)
+          @doSignin(data.username, data.password, data.returnroute)
 
       vent.on 'message:success:show', (data) =>
         @showMessage data, 'success'
@@ -39,6 +41,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     application.layout.content.show(view)
 
   showSignin: (params) ->
+    params = @parseParams(params)
     vent.trigger 'fetch:done' # switch off block
     vent.trigger 'set:active:header', 'signin:index', application.resources.key('Title_SignIn'), 'glyphicon-user'
     View = require './views/signin-view'
@@ -62,8 +65,13 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     View = require './views/debug-view'
     view = new View(resources: application.resources)
     application.layout.content.show(view)
+    
+  doSignout: ->
+    user.reset()
+    vent.trigger 'header:refresh'
+    vent.trigger config.hometrigger
 
-  doSignin: (username, password) ->
+  doSignin: (username, password, returnroute) ->
     # get the accesstoken
 
     vent.trigger 'fetch:start' # because save() does not trigger block
@@ -80,11 +88,15 @@ module.exports = class Controller extends Backbone.Marionette.Controller
           success: (model, response, options) =>
             user.set('api_userroles', model.get('roles'))
             vent.trigger 'message:success:show', 'signed in ' + username
-            vent.trigger 'navigation:signin'
+            vent.trigger 'header:refresh'
+            if _.isEmpty(returnroute)
+              vent.trigger config.startuptrigger
+            else
+              application.navigate returnroute
           error: (model, xhr, options) ->
             # vent.trigger 'message:error:show', 'profile fetch failed'
-            vent.trigger 'navigation:signout'
+            vent.trigger 'header:refresh'
       error: (model, xhr, options) ->
         vent.trigger 'message:error:show', 'sign in failed'
-        vent.trigger 'navigation:signout'
+        vent.trigger 'header:refresh'
         vent.trigger 'fetch:fail' # stop save() spinner

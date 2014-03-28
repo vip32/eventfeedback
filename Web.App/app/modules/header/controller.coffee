@@ -7,7 +7,7 @@ user = require 'user'
 module.exports = class Controller extends Backbone.Marionette.Controller
 
   constructor: (options) ->
-    log 'about controller init'
+    log 'header controller init'
 
     application.addInitializer (options) =>
 

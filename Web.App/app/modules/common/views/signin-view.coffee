@@ -21,6 +21,7 @@ module.exports = class SigninView extends Backbone.Marionette.ItemView
   onSignin: (e) ->
     e.preventDefault()
     data = Backbone.Syphon.serialize(@)
+    data.returnroute = @options.returnroute
     vent.trigger 'view:signin:do', data
 
   onShow: ->

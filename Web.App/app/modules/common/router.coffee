@@ -7,12 +7,14 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
 
   appRoutes:
     '': 'showHome'
+    'home': 'showHome'
     'about': 'showAbout'
     'debug': 'showDebug'
     'signin': 'showSignin'
+    'signout': 'doSignout'
 
   initialize: (options)  ->
-    log 'about router init'
+    log 'common router init'
 
     application.addInitializer (options) =>
 
@@ -26,22 +28,30 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
         console.warn 'sync:unknown error'
 
       vent.on 'home:index', =>
+        console.log 'HOME!'
         application.navigate 'home'
-        @controller.showHome()
+        #@controller.showHome()
 
       vent.on 'signin:index', =>
-        console.log application.getCurrentRoute()
-        if not application.getCurrentRoute().startsWith('signin') # startsWith
+        console.log 'current route:', application.currentRoute()
+        if not application.currentRoute().startsWith('signin')
           application.navigate 'signin',
-            returnroute: application.getCurrentRoute()
-          @controller.showSignin()
+            returnroute: application.currentRoute()
+        else
+          application.navigate 'signin',
+            returnroute: 'home' # should be se to current returnroute (from url)
+#        @controller.showSignin()
+
+      vent.on 'signout:index', =>
+        application.navigate 'signout'
 
       vent.on 'about:index', =>
+        console.log 'ABOUT!'
         application.navigate 'about'
-        @controller.showAbout()
+        #@controller.showAbout()
 
       vent.on 'debug:index', =>
         application.navigate 'debug'
-        @controller.showDebug()
+        #@controller.showDebug()
 
   controller: new Controller()

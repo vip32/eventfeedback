@@ -4,6 +4,7 @@ class Config
   approot: '/'
   apiroot: '/api/v1'
   apitimeout: 60000
+  hometrigger: 'home:index'
   startuptrigger: 'events:index'
   signintrigger: 'signin:index'
   brandtrigger: 'events:index'

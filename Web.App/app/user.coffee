@@ -5,10 +5,6 @@ class User
     encapsulates the current user
   ###
 
-  constructor: ->
-    ### initializes this instance ###
-    log 'user init'
-    
   set: (key, value) ->
     settings.set(key, value)
     

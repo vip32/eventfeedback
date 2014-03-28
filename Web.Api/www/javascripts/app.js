@@ -131,12 +131,13 @@ Application = (function(_super) {
         _ref = config.modules;
         for (name in _ref) {
           module = _ref[name];
-          log('module', name);
+          log('=== module', name);
           router = new (require(module));
           _this.routers[name] = router;
         }
+        log('routers:', _this.routers);
         Backbone.history.start();
-        return log('current route', _this.getCurrentRoute());
+        return log('current route:', _this.currentRoute());
       };
     })(this));
     this.addInitializer((function(_this) {
@@ -164,15 +165,17 @@ Application = (function(_super) {
   };
 
   Application.prototype.navigate = function(route, options) {
+    log("==========================| " + route + " |========================");
     log('navigate', route, options);
     options = options || {};
+    options.trigger = true;
     if (!_.isEmpty(options != null ? options.returnroute : void 0)) {
       route = "" + route + "?returnroute=" + options.returnroute;
     }
     return Backbone.history.navigate(route, options);
   };
 
-  Application.prototype.getCurrentRoute = function() {
+  Application.prototype.currentRoute = function() {
     return Backbone.history.fragment;
   };
 
@@ -226,6 +229,8 @@ Config = (function() {
   Config.prototype.apiroot = '/api/v1';
 
   Config.prototype.apitimeout = 60000;
+
+  Config.prototype.hometrigger = 'home:index';
 
   Config.prototype.startuptrigger = 'events:index';
 
@@ -407,6 +412,39 @@ module.exports = Collection = (function(_super) {
   return Collection;
 
 })(Backbone.Collection);
+});
+
+;require.register("lib/base/controller", function(exports, require, module) {
+var Controller,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = Controller = (function(_super) {
+  __extends(Controller, _super);
+
+  function Controller() {
+    return Controller.__super__.constructor.apply(this, arguments);
+  }
+
+  Controller.prototype.parseParams = function(params) {
+    var options;
+    options = {};
+    if (params && params.trim() !== '') {
+      params = params.split('&');
+      _.each(params, function(param) {
+        var values;
+        values = param.split('=');
+        if (values[1]) {
+          return options[values[0]] = values[1];
+        }
+      });
+    }
+    return options;
+  };
+
+  return Controller;
+
+})(Backbone.Marionette.Controller);
 });
 
 ;require.register("lib/base/item-view", function(exports, require, module) {
@@ -2022,11 +2060,13 @@ module.exports = UsersGeneratorView = (function(_super) {
 });
 
 ;require.register("modules/common/controller", function(exports, require, module) {
-var Controller, UserProfile, UserToken, application, settings, user, vent,
+var Controller, UserProfile, UserToken, application, config, settings, user, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 application = require('application');
+
+Controller = require('../../lib/base/controller');
 
 UserProfile = require('../../models/userprofile');
 
@@ -2038,11 +2078,13 @@ settings = require('settings');
 
 user = require('user');
 
+config = require('config');
+
 module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
 
   function Controller(options) {
-    log('about controller init');
+    log('common controller init');
     application.addInitializer((function(_this) {
       return function(options) {
         vent.on('view:signin:do', function(data) {
@@ -2052,7 +2094,7 @@ module.exports = Controller = (function(_super) {
               user.name(data.username);
             }
             user.remember(data.remember);
-            return _this.doSignin(data.username, data.password);
+            return _this.doSignin(data.username, data.password, data.returnroute);
           }
         });
         vent.on('message:success:show', function(data) {
@@ -2085,6 +2127,7 @@ module.exports = Controller = (function(_super) {
 
   Controller.prototype.showSignin = function(params) {
     var View, view;
+    params = this.parseParams(params);
     vent.trigger('fetch:done');
     vent.trigger('set:active:header', 'signin:index', application.resources.key('Title_SignIn'), 'glyphicon-user');
     View = require('./views/signin-view');
@@ -2119,7 +2162,13 @@ module.exports = Controller = (function(_super) {
     return application.layout.content.show(view);
   };
 
-  Controller.prototype.doSignin = function(username, password) {
+  Controller.prototype.doSignout = function() {
+    user.reset();
+    vent.trigger('header:refresh');
+    return vent.trigger(config.hometrigger);
+  };
+
+  Controller.prototype.doSignin = function(username, password, returnroute) {
     var userToken;
     vent.trigger('fetch:start');
     userToken = new UserToken.Model({
@@ -2137,17 +2186,22 @@ module.exports = Controller = (function(_super) {
             success: function(model, response, options) {
               user.set('api_userroles', model.get('roles'));
               vent.trigger('message:success:show', 'signed in ' + username);
-              return vent.trigger('navigation:signin');
+              vent.trigger('header:refresh');
+              if (_.isEmpty(returnroute)) {
+                return vent.trigger(config.startuptrigger);
+              } else {
+                return application.navigate(returnroute);
+              }
             },
             error: function(model, xhr, options) {
-              return vent.trigger('navigation:signout');
+              return vent.trigger('header:refresh');
             }
           });
         };
       })(this),
       error: function(model, xhr, options) {
         vent.trigger('message:error:show', 'sign in failed');
-        vent.trigger('navigation:signout');
+        vent.trigger('header:refresh');
         return vent.trigger('fetch:fail');
       }
     });
@@ -2155,7 +2209,7 @@ module.exports = Controller = (function(_super) {
 
   return Controller;
 
-})(Backbone.Marionette.Controller);
+})(Controller);
 });
 
 ;require.register("modules/common/router", function(exports, require, module) {
@@ -2180,13 +2234,15 @@ module.exports = Router = (function(_super) {
 
   Router.prototype.appRoutes = {
     '': 'showHome',
+    'home': 'showHome',
     'about': 'showAbout',
     'debug': 'showDebug',
-    'signin': 'showSignin'
+    'signin': 'showSignin',
+    'signout': 'doSignout'
   };
 
   Router.prototype.initialize = function(options) {
-    log('about router init');
+    log('common router init');
     return application.addInitializer((function(_this) {
       return function(options) {
         vent.on('sync:fail:unauthorized', function() {
@@ -2199,25 +2255,30 @@ module.exports = Router = (function(_super) {
           return console.warn('sync:unknown error');
         });
         vent.on('home:index', function() {
-          application.navigate('home');
-          return _this.controller.showHome();
+          console.log('HOME!');
+          return application.navigate('home');
         });
         vent.on('signin:index', function() {
-          console.log(application.getCurrentRoute());
-          if (!application.getCurrentRoute().startsWith('signin')) {
-            application.navigate('signin', {
-              returnroute: application.getCurrentRoute()
+          console.log('current route:', application.currentRoute());
+          if (!application.currentRoute().startsWith('signin')) {
+            return application.navigate('signin', {
+              returnroute: application.currentRoute()
             });
-            return _this.controller.showSignin();
+          } else {
+            return application.navigate('signin', {
+              returnroute: 'home'
+            });
           }
         });
+        vent.on('signout:index', function() {
+          return application.navigate('signout');
+        });
         vent.on('about:index', function() {
-          application.navigate('about');
-          return _this.controller.showAbout();
+          console.log('ABOUT!');
+          return application.navigate('about');
         });
         return vent.on('debug:index', function() {
-          application.navigate('debug');
-          return _this.controller.showDebug();
+          return application.navigate('debug');
         });
       };
     })(this));
@@ -2255,7 +2316,8 @@ module.exports = AboutView = (function(_super) {
   AboutView.prototype.template = require('./templates/about');
 
   AboutView.prototype.events = {
-    'click .js-reset': 'onReset'
+    'click .js-reset': 'onReset',
+    'click .js-signout': 'onSignout'
   };
 
   AboutView.prototype.initialize = function(options) {
@@ -2277,12 +2339,16 @@ module.exports = AboutView = (function(_super) {
     return scrollTo(0, 0);
   };
 
+  AboutView.prototype.onSignout = function() {
+    return vent.trigger('signout:index');
+  };
+
   AboutView.prototype.onReset = function(e) {
     e.preventDefault();
     user.reset();
     settings.destroy();
     vent.trigger('home:index');
-    return vent.trigger('resources:loaded');
+    return vent.trigger('header:refresh');
   };
 
   AboutView.prototype.onClose = function() {
@@ -2472,6 +2538,7 @@ module.exports = SigninView = (function(_super) {
     var data;
     e.preventDefault();
     data = Backbone.Syphon.serialize(this);
+    data.returnroute = this.options.returnroute;
     return vent.trigger('view:signin:do', data);
   };
 
@@ -2495,7 +2562,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, helper, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <h3>App</h3>\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.App\" target=\"_blank\">\r\n          <i class=\"icon-circlegithub\"></i>\r\n          &emsp;Sources\r\n        </a>\r\n      </p>\r\n      <ul>\r\n        <li>Backbone 1.1.0</li>\r\n        <li>Underscore 1.5.2</li>\r\n        <li>Twitter Bootstrap 3.0.0</li>\r\n        <li>MarionetteJS 1.2.2</li>\r\n        <!--<li>MomentJS 2.2.1</li>-->\r\n        <li>jQuery 2.0.3</li>\r\n        <li>JQuery RateIt 1.0.19</li>\r\n        <li>Fastclick 0.6.10</li>\r\n        <li>Pace 0.4.15</li>\r\n      </ul>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      <h3>Api</h3>\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.Api\" target=\"_blank\">\r\n          <i class=\"icon-circlegithub\"></i>\r\n          &emsp;Sources\r\n        </a>\r\n      </p>\r\n      <ul>\r\n        <li>Microsoft .Net 4.5, C#</li>\r\n        <li>Microsoft ASP.NET Web API 2</li>\r\n        <li>Microsoft Entity Framework 6.0</li>\r\n        <li>Microsoft ASP.NET Identity 1.0</li>\r\n      </ul>\r\n    </div>\r\n  </div>\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <h3>Dev</h3>\r\n      <ul>\r\n        <li>\r\n          <a href=\"https://github.com/WindowsAzure\" target=\"_blank\">Windows Azure</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/joyent/node\" target=\"_blank\">Node.js</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/brunch/brunch\" target=\"_blank\">Brunch</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/jashkenas/coffee-script\" target=\"_blank\">Coffeescript</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/bower/bower\" target=\"_blank\">Bower</a>\r\n        </li>\r\n      </ul>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      &nbsp;\r\n    </div>\r\n  </div>\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <!--<img src=\"http://qrfree.kaywa.com/?l=1&s=8&d=https%3A%2F%2Feventfeedback.azurewebsites.net\" alt=\"QRCode\"/>-->\r\n      <p>\r\n        <a href=\"/\">\r\n          <img class=\"qr\" height=\"88\" width=\"88\"/>\r\n        </a>\r\n      </p>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success js-reset\" href=\"#\">\r\n          <i class=\"icon-bomb\"></i>\r\n          &emsp;Reset</a>\r\n      </p>\r\n      <p>\r\n        <span class=\"glyphicon glyphicon-user\">&emsp;user: ";
+  buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <h3>App</h3>\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.App\" target=\"_blank\">\r\n          <i class=\"icon-circlegithub\"></i>\r\n          &emsp;Sources\r\n        </a>\r\n      </p>\r\n      <ul>\r\n        <li>Backbone 1.1.0</li>\r\n        <li>Underscore 1.5.2</li>\r\n        <li>Twitter Bootstrap 3.0.0</li>\r\n        <li>MarionetteJS 1.2.2</li>\r\n        <!--<li>MomentJS 2.2.1</li>-->\r\n        <li>jQuery 2.0.3</li>\r\n        <li>JQuery RateIt 1.0.19</li>\r\n        <li>Fastclick 0.6.10</li>\r\n        <li>Pace 0.4.15</li>\r\n      </ul>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      <h3>Api</h3>\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.Api\" target=\"_blank\">\r\n          <i class=\"icon-circlegithub\"></i>\r\n          &emsp;Sources\r\n        </a>\r\n      </p>\r\n      <ul>\r\n        <li>Microsoft .Net 4.5, C#</li>\r\n        <li>Microsoft ASP.NET Web API 2</li>\r\n        <li>Microsoft Entity Framework 6.0</li>\r\n        <li>Microsoft ASP.NET Identity 1.0</li>\r\n      </ul>\r\n    </div>\r\n  </div>\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <h3>Dev</h3>\r\n      <ul>\r\n        <li>\r\n          <a href=\"https://github.com/WindowsAzure\" target=\"_blank\">Windows Azure</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/joyent/node\" target=\"_blank\">Node.js</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/brunch/brunch\" target=\"_blank\">Brunch</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/jashkenas/coffee-script\" target=\"_blank\">Coffeescript</a>\r\n        </li>\r\n        <li>\r\n          <a href=\"https://github.com/bower/bower\" target=\"_blank\">Bower</a>\r\n        </li>\r\n      </ul>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      &nbsp;\r\n    </div>\r\n  </div>\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <!--<img src=\"http://qrfree.kaywa.com/?l=1&s=8&d=https%3A%2F%2Feventfeedback.azurewebsites.net\" alt=\"QRCode\"/>-->\r\n      <p>\r\n        <a href=\"/\">\r\n          <img class=\"qr\" height=\"88\" width=\"88\"/>\r\n        </a>\r\n      </p>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success js-signout\" href=\"#\">\r\n          <i class=\"icon-user\"></i>\r\n          &emsp;Signout\r\n        </a>\r\n      </p>\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success js-reset\" href=\"#\">\r\n          <i class=\"icon-bomb\"></i>\r\n          &emsp;Reset</a>\r\n      </p>\r\n      <p>\r\n        <span class=\"glyphicon glyphicon-user\">&emsp;user: ";
   if (helper = helpers.user) { stack1 = helper.call(depth0, {hash:{},data:data}); }
   else { helper = (depth0 && depth0.user); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
@@ -2870,25 +2937,17 @@ module.exports = Router = (function(_super) {
     log('event router init');
     return application.addInitializer((function(_this) {
       return function(options) {
-        vent.on('navigation:signin', function() {
-          application.navigate('events');
-          return _this.controller.showEventsIndex();
-        });
         vent.on('events:index', function() {
-          application.navigate('events');
-          return _this.controller.showEventsIndex();
+          return application.navigate('events');
         });
         vent.on('event:details', function(id) {
-          application.navigate('events/' + id);
-          return _this.controller.showEventDetails(id);
+          return application.navigate('events/' + id);
         });
         vent.on('session:details', function(id) {
-          application.navigate('sessions/' + id);
-          return _this.controller.showSessionDetails(id);
+          return application.navigate('sessions/' + id);
         });
         return vent.on('event:report', function(id) {
-          application.navigate('eventreport/' + id);
-          return _this.controller.showEventReport(id);
+          return application.navigate('eventreport/' + id);
         });
       };
     })(this));
@@ -4871,7 +4930,7 @@ module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
 
   function Controller(options) {
-    log('about controller init');
+    log('header controller init');
     application.addInitializer((function(_this) {
       return function(options) {
         _this.headers = new Header.Collection();
@@ -4927,10 +4986,7 @@ module.exports = Router = (function(_super) {
         application.on('start', function() {
           return _this.controller.showHeader();
         });
-        vent.on('navigation:signin', function() {
-          return _this.controller.showHeader();
-        });
-        return vent.on('navigation:signout', function() {
+        return vent.on('header:refresh', function() {
           return _this.controller.showHeader();
         });
       };
@@ -5249,15 +5305,12 @@ var User, settings;
 settings = require('settings');
 
 User = (function() {
+  function User() {}
+
 
   /*
     encapsulates the current user
    */
-  function User() {
-
-    /* initializes this instance */
-    log('user init');
-  }
 
   User.prototype.set = function(key, value) {
     return settings.set(key, value);
@@ -5346,8 +5399,8 @@ Vent = (function(_super) {
   }
 
   Vent.setup = function() {
-    return this.on('all', function(name) {
-      return log('vent:trigger -->', name);
+    return this.on('all', function(name, options) {
+      return log('vent:trigger -->', name, options);
     });
   };
 

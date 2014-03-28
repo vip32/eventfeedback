@@ -17,12 +17,13 @@ class Application extends Backbone.Marionette.Application
       log 'application init after'
 
       for name, module of config.modules
-        log 'module', name
+        log '=== module', name
         router = new (require module)
         @routers[name] = router
+      log 'routers:', @routers
 
       Backbone.history.start()
-      log 'current route', @getCurrentRoute()
+      log 'current route:', @currentRoute()
       #@on 'start', =>
         # if @getCurrentRoute() is ''
         #vent.trigger(config.startuptrigger) 
@@ -46,13 +47,15 @@ class Application extends Backbone.Marionette.Application
     # TODO possible trigger config.signintrigger + add return url
 
   navigate: (route, options) ->
+    log "==========================| #{route} |========================"
     log 'navigate', route, options
     options = options or {}
+    options.trigger = true # this causes the router (approutes) to react on url changes
     if not _.isEmpty(options?.returnroute)
       route = "#{route}?returnroute=#{options.returnroute}"
     Backbone.history.navigate(route, options)
 
-  getCurrentRoute: ->
+  currentRoute: ->
     Backbone.history.fragment
 
   startModule: (name, options) ->

@@ -3,7 +3,7 @@ Controller = require './controller'
 vent = require 'vent'
 
 module.exports = class Router extends Backbone.Marionette.AppRouter
-
+  
   initialize: (options)  ->
     log 'header router init'
 
@@ -12,10 +12,7 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
       application.on 'start', =>
         @controller.showHeader()
 
-      vent.on 'navigation:signin', =>
-        @controller.showHeader()
-
-      vent.on 'navigation:signout', =>
+      vent.on 'header:refresh', =>
         @controller.showHeader()
 
   controller: new Controller()

@@ -8,6 +8,7 @@ module.exports = class AboutView extends Backbone.Marionette.ItemView
   template: require  './templates/about'
   events:
     'click .js-reset': 'onReset'
+    'click .js-signout': 'onSignout'
 
   initialize: (options) ->
     vent.trigger 'navigation:back:off'
@@ -22,12 +23,15 @@ module.exports = class AboutView extends Backbone.Marionette.ItemView
   onShow: ->
     scrollTo(0,0)
     
+  onSignout: ->
+    vent.trigger 'signout:index'
+    
   onReset: (e) ->
     e.preventDefault()
     user.reset()
     settings.destroy()
     vent.trigger 'home:index'
-    vent.trigger 'resources:loaded' # resets the header + nav
+    vent.trigger 'header:refresh' 
     
   onClose: ->
     log 'about view close'
