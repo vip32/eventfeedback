@@ -13,7 +13,7 @@ namespace EventFeedback.Domain.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201403312024540_Initial"; }
+            get { return "201403312026106_Initial"; }
         }
         
         string IMigrationMetadata.Source

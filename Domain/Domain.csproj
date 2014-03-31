@@ -106,9 +106,9 @@
     <Compile Include="Entities\FeedbackQuestionType.cs" />
     <Compile Include="Entities\FeedbackDefinition.cs" />
     <Compile Include="Entities\ResourceText.cs" />
-    <Compile Include="Migrations\201403312024540_Initial.cs" />
-    <Compile Include="Migrations\201403312024540_Initial.Designer.cs">
-      <DependentUpon>201403312024540_Initial.cs</DependentUpon>
+    <Compile Include="Migrations\201403312026106_Initial.cs" />
+    <Compile Include="Migrations\201403312026106_Initial.Designer.cs">
+      <DependentUpon>201403312026106_Initial.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Migrations\TestData.cs" />
@@ -135,8 +135,8 @@
     <Content Include="Migrations\reset-database.sql" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201403312024540_Initial.resx">
-      <DependentUpon>201403312024540_Initial.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201403312026106_Initial.resx">
+      <DependentUpon>201403312026106_Initial.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
