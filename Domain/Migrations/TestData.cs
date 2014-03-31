@@ -122,6 +122,8 @@ namespace EventFeedback.Domain
                     new ResourceText { Key = "Text_Save", Value = "Save", Language = "en-US" },
                     new ResourceText { Key = "Text_Remove", Value = "Remove", Language = "en-US" },
                     new ResourceText { Key = "Text_Report", Value = "Report", Language = "en-US" },
+                    new ResourceText { Key = "Text_Edit", Value = "Edit", Language = "en-US" },
+                    new ResourceText { Key = "Text_New", Value = "New", Language = "en-US" },
                     new ResourceText { Key = "Home_Text", Value = "Home_Text", Language = "en-US" },
 
                     new ResourceText { Key = "Feedback_Saved_Success", Value = "Feedback gespeichert", Language = "de-DE" },
@@ -137,6 +139,8 @@ namespace EventFeedback.Domain
                     new ResourceText { Key = "Text_Save", Value = "Speichern", Language = "de-DE" },
                     new ResourceText { Key = "Text_Remove", Value = "Löschen", Language = "de-DE" },
                     new ResourceText { Key = "Text_Report", Value = "Report", Language = "de-DE" },
+                    new ResourceText { Key = "Text_Edit", Value = "Editieren", Language = "de-DE" },
+                    new ResourceText { Key = "Text_New", Value = "Neu", Language = "de-DE" },
                     new ResourceText { Key = "Home_Text", Value = "Die Event|Feedback App ist der Platz für dein Feedback zu unseren Entwicklertagen. Hier kannst du die von dir besuchten Sessions einfach und zeitnah bewerten und so den Speakern wertvolles Feedback liefern. Ein kurzer Kommentar macht deine Bewertung für die Speaker einfacher nachvollziehbar und sehr viel hilfreicher.", Language = "de-DE" }
                     );
             }
@@ -214,7 +218,7 @@ namespace EventFeedback.Domain
             {
                 new Event
                 {
-                    Active = false,
+                    Active = true,
                     Title = "2013 ET 1",
                     FeedbackDefinitionId = feedbackDefinitions.First().Id,
                     StartDate = new DateTime(2013, 2, 18),
@@ -282,7 +286,7 @@ namespace EventFeedback.Domain
                 },
                 new Event
                 {
-                    Active = false,
+                    Active = true,
                     Title = "2013 ET 2 (Pauses)",
                     FeedbackDefinitionId = feedbackDefinitions.First().Id,
                     StartDate = new DateTime(2013, 5, 10),
@@ -346,7 +350,7 @@ namespace EventFeedback.Domain
                 },
                 new Event
                 {
-                    Active = false,
+                    Active = true,
                     Title = "2013 ET 3",
                     FeedbackDefinitionId = feedbackDefinitions.First().Id,
                     StartDate = new DateTime(2013, 7, 1),
@@ -392,7 +396,7 @@ namespace EventFeedback.Domain
                 },
                 new Event
                 {
-                    Active = false,
+                    Active = true,
                     Title = "2013 ET 4",
                     FeedbackDefinitionId = feedbackDefinitions.First().Id,
                     StartDate = new DateTime(2013, 10, 09),

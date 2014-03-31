@@ -26,12 +26,17 @@
     </div>
   </div>
 
+  {{#if isAdmin}}
   <div class="row pull-right">
     <div class="col-xs-12">
       <br/>
+      <a class="btn btn-success btn-responsive js-edit" href="#">
+        <span class="glyphicon glyphicon-edit"></span>&emsp;{{resources.Text_Edit}}
+      </a>
       <a class="btn btn-success btn-responsive js-report" href="#">
         <span class="glyphicon glyphicon-list"></span>&emsp;{{resources.Text_Report}}
       </a>
     </div>
   </div>
+  {{/if}}
 </div>

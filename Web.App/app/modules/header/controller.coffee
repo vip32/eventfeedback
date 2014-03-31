@@ -1,10 +1,11 @@
 application = require 'application'
+Controller = require '../../lib/base/controller'
 Header = require '../../models/header'
 vent = require 'vent'
 settings = require 'settings'
 user = require 'user'
 
-module.exports = class Controller extends Backbone.Marionette.Controller
+module.exports = class Controller extends Controller
 
   constructor: (options) ->
     log 'header controller init'

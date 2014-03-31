@@ -31,18 +31,19 @@ namespace EventFeedback.Web.Api.Controllers
         {
             using (new TraceLogicalScope(_traceSource, "EventsController:Get"))
             {
-                _traceSource.Info("filter={0}", filter);
+                _traceSource.Info("filter={0}", filter.NullToEmpty());
                 IEnumerable<Event> result;
-                if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
-                    result = _context.Events.OrderBy(e => e.StartDate);
+                if (filter.NullToEmpty().Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
+                    result = _context.Events
+                        .OrderBy(e => e.StartDate);
                 else
                     result = _context.Events
                         .OrderBy(e => e.StartDate)
-                        .ToList().Where(e => e.IsActive()); //.Include("Sessions")
+                        .ToList().Where(e => e.IsActive()); 
                         //.Where(d => !(d.Active != null && !(bool) d.Active))
                         //.Where(d => !(d.Deleted != null && (bool) d.Deleted));
 
-                if (filter.Equals("current", StringComparison.CurrentCultureIgnoreCase))
+                if (filter.NullToEmpty().Equals("current", StringComparison.CurrentCultureIgnoreCase))
                     result = result.ToList().Where(e => e.IsCurrent());
                 return Ok(result);
             }
@@ -55,17 +56,18 @@ namespace EventFeedback.Web.Api.Controllers
         {
             using (new TraceLogicalScope(_traceSource, "EventsController:Get"))
             {
-                _traceSource.Info("filter={0}", filter);
+                _traceSource.Info("filter={0}", filter.NullToEmpty());
                 Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");
 
                 Event result;
-                if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
+                if (filter.NullToEmpty().Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
                     result = _context.Events.FirstOrDefault(x => x.Id == id); //.Include("Sessions")
                 else
                     result = _context.Events
-                        .Where(d => !(d.Active != null && !(bool) d.Active))
-                        .Where(d => !(d.Deleted != null && (bool) d.Deleted))
-                        .FirstOrDefault(x => x.Id == id); //.Include("Sessions")
+                        .ToList().Where(e => e.IsActive())
+                        //.Where(d => !(d.Active != null && !(bool) d.Active))
+                        //.Where(d => !(d.Deleted != null && (bool) d.Deleted))
+                        .FirstOrDefault(x => x.Id == id); 
                 if (result == null) return StatusCode(HttpStatusCode.NotFound);
                 return Ok(result);
             }

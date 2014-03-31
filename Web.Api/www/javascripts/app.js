@@ -347,6 +347,10 @@ if (typeof define === 'function' && define.amd) {
 }
 });
 
+;require.register("lib/backbone-form-editors", function(exports, require, module) {
+
+});
+
 ;require.register("lib/base/collection", function(exports, require, module) {
 var Collection, config, vent,
   __hasProp = {}.hasOwnProperty,
@@ -645,6 +649,38 @@ module.exports.Model = Event = (function(_super) {
   function Event() {
     return Event.__super__.constructor.apply(this, arguments);
   }
+
+  Event.prototype.schema = {
+    active: 'Checkbox',
+    title: {
+      type: 'Text',
+      validators: ['required']
+    },
+    description: {
+      type: 'Text',
+      validators: ['required']
+    },
+    feedbackAllowed: {
+      title: 'Feedback allowed',
+      type: 'Checkbox'
+    },
+    link: 'Text',
+    location: 'Text',
+    taglist: 'Text',
+    feedbackDefinitionId: {
+      title: 'Feedback type',
+      type: 'Select',
+      options: []
+    },
+    startDate: {
+      type: 'Text',
+      dataType: 'datetime-local'
+    },
+    endDate: {
+      type: 'Text',
+      dataType: 'datetime-local'
+    }
+  };
 
   return Event;
 
@@ -996,7 +1032,7 @@ module.exports.TestData = TestData = (function() {
       order: 5
     }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b890",
-      title: "-",
+      title: "",
       authenticated: true,
       roles: ['Administrator'],
       resource: '',
@@ -1004,26 +1040,6 @@ module.exports.TestData = TestData = (function() {
       trigger: "-",
       intern: true,
       order: 10
-    }, {
-      id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f6",
-      title: "Admin - Events",
-      authenticated: true,
-      roles: ['Administrator'],
-      resource: '',
-      glyphicon: 'glyphicon-bookmark',
-      trigger: "admin:events:edit",
-      intern: true,
-      order: 11
-    }, {
-      id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f7",
-      title: "Admin - Settings",
-      authenticated: true,
-      roles: ['Administrator'],
-      resource: '',
-      glyphicon: 'glyphicon-cog',
-      trigger: "admin:settings:index",
-      intern: true,
-      order: 12
     }, {
       id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f9",
       title: "Admin - Users",
@@ -1433,6 +1449,8 @@ var Controller, Event, Role, Session, User, application, settings, vent,
 
 application = require('application');
 
+Controller = require('../../lib/base/controller');
+
 vent = require('vent');
 
 settings = require('settings');
@@ -1560,7 +1578,7 @@ module.exports = Controller = (function(_super) {
 
   return Controller;
 
-})(Backbone.Marionette.Controller);
+})(Controller);
 });
 
 ;require.register("modules/admin/router", function(exports, require, module) {
@@ -1614,176 +1632,6 @@ module.exports = Router = (function(_super) {
   return Router;
 
 })(Backbone.Marionette.AppRouter);
-});
-
-;require.register("modules/admin/views/events-edit-view", function(exports, require, module) {
-var EventsEditView, application, vent,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-application = require('application');
-
-vent = require('vent');
-
-module.exports = EventsEditView = (function(_super) {
-  __extends(EventsEditView, _super);
-
-  function EventsEditView() {
-    return EventsEditView.__super__.constructor.apply(this, arguments);
-  }
-
-  EventsEditView.prototype.id = 'events-edit-view';
-
-  EventsEditView.prototype.template = require('./templates/events-edit');
-
-  EventsEditView.prototype.initialize = function(options) {
-    return this.resources = options != null ? options.resources : void 0;
-  };
-
-  EventsEditView.prototype.onShow = function() {
-    var columns, grid;
-    scrollTo(0, 0);
-    columns = [
-      {
-        name: "id",
-        label: "ID",
-        editable: false,
-        cell: 'string'
-      }, {
-        name: "title",
-        label: "Title",
-        cell: "string"
-      }, {
-        name: "description",
-        label: "Description",
-        cell: "string"
-      }
-    ];
-    grid = new Backgrid.Grid({
-      columns: columns,
-      collection: this.collection
-    });
-    return $("#js-table").append(grid.render().$el);
-  };
-
-  return EventsEditView;
-
-})(Backbone.Marionette.ItemView);
-});
-
-;require.register("modules/admin/views/sessions-edit-view", function(exports, require, module) {
-var SessionsEditView, application, vent,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-application = require('application');
-
-vent = require('vent');
-
-module.exports = SessionsEditView = (function(_super) {
-  __extends(SessionsEditView, _super);
-
-  function SessionsEditView() {
-    return SessionsEditView.__super__.constructor.apply(this, arguments);
-  }
-
-  SessionsEditView.prototype.id = 'sessions-edit-view';
-
-  SessionsEditView.prototype.template = require('./templates/sessions-edit');
-
-  SessionsEditView.prototype.initialize = function(options) {
-    return this.resources = options != null ? options.resources : void 0;
-  };
-
-  SessionsEditView.prototype.onShow = function() {
-    var columns, grid;
-    scrollTo(0, 0);
-    columns = [
-      {
-        name: "id",
-        label: "ID",
-        editable: false,
-        cell: 'string'
-      }, {
-        name: "title",
-        label: "Title",
-        cell: "string"
-      }, {
-        name: "description",
-        label: "Description",
-        cell: "string"
-      }
-    ];
-    grid = new Backgrid.Grid({
-      columns: columns,
-      collection: this.collection
-    });
-    return $("#js-table").append(grid.render().$el);
-  };
-
-  return SessionsEditView;
-
-})(Backbone.Marionette.ItemView);
-});
-
-;require.register("modules/admin/views/templates/events-edit", function(exports, require, module) {
-var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [4,'>= 1.0.0'];
-helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  
-
-
-  return "<div class=\"container\" id=\"js-table\">\r\n  EVENTS EDIT\r\n</div>";
-  });
-if (typeof define === 'function' && define.amd) {
-  define([], function() {
-    return __templateData;
-  });
-} else if (typeof module === 'object' && module && module.exports) {
-  module.exports = __templateData;
-} else {
-  __templateData;
-}
-});
-
-;require.register("modules/admin/views/templates/sessions-edit", function(exports, require, module) {
-var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [4,'>= 1.0.0'];
-helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  
-
-
-  return "<div class=\"container\" id=\"js-table\">\r\n  SESSIONS EDIT\r\n</div>";
-  });
-if (typeof define === 'function' && define.amd) {
-  define([], function() {
-    return __templateData;
-  });
-} else if (typeof module === 'object' && module && module.exports) {
-  module.exports = __templateData;
-} else {
-  __templateData;
-}
-});
-
-;require.register("modules/admin/views/templates/users-edit", function(exports, require, module) {
-var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [4,'>= 1.0.0'];
-helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  
-
-
-  return "<p>\r\n  <button type=\"button\" id=\"js-add\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-plus\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-refresh\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-refresh\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-generate\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-user\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-save\" class=\"btn btn-success btn-lg\">\r\n    <span class=\"glyphicon glyphicon-save\"></span>\r\n  </button>\r\n</p>\r\n\r\n<p>\r\n  <div class=\"container\" id=\"js-table\">\r\n    <!-- table here -->\r\n  </div>\r\n</p>\r\n\r\n<p>\r\n  <button type=\"button\" id=\"js-add\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-plus\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-refresh\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-refresh\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-generate\" class=\"btn btn-default btn-lg\">\r\n    <span class=\"glyphicon glyphicon-user\"></span>\r\n  </button>\r\n  <button type=\"button\" id=\"js-save\" class=\"btn btn-success btn-lg\">\r\n    <span class=\"glyphicon glyphicon-save\"></span>\r\n  </button>\r\n</p>";
-  });
-if (typeof define === 'function' && define.amd) {
-  define([], function() {
-    return __templateData;
-  });
-} else if (typeof module === 'object' && module && module.exports) {
-  module.exports = __templateData;
-} else {
-  __templateData;
-}
 });
 
 ;require.register("modules/admin/views/templates/users-generator-item", function(exports, require, module) {
@@ -1859,10 +1707,6 @@ if (typeof define === 'function' && define.amd) {
 } else {
   __templateData;
 }
-});
-
-;require.register("modules/admin/views/users-edit-view", function(exports, require, module) {
-
 });
 
 ;require.register("modules/admin/views/users-generator-item-view", function(exports, require, module) {
@@ -2361,7 +2205,7 @@ module.exports = AboutView = (function(_super) {
 });
 
 ;require.register("modules/common/views/debug-view", function(exports, require, module) {
-var DebugView, application, settings, user, vent,
+var DebugView, Event, application, settings, user, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2372,6 +2216,8 @@ vent = require('vent');
 settings = require('settings');
 
 user = require('user');
+
+Event = require('../../../models/event');
 
 module.exports = DebugView = (function(_super) {
   __extends(DebugView, _super);
@@ -2385,7 +2231,9 @@ module.exports = DebugView = (function(_super) {
   DebugView.prototype.template = require('./templates/debug');
 
   DebugView.prototype.events = {
-    'click .js-triggerevent': 'onTriggerEvent'
+    'click .js-triggerevent': 'onTriggerEvent',
+    'click .js-submit': 'onSubmit',
+    'click .js-remove': 'onRemove'
   };
 
   DebugView.prototype.initialize = function(options) {
@@ -2412,7 +2260,27 @@ module.exports = DebugView = (function(_super) {
 
   DebugView.prototype.onShow = function() {
     scrollTo(0, 0);
-    return log('resources', this.resources);
+    log('resources', this.resources);
+    this.model = new Event.Model({
+      title: 'new title'
+    });
+    this.form = new Backbone.Form({
+      model: this.model
+    }).render();
+    return this.$('#form').append(this.form.el);
+  };
+
+  DebugView.prototype.onSubmit = function() {
+    log('submit', this.form);
+    this.form.commit({
+      validate: true
+    });
+    this.model.set('key', _.str.slugify(this.model.get('title')));
+    return log('model:', this.model);
+  };
+
+  DebugView.prototype.onRemove = function() {
+    return log('remove');
   };
 
   DebugView.prototype.onClose = function() {
@@ -2599,17 +2467,21 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, helper, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div class=\"container\">\r\n  <h3>Debug</h3>\r\n  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n  cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n  proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n  <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n  <form>\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter1\" id=\"some_id1\" class=\"rating\" value=\"2\" />\r\n    <textarea></textarea>\r\n\r\n    <input type=\"number\" data-max=\"5\" data-min=\"1\"\r\n           name=\"your_awesome_parameter2\" id=\"some_id2\" class=\"rating\" value=\"1\" />\r\n    <textarea></textarea>\r\n    <br/>\r\n    <input type=\"text\" name=\"event\" placeholder=\"event\"/>\r\n    <button class=\"js-triggerevent\">trigger</button>\r\n    <br/>user: ";
+  buffer += "<div class=\"container\">\r\n  <h3>Debug</h3>\r\n  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\r\n  cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\r\n  proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>\r\n  <p>To see the difference between static and fixed top navbars, just scroll.</p>\r\n    \r\n  <button class=\"js-triggerevent\">trigger</button>\r\n  <br/>user: ";
   if (helper = helpers.user) { stack1 = helper.call(depth0, {hash:{},data:data}); }
   else { helper = (depth0 && depth0.user); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
-    + " \r\n    <br/>roles: ";
+    + " \r\n  <br/>roles: ";
   if (helper = helpers.roles) { stack1 = helper.call(depth0, {hash:{},data:data}); }
   else { helper = (depth0 && depth0.roles); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
-    + "\r\n    <br/>resources: "
+    + "\r\n  <br/>resources: "
     + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.TestKey1)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n  </form>\r\n</div>";
+    + "\r\n  <hr/>\r\n  <input type=\"datetime-local\"></input>\r\n  <div id=\"form\" class=\"well\"></div>\r\n\r\n  <div class=\"row pull-right\">\r\n    <div class=\"col-xs-12\">\r\n      <br/>\r\n      <button class=\"btn btn-danger btn-responsive js-remove\">\r\n        <span class=\"glyphicon glyphicon-remove\"></span>&emsp;"
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_Remove)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n      </button>\r\n      <button class=\"btn btn-success btn-responsive js-submit\">\r\n        <span class=\"glyphicon glyphicon-save\"></span>&emsp;"
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_Save)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n      </button>\r\n    </div>\r\n  </div>\r\n</div>";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
@@ -2713,7 +2585,7 @@ if (typeof define === 'function' && define.amd) {
 });
 
 ;require.register("modules/event/controller", function(exports, require, module) {
-var Controller, Event, EventReport, EventTag, Feedback, Session, application, config, settings, vent,
+var Controller, Event, EventReport, EventTag, Feedback, Session, application, config, settings, user, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2735,8 +2607,12 @@ EventReport = require('../../models/eventreport');
 
 EventTag = require('../../models/eventtag');
 
+user = require('user');
+
 module.exports = Controller = (function(_super) {
   __extends(Controller, _super);
+
+  Controller.prototype.resourceFilter = user.isAdministrator() ? 'all' : '';
 
   function Controller(options) {
     log('event controller init');
@@ -2757,7 +2633,10 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.showEventsIndex = function() {
     vent.trigger('fetch:done');
     return this.events.fetch({
-      reload: true
+      reload: true,
+      data: {
+        filter: this.resourceFilter
+      }
     }).done((function(_this) {
       return function(models) {
         return _this.feedbacks.fetch().done(function(feedbacks) {
@@ -2777,7 +2656,7 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.showEventDetails = function(id) {
     return this.events.fetch({
       data: {
-        filter: 'all'
+        filter: this.resourceFilter
       }
     }).done((function(_this) {
       return function(models) {
@@ -2818,12 +2697,43 @@ module.exports = Controller = (function(_super) {
     })(this));
   };
 
+  Controller.prototype.showEventsNew = function() {
+    return this.showEventEdit();
+  };
+
+  Controller.prototype.showEventEdit = function(id) {
+    return this.events.fetch({
+      data: {
+        filter: this.resourceFilter
+      }
+    }).done((function(_this) {
+      return function(models) {
+        var View, event, view;
+        event = models.get(id);
+        if (event == null) {
+          event = new Event.Model({
+            active: true
+          });
+          _this.events.add(event);
+        }
+        vent.trigger('set:active:header', 'events:index', 'edit', 'glyphicon-bookmark');
+        View = require('./views/event-edit-view');
+        view = new View({
+          model: event,
+          collection: _this.events,
+          resources: application.resources
+        });
+        return application.layout.content.show(view);
+      };
+    })(this));
+  };
+
   Controller.prototype.showEventReport = function(id) {
     settings.set('active-event', id);
     return this.eventreports.fetch({
       reload: true,
       data: {
-        filter: 'all'
+        filter: this.resourceFilter
       }
     }).done((function(_this) {
       return function(models) {
@@ -2929,6 +2839,8 @@ module.exports = Router = (function(_super) {
   Router.prototype.appRoutes = {
     'events': 'showEventsIndex',
     'events/:id': 'showEventDetails',
+    'events/edit/:id': 'showEventEdit',
+    'events/edit/new': 'showEventsNew',
     'sessions/:id': 'showSessionDetails',
     'eventreport/:id': 'showEventReport'
   };
@@ -2942,6 +2854,12 @@ module.exports = Router = (function(_super) {
         });
         vent.on('event:details', function(id) {
           return application.navigate('events/' + id);
+        });
+        vent.on('event:edit', function(id) {
+          return application.navigate('events/edit/' + id);
+        });
+        vent.on('events:new', function() {
+          return application.navigate('events/edit/new');
         });
         vent.on('session:details', function(id) {
           return application.navigate('sessions/' + id);
@@ -2991,6 +2909,7 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.itemViewContainer = '.js-sessions';
 
   EventDetailsView.prototype.events = {
+    'click .js-edit': 'onEdit',
     'click .js-report': 'onReport',
     'change .js-tag': 'onTag'
   };
@@ -3008,7 +2927,8 @@ module.exports = EventDetailsView = (function(_super) {
     return {
       resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0,
       tags: (_ref1 = this.tags) != null ? _ref1.toJSON() : void 0,
-      model: this.model.toJSON()
+      model: this.model.toJSON(),
+      isAdmin: user.isAdministrator()
     };
   };
 
@@ -3019,15 +2939,11 @@ module.exports = EventDetailsView = (function(_super) {
   };
 
   EventDetailsView.prototype.onShow = function() {
-    var roles, tag;
+    var tag;
     scrollTo(0, 0);
     tag = settings.get('active-eventtag');
     this.$("input:radio[name='tags'][value='" + tag + "']").attr('checked', 'checked').parent().addClass('active');
-    this.filterByTag(tag);
-    roles = user.roles();
-    if (!_.contains(roles, 'Administrator')) {
-      return $('.js-report').hide();
-    }
+    return this.filterByTag(tag);
   };
 
   EventDetailsView.prototype.onTag = function(e) {
@@ -3038,10 +2954,10 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.filterByTag = function(tag) {
     if (tag != null) {
       settings.set('active-eventtag', tag);
-      if (tag !== "") {
-        return this.collection.reset(this.orgcoll.filterForTag(tag));
-      } else {
+      if (_.isEmpty(tag)) {
         return this.collection.reset(this.orgcoll.models);
+      } else {
+        return this.collection.reset(this.orgcoll.filterForTag(tag));
       }
     }
   };
@@ -3049,6 +2965,11 @@ module.exports = EventDetailsView = (function(_super) {
   EventDetailsView.prototype.onBack = function() {
     log('back from event-details');
     return vent.trigger('events:index');
+  };
+
+  EventDetailsView.prototype.onEdit = function(e) {
+    e.preventDefault();
+    return vent.trigger('event:edit', settings.get('active-event'));
   };
 
   EventDetailsView.prototype.onReport = function(e) {
@@ -3064,6 +2985,93 @@ module.exports = EventDetailsView = (function(_super) {
   return EventDetailsView;
 
 })(Backbone.Marionette.CompositeView);
+});
+
+;require.register("modules/event/views/event-edit-view", function(exports, require, module) {
+var EventEditView, application, settings, vent,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+application = require('application');
+
+vent = require('vent');
+
+settings = require('settings');
+
+module.exports = EventEditView = (function(_super) {
+  __extends(EventEditView, _super);
+
+  function EventEditView() {
+    this.onBack = __bind(this.onBack, this);
+    return EventEditView.__super__.constructor.apply(this, arguments);
+  }
+
+  EventEditView.prototype.id = 'event-report-view';
+
+  EventEditView.prototype.template = require('./templates/event-edit');
+
+  EventEditView.prototype.events = {
+    'click .js-submit': 'onSubmit',
+    'click .js-remove': 'onRemove'
+  };
+
+  EventEditView.prototype.initialize = function(options) {
+    this.resources = options != null ? options.resources : void 0;
+    vent.trigger('navigation:back:on');
+    return vent.on('navigation:back', this.onBack);
+  };
+
+  EventEditView.prototype.serializeData = function() {
+    var _ref;
+    return {
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0
+    };
+  };
+
+  EventEditView.prototype.onShow = function() {
+    scrollTo(0, 0);
+    this.form = new Backbone.Form({
+      model: this.model
+    });
+    this.form.schema.feedbackDefinitionId.options = ['def1', 'def2'];
+    this.form.initialize();
+    return this.$('#form').append(this.form.render().el);
+  };
+
+  EventEditView.prototype.onSubmit = function(e) {
+    var errors;
+    e.preventDefault();
+    errors = this.form.commit({
+      validate: true
+    });
+    if (_.isEmpty(errors)) {
+      this.model.set('key', _.str.slugify(this.model.get('title')));
+      this.model.credentials = this.collection.credentials;
+      this.model.save({
+        wait: true
+      });
+      return this.onBack();
+    }
+  };
+
+  EventEditView.prototype.onRemove = function(e) {
+    return e.preventDefault();
+  };
+
+  EventEditView.prototype.onBack = function() {
+    log('back from event-edit');
+    return vent.trigger('events:index');
+  };
+
+  EventEditView.prototype.onClose = function() {
+    vent.off('navigation:back', this.onBack);
+    return log('event-edit view close');
+  };
+
+  return EventEditView;
+
+})(Backbone.Marionette.ItemView);
 });
 
 ;require.register("modules/event/views/event-item-view", function(exports, require, module) {
@@ -3178,7 +3186,7 @@ module.exports = EventReportView = (function(_super) {
 });
 
 ;require.register("modules/event/views/events-index-view", function(exports, require, module) {
-var Event, EventIndexView, application, vent,
+var Event, EventIndexView, application, user, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -3187,6 +3195,8 @@ application = require('application');
 vent = require('vent');
 
 Event = require('../../../models/event');
+
+user = require('user');
 
 module.exports = EventIndexView = (function(_super) {
   __extends(EventIndexView, _super);
@@ -3203,8 +3213,26 @@ module.exports = EventIndexView = (function(_super) {
 
   EventIndexView.prototype.itemViewContainer = '.js-events';
 
+  EventIndexView.prototype.events = {
+    'click .js-new': 'onNew'
+  };
+
   EventIndexView.prototype.initialize = function(options) {
+    this.resources = options != null ? options.resources : void 0;
     return vent.trigger('navigation:back:off');
+  };
+
+  EventIndexView.prototype.serializeData = function() {
+    var _ref;
+    return {
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0,
+      isAdmin: user.isAdministrator()
+    };
+  };
+
+  EventIndexView.prototype.onNew = function(e) {
+    e.preventDefault();
+    return vent.trigger('events:new');
   };
 
   EventIndexView.prototype.onClose = function() {
@@ -3405,14 +3433,51 @@ function program2(depth0,data) {
   return buffer;
   }
 
+function program4(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\r\n  <div class=\"row pull-right\">\r\n    <div class=\"col-xs-12\">\r\n      <br/>\r\n      <a class=\"btn btn-success btn-responsive js-edit\" href=\"#\">\r\n        <span class=\"glyphicon glyphicon-edit\"></span>&emsp;"
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_Edit)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n      </a>\r\n      <a class=\"btn btn-success btn-responsive js-report\" href=\"#\">\r\n        <span class=\"glyphicon glyphicon-list\"></span>&emsp;"
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_Report)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n      </a>\r\n    </div>\r\n  </div>\r\n  ";
+  return buffer;
+  }
+
   buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-12\">\r\n      <div class=\"btn-group pull-right\" data-toggle=\"buttons\">\r\n        <label class=\"btn btn-primary badge\">\r\n          <input type=\"radio\" class=\"js-tag\" name=\"tags\" value=\"\">&nbsp;&nbsp;\r\n          </input>\r\n        </label>\r\n        ";
   stack1 = helpers.each.call(depth0, (depth0 && depth0.tags), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n      </div>\r\n    </div>\r\n  </div>\r\n  <div class=\"list-group js-sessions\">\r\n    <!-- sessions -->\r\n  </div>\r\n\r\n  <div class=\"row pull-right\">\r\n    <div class=\"col-xs-12\">\r\n      <p>"
     + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.description)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "</p>\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"row pull-right\">\r\n    <div class=\"col-xs-12\">\r\n      <br/>\r\n      <a class=\"btn btn-success btn-responsive js-report\" href=\"#\">\r\n        <span class=\"glyphicon glyphicon-list\"></span>&emsp;"
-    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_Report)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n      </a>\r\n    </div>\r\n  </div>\r\n</div>";
+    + "</p>\r\n    </div>\r\n  </div>\r\n\r\n  ";
+  stack1 = helpers['if'].call(depth0, (depth0 && depth0.isAdmin), {hash:{},inverse:self.noop,fn:self.program(4, program4, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\r\n</div>";
+  return buffer;
+  });
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return __templateData;
+  });
+} else if (typeof module === 'object' && module && module.exports) {
+  module.exports = __templateData;
+} else {
+  __templateData;
+}
+});
+
+;require.register("modules/event/views/templates/event-edit", function(exports, require, module) {
+var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-xs-12\">\r\n      <div id=\"form\" class=\"well\"></div>\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"row pull-right\">\r\n    <div class=\"col-xs-12\">\r\n      <br/>\r\n      <button class=\"btn btn-danger btn-responsive js-remove\">\r\n        <span class=\"glyphicon glyphicon-remove\"></span>&emsp;"
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_Remove)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n      </button>\r\n      <button class=\"btn btn-success btn-responsive js-submit\">\r\n        <span class=\"glyphicon glyphicon-save\"></span>&emsp;"
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_Save)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n      </button>\r\n    </div>\r\n  </div>\r\n</div>";
   return buffer;
   });
 if (typeof define === 'function' && define.amd) {
@@ -3844,10 +3909,22 @@ if (typeof define === 'function' && define.amd) {
 var __templateData = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
+
+function program1(depth0,data) {
   
+  var buffer = "", stack1;
+  buffer += "\r\n  <div class=\"row pull-right\">\r\n    <div class=\"col-xs-12\">\r\n      <br/>\r\n      <button class=\"btn btn-success btn-responsive js-new\">\r\n        <span class=\"glyphicon glyphicon-plus\"></span>&emsp;"
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_New)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\r\n      </button>\r\n    </div>\r\n  </div>\r\n  ";
+  return buffer;
+  }
 
-
-  return "<div class=\"container\">\r\n  <div class=\"list-group js-events\" style=\"margin-top:39px;\">\r\n    <!-- events -->\r\n  </div>\r\n</div>";
+  buffer += "<div class=\"container\">\r\n  <div class=\"list-group js-events\" style=\"margin-top:39px;\">\r\n    <!-- events -->\r\n  </div>\r\n\r\n  ";
+  stack1 = helpers['if'].call(depth0, (depth0 && depth0.isAdmin), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\r\n</div>";
+  return buffer;
   });
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -4918,6 +4995,8 @@ var Controller, Header, application, settings, user, vent,
 
 application = require('application');
 
+Controller = require('../../lib/base/controller');
+
 Header = require('../../models/header');
 
 vent = require('vent');
@@ -4958,7 +5037,7 @@ module.exports = Controller = (function(_super) {
 
   return Controller;
 
-})(Backbone.Marionette.Controller);
+})(Controller);
 });
 
 ;require.register("modules/header/router", function(exports, require, module) {
@@ -5325,7 +5404,7 @@ User = (function() {
   };
 
   User.prototype.isAdministrator = function() {
-    return _.intersection(['Administrator'], this.roles).length > 0;
+    return _.intersection(['Administrator'], this.roles()).length > 0;
   };
 
   User.prototype.reset = function() {

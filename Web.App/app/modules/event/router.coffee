@@ -8,6 +8,8 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
   appRoutes:
     'events': 'showEventsIndex'
     'events/:id': 'showEventDetails'
+    'events/edit/:id': 'showEventEdit'
+    'events/edit/new': 'showEventsNew'
     'sessions/:id': 'showSessionDetails'
     'eventreport/:id': 'showEventReport'
 
@@ -26,6 +28,20 @@ module.exports = class Router extends Backbone.Marionette.AppRouter
         #   vent.trigger 'events:index'
         # else
         application.navigate 'events/' + id
+#        @controller.showEventDetails(id)
+
+      vent.on 'event:edit', (id) =>
+        # if @noActiveEvent()
+        #   vent.trigger 'events:index'
+        # else
+        application.navigate 'events/edit/' + id
+#        @controller.showEventDetails(id)
+
+      vent.on 'events:new', =>
+        # if @noActiveEvent()
+        #   vent.trigger 'events:index'
+        # else
+        application.navigate 'events/edit/new'
 #        @controller.showEventDetails(id)
 
       vent.on 'session:details', (id) =>

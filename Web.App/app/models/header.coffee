@@ -93,7 +93,7 @@ module.exports.TestData = class TestData
     order: 5
   ,
     id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b890"
-    title: "-"
+    title: ""
     authenticated: true
     roles: ['Administrator']
     resource: ''
@@ -101,26 +101,26 @@ module.exports.TestData = class TestData
     trigger: "-"
     intern: true
     order: 10
-  ,
-    id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f6"
-    title: "Admin - Events"
-    authenticated: true
-    roles: ['Administrator']
-    resource: ''
-    glyphicon: 'glyphicon-bookmark'
-    trigger: "admin:events:edit"
-    intern: true
-    order: 11
-  ,
-    id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f7"
-    title: "Admin - Settings"
-    authenticated: true
-    roles: ['Administrator']
-    resource: ''
-    glyphicon: 'glyphicon-cog'
-    trigger: "admin:settings:index"
-    intern: true
-    order: 12
+#  ,
+#    id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f6"
+#    title: "Admin - Events"
+#    authenticated: true
+#    roles: ['Administrator']
+#    resource: ''
+#    glyphicon: 'glyphicon-bookmark'
+#    trigger: "admin:events:edit"
+#    intern: true
+#    order: 11
+#  ,
+#    id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f7"
+#    title: "Admin - Settings"
+#    authenticated: true
+#    roles: ['Administrator']
+#    resource: ''
+#    glyphicon: 'glyphicon-cog'
+#    trigger: "admin:settings:index"
+#    intern: true
+#    order: 12
 #  ,
 #    id: "b85fd64c-3d4a-e8f1-8f1b-7d5e6ed8b8f8"
 #    title: "Admin - Reports"

@@ -307,7 +307,8 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
     <Content Include="Areas\HelpPage\Views\_ViewStart.cshtml" />
-    <None Include="Properties\PublishProfiles\etfeedback.pubxml" />
+    <None Include="Properties\PublishProfiles\etfeedback_azure_dev.pubxml" />
+    <None Include="Properties\PublishProfiles\etfeedback_azure_prod.pubxml" />
     <Content Include="www\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="www\fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="www\fonts\glyphicons-halflings-regular.woff" />
@@ -316,6 +317,12 @@
     <Content Include="www\stylesheets\app.css.map" />
     <Content Include="www\fonts\webhostinghub-glyphs.eot" />
     <Content Include="www\fonts\webhostinghub-glyphs.ttf" />
+    <None Include="Web.AzureDev.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.AzureProd.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">
@@ -340,6 +347,24 @@
     <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'AzureDev|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'AzureProd|AnyCPU'">
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>

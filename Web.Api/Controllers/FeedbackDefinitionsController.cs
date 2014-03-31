@@ -29,8 +29,6 @@ namespace EventFeedback.Web.Api.Controllers
         [ResponseType(typeof(IEnumerable<FeedbackDefinition>))]
         public IHttpActionResult Get([FromUri] string filter = "")
         {
-            //Thread.Sleep(1500);
-
             IEnumerable<FeedbackDefinition> result;
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
                 result = _context.FeedbackDefinitions.OrderBy(e => e.CreateDate);
@@ -53,12 +51,12 @@ namespace EventFeedback.Web.Api.Controllers
             FeedbackDefinition result;
             if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
                 result = _context.FeedbackDefinitions
-                    .FirstOrDefault(x => x.Id == id); //.Include("Sessions")
+                    .FirstOrDefault(x => x.Id == id); 
             else
                 result = _context.FeedbackDefinitions
                 .Where(d => !(d.Active != null && !(bool)d.Active))
                 .Where(d => !(d.Deleted != null && (bool)d.Deleted))
-                .FirstOrDefault(x => x.Id == id); //.Include("Sessions")
+                .FirstOrDefault(x => x.Id == id); 
             if (result == null) return StatusCode(HttpStatusCode.NotFound);
             return Ok(result);
         }

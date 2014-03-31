@@ -2,4 +2,15 @@
   <div class="list-group js-events" style="margin-top:39px;">
     <!-- events -->
   </div>
+
+  {{#if isAdmin}}
+  <div class="row pull-right">
+    <div class="col-xs-12">
+      <br/>
+      <button class="btn btn-success btn-responsive js-new">
+        <span class="glyphicon glyphicon-plus"></span>&emsp;{{resources.Text_New}}
+      </button>
+    </div>
+  </div>
+  {{/if}}
 </div>

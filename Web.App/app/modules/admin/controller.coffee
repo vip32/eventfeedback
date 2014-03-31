@@ -1,4 +1,5 @@
 application = require 'application'
+Controller = require '../../lib/base/controller'
 vent = require 'vent'
 settings = require 'settings'
 Event = require '../../models/event'
@@ -6,7 +7,7 @@ Session = require '../../models/session'
 User = require '../../models/user'
 Role = require '../../models/role'
 
-module.exports = class Controller extends Backbone.Marionette.Controller
+module.exports = class Controller extends Controller
 
   constructor: (options) ->
     log 'admin controller init'

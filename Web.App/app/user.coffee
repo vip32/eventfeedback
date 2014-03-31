@@ -16,7 +16,7 @@ class User
     # TODO: check expiration date (against now) of token
     
   isAdministrator: ->
-    _.intersection(['Administrator'], @roles).length > 0
+    return _.intersection(['Administrator'], @roles()).length > 0
   
   reset: ->
     settings.destroy('api_token')

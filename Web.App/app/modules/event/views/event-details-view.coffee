@@ -9,6 +9,7 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
   itemView: require './session-item-view'
   itemViewContainer: '.js-sessions'
   events:
+    'click .js-edit': 'onEdit'
     'click .js-report': 'onReport'
     'change .js-tag': 'onTag'
 
@@ -24,6 +25,7 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
     resources: @resources?.toJSON()
     tags: @tags?.toJSON()
     model: @model.toJSON()
+    isAdmin: user.isAdministrator()
 
   itemViewOptions: ->
     resources: @resources
@@ -36,9 +38,6 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
     # ^^ replace with bootstrap api: set the correct radio    
     @filterByTag(tag)
     # hide some administrator only elements
-    roles = user.roles()
-    if not _.contains(roles, 'Administrator')
-      $('.js-report').hide()
 
   onTag: (e) ->
     e.preventDefault()
@@ -48,14 +47,18 @@ module.exports = class EventDetailsView extends Backbone.Marionette.CompositeVie
     # filter the session collection by tag
     if tag?
       settings.set('active-eventtag', tag)
-      if tag isnt ""
-        @collection.reset(@orgcoll.filterForTag(tag))
-      else
+      if _.isEmpty(tag)
         @collection.reset(@orgcoll.models)
+      else
+        @collection.reset(@orgcoll.filterForTag(tag))
       
   onBack: =>
     log 'back from event-details'
     vent.trigger 'events:index'
+    
+  onEdit: (e) ->
+    e.preventDefault()  
+    vent.trigger 'event:edit',  settings.get('active-event')
     
   onReport: (e) ->
     e.preventDefault()

@@ -40,13 +40,13 @@ namespace EventFeedback.Web.Api.Controllers
                 if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
                     result = _context.Sessions
                         .Include(s => s.FeedbackDefinition)
-                        .OrderBy(e => e.StartDate)
-                        .Where(s => s.EventId == eventId);
+                        .Where(s => s.EventId == eventId)
+                        .OrderBy(e => e.StartDate);
                 else
                     result = _context.Sessions
                         .Include(s => s.FeedbackDefinition)
-                        .OrderBy(e => e.StartDate)
                         .Where(s => s.EventId == eventId)
+                        .OrderBy(e => e.StartDate)
                         .ToList().Where(e => e.IsActive());
                         //.Where(d => !(d.Active != null && !(bool) d.Active))
                         //.Where(d => !(d.Deleted != null && (bool) d.Deleted));
@@ -78,8 +78,9 @@ namespace EventFeedback.Web.Api.Controllers
                     result = _context.Sessions
                         .Include(s => s.FeedbackDefinition)
                         .Where(s => s.EventId == eventId)
-                        .Where(d => !(d.Active != null && !(bool) d.Active))
-                        .Where(d => !(d.Deleted != null && (bool) d.Deleted))
+                        .ToList().Where(e => e.IsActive())
+                        //.Where(d => !(d.Active != null && !(bool) d.Active))
+                        //.Where(d => !(d.Deleted != null && (bool) d.Deleted))
                         .FirstOrDefault(x => x.Id == id);
                 if (result == null) return StatusCode(HttpStatusCode.NotFound);
                 return Ok(result);

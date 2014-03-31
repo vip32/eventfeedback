@@ -7,9 +7,12 @@ Feedback = require '../../models/feedback'
 Session = require '../../models/session'
 EventReport = require '../../models/eventreport'
 EventTag = require '../../models/eventtag'
+user = require 'user'
 
 module.exports = class Controller extends Backbone.Marionette.Controller
-
+  
+  resourceFilter: if user.isAdministrator() then 'all' else ''
+  
   constructor: (options) ->
     log 'event controller init'
 
@@ -25,13 +28,10 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         @saveFeedback feedback
 
   showEventsIndex: ->
-    #logger.log 'aa'
-
     vent.trigger 'fetch:done' # switch off block
     @events.fetch(
       reload: true # needed after login, otherwise FAIL on fetch
-#      data:
-#        filter: 'all'
+      data: filter: @resourceFilter
     ).done (models) =>
       @feedbacks.fetch(
           # reload: true
@@ -43,8 +43,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
   showEventDetails: (id) ->
     @events.fetch(
-      data:
-        filter: 'all'
+      data: filter: @resourceFilter
     ).done (models) =>
       event = models.get(id)
       if not event?
@@ -70,13 +69,29 @@ module.exports = class Controller extends Backbone.Marionette.Controller
             View = require './views/event-details-view'
             view = new View(model: event, collection: sessions, tags: tags, resources: application.resources)
             application.layout.content.show(view)
+  
+  showEventsNew: ->
+    @showEventEdit()
+  
+  showEventEdit: (id) ->
+    @events.fetch(
+      data: filter: @resourceFilter
+    ).done (models) =>
+      event = models.get(id)
+      if not event?
+        event = new Event.Model(active: true)
+        @events.add event
+      vent.trigger 'set:active:header', 'events:index', 'edit', 'glyphicon-bookmark'
 
+      View = require './views/event-edit-view'
+      view = new View(model: event, collection: @events, resources: application.resources)
+      application.layout.content.show(view)
+            
   showEventReport: (id) ->
     settings.set('active-event', id)
     @eventreports.fetch(
       reload: true
-      data:
-        filter: 'all'
+      data: filter: @resourceFilter
     ).done (models) =>
       event = models.first()
       if not event?
@@ -120,6 +135,6 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       error: (model, xhr, options) =>
         vent.trigger 'message:error:show', application.resources.key('Feedback_Saved_Failed')
         vent.trigger 'fetch:fail'
-
+    
   onClose: ->
     log 'event controller close'

@@ -4,19 +4,24 @@
   cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
   proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
   <p>To see the difference between static and fixed top navbars, just scroll.</p>
-  <form>
-    <input type="number" data-max="5" data-min="1"
-           name="your_awesome_parameter1" id="some_id1" class="rating" value="2" />
-    <textarea></textarea>
+    
+  <button class="js-triggerevent">trigger</button>
+  <br/>user: {{user}} 
+  <br/>roles: {{roles}}
+  <br/>resources: {{resources.TestKey1}}
+  <hr/>
+  <input type="datetime-local"></input>
+  <div id="form" class="well"></div>
 
-    <input type="number" data-max="5" data-min="1"
-           name="your_awesome_parameter2" id="some_id2" class="rating" value="1" />
-    <textarea></textarea>
-    <br/>
-    <input type="text" name="event" placeholder="event"/>
-    <button class="js-triggerevent">trigger</button>
-    <br/>user: {{user}} 
-    <br/>roles: {{roles}}
-    <br/>resources: {{resources.TestKey1}}
-  </form>
+  <div class="row pull-right">
+    <div class="col-xs-12">
+      <br/>
+      <button class="btn btn-danger btn-responsive js-remove">
+        <span class="glyphicon glyphicon-remove"></span>&emsp;{{resources.Text_Remove}}
+      </button>
+      <button class="btn btn-success btn-responsive js-submit">
+        <span class="glyphicon glyphicon-save"></span>&emsp;{{resources.Text_Save}}
+      </button>
+    </div>
+  </div>
 </div>
