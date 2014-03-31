@@ -307,8 +307,7 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
     <Content Include="Areas\HelpPage\Views\_ViewStart.cshtml" />
-    <None Include="Properties\PublishProfiles\etfeedback_azure_dev.pubxml" />
-    <None Include="Properties\PublishProfiles\etfeedback_azure_prod.pubxml" />
+    <None Include="Properties\PublishProfiles\etfeedback_azure_staging.pubxml" />
     <Content Include="www\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="www\fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="www\fonts\glyphicons-halflings-regular.woff" />
@@ -317,10 +316,7 @@
     <Content Include="www\stylesheets\app.css.map" />
     <Content Include="www\fonts\webhostinghub-glyphs.eot" />
     <Content Include="www\fonts\webhostinghub-glyphs.ttf" />
-    <None Include="Web.AzureDev.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
-    <None Include="Web.AzureProd.config">
+    <None Include="Web.Azure.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
