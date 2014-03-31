@@ -10,6 +10,7 @@
   "dependencies": {
     "backbone": "~1.1.2",
     "backbone.marionette": "~1.6.4",
+    "backbone-forms": "~0.14.0",
     "backbone.wreqr": "~1.0.1",
     "backbone.babysitter": "~0.1.0",
     "Backbone.localStorage": "~1.1.7",
@@ -33,6 +34,16 @@
         "jquery": "*"
       },
       "main": "backbone.js"
+    },
+    "backbone-forms": {
+      "dependencies": {
+        "backbone": "*"
+      },
+      "main": [
+        "distribution/backbone-forms.js",
+        "distribution/templates/bootstrap3.js",
+        "distribution/templates/bootstrap3.css"
+      ]
     },
     "backbone.wreqr": {
       "dependencies": {

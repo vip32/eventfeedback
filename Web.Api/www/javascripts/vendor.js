@@ -14914,6 +14914,2451 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
 
 }(jQuery);
 
+;/**
+ * Backbone Forms v0.13.0
+ *
+ * Copyright (c) 2013 Charles Davison, Pow Media Ltd
+ *
+ * License and more information at:
+ * http://github.com/powmedia/backbone-forms
+ */
+;(function(root) {
+
+  //DEPENDENCIES
+  //CommonJS
+  if (typeof exports !== 'undefined' && typeof require !== 'undefined') {
+    var $ = root.jQuery || root.Zepto || root.ender || require('jquery'),
+        _ = root._ || require('underscore'),
+        Backbone = root.Backbone || require('backbone');
+  }
+
+  //Browser
+  else {
+    var $ = root.jQuery,
+        _ = root._,
+        Backbone = root.Backbone;
+  }
+
+
+  //SOURCE
+  //==================================================================================================
+//FORM
+//==================================================================================================
+
+var Form = Backbone.View.extend({
+
+  /**
+   * Constructor
+   * 
+   * @param {Object} [options.schema]
+   * @param {Backbone.Model} [options.model]
+   * @param {Object} [options.data]
+   * @param {String[]|Object[]} [options.fieldsets]
+   * @param {String[]} [options.fields]
+   * @param {String} [options.idPrefix]
+   * @param {Form.Field} [options.Field]
+   * @param {Form.Fieldset} [options.Fieldset]
+   * @param {Function} [options.template]
+   */
+  initialize: function(options) {
+    var self = this;
+
+    options = options || {};
+
+    //Find the schema to use
+    var schema = this.schema = (function() {
+      //Prefer schema from options
+      if (options.schema) return _.result(options, 'schema');
+
+      //Then schema on model
+      var model = options.model;
+      if (model && model.schema) {
+        return (_.isFunction(model.schema)) ? model.schema() : model.schema;
+      }
+
+      //Then built-in schema
+      if (self.schema) {
+        return (_.isFunction(self.schema)) ? self.schema() : self.schema;
+      }
+
+      //Fallback to empty schema
+      return {};
+    })();
+
+    //Store important data
+    _.extend(this, _.pick(options, 'model', 'data', 'idPrefix', 'templateData'));
+
+    //Override defaults
+    var constructor = this.constructor;
+    this.template = options.template || this.template || constructor.template;
+    this.Fieldset = options.Fieldset || this.Fieldset || constructor.Fieldset;
+    this.Field = options.Field || this.Field || constructor.Field;
+    this.NestedField = options.NestedField || this.NestedField || constructor.NestedField;
+
+    //Check which fields will be included (defaults to all)
+    var selectedFields = this.selectedFields = options.fields || _.keys(schema);
+
+    //Create fields
+    var fields = this.fields = {};
+
+    _.each(selectedFields, function(key) {
+      var fieldSchema = schema[key];
+      fields[key] = this.createField(key, fieldSchema);
+    }, this);
+
+    //Create fieldsets
+    var fieldsetSchema = options.fieldsets || [selectedFields],
+        fieldsets = this.fieldsets = [];
+
+    _.each(fieldsetSchema, function(itemSchema) {
+      this.fieldsets.push(this.createFieldset(itemSchema));
+    }, this);
+  },
+
+  /**
+   * Creates a Fieldset instance
+   *
+   * @param {String[]|Object[]} schema       Fieldset schema
+   *
+   * @return {Form.Fieldset}
+   */
+  createFieldset: function(schema) {
+    var options = {
+      schema: schema,
+      fields: this.fields
+    };
+
+    return new this.Fieldset(options);
+  },
+
+  /**
+   * Creates a Field instance
+   *
+   * @param {String} key
+   * @param {Object} schema       Field schema
+   *
+   * @return {Form.Field}
+   */
+  createField: function(key, schema) {
+    var options = {
+      form: this,
+      key: key,
+      schema: schema,
+      idPrefix: this.idPrefix
+    };
+
+    if (this.model) {
+      options.model = this.model;
+    } else if (this.data) {
+      options.value = this.data[key];
+    } else {
+      options.value = null;
+    }
+
+    var field = new this.Field(options);
+
+    this.listenTo(field.editor, 'all', this.handleEditorEvent);
+
+    return field;
+  },
+
+  /**
+   * Callback for when an editor event is fired.
+   * Re-triggers events on the form as key:event and triggers additional form-level events
+   *
+   * @param {String} event
+   * @param {Editor} editor
+   */
+  handleEditorEvent: function(event, editor) {
+    //Re-trigger editor events on the form
+    var formEvent = editor.key+':'+event;
+
+    this.trigger.call(this, formEvent, this, editor, Array.prototype.slice.call(arguments, 2));
+
+    //Trigger additional events
+    switch (event) {
+      case 'change':
+        this.trigger('change', this);
+        break;
+
+      case 'focus':
+        if (!this.hasFocus) this.trigger('focus', this);
+        break;
+
+      case 'blur':
+        if (this.hasFocus) {
+          //TODO: Is the timeout etc needed?
+          var self = this;
+          setTimeout(function() {
+            var focusedField = _.find(self.fields, function(field) {
+              return field.editor.hasFocus;
+            });
+
+            if (!focusedField) self.trigger('blur', self);
+          }, 0);
+        }
+        break;
+    }
+  },
+
+  render: function() {
+    var self = this,
+        fields = this.fields;
+
+    //Render form
+    var $form = $($.trim(this.template(_.result(this, 'templateData'))));
+
+    //Render standalone editors
+    $form.find('[data-editors]').add($form).each(function(i, el) {
+      var $container = $(el),
+          selection = $container.attr('data-editors');
+
+      if (_.isUndefined(selection)) return;
+
+      //Work out which fields to include
+      var keys = (selection == '*')
+        ? self.selectedFields || _.keys(fields)
+        : selection.split(',');
+
+      //Add them
+      _.each(keys, function(key) {
+        var field = fields[key];
+
+        $container.append(field.editor.render().el);
+      });
+    });
+
+    //Render standalone fields
+    $form.find('[data-fields]').add($form).each(function(i, el) {
+      var $container = $(el),
+          selection = $container.attr('data-fields');
+
+      if (_.isUndefined(selection)) return;
+
+      //Work out which fields to include
+      var keys = (selection == '*')
+        ? self.selectedFields || _.keys(fields)
+        : selection.split(',');
+
+      //Add them
+      _.each(keys, function(key) {
+        var field = fields[key];
+
+        $container.append(field.render().el);
+      });
+    });
+
+    //Render fieldsets
+    $form.find('[data-fieldsets]').add($form).each(function(i, el) {
+      var $container = $(el),
+          selection = $container.attr('data-fieldsets');
+
+      if (_.isUndefined(selection)) return;
+
+      _.each(self.fieldsets, function(fieldset) {
+        $container.append(fieldset.render().el);
+      });
+    });
+
+    //Set the main element
+    this.setElement($form);
+    
+    //Set class
+    $form.addClass(this.className);
+
+    return this;
+  },
+
+  /**
+   * Validate the data
+   *
+   * @return {Object}       Validation errors
+   */
+  validate: function(options) {
+    var self = this,
+        fields = this.fields,
+        model = this.model,
+        errors = {};
+
+    options = options || {};
+
+    //Collect errors from schema validation
+    _.each(fields, function(field) {
+      var error = field.validate();
+      if (error) {
+        errors[field.key] = error;
+      }
+    });
+
+    //Get errors from default Backbone model validator
+    if (!options.skipModelValidate && model && model.validate) {
+      var modelErrors = model.validate(this.getValue());
+
+      if (modelErrors) {
+        var isDictionary = _.isObject(modelErrors) && !_.isArray(modelErrors);
+
+        //If errors are not in object form then just store on the error object
+        if (!isDictionary) {
+          errors._others = errors._others || [];
+          errors._others.push(modelErrors);
+        }
+
+        //Merge programmatic errors (requires model.validate() to return an object e.g. { fieldKey: 'error' })
+        if (isDictionary) {
+          _.each(modelErrors, function(val, key) {
+            //Set error on field if there isn't one already
+            if (fields[key] && !errors[key]) {
+              fields[key].setError(val);
+              errors[key] = val;
+            }
+
+            else {
+              //Otherwise add to '_others' key
+              errors._others = errors._others || [];
+              var tmpErr = {};
+              tmpErr[key] = val;
+              errors._others.push(tmpErr);
+            }
+          });
+        }
+      }
+    }
+
+    return _.isEmpty(errors) ? null : errors;
+  },
+
+  /**
+   * Update the model with all latest values.
+   *
+   * @param {Object} [options]  Options to pass to Model#set (e.g. { silent: true })
+   *
+   * @return {Object}  Validation errors
+   */
+  commit: function(options) {
+    //Validate
+    options = options || {};
+
+    var validateOptions = {
+        skipModelValidate: !options.validate
+    };
+
+    var errors = this.validate(validateOptions);
+    if (errors) return errors;
+
+    //Commit
+    var modelError;
+
+    var setOptions = _.extend({
+      error: function(model, e) {
+        modelError = e;
+      }
+    }, options);
+
+    this.model.set(this.getValue(), setOptions);
+    
+    if (modelError) return modelError;
+  },
+
+  /**
+   * Get all the field values as an object.
+   * Use this method when passing data instead of objects
+   *
+   * @param {String} [key]    Specific field value to get
+   */
+  getValue: function(key) {
+    //Return only given key if specified
+    if (key) return this.fields[key].getValue();
+
+    //Otherwise return entire form
+    var values = {};
+    _.each(this.fields, function(field) {
+      values[field.key] = field.getValue();
+    });
+
+    return values;
+  },
+
+  /**
+   * Update field values, referenced by key
+   *
+   * @param {Object|String} key     New values to set, or property to set
+   * @param val                     Value to set
+   */
+  setValue: function(prop, val) {
+    var data = {};
+    if (typeof prop === 'string') {
+      data[prop] = val;
+    } else {
+      data = prop;
+    }
+
+    var key;
+    for (key in this.schema) {
+      if (data[key] !== undefined) {
+        this.fields[key].setValue(data[key]);
+      }
+    }
+  },
+
+  /**
+   * Returns the editor for a given field key
+   *
+   * @param {String} key
+   *
+   * @return {Editor}
+   */
+  getEditor: function(key) {
+    var field = this.fields[key];
+    if (!field) throw new Error('Field not found: '+key);
+
+    return field.editor;
+  },
+
+  /**
+   * Gives the first editor in the form focus
+   */
+  focus: function() {
+    if (this.hasFocus) return;
+
+    //Get the first field
+    var fieldset = this.fieldsets[0],
+        field = fieldset.getFieldAt(0);
+
+    if (!field) return;
+
+    //Set focus
+    field.editor.focus();
+  },
+
+  /**
+   * Removes focus from the currently focused editor
+   */
+  blur: function() {
+    if (!this.hasFocus) return;
+
+    var focusedField = _.find(this.fields, function(field) {
+      return field.editor.hasFocus;
+    });
+
+    if (focusedField) focusedField.editor.blur();
+  },
+
+  /**
+   * Manages the hasFocus property
+   *
+   * @param {String} event
+   */
+  trigger: function(event) {
+    if (event === 'focus') {
+      this.hasFocus = true;
+    }
+    else if (event === 'blur') {
+      this.hasFocus = false;
+    }
+
+    return Backbone.View.prototype.trigger.apply(this, arguments);
+  },
+
+  /**
+   * Override default remove function in order to remove embedded views
+   *
+   * TODO: If editors are included directly with data-editors="x", they need to be removed
+   * May be best to use XView to manage adding/removing views
+   */
+  remove: function() {
+    _.each(this.fieldsets, function(fieldset) {
+      fieldset.remove();
+    });
+
+    _.each(this.fields, function(field) {
+      field.remove();
+    });
+
+    return Backbone.View.prototype.remove.apply(this, arguments);
+  }
+
+}, {
+
+  //STATICS
+  template: _.template('\
+    <form data-fieldsets></form>\
+  ', null, this.templateSettings),
+
+  templateSettings: {
+    evaluate: /<%([\s\S]+?)%>/g, 
+    interpolate: /<%=([\s\S]+?)%>/g, 
+    escape: /<%-([\s\S]+?)%>/g
+  },
+
+  editors: {}
+
+});
+
+  
+//==================================================================================================
+//VALIDATORS
+//==================================================================================================
+
+Form.validators = (function() {
+
+  var validators = {};
+
+  validators.errMessages = {
+    required: 'Required',
+    regexp: 'Invalid',
+    email: 'Invalid email address',
+    url: 'Invalid URL',
+    match: _.template('Must match field "<%= field %>"', null, Form.templateSettings)
+  };
+  
+  validators.required = function(options) {
+    options = _.extend({
+      type: 'required',
+      message: this.errMessages.required
+    }, options);
+     
+    return function required(value) {
+      options.value = value;
+      
+      var err = {
+        type: options.type,
+        message: _.isFunction(options.message) ? options.message(options) : options.message
+      };
+      
+      if (value === null || value === undefined || value === false || value === '') return err;
+    };
+  };
+  
+  validators.regexp = function(options) {
+    if (!options.regexp) throw new Error('Missing required "regexp" option for "regexp" validator');
+  
+    options = _.extend({
+      type: 'regexp',
+      message: this.errMessages.regexp
+    }, options);
+    
+    return function regexp(value) {
+      options.value = value;
+      
+      var err = {
+        type: options.type,
+        message: _.isFunction(options.message) ? options.message(options) : options.message
+      };
+      
+      //Don't check empty values (add a 'required' validator for this)
+      if (value === null || value === undefined || value === '') return;
+
+      if (!options.regexp.test(value)) return err;
+    };
+  };
+  
+  validators.email = function(options) {
+    options = _.extend({
+      type: 'email',
+      message: this.errMessages.email,
+      regexp: /^[\w\-]{1,}([\w\-\+.]{1,1}[\w\-]{1,}){0,}[@][\w\-]{1,}([.]([\w\-]{1,})){1,3}$/
+    }, options);
+    
+    return validators.regexp(options);
+  };
+  
+  validators.url = function(options) {
+    options = _.extend({
+      type: 'url',
+      message: this.errMessages.url,
+      regexp: /^(http|https):\/\/(([A-Z0-9][A-Z0-9_\-]*)(\.[A-Z0-9][A-Z0-9_\-]*)+)(:(\d+))?\/?/i
+    }, options);
+    
+    return validators.regexp(options);
+  };
+  
+  validators.match = function(options) {
+    if (!options.field) throw new Error('Missing required "field" options for "match" validator');
+    
+    options = _.extend({
+      type: 'match',
+      message: this.errMessages.match
+    }, options);
+    
+    return function match(value, attrs) {
+      options.value = value;
+      
+      var err = {
+        type: options.type,
+        message: _.isFunction(options.message) ? options.message(options) : options.message
+      };
+      
+      //Don't check empty values (add a 'required' validator for this)
+      if (value === null || value === undefined || value === '') return;
+      
+      if (value !== attrs[options.field]) return err;
+    };
+  };
+
+
+  return validators;
+
+})();
+
+
+//==================================================================================================
+//FIELDSET
+//==================================================================================================
+
+Form.Fieldset = Backbone.View.extend({
+
+  /**
+   * Constructor
+   *
+   * Valid fieldset schemas:
+   *   ['field1', 'field2']
+   *   { legend: 'Some Fieldset', fields: ['field1', 'field2'] }
+   *
+   * @param {String[]|Object[]} options.schema      Fieldset schema
+   * @param {Object} options.fields           Form fields
+   */
+  initialize: function(options) {
+    options = options || {};
+
+    //Create the full fieldset schema, merging defaults etc.
+    var schema = this.schema = this.createSchema(options.schema);
+
+    //Store the fields for this fieldset
+    this.fields = _.pick(options.fields, schema.fields);
+    
+    //Override defaults
+    this.template = options.template || this.constructor.template;
+  },
+
+  /**
+   * Creates the full fieldset schema, normalising, merging defaults etc.
+   *
+   * @param {String[]|Object[]} schema
+   *
+   * @return {Object}
+   */
+  createSchema: function(schema) {
+    //Normalise to object
+    if (_.isArray(schema)) {
+      schema = { fields: schema };
+    }
+
+    //Add null legend to prevent template error
+    schema.legend = schema.legend || null;
+
+    return schema;
+  },
+
+  /**
+   * Returns the field for a given index
+   *
+   * @param {Number} index
+   *
+   * @return {Field}
+   */
+  getFieldAt: function(index) {
+    var key = this.schema.fields[index];
+
+    return this.fields[key];
+  },
+
+  /**
+   * Returns data to pass to template
+   *
+   * @return {Object}
+   */
+  templateData: function() {
+    return this.schema;
+  },
+
+  /**
+   * Renders the fieldset and fields
+   *
+   * @return {Fieldset} this
+   */
+  render: function() {
+    var schema = this.schema,
+        fields = this.fields;
+
+    //Render fieldset
+    var $fieldset = $($.trim(this.template(_.result(this, 'templateData'))));
+
+    //Render fields
+    $fieldset.find('[data-fields]').add($fieldset).each(function(i, el) {
+      var $container = $(el),
+          selection = $container.attr('data-fields');
+
+      if (_.isUndefined(selection)) return;
+
+      _.each(fields, function(field) {
+        $container.append(field.render().el);
+      });
+    });
+
+    this.setElement($fieldset);
+
+    return this;
+  },
+
+  /**
+   * Remove embedded views then self
+   */
+  remove: function() {
+    _.each(this.fields, function(field) {
+      field.remove();
+    });
+
+    Backbone.View.prototype.remove.call(this);
+  }
+  
+}, {
+  //STATICS
+
+  template: _.template('\
+    <fieldset data-fields>\
+      <% if (legend) { %>\
+        <legend><%= legend %></legend>\
+      <% } %>\
+    </fieldset>\
+  ', null, Form.templateSettings)
+
+});
+
+
+//==================================================================================================
+//FIELD
+//==================================================================================================
+
+Form.Field = Backbone.View.extend({
+
+  /**
+   * Constructor
+   * 
+   * @param {Object} options.key
+   * @param {Object} options.form
+   * @param {Object} [options.schema]
+   * @param {Function} [options.schema.template]
+   * @param {Backbone.Model} [options.model]
+   * @param {Object} [options.value]
+   * @param {String} [options.idPrefix]
+   * @param {Function} [options.template]
+   * @param {Function} [options.errorClassName]
+   */
+  initialize: function(options) {
+    options = options || {};
+
+    //Store important data
+    _.extend(this, _.pick(options, 'form', 'key', 'model', 'value', 'idPrefix'));
+
+    //Create the full field schema, merging defaults etc.
+    var schema = this.schema = this.createSchema(options.schema);
+
+    //Override defaults
+    this.template = options.template || schema.template || this.constructor.template;
+    this.errorClassName = options.errorClassName || this.constructor.errorClassName;
+
+    //Create editor
+    this.editor = this.createEditor();
+  },
+
+  /**
+   * Creates the full field schema, merging defaults etc.
+   *
+   * @param {Object|String} schema
+   *
+   * @return {Object}
+   */
+  createSchema: function(schema) {
+    if (_.isString(schema)) schema = { type: schema };
+
+    //Set defaults
+    schema = _.extend({
+      type: 'Text',
+      title: this.createTitle()
+    }, schema);
+
+    //Get the real constructor function i.e. if type is a string such as 'Text'
+    schema.type = (_.isString(schema.type)) ? Form.editors[schema.type] : schema.type;
+
+    return schema;
+  },
+
+  /**
+   * Creates the editor specified in the schema; either an editor string name or
+   * a constructor function
+   *
+   * @return {View}
+   */
+  createEditor: function() {
+    var options = _.extend(
+      _.pick(this, 'schema', 'form', 'key', 'model', 'value'),
+      { id: this.createEditorId() }
+    );
+
+    var constructorFn = this.schema.type;
+
+    return new constructorFn(options);
+  },
+
+  /**
+   * Creates the ID that will be assigned to the editor
+   *
+   * @return {String}
+   */
+  createEditorId: function() {
+    var prefix = this.idPrefix,
+        id = this.key;
+
+    //Replace periods with underscores (e.g. for when using paths)
+    id = id.replace(/\./g, '_');
+
+    //If a specific ID prefix is set, use it
+    if (_.isString(prefix) || _.isNumber(prefix)) return prefix + id;
+    if (_.isNull(prefix)) return id;
+
+    //Otherwise, if there is a model use it's CID to avoid conflicts when multiple forms are on the page
+    if (this.model) return this.model.cid + '_' + id;
+
+    return id;
+  },
+
+  /**
+   * Create the default field title (label text) from the key name.
+   * (Converts 'camelCase' to 'Camel Case')
+   *
+   * @return {String}
+   */
+  createTitle: function() {
+    var str = this.key;
+
+    //Add spaces
+    str = str.replace(/([A-Z])/g, ' $1');
+
+    //Uppercase first character
+    str = str.replace(/^./, function(str) { return str.toUpperCase(); });
+
+    return str;
+  },
+
+  /**
+   * Returns the data to be passed to the template
+   *
+   * @return {Object}
+   */
+  templateData: function() {
+    var schema = this.schema;
+
+    return {
+      help: schema.help || '',
+      title: schema.title,
+      fieldAttrs: schema.fieldAttrs,
+      editorAttrs: schema.editorAttrs,
+      key: this.key,
+      editorId: this.editor.id
+    };
+  },
+
+  /**
+   * Render the field and editor
+   *
+   * @return {Field} self
+   */
+  render: function() {
+    var schema = this.schema,
+        editor = this.editor;
+
+    //Only render the editor if Hidden
+    if (schema.type == Form.editors.Hidden) {
+      return this.setElement(editor.render().el);
+    }
+
+    //Render field
+    var $field = $($.trim(this.template(_.result(this, 'templateData'))));
+
+    if (schema.fieldClass) $field.addClass(schema.fieldClass);
+    if (schema.fieldAttrs) $field.attr(schema.fieldAttrs);
+
+    //Render editor
+    $field.find('[data-editor]').add($field).each(function(i, el) {
+      var $container = $(el),
+          selection = $container.attr('data-editor');
+
+      if (_.isUndefined(selection)) return;
+
+      $container.append(editor.render().el);
+    });
+
+    this.setElement($field);
+
+    return this;
+  },
+
+  /**
+   * Check the validity of the field
+   *
+   * @return {String}
+   */
+  validate: function() {
+    var error = this.editor.validate();
+
+    if (error) {
+      this.setError(error.message);
+    } else {
+      this.clearError();
+    }
+
+    return error;
+  },
+
+  /**
+   * Set the field into an error state, adding the error class and setting the error message
+   *
+   * @param {String} msg     Error message
+   */
+  setError: function(msg) {
+    //Nested form editors (e.g. Object) set their errors internally
+    if (this.editor.hasNestedForm) return;
+
+    //Add error CSS class
+    this.$el.addClass(this.errorClassName);
+
+    //Set error message
+    this.$('[data-error]').html(msg);
+  },
+
+  /**
+   * Clear the error state and reset the help message
+   */
+  clearError: function() {
+    //Remove error CSS class
+    this.$el.removeClass(this.errorClassName);
+
+    //Clear error message
+    this.$('[data-error]').empty();
+  },
+
+  /**
+   * Update the model with the new value from the editor
+   *
+   * @return {Mixed}
+   */
+  commit: function() {
+    return this.editor.commit();
+  },
+
+  /**
+   * Get the value from the editor
+   *
+   * @return {Mixed}
+   */
+  getValue: function() {
+    return this.editor.getValue();
+  },
+
+  /**
+   * Set/change the value of the editor
+   *
+   * @param {Mixed} value
+   */
+  setValue: function(value) {
+    this.editor.setValue(value);
+  },
+
+  /**
+   * Give the editor focus
+   */
+  focus: function() {
+    this.editor.focus();
+  },
+
+  /**
+   * Remove focus from the editor
+   */
+  blur: function() {
+    this.editor.blur();
+  },
+
+  /**
+   * Remove the field and editor views
+   */
+  remove: function() {
+    this.editor.remove();
+
+    Backbone.View.prototype.remove.call(this);
+  }
+
+}, {
+  //STATICS
+
+  template: _.template('\
+    <div>\
+      <label for="<%= editorId %>"><%= title %></label>\
+      <div>\
+        <span data-editor></span>\
+        <div data-error></div>\
+        <div><%= help %></div>\
+      </div>\
+    </div>\
+  ', null, Form.templateSettings),
+
+  /**
+   * CSS class name added to the field when there is a validation error
+   */
+  errorClassName: 'error'
+
+});
+
+
+//==================================================================================================
+//NESTEDFIELD
+//==================================================================================================
+
+Form.NestedField = Form.Field.extend({
+
+  template: _.template($.trim('\
+    <div>\
+      <span data-editor></span>\
+      <% if (help) { %>\
+        <div><%= help %></div>\
+      <% } %>\
+      <div data-error></div>\
+    </div>\
+  '), null, Form.templateSettings)
+
+});
+
+/**
+ * Base editor (interface). To be extended, not used directly
+ *
+ * @param {Object} options
+ * @param {String} [options.id]         Editor ID
+ * @param {Model} [options.model]       Use instead of value, and use commit()
+ * @param {String} [options.key]        The model attribute key. Required when using 'model'
+ * @param {Mixed} [options.value]       When not using a model. If neither provided, defaultValue will be used
+ * @param {Object} [options.schema]     Field schema; may be required by some editors
+ * @param {Object} [options.validators] Validators; falls back to those stored on schema
+ * @param {Object} [options.form]       The form
+ */
+Form.Editor = Form.editors.Base = Backbone.View.extend({
+
+  defaultValue: null,
+
+  hasFocus: false,
+
+  initialize: function(options) {
+    var options = options || {};
+
+    //Set initial value
+    if (options.model) {
+      if (!options.key) throw new Error("Missing option: 'key'");
+
+      this.model = options.model;
+
+      this.value = this.model.get(options.key);
+    }
+    else if (options.value !== undefined) {
+      this.value = options.value;
+    }
+
+    if (this.value === undefined) this.value = this.defaultValue;
+
+    //Store important data
+    _.extend(this, _.pick(options, 'key', 'form'));
+
+    var schema = this.schema = options.schema || {};
+
+    this.validators = options.validators || schema.validators;
+
+    //Main attributes
+    this.$el.attr('id', this.id);
+    this.$el.attr('name', this.getName());
+    if (schema.editorClass) this.$el.addClass(schema.editorClass);
+    if (schema.editorAttrs) this.$el.attr(schema.editorAttrs);
+  },
+
+  /**
+   * Get the value for the form input 'name' attribute
+   *
+   * @return {String}
+   *
+   * @api private
+   */
+  getName: function() {
+    var key = this.key || '';
+
+    //Replace periods with underscores (e.g. for when using paths)
+    return key.replace(/\./g, '_');
+  },
+
+  /**
+   * Get editor value
+   * Extend and override this method to reflect changes in the DOM
+   *
+   * @return {Mixed}
+   */
+  getValue: function() {
+    return this.value;
+  },
+
+  /**
+   * Set editor value
+   * Extend and override this method to reflect changes in the DOM
+   *
+   * @param {Mixed} value
+   */
+  setValue: function(value) {
+    this.value = value;
+  },
+
+  /**
+   * Give the editor focus
+   * Extend and override this method
+   */
+  focus: function() {
+    throw new Error('Not implemented');
+  },
+  
+  /**
+   * Remove focus from the editor
+   * Extend and override this method
+   */
+  blur: function() {
+    throw new Error('Not implemented');
+  },
+
+  /**
+   * Update the model with the current value
+   *
+   * @param {Object} [options]              Options to pass to model.set()
+   * @param {Boolean} [options.validate]    Set to true to trigger built-in model validation
+   *
+   * @return {Mixed} error
+   */
+  commit: function(options) {
+    var error = this.validate();
+    if (error) return error;
+
+    this.listenTo(this.model, 'invalid', function(model, e) {
+      error = e;
+    });
+    this.model.set(this.key, this.getValue(), options);
+
+    if (error) return error;
+  },
+
+  /**
+   * Check validity
+   *
+   * @return {Object|Undefined}
+   */
+  validate: function() {
+    var $el = this.$el,
+        error = null,
+        value = this.getValue(),
+        formValues = this.form ? this.form.getValue() : {},
+        validators = this.validators,
+        getValidator = this.getValidator;
+
+    if (validators) {
+      //Run through validators until an error is found
+      _.every(validators, function(validator) {
+        error = getValidator(validator)(value, formValues);
+
+        return error ? false : true;
+      });
+    }
+
+    return error;
+  },
+
+  /**
+   * Set this.hasFocus, or call parent trigger()
+   *
+   * @param {String} event
+   */
+  trigger: function(event) {
+    if (event === 'focus') {
+      this.hasFocus = true;
+    }
+    else if (event === 'blur') {
+      this.hasFocus = false;
+    }
+
+    return Backbone.View.prototype.trigger.apply(this, arguments);
+  },
+
+  /**
+   * Returns a validation function based on the type defined in the schema
+   *
+   * @param {RegExp|String|Function} validator
+   * @return {Function}
+   */
+  getValidator: function(validator) {
+    var validators = Form.validators;
+
+    //Convert regular expressions to validators
+    if (_.isRegExp(validator)) {
+      return validators.regexp({ regexp: validator });
+    }
+    
+    //Use a built-in validator if given a string
+    if (_.isString(validator)) {
+      if (!validators[validator]) throw new Error('Validator "'+validator+'" not found');
+      
+      return validators[validator]();
+    }
+
+    //Functions can be used directly
+    if (_.isFunction(validator)) return validator;
+
+    //Use a customised built-in validator if given an object
+    if (_.isObject(validator) && validator.type) {
+      var config = validator;
+      
+      return validators[config.type](config);
+    }
+    
+    //Unkown validator type
+    throw new Error('Invalid validator: ' + validator);
+  }
+});
+
+/**
+ * Text
+ * 
+ * Text input with focus, blur and change events
+ */
+Form.editors.Text = Form.Editor.extend({
+
+  tagName: 'input',
+
+  defaultValue: '',
+
+  previousValue: '',
+
+  events: {
+    'keyup':    'determineChange',
+    'keypress': function(event) {
+      var self = this;
+      setTimeout(function() {
+        self.determineChange();
+      }, 0);
+    },
+    'select':   function(event) {
+      this.trigger('select', this);
+    },
+    'focus':    function(event) {
+      this.trigger('focus', this);
+    },
+    'blur':     function(event) {
+      this.trigger('blur', this);
+    }
+  },
+
+  initialize: function(options) {
+    Form.editors.Base.prototype.initialize.call(this, options);
+
+    var schema = this.schema;
+
+    //Allow customising text type (email, phone etc.) for HTML5 browsers
+    var type = 'text';
+
+    if (schema && schema.editorAttrs && schema.editorAttrs.type) type = schema.editorAttrs.type;
+    if (schema && schema.dataType) type = schema.dataType;
+
+    this.$el.attr('type', type);
+  },
+
+  /**
+   * Adds the editor to the DOM
+   */
+  render: function() {
+    this.setValue(this.value);
+
+    return this;
+  },
+
+  determineChange: function(event) {
+    var currentValue = this.$el.val();
+    var changed = (currentValue !== this.previousValue);
+
+    if (changed) {
+      this.previousValue = currentValue;
+
+      this.trigger('change', this);
+    }
+  },
+
+  /**
+   * Returns the current editor value
+   * @return {String}
+   */
+  getValue: function() {
+    return this.$el.val();
+  },
+
+  /**
+   * Sets the value of the form element
+   * @param {String}
+   */
+  setValue: function(value) {
+    this.$el.val(value);
+  },
+
+  focus: function() {
+    if (this.hasFocus) return;
+
+    this.$el.focus();
+  },
+
+  blur: function() {
+    if (!this.hasFocus) return;
+
+    this.$el.blur();
+  },
+
+  select: function() {
+    this.$el.select();
+  }
+
+});
+
+/**
+ * TextArea editor
+ */
+Form.editors.TextArea = Form.editors.Text.extend({
+
+  tagName: 'textarea',
+
+  /**
+   * Override Text constructor so type property isn't set (issue #261)
+   */
+  initialize: function(options) {
+    Form.editors.Base.prototype.initialize.call(this, options);
+  }
+
+});
+
+/**
+ * Password editor
+ */
+Form.editors.Password = Form.editors.Text.extend({
+
+  initialize: function(options) {
+    Form.editors.Text.prototype.initialize.call(this, options);
+
+    this.$el.attr('type', 'password');
+  }
+
+});
+
+/**
+ * NUMBER
+ * 
+ * Normal text input that only allows a number. Letters etc. are not entered.
+ */
+Form.editors.Number = Form.editors.Text.extend({
+
+  defaultValue: 0,
+
+  events: _.extend({}, Form.editors.Text.prototype.events, {
+    'keypress': 'onKeyPress',
+    'change': 'onKeyPress'
+  }),
+
+  initialize: function(options) {
+    Form.editors.Text.prototype.initialize.call(this, options);
+
+    var schema = this.schema;
+
+    this.$el.attr('type', 'number');
+
+    if (!schema || !schema.editorAttrs || !schema.editorAttrs.step) {
+      // provide a default for `step` attr,
+      // but don't overwrite if already specified
+      this.$el.attr('step', 'any');
+    }
+  },
+
+  /**
+   * Check value is numeric
+   */
+  onKeyPress: function(event) {
+    var self = this,
+        delayedDetermineChange = function() {
+          setTimeout(function() {
+            self.determineChange();
+          }, 0);
+        };
+
+    //Allow backspace
+    if (event.charCode === 0) {
+      delayedDetermineChange();
+      return;
+    }
+
+    //Get the whole new value so that we can prevent things like double decimals points etc.
+    var newVal = this.$el.val()
+    if( event.charCode != undefined ) {
+      newVal = newVal + String.fromCharCode(event.charCode);
+    }
+
+    var numeric = /^[0-9]*\.?[0-9]*?$/.test(newVal);
+
+    if (numeric) {
+      delayedDetermineChange();
+    }
+    else {
+      event.preventDefault();
+    }
+  },
+
+  getValue: function() {
+    var value = this.$el.val();
+
+    return value === "" ? null : parseFloat(value, 10);
+  },
+
+  setValue: function(value) {
+    value = (function() {
+      if (_.isNumber(value)) return value;
+
+      if (_.isString(value) && value !== '') return parseFloat(value, 10);
+
+      return null;
+    })();
+
+    if (_.isNaN(value)) value = null;
+
+    Form.editors.Text.prototype.setValue.call(this, value);
+  }
+
+});
+
+/**
+ * Hidden editor
+ */
+Form.editors.Hidden = Form.editors.Text.extend({
+
+  defaultValue: '',
+
+  initialize: function(options) {
+    Form.editors.Text.prototype.initialize.call(this, options);
+
+    this.$el.attr('type', 'hidden');
+  },
+
+  focus: function() {
+
+  },
+
+  blur: function() {
+
+  }
+
+});
+
+/**
+ * Checkbox editor
+ *
+ * Creates a single checkbox, i.e. boolean value
+ */
+Form.editors.Checkbox = Form.editors.Base.extend({
+
+  defaultValue: false,
+
+  tagName: 'input',
+
+  events: {
+    'click':  function(event) {
+      this.trigger('change', this);
+    },
+    'focus':  function(event) {
+      this.trigger('focus', this);
+    },
+    'blur':   function(event) {
+      this.trigger('blur', this);
+    }
+  },
+
+  initialize: function(options) {
+    Form.editors.Base.prototype.initialize.call(this, options);
+
+    this.$el.attr('type', 'checkbox');
+  },
+
+  /**
+   * Adds the editor to the DOM
+   */
+  render: function() {
+    this.setValue(this.value);
+
+    return this;
+  },
+
+  getValue: function() {
+    return this.$el.prop('checked');
+  },
+
+  setValue: function(value) {
+    if (value) {
+      this.$el.prop('checked', true);
+    }else{
+      this.$el.prop('checked', false);
+    }
+  },
+
+  focus: function() {
+    if (this.hasFocus) return;
+
+    this.$el.focus();
+  },
+
+  blur: function() {
+    if (!this.hasFocus) return;
+
+    this.$el.blur();
+  }
+
+});
+
+/**
+ * Select editor
+ *
+ * Renders a <select> with given options
+ *
+ * Requires an 'options' value on the schema.
+ *  Can be an array of options, a function that calls back with the array of options, a string of HTML
+ *  or a Backbone collection. If a collection, the models must implement a toString() method
+ */
+Form.editors.Select = Form.editors.Base.extend({
+
+  tagName: 'select',
+
+  events: {
+    'change': function(event) {
+      this.trigger('change', this);
+    },
+    'focus':  function(event) {
+      this.trigger('focus', this);
+    },
+    'blur':   function(event) {
+      this.trigger('blur', this);
+    }
+  },
+
+  initialize: function(options) {
+    Form.editors.Base.prototype.initialize.call(this, options);
+
+    if (!this.schema || !this.schema.options) throw new Error("Missing required 'schema.options'");
+  },
+
+  render: function() {
+    this.setOptions(this.schema.options);
+
+    return this;
+  },
+
+  /**
+   * Sets the options that populate the <select>
+   *
+   * @param {Mixed} options
+   */
+  setOptions: function(options) {
+    var self = this;
+
+    //If a collection was passed, check if it needs fetching
+    if (options instanceof Backbone.Collection) {
+      var collection = options;
+
+      //Don't do the fetch if it's already populated
+      if (collection.length > 0) {
+        this.renderOptions(options);
+      } else {
+        collection.fetch({
+          success: function(collection) {
+            self.renderOptions(options);
+          }
+        });
+      }
+    }
+
+    //If a function was passed, run it to get the options
+    else if (_.isFunction(options)) {
+      options(function(result) {
+        self.renderOptions(result);
+      }, self);
+    }
+
+    //Otherwise, ready to go straight to renderOptions
+    else {
+      this.renderOptions(options);
+    }
+  },
+
+  /**
+   * Adds the <option> html to the DOM
+   * @param {Mixed}   Options as a simple array e.g. ['option1', 'option2']
+   *                      or as an array of objects e.g. [{val: 543, label: 'Title for object 543'}]
+   *                      or as a string of <option> HTML to insert into the <select>
+   *                      or any object
+   */
+  renderOptions: function(options) {
+    var $select = this.$el,
+        html;
+
+    html = this._getOptionsHtml(options);
+
+    //Insert options
+    $select.html(html);
+
+    //Select correct option
+    this.setValue(this.value);
+  },
+
+  _getOptionsHtml: function(options) {
+    var html;
+    //Accept string of HTML
+    if (_.isString(options)) {
+      html = options;
+    }
+
+    //Or array
+    else if (_.isArray(options)) {
+      html = this._arrayToHtml(options);
+    }
+
+    //Or Backbone collection
+    else if (options instanceof Backbone.Collection) {
+      html = this._collectionToHtml(options);
+    }
+
+    else if (_.isFunction(options)) {
+      var newOptions;
+
+      options(function(opts) {
+        newOptions = opts;
+      }, this);
+
+      html = this._getOptionsHtml(newOptions);
+    //Or any object
+    }else{
+      html=this._objectToHtml(options);
+    }
+
+    return html;
+  },
+
+
+  getValue: function() {
+    return this.$el.val();
+  },
+
+  setValue: function(value) {
+    this.$el.val(value);
+  },
+
+  focus: function() {
+    if (this.hasFocus) return;
+
+    this.$el.focus();
+  },
+
+  blur: function() {
+    if (!this.hasFocus) return;
+
+    this.$el.blur();
+  },
+
+  /**
+   * Transforms a collection into HTML ready to use in the renderOptions method
+   * @param {Backbone.Collection}
+   * @return {String}
+   */
+  _collectionToHtml: function(collection) {
+    //Convert collection to array first
+    var array = [];
+    collection.each(function(model) {
+      array.push({ val: model.id, label: model.toString() });
+    });
+
+    //Now convert to HTML
+    var html = this._arrayToHtml(array);
+
+    return html;
+  },
+  /**
+   * Transforms an object into HTML ready to use in the renderOptions method
+   * @param {Object}
+   * @return {String}
+   */
+  _objectToHtml: function(obj) {
+    //Convert object to array first
+    var array = [];
+    for(var key in obj){
+      if( obj.hasOwnProperty( key ) ) {
+        array.push({ val: key, label: obj[key] });
+      }
+    }
+
+    //Now convert to HTML
+    var html = this._arrayToHtml(array);
+
+    return html;
+  },
+
+
+
+  /**
+   * Create the <option> HTML
+   * @param {Array}   Options as a simple array e.g. ['option1', 'option2']
+   *                      or as an array of objects e.g. [{val: 543, label: 'Title for object 543'}]
+   * @return {String} HTML
+   */
+  _arrayToHtml: function(array) {
+    var html = [];
+
+    //Generate HTML
+    _.each(array, function(option) {
+      if (_.isObject(option)) {
+        if (option.group) {
+          html.push('<optgroup label="'+option.group+'">');
+          html.push(this._getOptionsHtml(option.options))
+          html.push('</optgroup>');
+        } else {
+          var val = (option.val || option.val === 0) ? option.val : '';
+          html.push('<option value="'+val+'">'+option.label+'</option>');
+        }
+      }
+      else {
+        html.push('<option>'+option+'</option>');
+      }
+    }, this);
+
+    return html.join('');
+  }
+
+});
+
+/**
+ * Radio editor
+ *
+ * Renders a <ul> with given options represented as <li> objects containing radio buttons
+ *
+ * Requires an 'options' value on the schema.
+ *  Can be an array of options, a function that calls back with the array of options, a string of HTML
+ *  or a Backbone collection. If a collection, the models must implement a toString() method
+ */
+Form.editors.Radio = Form.editors.Select.extend({
+
+  tagName: 'ul',
+
+  events: {
+    'change input[type=radio]': function() {
+      this.trigger('change', this);
+    },
+    'focus input[type=radio]': function() {
+      if (this.hasFocus) return;
+      this.trigger('focus', this);
+    },
+    'blur input[type=radio]': function() {
+      if (!this.hasFocus) return;
+      var self = this;
+      setTimeout(function() {
+        if (self.$('input[type=radio]:focus')[0]) return;
+        self.trigger('blur', self);
+      }, 0);
+    }
+  },
+
+  getValue: function() {
+    return this.$('input[type=radio]:checked').val();
+  },
+
+  setValue: function(value) {
+    this.$('input[type=radio]').val([value]);
+  },
+
+  focus: function() {
+    if (this.hasFocus) return;
+
+    var checked = this.$('input[type=radio]:checked');
+    if (checked[0]) {
+      checked.focus();
+      return;
+    }
+
+    this.$('input[type=radio]').first().focus();
+  },
+
+  blur: function() {
+    if (!this.hasFocus) return;
+
+    this.$('input[type=radio]:focus').blur();
+  },
+
+  /**
+   * Create the radio list HTML
+   * @param {Array}   Options as a simple array e.g. ['option1', 'option2']
+   *                      or as an array of objects e.g. [{val: 543, label: 'Title for object 543'}]
+   * @return {String} HTML
+   */
+  _arrayToHtml: function (array) {
+    var html = [];
+    var self = this;
+
+    _.each(array, function(option, index) {
+      var itemHtml = '<li>';
+      if (_.isObject(option)) {
+        var val = (option.val || option.val === 0) ? option.val : '';
+        itemHtml += ('<input type="radio" name="'+self.getName()+'" value="'+val+'" id="'+self.id+'-'+index+'" />');
+        itemHtml += ('<label for="'+self.id+'-'+index+'">'+option.label+'</label>');
+      }
+      else {
+        itemHtml += ('<input type="radio" name="'+self.getName()+'" value="'+option+'" id="'+self.id+'-'+index+'" />');
+        itemHtml += ('<label for="'+self.id+'-'+index+'">'+option+'</label>');
+      }
+      itemHtml += '</li>';
+      html.push(itemHtml);
+    });
+
+    return html.join('');
+  }
+
+});
+
+/**
+ * Checkboxes editor
+ *
+ * Renders a <ul> with given options represented as <li> objects containing checkboxes
+ *
+ * Requires an 'options' value on the schema.
+ *  Can be an array of options, a function that calls back with the array of options, a string of HTML
+ *  or a Backbone collection. If a collection, the models must implement a toString() method
+ */
+Form.editors.Checkboxes = Form.editors.Select.extend({
+
+  tagName: 'ul',
+
+  groupNumber: 0,
+
+  events: {
+    'click input[type=checkbox]': function() {
+      this.trigger('change', this);
+    },
+    'focus input[type=checkbox]': function() {
+      if (this.hasFocus) return;
+      this.trigger('focus', this);
+    },
+    'blur input[type=checkbox]':  function() {
+      if (!this.hasFocus) return;
+      var self = this;
+      setTimeout(function() {
+        if (self.$('input[type=checkbox]:focus')[0]) return;
+        self.trigger('blur', self);
+      }, 0);
+    }
+  },
+
+  getValue: function() {
+    var values = [];
+    this.$('input[type=checkbox]:checked').each(function() {
+      values.push($(this).val());
+    });
+    return values;
+  },
+
+  setValue: function(values) {
+    if (!_.isArray(values)) values = [values];
+    this.$('input[type=checkbox]').val(values);
+  },
+
+  focus: function() {
+    if (this.hasFocus) return;
+
+    this.$('input[type=checkbox]').first().focus();
+  },
+
+  blur: function() {
+    if (!this.hasFocus) return;
+
+    this.$('input[type=checkbox]:focus').blur();
+  },
+
+  /**
+   * Create the checkbox list HTML
+   * @param {Array}   Options as a simple array e.g. ['option1', 'option2']
+   *                      or as an array of objects e.g. [{val: 543, label: 'Title for object 543'}]
+   * @return {String} HTML
+   */
+  _arrayToHtml: function (array) {
+    var html = [];
+    var self = this;
+
+    _.each(array, function(option, index) {
+      var itemHtml = '<li>';
+			var close = true;
+      if (_.isObject(option)) {
+        if (option.group) {
+          var originalId = self.id;
+          self.id += "-" + self.groupNumber++; 
+          itemHtml = ('<fieldset class="group"> <legend>'+option.group+'</legend>');
+          itemHtml += (self._arrayToHtml(option.options));
+          itemHtml += ('</fieldset>');
+          self.id = originalId;
+					close = false;
+        }else{
+          var val = (option.val || option.val === 0) ? option.val : '';
+          itemHtml += ('<input type="checkbox" name="'+self.getName()+'" value="'+val+'" id="'+self.id+'-'+index+'" />');
+          itemHtml += ('<label for="'+self.id+'-'+index+'">'+option.label+'</label>');
+        }
+      }
+      else {
+        itemHtml += ('<input type="checkbox" name="'+self.getName()+'" value="'+option+'" id="'+self.id+'-'+index+'" />');
+        itemHtml += ('<label for="'+self.id+'-'+index+'">'+option+'</label>');
+      }
+			if(close){
+				itemHtml += '</li>';
+			}
+      html.push(itemHtml);
+    });
+
+    return html.join('');
+  }
+
+});
+
+/**
+ * Object editor
+ *
+ * Creates a child form. For editing Javascript objects
+ *
+ * @param {Object} options
+ * @param {Form} options.form                 The form this editor belongs to; used to determine the constructor for the nested form
+ * @param {Object} options.schema             The schema for the object
+ * @param {Object} options.schema.subSchema   The schema for the nested form
+ */
+Form.editors.Object = Form.editors.Base.extend({
+  //Prevent error classes being set on the main control; they are internally on the individual fields
+  hasNestedForm: true,
+
+  initialize: function(options) {
+    //Set default value for the instance so it's not a shared object
+    this.value = {};
+
+    //Init
+    Form.editors.Base.prototype.initialize.call(this, options);
+
+    //Check required options
+    if (!this.form) throw new Error('Missing required option "form"');
+    if (!this.schema.subSchema) throw new Error("Missing required 'schema.subSchema' option for Object editor");
+  },
+
+  render: function() {
+    //Get the constructor for creating the nested form; i.e. the same constructor as used by the parent form
+    var NestedForm = this.form.constructor;
+
+    //Create the nested form
+    this.nestedForm = new NestedForm({
+      schema: this.schema.subSchema,
+      data: this.value,
+      idPrefix: this.id + '_',
+      Field: NestedForm.NestedField
+    });
+
+    this._observeFormEvents();
+
+    this.$el.html(this.nestedForm.render().el);
+
+    if (this.hasFocus) this.trigger('blur', this);
+
+    return this;
+  },
+
+  getValue: function() {
+    if (this.nestedForm) return this.nestedForm.getValue();
+
+    return this.value;
+  },
+
+  setValue: function(value) {
+    this.value = value;
+
+    this.render();
+  },
+
+  focus: function() {
+    if (this.hasFocus) return;
+
+    this.nestedForm.focus();
+  },
+
+  blur: function() {
+    if (!this.hasFocus) return;
+
+    this.nestedForm.blur();
+  },
+
+  remove: function() {
+    this.nestedForm.remove();
+
+    Backbone.View.prototype.remove.call(this);
+  },
+
+  validate: function() {
+    return this.nestedForm.validate();
+  },
+
+  _observeFormEvents: function() {
+    if (!this.nestedForm) return;
+    
+    this.nestedForm.on('all', function() {
+      // args = ["key:change", form, fieldEditor]
+      var args = _.toArray(arguments);
+      args[1] = this;
+      // args = ["key:change", this=objectEditor, fieldEditor]
+
+      this.trigger.apply(this, args);
+    }, this);
+  }
+
+});
+
+/**
+ * NestedModel editor
+ *
+ * Creates a child form. For editing nested Backbone models
+ *
+ * Special options:
+ *   schema.model:   Embedded model constructor
+ */
+Form.editors.NestedModel = Form.editors.Object.extend({
+  initialize: function(options) {
+    Form.editors.Base.prototype.initialize.call(this, options);
+
+    if (!this.form) throw new Error('Missing required option "form"');
+    if (!options.schema.model) throw new Error('Missing required "schema.model" option for NestedModel editor');
+  },
+
+  render: function() {
+    //Get the constructor for creating the nested form; i.e. the same constructor as used by the parent form
+    var NestedForm = this.form.constructor;
+
+    var data = this.value || {},
+        key = this.key,
+        nestedModel = this.schema.model;
+
+    //Wrap the data in a model if it isn't already a model instance
+    var modelInstance = (data.constructor === nestedModel) ? data : new nestedModel(data);
+
+    this.nestedForm = new NestedForm({
+      model: modelInstance,
+      idPrefix: this.id + '_',
+      fieldTemplate: 'nestedField'
+    });
+
+    this._observeFormEvents();
+
+    //Render form
+    this.$el.html(this.nestedForm.render().el);
+
+    if (this.hasFocus) this.trigger('blur', this);
+
+    return this;
+  },
+
+  /**
+   * Update the embedded model, checking for nested validation errors and pass them up
+   * Then update the main model if all OK
+   *
+   * @return {Error|null} Validation error or null
+   */
+  commit: function() {
+    var error = this.nestedForm.commit();
+    if (error) {
+      this.$el.addClass('error');
+      return error;
+    }
+
+    return Form.editors.Object.prototype.commit.call(this);
+  }
+
+});
+
+/**
+ * Date editor
+ *
+ * Schema options
+ * @param {Number|String} [options.schema.yearStart]  First year in list. Default: 100 years ago
+ * @param {Number|String} [options.schema.yearEnd]    Last year in list. Default: current year
+ *
+ * Config options (if not set, defaults to options stored on the main Date class)
+ * @param {Boolean} [options.showMonthNames]  Use month names instead of numbers. Default: true
+ * @param {String[]} [options.monthNames]     Month names. Default: Full English names
+ */
+Form.editors.Date = Form.editors.Base.extend({
+
+  events: {
+    'change select':  function() {
+      this.updateHidden();
+      this.trigger('change', this);
+    },
+    'focus select':   function() {
+      if (this.hasFocus) return;
+      this.trigger('focus', this);
+    },
+    'blur select':    function() {
+      if (!this.hasFocus) return;
+      var self = this;
+      setTimeout(function() {
+        if (self.$('select:focus')[0]) return;
+        self.trigger('blur', self);
+      }, 0);
+    }
+  },
+
+  initialize: function(options) {
+    options = options || {};
+
+    Form.editors.Base.prototype.initialize.call(this, options);
+
+    var Self = Form.editors.Date,
+        today = new Date();
+
+    //Option defaults
+    this.options = _.extend({
+      monthNames: Self.monthNames,
+      showMonthNames: Self.showMonthNames
+    }, options);
+
+    //Schema defaults
+    this.schema = _.extend({
+      yearStart: today.getFullYear() - 100,
+      yearEnd: today.getFullYear()
+    }, options.schema || {});
+
+    //Cast to Date
+    if (this.value && !_.isDate(this.value)) {
+      this.value = new Date(this.value);
+    }
+
+    //Set default date
+    if (!this.value) {
+      var date = new Date();
+      date.setSeconds(0);
+      date.setMilliseconds(0);
+
+      this.value = date;
+    }
+
+    //Template
+    this.template = options.template || this.constructor.template;
+  },
+
+  render: function() {
+    var options = this.options,
+        schema = this.schema;
+
+    var datesOptions = _.map(_.range(1, 32), function(date) {
+      return '<option value="'+date+'">' + date + '</option>';
+    });
+
+    var monthsOptions = _.map(_.range(0, 12), function(month) {
+      var value = (options.showMonthNames)
+          ? options.monthNames[month]
+          : (month + 1);
+
+      return '<option value="'+month+'">' + value + '</option>';
+    });
+
+    var yearRange = (schema.yearStart < schema.yearEnd)
+      ? _.range(schema.yearStart, schema.yearEnd + 1)
+      : _.range(schema.yearStart, schema.yearEnd - 1, -1);
+
+    var yearsOptions = _.map(yearRange, function(year) {
+      return '<option value="'+year+'">' + year + '</option>';
+    });
+
+    //Render the selects
+    var $el = $($.trim(this.template({
+      dates: datesOptions.join(''),
+      months: monthsOptions.join(''),
+      years: yearsOptions.join('')
+    })));
+
+    //Store references to selects
+    this.$date = $el.find('[data-type="date"]');
+    this.$month = $el.find('[data-type="month"]');
+    this.$year = $el.find('[data-type="year"]');
+
+    //Create the hidden field to store values in case POSTed to server
+    this.$hidden = $('<input type="hidden" name="'+this.key+'" />');
+    $el.append(this.$hidden);
+
+    //Set value on this and hidden field
+    this.setValue(this.value);
+
+    //Remove the wrapper tag
+    this.setElement($el);
+    this.$el.attr('id', this.id);
+    this.$el.attr('name', this.getName());
+
+    if (this.hasFocus) this.trigger('blur', this);
+
+    return this;
+  },
+
+  /**
+   * @return {Date}   Selected date
+   */
+  getValue: function() {
+    var year = this.$year.val(),
+        month = this.$month.val(),
+        date = this.$date.val();
+
+    if (!year || !month || !date) return null;
+
+    return new Date(year, month, date);
+  },
+
+  /**
+   * @param {Date} date
+   */
+  setValue: function(date) {
+    this.$date.val(date.getDate());
+    this.$month.val(date.getMonth());
+    this.$year.val(date.getFullYear());
+
+    this.updateHidden();
+  },
+
+  focus: function() {
+    if (this.hasFocus) return;
+
+    this.$('select').first().focus();
+  },
+
+  blur: function() {
+    if (!this.hasFocus) return;
+
+    this.$('select:focus').blur();
+  },
+
+  /**
+   * Update the hidden input which is maintained for when submitting a form
+   * via a normal browser POST
+   */
+  updateHidden: function() {
+    var val = this.getValue();
+
+    if (_.isDate(val)) val = val.toISOString();
+
+    this.$hidden.val(val);
+  }
+
+}, {
+  //STATICS
+  template: _.template('\
+    <div>\
+      <select data-type="date"><%= dates %></select>\
+      <select data-type="month"><%= months %></select>\
+      <select data-type="year"><%= years %></select>\
+    </div>\
+  ', null, Form.templateSettings),
+
+  //Whether to show month names instead of numbers
+  showMonthNames: true,
+
+  //Month names to use if showMonthNames is true
+  //Replace for localisation, e.g. Form.editors.Date.monthNames = ['Janvier', 'Fevrier'...]
+  monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+});
+
+/**
+ * DateTime editor
+ *
+ * @param {Editor} [options.DateEditor]           Date editor view to use (not definition)
+ * @param {Number} [options.schema.minsInterval]  Interval between minutes. Default: 15
+ */
+Form.editors.DateTime = Form.editors.Base.extend({
+
+  events: {
+    'change select':  function() {
+      this.updateHidden();
+      this.trigger('change', this);
+    },
+    'focus select':   function() {
+      if (this.hasFocus) return;
+      this.trigger('focus', this);
+    },
+    'blur select':    function() {
+      if (!this.hasFocus) return;
+      var self = this;
+      setTimeout(function() {
+        if (self.$('select:focus')[0]) return;
+        self.trigger('blur', self);
+      }, 0);
+    }
+  },
+
+  initialize: function(options) {
+    options = options || {};
+
+    Form.editors.Base.prototype.initialize.call(this, options);
+
+    //Option defaults
+    this.options = _.extend({
+      DateEditor: Form.editors.DateTime.DateEditor
+    }, options);
+
+    //Schema defaults
+    this.schema = _.extend({
+      minsInterval: 15
+    }, options.schema || {});
+
+    //Create embedded date editor
+    this.dateEditor = new this.options.DateEditor(options);
+
+    this.value = this.dateEditor.value;
+
+    //Template
+    this.template = options.template || this.constructor.template;
+  },
+
+  render: function() {
+    function pad(n) {
+      return n < 10 ? '0' + n : n;
+    }
+
+    var schema = this.schema;
+
+    //Create options
+    var hoursOptions = _.map(_.range(0, 24), function(hour) {
+      return '<option value="'+hour+'">' + pad(hour) + '</option>';
+    });
+
+    var minsOptions = _.map(_.range(0, 60, schema.minsInterval), function(min) {
+      return '<option value="'+min+'">' + pad(min) + '</option>';
+    });
+
+    //Render time selects
+    var $el = $($.trim(this.template({
+      hours: hoursOptions.join(),
+      mins: minsOptions.join()
+    })));
+
+    //Include the date editor
+    $el.find('[data-date]').append(this.dateEditor.render().el);
+
+    //Store references to selects
+    this.$hour = $el.find('select[data-type="hour"]');
+    this.$min = $el.find('select[data-type="min"]');
+
+    //Get the hidden date field to store values in case POSTed to server
+    this.$hidden = $el.find('input[type="hidden"]');
+
+    //Set time
+    this.setValue(this.value);
+
+    this.setElement($el);
+    this.$el.attr('id', this.id);
+    this.$el.attr('name', this.getName());
+
+    if (this.hasFocus) this.trigger('blur', this);
+
+    return this;
+  },
+
+  /**
+   * @return {Date}   Selected datetime
+   */
+  getValue: function() {
+    var date = this.dateEditor.getValue();
+
+    var hour = this.$hour.val(),
+        min = this.$min.val();
+
+    if (!date || !hour || !min) return null;
+
+    date.setHours(hour);
+    date.setMinutes(min);
+
+    return date;
+  },
+
+  /**
+   * @param {Date}
+   */
+  setValue: function(date) {
+    if (!_.isDate(date)) date = new Date(date);
+
+    this.dateEditor.setValue(date);
+
+    this.$hour.val(date.getHours());
+    this.$min.val(date.getMinutes());
+
+    this.updateHidden();
+  },
+
+  focus: function() {
+    if (this.hasFocus) return;
+
+    this.$('select').first().focus();
+  },
+
+  blur: function() {
+    if (!this.hasFocus) return;
+
+    this.$('select:focus').blur();
+  },
+
+  /**
+   * Update the hidden input which is maintained for when submitting a form
+   * via a normal browser POST
+   */
+  updateHidden: function() {
+    var val = this.getValue();
+    if (_.isDate(val)) val = val.toISOString();
+
+    this.$hidden.val(val);
+  },
+
+  /**
+   * Remove the Date editor before removing self
+   */
+  remove: function() {
+    this.dateEditor.remove();
+
+    Form.editors.Base.prototype.remove.call(this);
+  }
+
+}, {
+  //STATICS
+  template: _.template('\
+    <div class="bbf-datetime">\
+      <div class="bbf-date-container" data-date></div>\
+      <select data-type="hour"><%= hours %></select>\
+      :\
+      <select data-type="min"><%= mins %></select>\
+    </div>\
+  ', null, Form.templateSettings),
+
+  //The date editor to use (constructor function, not instance)
+  DateEditor: Form.editors.Date
+});
+
+
+
+  //Metadata
+  Form.VERSION = '0.13.0';
+
+
+  //Exports
+  Backbone.Form = Form;
+  if (typeof exports !== 'undefined') exports = Form;
+
+})(window || global || this);
+
 ;// MarionetteJS (Backbone.Marionette)
 // ----------------------------------
 // v1.6.4
@@ -17468,6 +19913,755 @@ _.extend(Marionette.Module, {
   return Marionette;
 })(this, Backbone, _);
 
+;/**
+ * Copyright (c) 2011-2013 Felix Gnass
+ * Licensed under the MIT license
+ */
+(function(root, factory) {
+
+  /* CommonJS */
+  if (typeof exports == 'object')  module.exports = factory()
+
+  /* AMD module */
+  else if (typeof define == 'function' && define.amd) define(factory)
+
+  /* Browser global */
+  else root.Spinner = factory()
+}
+(this, function() {
+  "use strict";
+
+  var prefixes = ['webkit', 'Moz', 'ms', 'O'] /* Vendor prefixes */
+    , animations = {} /* Animation rules keyed by their name */
+    , useCssAnimations /* Whether to use CSS animations or setTimeout */
+
+  /**
+   * Utility function to create elements. If no tag name is given,
+   * a DIV is created. Optionally properties can be passed.
+   */
+  function createEl(tag, prop) {
+    var el = document.createElement(tag || 'div')
+      , n
+
+    for(n in prop) el[n] = prop[n]
+    return el
+  }
+
+  /**
+   * Appends children and returns the parent.
+   */
+  function ins(parent /* child1, child2, ...*/) {
+    for (var i=1, n=arguments.length; i<n; i++)
+      parent.appendChild(arguments[i])
+
+    return parent
+  }
+
+  /**
+   * Insert a new stylesheet to hold the @keyframe or VML rules.
+   */
+  var sheet = (function() {
+    var el = createEl('style', {type : 'text/css'})
+    ins(document.getElementsByTagName('head')[0], el)
+    return el.sheet || el.styleSheet
+  }())
+
+  /**
+   * Creates an opacity keyframe animation rule and returns its name.
+   * Since most mobile Webkits have timing issues with animation-delay,
+   * we create separate rules for each line/segment.
+   */
+  function addAnimation(alpha, trail, i, lines) {
+    var name = ['opacity', trail, ~~(alpha*100), i, lines].join('-')
+      , start = 0.01 + i/lines * 100
+      , z = Math.max(1 - (1-alpha) / trail * (100-start), alpha)
+      , prefix = useCssAnimations.substring(0, useCssAnimations.indexOf('Animation')).toLowerCase()
+      , pre = prefix && '-' + prefix + '-' || ''
+
+    if (!animations[name]) {
+      sheet.insertRule(
+        '@' + pre + 'keyframes ' + name + '{' +
+        '0%{opacity:' + z + '}' +
+        start + '%{opacity:' + alpha + '}' +
+        (start+0.01) + '%{opacity:1}' +
+        (start+trail) % 100 + '%{opacity:' + alpha + '}' +
+        '100%{opacity:' + z + '}' +
+        '}', sheet.cssRules.length)
+
+      animations[name] = 1
+    }
+
+    return name
+  }
+
+  /**
+   * Tries various vendor prefixes and returns the first supported property.
+   */
+  function vendor(el, prop) {
+    var s = el.style
+      , pp
+      , i
+
+    prop = prop.charAt(0).toUpperCase() + prop.slice(1)
+    for(i=0; i<prefixes.length; i++) {
+      pp = prefixes[i]+prop
+      if(s[pp] !== undefined) return pp
+    }
+    if(s[prop] !== undefined) return prop
+  }
+
+  /**
+   * Sets multiple style properties at once.
+   */
+  function css(el, prop) {
+    for (var n in prop)
+      el.style[vendor(el, n)||n] = prop[n]
+
+    return el
+  }
+
+  /**
+   * Fills in default values.
+   */
+  function merge(obj) {
+    for (var i=1; i < arguments.length; i++) {
+      var def = arguments[i]
+      for (var n in def)
+        if (obj[n] === undefined) obj[n] = def[n]
+    }
+    return obj
+  }
+
+  /**
+   * Returns the absolute page-offset of the given element.
+   */
+  function pos(el) {
+    var o = { x:el.offsetLeft, y:el.offsetTop }
+    while((el = el.offsetParent))
+      o.x+=el.offsetLeft, o.y+=el.offsetTop
+
+    return o
+  }
+
+  /**
+   * Returns the line color from the given string or array.
+   */
+  function getColor(color, idx) {
+    return typeof color == 'string' ? color : color[idx % color.length]
+  }
+
+  // Built-in defaults
+
+  var defaults = {
+    lines: 12,            // The number of lines to draw
+    length: 7,            // The length of each line
+    width: 5,             // The line thickness
+    radius: 10,           // The radius of the inner circle
+    rotate: 0,            // Rotation offset
+    corners: 1,           // Roundness (0..1)
+    color: '#000',        // #rgb or #rrggbb
+    direction: 1,         // 1: clockwise, -1: counterclockwise
+    speed: 1,             // Rounds per second
+    trail: 100,           // Afterglow percentage
+    opacity: 1/4,         // Opacity of the lines
+    fps: 20,              // Frames per second when using setTimeout()
+    zIndex: 2e9,          // Use a high z-index by default
+    className: 'spinner', // CSS class to assign to the element
+    top: 'auto',          // center vertically
+    left: 'auto',         // center horizontally
+    position: 'relative'  // element position
+  }
+
+  /** The constructor */
+  function Spinner(o) {
+    if (typeof this == 'undefined') return new Spinner(o)
+    this.opts = merge(o || {}, Spinner.defaults, defaults)
+  }
+
+  // Global defaults that override the built-ins:
+  Spinner.defaults = {}
+
+  merge(Spinner.prototype, {
+
+    /**
+     * Adds the spinner to the given target element. If this instance is already
+     * spinning, it is automatically removed from its previous target b calling
+     * stop() internally.
+     */
+    spin: function(target) {
+      this.stop()
+
+      var self = this
+        , o = self.opts
+        , el = self.el = css(createEl(0, {className: o.className}), {position: o.position, width: 0, zIndex: o.zIndex})
+        , mid = o.radius+o.length+o.width
+        , ep // element position
+        , tp // target position
+
+      if (target) {
+        target.insertBefore(el, target.firstChild||null)
+        tp = pos(target)
+        ep = pos(el)
+        css(el, {
+          left: (o.left == 'auto' ? tp.x-ep.x + (target.offsetWidth >> 1) : parseInt(o.left, 10) + mid) + 'px',
+          top: (o.top == 'auto' ? tp.y-ep.y + (target.offsetHeight >> 1) : parseInt(o.top, 10) + mid)  + 'px'
+        })
+      }
+
+      el.setAttribute('role', 'progressbar')
+      self.lines(el, self.opts)
+
+      if (!useCssAnimations) {
+        // No CSS animation support, use setTimeout() instead
+        var i = 0
+          , start = (o.lines - 1) * (1 - o.direction) / 2
+          , alpha
+          , fps = o.fps
+          , f = fps/o.speed
+          , ostep = (1-o.opacity) / (f*o.trail / 100)
+          , astep = f/o.lines
+
+        ;(function anim() {
+          i++;
+          for (var j = 0; j < o.lines; j++) {
+            alpha = Math.max(1 - (i + (o.lines - j) * astep) % f * ostep, o.opacity)
+
+            self.opacity(el, j * o.direction + start, alpha, o)
+          }
+          self.timeout = self.el && setTimeout(anim, ~~(1000/fps))
+        })()
+      }
+      return self
+    },
+
+    /**
+     * Stops and removes the Spinner.
+     */
+    stop: function() {
+      var el = this.el
+      if (el) {
+        clearTimeout(this.timeout)
+        if (el.parentNode) el.parentNode.removeChild(el)
+        this.el = undefined
+      }
+      return this
+    },
+
+    /**
+     * Internal method that draws the individual lines. Will be overwritten
+     * in VML fallback mode below.
+     */
+    lines: function(el, o) {
+      var i = 0
+        , start = (o.lines - 1) * (1 - o.direction) / 2
+        , seg
+
+      function fill(color, shadow) {
+        return css(createEl(), {
+          position: 'absolute',
+          width: (o.length+o.width) + 'px',
+          height: o.width + 'px',
+          background: color,
+          boxShadow: shadow,
+          transformOrigin: 'left',
+          transform: 'rotate(' + ~~(360/o.lines*i+o.rotate) + 'deg) translate(' + o.radius+'px' +',0)',
+          borderRadius: (o.corners * o.width>>1) + 'px'
+        })
+      }
+
+      for (; i < o.lines; i++) {
+        seg = css(createEl(), {
+          position: 'absolute',
+          top: 1+~(o.width/2) + 'px',
+          transform: o.hwaccel ? 'translate3d(0,0,0)' : '',
+          opacity: o.opacity,
+          animation: useCssAnimations && addAnimation(o.opacity, o.trail, start + i * o.direction, o.lines) + ' ' + 1/o.speed + 's linear infinite'
+        })
+
+        if (o.shadow) ins(seg, css(fill('#000', '0 0 4px ' + '#000'), {top: 2+'px'}))
+        ins(el, ins(seg, fill(getColor(o.color, i), '0 0 1px rgba(0,0,0,.1)')))
+      }
+      return el
+    },
+
+    /**
+     * Internal method that adjusts the opacity of a single line.
+     * Will be overwritten in VML fallback mode below.
+     */
+    opacity: function(el, i, val) {
+      if (i < el.childNodes.length) el.childNodes[i].style.opacity = val
+    }
+
+  })
+
+
+  function initVML() {
+
+    /* Utility function to create a VML tag */
+    function vml(tag, attr) {
+      return createEl('<' + tag + ' xmlns="urn:schemas-microsoft.com:vml" class="spin-vml">', attr)
+    }
+
+    // No CSS transforms but VML support, add a CSS rule for VML elements:
+    sheet.addRule('.spin-vml', 'behavior:url(#default#VML)')
+
+    Spinner.prototype.lines = function(el, o) {
+      var r = o.length+o.width
+        , s = 2*r
+
+      function grp() {
+        return css(
+          vml('group', {
+            coordsize: s + ' ' + s,
+            coordorigin: -r + ' ' + -r
+          }),
+          { width: s, height: s }
+        )
+      }
+
+      var margin = -(o.width+o.length)*2 + 'px'
+        , g = css(grp(), {position: 'absolute', top: margin, left: margin})
+        , i
+
+      function seg(i, dx, filter) {
+        ins(g,
+          ins(css(grp(), {rotation: 360 / o.lines * i + 'deg', left: ~~dx}),
+            ins(css(vml('roundrect', {arcsize: o.corners}), {
+                width: r,
+                height: o.width,
+                left: o.radius,
+                top: -o.width>>1,
+                filter: filter
+              }),
+              vml('fill', {color: getColor(o.color, i), opacity: o.opacity}),
+              vml('stroke', {opacity: 0}) // transparent stroke to fix color bleeding upon opacity change
+            )
+          )
+        )
+      }
+
+      if (o.shadow)
+        for (i = 1; i <= o.lines; i++)
+          seg(i, -2, 'progid:DXImageTransform.Microsoft.Blur(pixelradius=2,makeshadow=1,shadowopacity=.3)')
+
+      for (i = 1; i <= o.lines; i++) seg(i)
+      return ins(el, g)
+    }
+
+    Spinner.prototype.opacity = function(el, i, val, o) {
+      var c = el.firstChild
+      o = o.shadow && o.lines || 0
+      if (c && i+o < c.childNodes.length) {
+        c = c.childNodes[i+o]; c = c && c.firstChild; c = c && c.firstChild
+        if (c) c.opacity = val
+      }
+    }
+  }
+
+  var probe = css(createEl('group'), {behavior: 'url(#default#VML)'})
+
+  if (!vendor(probe, 'transform') && probe.adj) initVML()
+  else useCssAnimations = vendor(probe, 'animation')
+
+  return Spinner
+
+}));
+
+;/* ========================================================================
+ * bootstrap-switch - v2.0.1
+ * http://www.bootstrap-switch.org
+ * ========================================================================
+ * Copyright 2012-2013 Mattia Larentis
+ *
+ * ========================================================================
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ========================================================================
+ */
+
+(function() {
+  (function($) {
+    $.fn.bootstrapSwitch = function(method) {
+      var methods;
+      methods = {
+        init: function() {
+          return this.each(function() {
+            var $div, $element, $form, $label, $switchLeft, $switchRight, $wrapper, changeState;
+            $element = $(this);
+            $switchLeft = $("<span>", {
+              "class": "switch-left",
+              html: function() {
+                var html, label;
+                html = "ON";
+                label = $element.data("on-label");
+                if (label != null) {
+                  html = label;
+                }
+                return html;
+              }
+            });
+            $switchRight = $("<span>", {
+              "class": "switch-right",
+              html: function() {
+                var html, label;
+                html = "OFF";
+                label = $element.data("off-label");
+                if (label != null) {
+                  html = label;
+                }
+                return html;
+              }
+            });
+            $label = $("<label>", {
+              "for": $element.attr("id"),
+              html: function() {
+                var html, icon, label;
+                html = "&nbsp;";
+                icon = $element.data("label-icon");
+                label = $element.data("text-label");
+                if (icon != null) {
+                  html = "<i class=\"icon " + icon + "\"></i>";
+                }
+                if (label != null) {
+                  html = label;
+                }
+                return html;
+              }
+            });
+            $div = $("<div>");
+            $wrapper = $("<div>", {
+              "class": "has-switch",
+              tabindex: 0
+            });
+            $form = $element.closest("form");
+            changeState = function() {
+              if ($label.hasClass("label-change-switch")) {
+                return;
+              }
+              return $label.trigger("mousedown").trigger("mouseup").trigger("click");
+            };
+            $element.data("bootstrap-switch", true);
+            if ($element.data("on") != null) {
+              $switchLeft.addClass("switch-" + $element.data("on"));
+            }
+            if ($element.data("off") != null) {
+              $switchRight.addClass("switch-" + $element.data("off"));
+            }
+            $wrapper.data("animated", false);
+            if ($element.data("animated") !== false) {
+              $wrapper.addClass("switch-animate").data("animated", true);
+            }
+            $div = $element.wrap($div).parent();
+            $wrapper = $div.wrap($wrapper).parent();
+            if ($element.attr("class")) {
+              $.each(["switch-mini", "switch-small", "switch-large"], function(i, cls) {
+                if ($element.attr("class").indexOf(cls) >= 0) {
+                  return $wrapper.addClass(cls);
+                }
+              });
+            }
+            $element.before($switchLeft).before($label).before($switchRight);
+            $wrapper.addClass($element.is(":checked") ? "switch-on" : "switch-off");
+            if ($element.is(":disabled") || $element.is("[readonly]")) {
+              $wrapper.addClass("disabled");
+            }
+            $element.on("keydown", function(e) {
+              if (e.keyCode !== 32) {
+                return;
+              }
+              e.stopImmediatePropagation();
+              e.preventDefault();
+              return changeState();
+            }).on("change", function(e, skip) {
+              var isChecked, state;
+              isChecked = $element.is(":checked");
+              state = $wrapper.hasClass("switch-off");
+              e.preventDefault();
+              $div.css("left", "");
+              if (state !== isChecked) {
+                return;
+              }
+              if (isChecked) {
+                $wrapper.removeClass("switch-off").addClass("switch-on");
+              } else {
+                $wrapper.removeClass("switch-on").addClass("switch-off");
+              }
+              if ($wrapper.data("animated") !== false) {
+                $wrapper.addClass("switch-animate");
+              }
+              if (typeof skip === "boolean" && skip) {
+                return;
+              }
+              return $element.trigger("switch-change", {
+                el: $element,
+                value: isChecked
+              });
+            });
+            $wrapper.on("keydown", function(e) {
+              if (!e.which || $element.is(":disabled") || $element.is("[readonly]")) {
+                return;
+              }
+              switch (e.which) {
+                case 32:
+                  e.preventDefault();
+                  return changeState();
+                case 37:
+                  e.preventDefault();
+                  if ($element.is(":checked")) {
+                    return changeState();
+                  }
+                  break;
+                case 39:
+                  e.preventDefault();
+                  if (!$element.is(":checked")) {
+                    return changeState();
+                  }
+              }
+            });
+            $switchLeft.on("click", function() {
+              return changeState();
+            });
+            $switchRight.on("click", function() {
+              return changeState();
+            });
+            $label.on("mousedown touchstart", function(e) {
+              var moving;
+              moving = false;
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              $wrapper.removeClass("switch-animate");
+              if ($element.is(":disabled") || $element.is("[readonly]") || $element.hasClass("radio-no-uncheck")) {
+                return $label.unbind("click");
+              }
+              return $label.on("mousemove touchmove", function(e) {
+                var left, percent, relativeX, right;
+                relativeX = (e.pageX || e.originalEvent.targetTouches[0].pageX) - $wrapper.offset().left;
+                percent = (relativeX / $wrapper.width()) * 100;
+                left = 25;
+                right = 75;
+                moving = true;
+                if (percent < left) {
+                  percent = left;
+                } else if (percent > right) {
+                  percent = right;
+                }
+                return $div.css("left", (percent - right) + "%");
+              }).on("click touchend", function(e) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                $label.unbind("mouseleave");
+                if (moving) {
+                  $element.prop("checked", parseInt($label.parent().css("left"), 10) > -25);
+                } else {
+                  $element.prop("checked", !$element.is(":checked"));
+                }
+                moving = false;
+                return $element.trigger("change");
+              }).on("mouseleave", function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                $label.unbind("mouseleave mousemove").trigger("mouseup");
+                return $element.prop("checked", parseInt($label.parent().css("left"), 10) > -25).trigger("change");
+              }).on("mouseup", function(e) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                return $label.trigger("mouseleave");
+              });
+            });
+            if (!$form.data("bootstrap-switch")) {
+              return $form.bind("reset", function() {
+                return window.setTimeout(function() {
+                  return $form.find(".has-switch").each(function() {
+                    var $input;
+                    $input = $(this).find("input");
+                    return $input.prop("checked", $input.is(":checked")).trigger("change");
+                  });
+                }, 1);
+              }).data("bootstrap-switch", true);
+            }
+          });
+        },
+        setDisabled: function(disabled) {
+          var $element, $wrapper;
+          $element = $(this);
+          $wrapper = $element.parents(".has-switch");
+          if (disabled) {
+            $wrapper.addClass("disabled");
+            $element.prop("disabled", true);
+          } else {
+            $wrapper.removeClass("disabled");
+            $element.prop("disabled", false);
+          }
+          return $element;
+        },
+        toggleDisabled: function() {
+          var $element;
+          $element = $(this);
+          $element.prop("disabled", !$element.is(":disabled")).parents(".has-switch").toggleClass("disabled");
+          return $element;
+        },
+        isDisabled: function() {
+          return $(this).is(":disabled");
+        },
+        setReadOnly: function(readonly) {
+          var $element, $wrapper;
+          $element = $(this);
+          $wrapper = $element.parents(".has-switch");
+          if (readonly) {
+            $wrapper.addClass("disabled");
+            $element.prop("readonly", true);
+          } else {
+            $wrapper.removeClass("disabled");
+            $element.prop("readonly", false);
+          }
+          return $element;
+        },
+        toggleReadOnly: function() {
+          var $element;
+          $element = $(this);
+          $element.prop("readonly", !$element.is("[readonly]")).parents(".has-switch").toggleClass("disabled");
+          return $element;
+        },
+        isReadOnly: function() {
+          return $(this).is("[readonly]");
+        },
+        toggleState: function(skip) {
+          var $element;
+          $element = $(this);
+          $element.prop("checked", !$element.is(":checked")).trigger("change", skip);
+          return $element;
+        },
+        toggleRadioState: function(skip) {
+          var $element;
+          $element = $(this);
+          $element.not(":checked").prop("checked", !$element.is(":checked")).trigger("change", skip);
+          return $element;
+        },
+        toggleRadioStateAllowUncheck: function(uncheck, skip) {
+          var $element;
+          $element = $(this);
+          if (uncheck) {
+            $element.not(":checked").trigger("change", skip);
+          } else {
+            $element.not(":checked").prop("checked", !$element.is(":checked")).trigger("change", skip);
+          }
+          return $element;
+        },
+        setState: function(value, skip) {
+          var $element;
+          $element = $(this);
+          $element.prop("checked", value).trigger("change", skip);
+          return $element;
+        },
+        setOnLabel: function(value) {
+          var $element;
+          $element = $(this);
+          $element.siblings(".switch-left").html(value);
+          return $element;
+        },
+        setOffLabel: function(value) {
+          var $element;
+          $element = $(this);
+          $element.siblings(".switch-right").html(value);
+          return $element;
+        },
+        setOnClass: function(value) {
+          var $element, $switchLeft, cls;
+          $element = $(this);
+          $switchLeft = $element.siblings(".switch-left");
+          cls = $element.attr("data-on");
+          if (value == null) {
+            return;
+          }
+          if (cls != null) {
+            $switchLeft.removeClass("switch-" + cls);
+          }
+          $switchLeft.addClass("switch-" + value);
+          return $element;
+        },
+        setOffClass: function(value) {
+          var $element, $switchRight, cls;
+          $element = $(this);
+          $switchRight = $element.siblings(".switch-right");
+          cls = $element.attr("data-off");
+          if (value == null) {
+            return;
+          }
+          if (cls != null) {
+            $switchRight.removeClass("switch-" + cls);
+          }
+          $switchRight.addClass("switch-" + value);
+          return $element;
+        },
+        setAnimated: function(value) {
+          var $element, $wrapper;
+          $element = $(this);
+          $wrapper = $element.parents(".has-switch");
+          if (value == null) {
+            value = false;
+          }
+          $wrapper.data("animated", value).attr("data-animated", value)[$wrapper.data("animated") !== false ? "addClass" : "removeClass"]("switch-animate");
+          return $element;
+        },
+        setSizeClass: function(value) {
+          var $element, $wrapper;
+          $element = $(this);
+          $wrapper = $element.parents(".has-switch");
+          $.each(["switch-mini", "switch-small", "switch-large"], function(i, cls) {
+            return $wrapper[cls !== value ? "removeClass" : "addClass"](cls);
+          });
+          return $element;
+        },
+        setTextLabel: function(value) {
+          var $element;
+          $element = $(this);
+          $element.siblings("label").html(value || "&nbsp");
+          return $element;
+        },
+        setTextIcon: function(value) {
+          var $element;
+          $element = $(this);
+          $element.siblings("label").html(value ? "<i class=\"icon " + value + "\"></i>" : "&nbsp;");
+          return $element;
+        },
+        state: function() {
+          return $(this).is(":checked");
+        },
+        destroy: function() {
+          var $div, $element, $form;
+          $element = $(this);
+          $div = $element.parent();
+          $form = $div.closest("form");
+          $div.children().not($element).remove();
+          $element.unwrap().unwrap().off("change");
+          if ($form.length) {
+            $form.off("reset").removeData("bootstrap-switch");
+          }
+          return $element;
+        }
+      };
+      if (methods[method]) {
+        return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+      }
+      if (typeof method === "object" || !method) {
+        return methods.init.apply(this, arguments);
+      }
+      return $.error("Method " + method + " does not exist!");
+    };
+    return this;
+  })(jQuery);
+
+}).call(this);
+
 ;(function() {
   var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Evented, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, ignoreStack, init, now, options, requestAnimationFrame, result, runAnimation, scalers, shouldIgnoreURL, shouldTrack, source, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _i, _intercept, _len, _pushState, _ref, _ref1, _replaceState,
     __slice = [].slice,
@@ -18384,754 +21578,83 @@ _.extend(Marionette.Module, {
 
 }).call(this);
 
-;/**
- * Copyright (c) 2011-2013 Felix Gnass
- * Licensed under the MIT license
+;/** 
+ * Include this template file after backbone-forms.amd.js to override the default templates
+ * 
+ * 'data-*' attributes control where elements are placed
  */
-(function(root, factory) {
+;(function(Form) {
 
-  /* CommonJS */
-  if (typeof exports == 'object')  module.exports = factory()
-
-  /* AMD module */
-  else if (typeof define == 'function' && define.amd) define(factory)
-
-  /* Browser global */
-  else root.Spinner = factory()
-}
-(this, function() {
-  "use strict";
-
-  var prefixes = ['webkit', 'Moz', 'ms', 'O'] /* Vendor prefixes */
-    , animations = {} /* Animation rules keyed by their name */
-    , useCssAnimations /* Whether to use CSS animations or setTimeout */
-
+  
   /**
-   * Utility function to create elements. If no tag name is given,
-   * a DIV is created. Optionally properties can be passed.
+   * Bootstrap 3 templates
    */
-  function createEl(tag, prop) {
-    var el = document.createElement(tag || 'div')
-      , n
+  Form.template = _.template('\
+    <form class="form-horizontal" role="form" data-fieldsets></form>\
+  ');
 
-    for(n in prop) el[n] = prop[n]
-    return el
+
+  Form.Fieldset.template = _.template('\
+    <fieldset data-fields>\
+      <% if (legend) { %>\
+        <legend><%= legend %></legend>\
+      <% } %>\
+    </fieldset>\
+  ');
+
+
+  Form.Field.template = _.template('\
+    <div class="form-group field-<%= key %>">\
+      <label class="col-sm-2 control-label" for="<%= editorId %>"><%= title %></label>\
+      <div class="col-sm-10">\
+        <span data-editor></span>\
+        <p class="help-block" data-error></p>\
+        <p class="help-block"><%= help %></p>\
+      </div>\
+    </div>\
+  ');
+
+
+  Form.NestedField.template = _.template('\
+    <div class="field-<%= key %>">\
+      <div title="<%= title %>" class="input-xlarge">\
+        <span data-editor></span>\
+        <div class="help-inline" data-error></div>\
+      </div>\
+      <div class="help-block"><%= help %></div>\
+    </div>\
+  ');
+
+  Form.editors.Base.prototype.className = 'form-control';
+  Form.Field.errorClassName = 'has-error';
+
+
+  if (Form.editors.List) {
+
+    Form.editors.List.template = _.template('\
+      <div class="bbf-list">\
+        <ul class="unstyled clearfix" data-items></ul>\
+        <button type="button" class="btn bbf-add" data-action="add">Add</button>\
+      </div>\
+    ');
+
+
+    Form.editors.List.Item.template = _.template('\
+      <li class="clearfix">\
+        <div class="pull-left" data-editor></div>\
+        <button type="button" class="btn bbf-del" data-action="remove">&times;</button>\
+      </li>\
+    ');
+    
+
+    Form.editors.List.Object.template = Form.editors.List.NestedModel.template = _.template('\
+      <div class="bbf-list-modal"><%= summary %></div>\
+    ');
+
   }
 
-  /**
-   * Appends children and returns the parent.
-   */
-  function ins(parent /* child1, child2, ...*/) {
-    for (var i=1, n=arguments.length; i<n; i++)
-      parent.appendChild(arguments[i])
 
-    return parent
-  }
-
-  /**
-   * Insert a new stylesheet to hold the @keyframe or VML rules.
-   */
-  var sheet = (function() {
-    var el = createEl('style', {type : 'text/css'})
-    ins(document.getElementsByTagName('head')[0], el)
-    return el.sheet || el.styleSheet
-  }())
-
-  /**
-   * Creates an opacity keyframe animation rule and returns its name.
-   * Since most mobile Webkits have timing issues with animation-delay,
-   * we create separate rules for each line/segment.
-   */
-  function addAnimation(alpha, trail, i, lines) {
-    var name = ['opacity', trail, ~~(alpha*100), i, lines].join('-')
-      , start = 0.01 + i/lines * 100
-      , z = Math.max(1 - (1-alpha) / trail * (100-start), alpha)
-      , prefix = useCssAnimations.substring(0, useCssAnimations.indexOf('Animation')).toLowerCase()
-      , pre = prefix && '-' + prefix + '-' || ''
-
-    if (!animations[name]) {
-      sheet.insertRule(
-        '@' + pre + 'keyframes ' + name + '{' +
-        '0%{opacity:' + z + '}' +
-        start + '%{opacity:' + alpha + '}' +
-        (start+0.01) + '%{opacity:1}' +
-        (start+trail) % 100 + '%{opacity:' + alpha + '}' +
-        '100%{opacity:' + z + '}' +
-        '}', sheet.cssRules.length)
-
-      animations[name] = 1
-    }
-
-    return name
-  }
-
-  /**
-   * Tries various vendor prefixes and returns the first supported property.
-   */
-  function vendor(el, prop) {
-    var s = el.style
-      , pp
-      , i
-
-    prop = prop.charAt(0).toUpperCase() + prop.slice(1)
-    for(i=0; i<prefixes.length; i++) {
-      pp = prefixes[i]+prop
-      if(s[pp] !== undefined) return pp
-    }
-    if(s[prop] !== undefined) return prop
-  }
-
-  /**
-   * Sets multiple style properties at once.
-   */
-  function css(el, prop) {
-    for (var n in prop)
-      el.style[vendor(el, n)||n] = prop[n]
-
-    return el
-  }
-
-  /**
-   * Fills in default values.
-   */
-  function merge(obj) {
-    for (var i=1; i < arguments.length; i++) {
-      var def = arguments[i]
-      for (var n in def)
-        if (obj[n] === undefined) obj[n] = def[n]
-    }
-    return obj
-  }
-
-  /**
-   * Returns the absolute page-offset of the given element.
-   */
-  function pos(el) {
-    var o = { x:el.offsetLeft, y:el.offsetTop }
-    while((el = el.offsetParent))
-      o.x+=el.offsetLeft, o.y+=el.offsetTop
-
-    return o
-  }
-
-  /**
-   * Returns the line color from the given string or array.
-   */
-  function getColor(color, idx) {
-    return typeof color == 'string' ? color : color[idx % color.length]
-  }
-
-  // Built-in defaults
-
-  var defaults = {
-    lines: 12,            // The number of lines to draw
-    length: 7,            // The length of each line
-    width: 5,             // The line thickness
-    radius: 10,           // The radius of the inner circle
-    rotate: 0,            // Rotation offset
-    corners: 1,           // Roundness (0..1)
-    color: '#000',        // #rgb or #rrggbb
-    direction: 1,         // 1: clockwise, -1: counterclockwise
-    speed: 1,             // Rounds per second
-    trail: 100,           // Afterglow percentage
-    opacity: 1/4,         // Opacity of the lines
-    fps: 20,              // Frames per second when using setTimeout()
-    zIndex: 2e9,          // Use a high z-index by default
-    className: 'spinner', // CSS class to assign to the element
-    top: 'auto',          // center vertically
-    left: 'auto',         // center horizontally
-    position: 'relative'  // element position
-  }
-
-  /** The constructor */
-  function Spinner(o) {
-    if (typeof this == 'undefined') return new Spinner(o)
-    this.opts = merge(o || {}, Spinner.defaults, defaults)
-  }
-
-  // Global defaults that override the built-ins:
-  Spinner.defaults = {}
-
-  merge(Spinner.prototype, {
-
-    /**
-     * Adds the spinner to the given target element. If this instance is already
-     * spinning, it is automatically removed from its previous target b calling
-     * stop() internally.
-     */
-    spin: function(target) {
-      this.stop()
-
-      var self = this
-        , o = self.opts
-        , el = self.el = css(createEl(0, {className: o.className}), {position: o.position, width: 0, zIndex: o.zIndex})
-        , mid = o.radius+o.length+o.width
-        , ep // element position
-        , tp // target position
-
-      if (target) {
-        target.insertBefore(el, target.firstChild||null)
-        tp = pos(target)
-        ep = pos(el)
-        css(el, {
-          left: (o.left == 'auto' ? tp.x-ep.x + (target.offsetWidth >> 1) : parseInt(o.left, 10) + mid) + 'px',
-          top: (o.top == 'auto' ? tp.y-ep.y + (target.offsetHeight >> 1) : parseInt(o.top, 10) + mid)  + 'px'
-        })
-      }
-
-      el.setAttribute('role', 'progressbar')
-      self.lines(el, self.opts)
-
-      if (!useCssAnimations) {
-        // No CSS animation support, use setTimeout() instead
-        var i = 0
-          , start = (o.lines - 1) * (1 - o.direction) / 2
-          , alpha
-          , fps = o.fps
-          , f = fps/o.speed
-          , ostep = (1-o.opacity) / (f*o.trail / 100)
-          , astep = f/o.lines
-
-        ;(function anim() {
-          i++;
-          for (var j = 0; j < o.lines; j++) {
-            alpha = Math.max(1 - (i + (o.lines - j) * astep) % f * ostep, o.opacity)
-
-            self.opacity(el, j * o.direction + start, alpha, o)
-          }
-          self.timeout = self.el && setTimeout(anim, ~~(1000/fps))
-        })()
-      }
-      return self
-    },
-
-    /**
-     * Stops and removes the Spinner.
-     */
-    stop: function() {
-      var el = this.el
-      if (el) {
-        clearTimeout(this.timeout)
-        if (el.parentNode) el.parentNode.removeChild(el)
-        this.el = undefined
-      }
-      return this
-    },
-
-    /**
-     * Internal method that draws the individual lines. Will be overwritten
-     * in VML fallback mode below.
-     */
-    lines: function(el, o) {
-      var i = 0
-        , start = (o.lines - 1) * (1 - o.direction) / 2
-        , seg
-
-      function fill(color, shadow) {
-        return css(createEl(), {
-          position: 'absolute',
-          width: (o.length+o.width) + 'px',
-          height: o.width + 'px',
-          background: color,
-          boxShadow: shadow,
-          transformOrigin: 'left',
-          transform: 'rotate(' + ~~(360/o.lines*i+o.rotate) + 'deg) translate(' + o.radius+'px' +',0)',
-          borderRadius: (o.corners * o.width>>1) + 'px'
-        })
-      }
-
-      for (; i < o.lines; i++) {
-        seg = css(createEl(), {
-          position: 'absolute',
-          top: 1+~(o.width/2) + 'px',
-          transform: o.hwaccel ? 'translate3d(0,0,0)' : '',
-          opacity: o.opacity,
-          animation: useCssAnimations && addAnimation(o.opacity, o.trail, start + i * o.direction, o.lines) + ' ' + 1/o.speed + 's linear infinite'
-        })
-
-        if (o.shadow) ins(seg, css(fill('#000', '0 0 4px ' + '#000'), {top: 2+'px'}))
-        ins(el, ins(seg, fill(getColor(o.color, i), '0 0 1px rgba(0,0,0,.1)')))
-      }
-      return el
-    },
-
-    /**
-     * Internal method that adjusts the opacity of a single line.
-     * Will be overwritten in VML fallback mode below.
-     */
-    opacity: function(el, i, val) {
-      if (i < el.childNodes.length) el.childNodes[i].style.opacity = val
-    }
-
-  })
-
-
-  function initVML() {
-
-    /* Utility function to create a VML tag */
-    function vml(tag, attr) {
-      return createEl('<' + tag + ' xmlns="urn:schemas-microsoft.com:vml" class="spin-vml">', attr)
-    }
-
-    // No CSS transforms but VML support, add a CSS rule for VML elements:
-    sheet.addRule('.spin-vml', 'behavior:url(#default#VML)')
-
-    Spinner.prototype.lines = function(el, o) {
-      var r = o.length+o.width
-        , s = 2*r
-
-      function grp() {
-        return css(
-          vml('group', {
-            coordsize: s + ' ' + s,
-            coordorigin: -r + ' ' + -r
-          }),
-          { width: s, height: s }
-        )
-      }
-
-      var margin = -(o.width+o.length)*2 + 'px'
-        , g = css(grp(), {position: 'absolute', top: margin, left: margin})
-        , i
-
-      function seg(i, dx, filter) {
-        ins(g,
-          ins(css(grp(), {rotation: 360 / o.lines * i + 'deg', left: ~~dx}),
-            ins(css(vml('roundrect', {arcsize: o.corners}), {
-                width: r,
-                height: o.width,
-                left: o.radius,
-                top: -o.width>>1,
-                filter: filter
-              }),
-              vml('fill', {color: getColor(o.color, i), opacity: o.opacity}),
-              vml('stroke', {opacity: 0}) // transparent stroke to fix color bleeding upon opacity change
-            )
-          )
-        )
-      }
-
-      if (o.shadow)
-        for (i = 1; i <= o.lines; i++)
-          seg(i, -2, 'progid:DXImageTransform.Microsoft.Blur(pixelradius=2,makeshadow=1,shadowopacity=.3)')
-
-      for (i = 1; i <= o.lines; i++) seg(i)
-      return ins(el, g)
-    }
-
-    Spinner.prototype.opacity = function(el, i, val, o) {
-      var c = el.firstChild
-      o = o.shadow && o.lines || 0
-      if (c && i+o < c.childNodes.length) {
-        c = c.childNodes[i+o]; c = c && c.firstChild; c = c && c.firstChild
-        if (c) c.opacity = val
-      }
-    }
-  }
-
-  var probe = css(createEl('group'), {behavior: 'url(#default#VML)'})
-
-  if (!vendor(probe, 'transform') && probe.adj) initVML()
-  else useCssAnimations = vendor(probe, 'animation')
-
-  return Spinner
-
-}));
-
-;/* ========================================================================
- * bootstrap-switch - v2.0.1
- * http://www.bootstrap-switch.org
- * ========================================================================
- * Copyright 2012-2013 Mattia Larentis
- *
- * ========================================================================
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ========================================================================
- */
-
-(function() {
-  (function($) {
-    $.fn.bootstrapSwitch = function(method) {
-      var methods;
-      methods = {
-        init: function() {
-          return this.each(function() {
-            var $div, $element, $form, $label, $switchLeft, $switchRight, $wrapper, changeState;
-            $element = $(this);
-            $switchLeft = $("<span>", {
-              "class": "switch-left",
-              html: function() {
-                var html, label;
-                html = "ON";
-                label = $element.data("on-label");
-                if (label != null) {
-                  html = label;
-                }
-                return html;
-              }
-            });
-            $switchRight = $("<span>", {
-              "class": "switch-right",
-              html: function() {
-                var html, label;
-                html = "OFF";
-                label = $element.data("off-label");
-                if (label != null) {
-                  html = label;
-                }
-                return html;
-              }
-            });
-            $label = $("<label>", {
-              "for": $element.attr("id"),
-              html: function() {
-                var html, icon, label;
-                html = "&nbsp;";
-                icon = $element.data("label-icon");
-                label = $element.data("text-label");
-                if (icon != null) {
-                  html = "<i class=\"icon " + icon + "\"></i>";
-                }
-                if (label != null) {
-                  html = label;
-                }
-                return html;
-              }
-            });
-            $div = $("<div>");
-            $wrapper = $("<div>", {
-              "class": "has-switch",
-              tabindex: 0
-            });
-            $form = $element.closest("form");
-            changeState = function() {
-              if ($label.hasClass("label-change-switch")) {
-                return;
-              }
-              return $label.trigger("mousedown").trigger("mouseup").trigger("click");
-            };
-            $element.data("bootstrap-switch", true);
-            if ($element.data("on") != null) {
-              $switchLeft.addClass("switch-" + $element.data("on"));
-            }
-            if ($element.data("off") != null) {
-              $switchRight.addClass("switch-" + $element.data("off"));
-            }
-            $wrapper.data("animated", false);
-            if ($element.data("animated") !== false) {
-              $wrapper.addClass("switch-animate").data("animated", true);
-            }
-            $div = $element.wrap($div).parent();
-            $wrapper = $div.wrap($wrapper).parent();
-            if ($element.attr("class")) {
-              $.each(["switch-mini", "switch-small", "switch-large"], function(i, cls) {
-                if ($element.attr("class").indexOf(cls) >= 0) {
-                  return $wrapper.addClass(cls);
-                }
-              });
-            }
-            $element.before($switchLeft).before($label).before($switchRight);
-            $wrapper.addClass($element.is(":checked") ? "switch-on" : "switch-off");
-            if ($element.is(":disabled") || $element.is("[readonly]")) {
-              $wrapper.addClass("disabled");
-            }
-            $element.on("keydown", function(e) {
-              if (e.keyCode !== 32) {
-                return;
-              }
-              e.stopImmediatePropagation();
-              e.preventDefault();
-              return changeState();
-            }).on("change", function(e, skip) {
-              var isChecked, state;
-              isChecked = $element.is(":checked");
-              state = $wrapper.hasClass("switch-off");
-              e.preventDefault();
-              $div.css("left", "");
-              if (state !== isChecked) {
-                return;
-              }
-              if (isChecked) {
-                $wrapper.removeClass("switch-off").addClass("switch-on");
-              } else {
-                $wrapper.removeClass("switch-on").addClass("switch-off");
-              }
-              if ($wrapper.data("animated") !== false) {
-                $wrapper.addClass("switch-animate");
-              }
-              if (typeof skip === "boolean" && skip) {
-                return;
-              }
-              return $element.trigger("switch-change", {
-                el: $element,
-                value: isChecked
-              });
-            });
-            $wrapper.on("keydown", function(e) {
-              if (!e.which || $element.is(":disabled") || $element.is("[readonly]")) {
-                return;
-              }
-              switch (e.which) {
-                case 32:
-                  e.preventDefault();
-                  return changeState();
-                case 37:
-                  e.preventDefault();
-                  if ($element.is(":checked")) {
-                    return changeState();
-                  }
-                  break;
-                case 39:
-                  e.preventDefault();
-                  if (!$element.is(":checked")) {
-                    return changeState();
-                  }
-              }
-            });
-            $switchLeft.on("click", function() {
-              return changeState();
-            });
-            $switchRight.on("click", function() {
-              return changeState();
-            });
-            $label.on("mousedown touchstart", function(e) {
-              var moving;
-              moving = false;
-              e.preventDefault();
-              e.stopImmediatePropagation();
-              $wrapper.removeClass("switch-animate");
-              if ($element.is(":disabled") || $element.is("[readonly]") || $element.hasClass("radio-no-uncheck")) {
-                return $label.unbind("click");
-              }
-              return $label.on("mousemove touchmove", function(e) {
-                var left, percent, relativeX, right;
-                relativeX = (e.pageX || e.originalEvent.targetTouches[0].pageX) - $wrapper.offset().left;
-                percent = (relativeX / $wrapper.width()) * 100;
-                left = 25;
-                right = 75;
-                moving = true;
-                if (percent < left) {
-                  percent = left;
-                } else if (percent > right) {
-                  percent = right;
-                }
-                return $div.css("left", (percent - right) + "%");
-              }).on("click touchend", function(e) {
-                e.stopImmediatePropagation();
-                e.preventDefault();
-                $label.unbind("mouseleave");
-                if (moving) {
-                  $element.prop("checked", parseInt($label.parent().css("left"), 10) > -25);
-                } else {
-                  $element.prop("checked", !$element.is(":checked"));
-                }
-                moving = false;
-                return $element.trigger("change");
-              }).on("mouseleave", function(e) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                $label.unbind("mouseleave mousemove").trigger("mouseup");
-                return $element.prop("checked", parseInt($label.parent().css("left"), 10) > -25).trigger("change");
-              }).on("mouseup", function(e) {
-                e.stopImmediatePropagation();
-                e.preventDefault();
-                return $label.trigger("mouseleave");
-              });
-            });
-            if (!$form.data("bootstrap-switch")) {
-              return $form.bind("reset", function() {
-                return window.setTimeout(function() {
-                  return $form.find(".has-switch").each(function() {
-                    var $input;
-                    $input = $(this).find("input");
-                    return $input.prop("checked", $input.is(":checked")).trigger("change");
-                  });
-                }, 1);
-              }).data("bootstrap-switch", true);
-            }
-          });
-        },
-        setDisabled: function(disabled) {
-          var $element, $wrapper;
-          $element = $(this);
-          $wrapper = $element.parents(".has-switch");
-          if (disabled) {
-            $wrapper.addClass("disabled");
-            $element.prop("disabled", true);
-          } else {
-            $wrapper.removeClass("disabled");
-            $element.prop("disabled", false);
-          }
-          return $element;
-        },
-        toggleDisabled: function() {
-          var $element;
-          $element = $(this);
-          $element.prop("disabled", !$element.is(":disabled")).parents(".has-switch").toggleClass("disabled");
-          return $element;
-        },
-        isDisabled: function() {
-          return $(this).is(":disabled");
-        },
-        setReadOnly: function(readonly) {
-          var $element, $wrapper;
-          $element = $(this);
-          $wrapper = $element.parents(".has-switch");
-          if (readonly) {
-            $wrapper.addClass("disabled");
-            $element.prop("readonly", true);
-          } else {
-            $wrapper.removeClass("disabled");
-            $element.prop("readonly", false);
-          }
-          return $element;
-        },
-        toggleReadOnly: function() {
-          var $element;
-          $element = $(this);
-          $element.prop("readonly", !$element.is("[readonly]")).parents(".has-switch").toggleClass("disabled");
-          return $element;
-        },
-        isReadOnly: function() {
-          return $(this).is("[readonly]");
-        },
-        toggleState: function(skip) {
-          var $element;
-          $element = $(this);
-          $element.prop("checked", !$element.is(":checked")).trigger("change", skip);
-          return $element;
-        },
-        toggleRadioState: function(skip) {
-          var $element;
-          $element = $(this);
-          $element.not(":checked").prop("checked", !$element.is(":checked")).trigger("change", skip);
-          return $element;
-        },
-        toggleRadioStateAllowUncheck: function(uncheck, skip) {
-          var $element;
-          $element = $(this);
-          if (uncheck) {
-            $element.not(":checked").trigger("change", skip);
-          } else {
-            $element.not(":checked").prop("checked", !$element.is(":checked")).trigger("change", skip);
-          }
-          return $element;
-        },
-        setState: function(value, skip) {
-          var $element;
-          $element = $(this);
-          $element.prop("checked", value).trigger("change", skip);
-          return $element;
-        },
-        setOnLabel: function(value) {
-          var $element;
-          $element = $(this);
-          $element.siblings(".switch-left").html(value);
-          return $element;
-        },
-        setOffLabel: function(value) {
-          var $element;
-          $element = $(this);
-          $element.siblings(".switch-right").html(value);
-          return $element;
-        },
-        setOnClass: function(value) {
-          var $element, $switchLeft, cls;
-          $element = $(this);
-          $switchLeft = $element.siblings(".switch-left");
-          cls = $element.attr("data-on");
-          if (value == null) {
-            return;
-          }
-          if (cls != null) {
-            $switchLeft.removeClass("switch-" + cls);
-          }
-          $switchLeft.addClass("switch-" + value);
-          return $element;
-        },
-        setOffClass: function(value) {
-          var $element, $switchRight, cls;
-          $element = $(this);
-          $switchRight = $element.siblings(".switch-right");
-          cls = $element.attr("data-off");
-          if (value == null) {
-            return;
-          }
-          if (cls != null) {
-            $switchRight.removeClass("switch-" + cls);
-          }
-          $switchRight.addClass("switch-" + value);
-          return $element;
-        },
-        setAnimated: function(value) {
-          var $element, $wrapper;
-          $element = $(this);
-          $wrapper = $element.parents(".has-switch");
-          if (value == null) {
-            value = false;
-          }
-          $wrapper.data("animated", value).attr("data-animated", value)[$wrapper.data("animated") !== false ? "addClass" : "removeClass"]("switch-animate");
-          return $element;
-        },
-        setSizeClass: function(value) {
-          var $element, $wrapper;
-          $element = $(this);
-          $wrapper = $element.parents(".has-switch");
-          $.each(["switch-mini", "switch-small", "switch-large"], function(i, cls) {
-            return $wrapper[cls !== value ? "removeClass" : "addClass"](cls);
-          });
-          return $element;
-        },
-        setTextLabel: function(value) {
-          var $element;
-          $element = $(this);
-          $element.siblings("label").html(value || "&nbsp");
-          return $element;
-        },
-        setTextIcon: function(value) {
-          var $element;
-          $element = $(this);
-          $element.siblings("label").html(value ? "<i class=\"icon " + value + "\"></i>" : "&nbsp;");
-          return $element;
-        },
-        state: function() {
-          return $(this).is(":checked");
-        },
-        destroy: function() {
-          var $div, $element, $form;
-          $element = $(this);
-          $div = $element.parent();
-          $form = $div.closest("form");
-          $div.children().not($element).remove();
-          $element.unwrap().unwrap().off("change");
-          if ($form.length) {
-            $form.off("reset").removeData("bootstrap-switch");
-          }
-          return $element;
-        }
-      };
-      if (methods[method]) {
-        return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-      }
-      if (typeof method === "object" || !method) {
-        return methods.init.apply(this, arguments);
-      }
-      return $.error("Method " + method + " does not exist!");
-    };
-    return this;
-  })(jQuery);
-
-}).call(this);
+})(Backbone.Form);
 
 ;/**
  * Backbone localStorage Adapter
@@ -19355,6 +21878,22 @@ Backbone.sync = function(method, model, options) {
 
 return Backbone.LocalStorage;
 }));
+
+;// Console-polyfill. MIT license.
+// https://github.com/paulmillr/console-polyfill
+// Make it safe to do console.log() always.
+(function(con) {
+  'use strict';
+  var prop, method;
+  var empty = {};
+  var dummy = function() {};
+  var properties = 'memory'.split(',');
+  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
+     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
+     'time,timeEnd,trace,warn').split(',');
+  while (prop = properties.pop()) con[prop] = con[prop] || empty;
+  while (method = methods.pop()) con[method] = con[method] || dummy;
+})(this.console = this.console || {});
 
 ;/*!
  * jQuery blockUI plugin
@@ -20056,939 +22595,6 @@ $('#el').spin('flower', 'red');
   }
 
 }));
-
-;/*!
-	Autosize v1.17.8 - 2013-09-07
-	Automatically adjust textarea height based on user input.
-	(c) 2013 Jack Moore - http://www.jacklmoore.com/autosize
-	license: http://www.opensource.org/licenses/mit-license.php
-*/
-(function (factory) {
-	if (typeof define === 'function' && define.amd) {
-		// AMD. Register as an anonymous module.
-		define(['jquery'], factory);
-	} else {
-		// Browser globals: jQuery or jQuery-like library, such as Zepto
-		factory(window.jQuery || window.$);
-	}
-}(function ($) {
-	var
-	defaults = {
-		className: 'autosizejs',
-		append: '',
-		callback: false,
-		resizeDelay: 10
-	},
-
-	// border:0 is unnecessary, but avoids a bug in FireFox on OSX
-	copy = '<textarea tabindex="-1" style="position:absolute; top:-999px; left:0; right:auto; bottom:auto; border:0; padding: 0; -moz-box-sizing:content-box; -webkit-box-sizing:content-box; box-sizing:content-box; word-wrap:break-word; height:0 !important; min-height:0 !important; overflow:hidden; transition:none; -webkit-transition:none; -moz-transition:none;"/>',
-
-	// line-height is conditionally included because IE7/IE8/old Opera do not return the correct value.
-	typographyStyles = [
-		'fontFamily',
-		'fontSize',
-		'fontWeight',
-		'fontStyle',
-		'letterSpacing',
-		'textTransform',
-		'wordSpacing',
-		'textIndent'
-	],
-
-	// to keep track which textarea is being mirrored when adjust() is called.
-	mirrored,
-
-	// the mirror element, which is used to calculate what size the mirrored element should be.
-	mirror = $(copy).data('autosize', true)[0];
-
-	// test that line-height can be accurately copied.
-	mirror.style.lineHeight = '99px';
-	if ($(mirror).css('lineHeight') === '99px') {
-		typographyStyles.push('lineHeight');
-	}
-	mirror.style.lineHeight = '';
-
-	$.fn.autosize = function (options) {
-		if (!this.length) {
-			return this;
-		}
-
-		options = $.extend({}, defaults, options || {});
-
-		if (mirror.parentNode !== document.body) {
-			$(document.body).append(mirror);
-		}
-
-		return this.each(function () {
-			var
-			ta = this,
-			$ta = $(ta),
-			maxHeight,
-			minHeight,
-			boxOffset = 0,
-			callback = $.isFunction(options.callback),
-			originalStyles = {
-				height: ta.style.height,
-				overflow: ta.style.overflow,
-				overflowY: ta.style.overflowY,
-				wordWrap: ta.style.wordWrap,
-				resize: ta.style.resize
-			},
-			timeout,
-			width = $ta.width();
-
-			if ($ta.data('autosize')) {
-				// exit if autosize has already been applied, or if the textarea is the mirror element.
-				return;
-			}
-			$ta.data('autosize', true);
-
-			if ($ta.css('box-sizing') === 'border-box' || $ta.css('-moz-box-sizing') === 'border-box' || $ta.css('-webkit-box-sizing') === 'border-box'){
-				boxOffset = $ta.outerHeight() - $ta.height();
-			}
-
-			// IE8 and lower return 'auto', which parses to NaN, if no min-height is set.
-			minHeight = Math.max(parseInt($ta.css('minHeight'), 10) - boxOffset || 0, $ta.height());
-
-			$ta.css({
-				overflow: 'hidden',
-				overflowY: 'hidden',
-				wordWrap: 'break-word', // horizontal overflow is hidden, so break-word is necessary for handling words longer than the textarea width
-				resize: ($ta.css('resize') === 'none' || $ta.css('resize') === 'vertical') ? 'none' : 'horizontal'
-			});
-
-			// The mirror width must exactly match the textarea width, so using getBoundingClientRect because it doesn't round the sub-pixel value.
-			function setWidth() {
-				var style, width;
-				
-				if ('getComputedStyle' in window) {
-					style = window.getComputedStyle(ta);
-					width = ta.getBoundingClientRect().width;
-
-					$.each(['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'], function(i,val){
-						width -= parseInt(style[val],10);
-					});
-
-					mirror.style.width = width + 'px';
-				}
-				else {
-					// window.getComputedStyle, getBoundingClientRect returning a width are unsupported and unneeded in IE8 and lower.
-					mirror.style.width = Math.max($ta.width(), 0) + 'px';
-				}
-			}
-
-			function initMirror() {
-				var styles = {};
-
-				mirrored = ta;
-				mirror.className = options.className;
-				maxHeight = parseInt($ta.css('maxHeight'), 10);
-
-				// mirror is a duplicate textarea located off-screen that
-				// is automatically updated to contain the same text as the
-				// original textarea.  mirror always has a height of 0.
-				// This gives a cross-browser supported way getting the actual
-				// height of the text, through the scrollTop property.
-				$.each(typographyStyles, function(i,val){
-					styles[val] = $ta.css(val);
-				});
-				$(mirror).css(styles);
-
-				setWidth();
-
-				// Chrome-specific fix:
-				// When the textarea y-overflow is hidden, Chrome doesn't reflow the text to account for the space
-				// made available by removing the scrollbar. This workaround triggers the reflow for Chrome.
-				if (window.chrome) {
-					var width = ta.style.width;
-					ta.style.width = '0px';
-					var ignore = ta.offsetWidth;
-					ta.style.width = width;
-				}
-			}
-
-			// Using mainly bare JS in this function because it is going
-			// to fire very often while typing, and needs to very efficient.
-			function adjust() {
-				var height, original;
-
-				if (mirrored !== ta) {
-					initMirror();
-				} else {
-					setWidth();
-				}
-
-				mirror.value = ta.value + options.append;
-				mirror.style.overflowY = ta.style.overflowY;
-				original = parseInt(ta.style.height,10);
-
-				// Setting scrollTop to zero is needed in IE8 and lower for the next step to be accurately applied
-				mirror.scrollTop = 0;
-
-				mirror.scrollTop = 9e4;
-
-				// Using scrollTop rather than scrollHeight because scrollHeight is non-standard and includes padding.
-				height = mirror.scrollTop;
-
-				if (maxHeight && height > maxHeight) {
-					ta.style.overflowY = 'scroll';
-					height = maxHeight;
-				} else {
-					ta.style.overflowY = 'hidden';
-					if (height < minHeight) {
-						height = minHeight;
-					}
-				}
-
-				height += boxOffset;
-
-				if (original !== height) {
-					ta.style.height = height + 'px';
-					if (callback) {
-						options.callback.call(ta,ta);
-					}
-				}
-			}
-
-			function resize () {
-				clearTimeout(timeout);
-				timeout = setTimeout(function(){
-					var newWidth = $ta.width();
-
-					if (newWidth !== width) {
-						width = newWidth;
-						adjust();
-					}
-				}, parseInt(options.resizeDelay,10));
-			}
-
-			if ('onpropertychange' in ta) {
-				if ('oninput' in ta) {
-					// Detects IE9.  IE9 does not fire onpropertychange or oninput for deletions,
-					// so binding to onkeyup to catch most of those occasions.  There is no way that I
-					// know of to detect something like 'cut' in IE9.
-					$ta.on('input.autosize keyup.autosize', adjust);
-				} else {
-					// IE7 / IE8
-					$ta.on('propertychange.autosize', function(){
-						if(event.propertyName === 'value'){
-							adjust();
-						}
-					});
-				}
-			} else {
-				// Modern Browsers
-				$ta.on('input.autosize', adjust);
-			}
-
-			// Set options.resizeDelay to false if using fixed-width textarea elements.
-			// Uses a timeout and width check to reduce the amount of times adjust needs to be called after window resize.
-
-			if (options.resizeDelay !== false) {
-				$(window).on('resize.autosize', resize);
-			}
-
-			// Event for manual triggering if needed.
-			// Should only be needed when the value of the textarea is changed through JavaScript rather than user input.
-			$ta.on('autosize.resize', adjust);
-
-			// Event for manual triggering that also forces the styles to update as well.
-			// Should only be needed if one of typography styles of the textarea change, and the textarea is already the target of the adjust method.
-			$ta.on('autosize.resizeIncludeStyle', function() {
-				mirrored = null;
-				adjust();
-			});
-
-			$ta.on('autosize.destroy', function(){
-				mirrored = null;
-				clearTimeout(timeout);
-				$(window).off('resize', resize);
-				$ta
-					.off('autosize')
-					.off('.autosize')
-					.css(originalStyles)
-					.removeData('autosize');
-			});
-
-			// Call adjust in case the textarea already contains text.
-			adjust();
-		});
-	};
-}));
-
-;//  Underscore.string
-//  (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
-//  Underscore.string is freely distributable under the terms of the MIT license.
-//  Documentation: https://github.com/epeli/underscore.string
-//  Some code is borrowed from MooTools and Alexandru Marasteanu.
-//  Version '2.3.2'
-
-!function(root, String){
-  'use strict';
-
-  // Defining helper functions.
-
-  var nativeTrim = String.prototype.trim;
-  var nativeTrimRight = String.prototype.trimRight;
-  var nativeTrimLeft = String.prototype.trimLeft;
-
-  var parseNumber = function(source) { return source * 1 || 0; };
-
-  var strRepeat = function(str, qty){
-    if (qty < 1) return '';
-    var result = '';
-    while (qty > 0) {
-      if (qty & 1) result += str;
-      qty >>= 1, str += str;
-    }
-    return result;
-  };
-
-  var slice = [].slice;
-
-  var defaultToWhiteSpace = function(characters) {
-    if (characters == null)
-      return '\\s';
-    else if (characters.source)
-      return characters.source;
-    else
-      return '[' + _s.escapeRegExp(characters) + ']';
-  };
-
-  // Helper for toBoolean
-  function boolMatch(s, matchers) {
-    var i, matcher, down = s.toLowerCase();
-    matchers = [].concat(matchers);
-    for (i = 0; i < matchers.length; i += 1) {
-      matcher = matchers[i];
-      if (!matcher) continue;
-      if (matcher.test && matcher.test(s)) return true;
-      if (matcher.toLowerCase() === down) return true;
-    }
-  }
-
-  var escapeChars = {
-    lt: '<',
-    gt: '>',
-    quot: '"',
-    amp: '&',
-    apos: "'"
-  };
-
-  var reversedEscapeChars = {};
-  for(var key in escapeChars) reversedEscapeChars[escapeChars[key]] = key;
-  reversedEscapeChars["'"] = '#39';
-
-  // sprintf() for JavaScript 0.7-beta1
-  // http://www.diveintojavascript.com/projects/javascript-sprintf
-  //
-  // Copyright (c) Alexandru Marasteanu <alexaholic [at) gmail (dot] com>
-  // All rights reserved.
-
-  var sprintf = (function() {
-    function get_type(variable) {
-      return Object.prototype.toString.call(variable).slice(8, -1).toLowerCase();
-    }
-
-    var str_repeat = strRepeat;
-
-    var str_format = function() {
-      if (!str_format.cache.hasOwnProperty(arguments[0])) {
-        str_format.cache[arguments[0]] = str_format.parse(arguments[0]);
-      }
-      return str_format.format.call(null, str_format.cache[arguments[0]], arguments);
-    };
-
-    str_format.format = function(parse_tree, argv) {
-      var cursor = 1, tree_length = parse_tree.length, node_type = '', arg, output = [], i, k, match, pad, pad_character, pad_length;
-      for (i = 0; i < tree_length; i++) {
-        node_type = get_type(parse_tree[i]);
-        if (node_type === 'string') {
-          output.push(parse_tree[i]);
-        }
-        else if (node_type === 'array') {
-          match = parse_tree[i]; // convenience purposes only
-          if (match[2]) { // keyword argument
-            arg = argv[cursor];
-            for (k = 0; k < match[2].length; k++) {
-              if (!arg.hasOwnProperty(match[2][k])) {
-                throw new Error(sprintf('[_.sprintf] property "%s" does not exist', match[2][k]));
-              }
-              arg = arg[match[2][k]];
-            }
-          } else if (match[1]) { // positional argument (explicit)
-            arg = argv[match[1]];
-          }
-          else { // positional argument (implicit)
-            arg = argv[cursor++];
-          }
-
-          if (/[^s]/.test(match[8]) && (get_type(arg) != 'number')) {
-            throw new Error(sprintf('[_.sprintf] expecting number but found %s', get_type(arg)));
-          }
-          switch (match[8]) {
-            case 'b': arg = arg.toString(2); break;
-            case 'c': arg = String.fromCharCode(arg); break;
-            case 'd': arg = parseInt(arg, 10); break;
-            case 'e': arg = match[7] ? arg.toExponential(match[7]) : arg.toExponential(); break;
-            case 'f': arg = match[7] ? parseFloat(arg).toFixed(match[7]) : parseFloat(arg); break;
-            case 'o': arg = arg.toString(8); break;
-            case 's': arg = ((arg = String(arg)) && match[7] ? arg.substring(0, match[7]) : arg); break;
-            case 'u': arg = Math.abs(arg); break;
-            case 'x': arg = arg.toString(16); break;
-            case 'X': arg = arg.toString(16).toUpperCase(); break;
-          }
-          arg = (/[def]/.test(match[8]) && match[3] && arg >= 0 ? '+'+ arg : arg);
-          pad_character = match[4] ? match[4] == '0' ? '0' : match[4].charAt(1) : ' ';
-          pad_length = match[6] - String(arg).length;
-          pad = match[6] ? str_repeat(pad_character, pad_length) : '';
-          output.push(match[5] ? arg + pad : pad + arg);
-        }
-      }
-      return output.join('');
-    };
-
-    str_format.cache = {};
-
-    str_format.parse = function(fmt) {
-      var _fmt = fmt, match = [], parse_tree = [], arg_names = 0;
-      while (_fmt) {
-        if ((match = /^[^\x25]+/.exec(_fmt)) !== null) {
-          parse_tree.push(match[0]);
-        }
-        else if ((match = /^\x25{2}/.exec(_fmt)) !== null) {
-          parse_tree.push('%');
-        }
-        else if ((match = /^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(_fmt)) !== null) {
-          if (match[2]) {
-            arg_names |= 1;
-            var field_list = [], replacement_field = match[2], field_match = [];
-            if ((field_match = /^([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
-              field_list.push(field_match[1]);
-              while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
-                if ((field_match = /^\.([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
-                  field_list.push(field_match[1]);
-                }
-                else if ((field_match = /^\[(\d+)\]/.exec(replacement_field)) !== null) {
-                  field_list.push(field_match[1]);
-                }
-                else {
-                  throw new Error('[_.sprintf] huh?');
-                }
-              }
-            }
-            else {
-              throw new Error('[_.sprintf] huh?');
-            }
-            match[2] = field_list;
-          }
-          else {
-            arg_names |= 2;
-          }
-          if (arg_names === 3) {
-            throw new Error('[_.sprintf] mixing positional and named placeholders is not (yet) supported');
-          }
-          parse_tree.push(match);
-        }
-        else {
-          throw new Error('[_.sprintf] huh?');
-        }
-        _fmt = _fmt.substring(match[0].length);
-      }
-      return parse_tree;
-    };
-
-    return str_format;
-  })();
-
-
-
-  // Defining underscore.string
-
-  var _s = {
-
-    VERSION: '2.3.0',
-
-    isBlank: function(str){
-      if (str == null) str = '';
-      return (/^\s*$/).test(str);
-    },
-
-    stripTags: function(str){
-      if (str == null) return '';
-      return String(str).replace(/<\/?[^>]+>/g, '');
-    },
-
-    capitalize : function(str){
-      str = str == null ? '' : String(str);
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    },
-
-    chop: function(str, step){
-      if (str == null) return [];
-      str = String(str);
-      step = ~~step;
-      return step > 0 ? str.match(new RegExp('.{1,' + step + '}', 'g')) : [str];
-    },
-
-    clean: function(str){
-      return _s.strip(str).replace(/\s+/g, ' ');
-    },
-
-    count: function(str, substr){
-      if (str == null || substr == null) return 0;
-
-      str = String(str);
-      substr = String(substr);
-
-      var count = 0,
-        pos = 0,
-        length = substr.length;
-
-      while (true) {
-        pos = str.indexOf(substr, pos);
-        if (pos === -1) break;
-        count++;
-        pos += length;
-      }
-
-      return count;
-    },
-
-    chars: function(str) {
-      if (str == null) return [];
-      return String(str).split('');
-    },
-
-    swapCase: function(str) {
-      if (str == null) return '';
-      return String(str).replace(/\S/g, function(c){
-        return c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase();
-      });
-    },
-
-    escapeHTML: function(str) {
-      if (str == null) return '';
-      return String(str).replace(/[&<>"']/g, function(m){ return '&' + reversedEscapeChars[m] + ';'; });
-    },
-
-    unescapeHTML: function(str) {
-      if (str == null) return '';
-      return String(str).replace(/\&([^;]+);/g, function(entity, entityCode){
-        var match;
-
-        if (entityCode in escapeChars) {
-          return escapeChars[entityCode];
-        } else if (match = entityCode.match(/^#x([\da-fA-F]+)$/)) {
-          return String.fromCharCode(parseInt(match[1], 16));
-        } else if (match = entityCode.match(/^#(\d+)$/)) {
-          return String.fromCharCode(~~match[1]);
-        } else {
-          return entity;
-        }
-      });
-    },
-
-    escapeRegExp: function(str){
-      if (str == null) return '';
-      return String(str).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
-    },
-
-    splice: function(str, i, howmany, substr){
-      var arr = _s.chars(str);
-      arr.splice(~~i, ~~howmany, substr);
-      return arr.join('');
-    },
-
-    insert: function(str, i, substr){
-      return _s.splice(str, i, 0, substr);
-    },
-
-    include: function(str, needle){
-      if (needle === '') return true;
-      if (str == null) return false;
-      return String(str).indexOf(needle) !== -1;
-    },
-
-    join: function() {
-      var args = slice.call(arguments),
-        separator = args.shift();
-
-      if (separator == null) separator = '';
-
-      return args.join(separator);
-    },
-
-    lines: function(str) {
-      if (str == null) return [];
-      return String(str).split("\n");
-    },
-
-    reverse: function(str){
-      return _s.chars(str).reverse().join('');
-    },
-
-    startsWith: function(str, starts){
-      if (starts === '') return true;
-      if (str == null || starts == null) return false;
-      str = String(str); starts = String(starts);
-      return str.length >= starts.length && str.slice(0, starts.length) === starts;
-    },
-
-    endsWith: function(str, ends){
-      if (ends === '') return true;
-      if (str == null || ends == null) return false;
-      str = String(str); ends = String(ends);
-      return str.length >= ends.length && str.slice(str.length - ends.length) === ends;
-    },
-
-    succ: function(str){
-      if (str == null) return '';
-      str = String(str);
-      return str.slice(0, -1) + String.fromCharCode(str.charCodeAt(str.length-1) + 1);
-    },
-
-    titleize: function(str){
-      if (str == null) return '';
-      str  = String(str).toLowerCase();
-      return str.replace(/(?:^|\s|-)\S/g, function(c){ return c.toUpperCase(); });
-    },
-
-    camelize: function(str){
-      return _s.trim(str).replace(/[-_\s]+(.)?/g, function(match, c){ return c ? c.toUpperCase() : ""; });
-    },
-
-    underscored: function(str){
-      return _s.trim(str).replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/[-\s]+/g, '_').toLowerCase();
-    },
-
-    dasherize: function(str){
-      return _s.trim(str).replace(/([A-Z])/g, '-$1').replace(/[-_\s]+/g, '-').toLowerCase();
-    },
-
-    classify: function(str){
-      return _s.titleize(String(str).replace(/[\W_]/g, ' ')).replace(/\s/g, '');
-    },
-
-    humanize: function(str){
-      return _s.capitalize(_s.underscored(str).replace(/_id$/,'').replace(/_/g, ' '));
-    },
-
-    trim: function(str, characters){
-      if (str == null) return '';
-      if (!characters && nativeTrim) return nativeTrim.call(str);
-      characters = defaultToWhiteSpace(characters);
-      return String(str).replace(new RegExp('\^' + characters + '+|' + characters + '+$', 'g'), '');
-    },
-
-    ltrim: function(str, characters){
-      if (str == null) return '';
-      if (!characters && nativeTrimLeft) return nativeTrimLeft.call(str);
-      characters = defaultToWhiteSpace(characters);
-      return String(str).replace(new RegExp('^' + characters + '+'), '');
-    },
-
-    rtrim: function(str, characters){
-      if (str == null) return '';
-      if (!characters && nativeTrimRight) return nativeTrimRight.call(str);
-      characters = defaultToWhiteSpace(characters);
-      return String(str).replace(new RegExp(characters + '+$'), '');
-    },
-
-    truncate: function(str, length, truncateStr){
-      if (str == null) return '';
-      str = String(str); truncateStr = truncateStr || '...';
-      length = ~~length;
-      return str.length > length ? str.slice(0, length) + truncateStr : str;
-    },
-
-    /**
-     * _s.prune: a more elegant version of truncate
-     * prune extra chars, never leaving a half-chopped word.
-     * @author github.com/rwz
-     */
-    prune: function(str, length, pruneStr){
-      if (str == null) return '';
-
-      str = String(str); length = ~~length;
-      pruneStr = pruneStr != null ? String(pruneStr) : '...';
-
-      if (str.length <= length) return str;
-
-      var tmpl = function(c){ return c.toUpperCase() !== c.toLowerCase() ? 'A' : ' '; },
-        template = str.slice(0, length+1).replace(/.(?=\W*\w*$)/g, tmpl); // 'Hello, world' -> 'HellAA AAAAA'
-
-      if (template.slice(template.length-2).match(/\w\w/))
-        template = template.replace(/\s*\S+$/, '');
-      else
-        template = _s.rtrim(template.slice(0, template.length-1));
-
-      return (template+pruneStr).length > str.length ? str : str.slice(0, template.length)+pruneStr;
-    },
-
-    words: function(str, delimiter) {
-      if (_s.isBlank(str)) return [];
-      return _s.trim(str, delimiter).split(delimiter || /\s+/);
-    },
-
-    pad: function(str, length, padStr, type) {
-      str = str == null ? '' : String(str);
-      length = ~~length;
-
-      var padlen  = 0;
-
-      if (!padStr)
-        padStr = ' ';
-      else if (padStr.length > 1)
-        padStr = padStr.charAt(0);
-
-      switch(type) {
-        case 'right':
-          padlen = length - str.length;
-          return str + strRepeat(padStr, padlen);
-        case 'both':
-          padlen = length - str.length;
-          return strRepeat(padStr, Math.ceil(padlen/2)) + str
-                  + strRepeat(padStr, Math.floor(padlen/2));
-        default: // 'left'
-          padlen = length - str.length;
-          return strRepeat(padStr, padlen) + str;
-        }
-    },
-
-    lpad: function(str, length, padStr) {
-      return _s.pad(str, length, padStr);
-    },
-
-    rpad: function(str, length, padStr) {
-      return _s.pad(str, length, padStr, 'right');
-    },
-
-    lrpad: function(str, length, padStr) {
-      return _s.pad(str, length, padStr, 'both');
-    },
-
-    sprintf: sprintf,
-
-    vsprintf: function(fmt, argv){
-      argv.unshift(fmt);
-      return sprintf.apply(null, argv);
-    },
-
-    toNumber: function(str, decimals) {
-      if (!str) return 0;
-      str = _s.trim(str);
-      if (!str.match(/^-?\d+(?:\.\d+)?$/)) return NaN;
-      return parseNumber(parseNumber(str).toFixed(~~decimals));
-    },
-
-    numberFormat : function(number, dec, dsep, tsep) {
-      if (isNaN(number) || number == null) return '';
-
-      number = number.toFixed(~~dec);
-      tsep = typeof tsep == 'string' ? tsep : ',';
-
-      var parts = number.split('.'), fnums = parts[0],
-        decimals = parts[1] ? (dsep || '.') + parts[1] : '';
-
-      return fnums.replace(/(\d)(?=(?:\d{3})+$)/g, '$1' + tsep) + decimals;
-    },
-
-    strRight: function(str, sep){
-      if (str == null) return '';
-      str = String(str); sep = sep != null ? String(sep) : sep;
-      var pos = !sep ? -1 : str.indexOf(sep);
-      return ~pos ? str.slice(pos+sep.length, str.length) : str;
-    },
-
-    strRightBack: function(str, sep){
-      if (str == null) return '';
-      str = String(str); sep = sep != null ? String(sep) : sep;
-      var pos = !sep ? -1 : str.lastIndexOf(sep);
-      return ~pos ? str.slice(pos+sep.length, str.length) : str;
-    },
-
-    strLeft: function(str, sep){
-      if (str == null) return '';
-      str = String(str); sep = sep != null ? String(sep) : sep;
-      var pos = !sep ? -1 : str.indexOf(sep);
-      return ~pos ? str.slice(0, pos) : str;
-    },
-
-    strLeftBack: function(str, sep){
-      if (str == null) return '';
-      str += ''; sep = sep != null ? ''+sep : sep;
-      var pos = str.lastIndexOf(sep);
-      return ~pos ? str.slice(0, pos) : str;
-    },
-
-    toSentence: function(array, separator, lastSeparator, serial) {
-      separator = separator || ', ';
-      lastSeparator = lastSeparator || ' and ';
-      var a = array.slice(), lastMember = a.pop();
-
-      if (array.length > 2 && serial) lastSeparator = _s.rtrim(separator) + lastSeparator;
-
-      return a.length ? a.join(separator) + lastSeparator + lastMember : lastMember;
-    },
-
-    toSentenceSerial: function() {
-      var args = slice.call(arguments);
-      args[3] = true;
-      return _s.toSentence.apply(_s, args);
-    },
-
-    slugify: function(str) {
-      if (str == null) return '';
-
-      var from  = "ąàáäâãåæăćęèéëêìíïîłńòóöôõøśșțùúüûñçżź",
-          to    = "aaaaaaaaaceeeeeiiiilnoooooosstuuuunczz",
-          regex = new RegExp(defaultToWhiteSpace(from), 'g');
-
-      str = String(str).toLowerCase().replace(regex, function(c){
-        var index = from.indexOf(c);
-        return to.charAt(index) || '-';
-      });
-
-      return _s.dasherize(str.replace(/[^\w\s-]/g, ''));
-    },
-
-    surround: function(str, wrapper) {
-      return [wrapper, str, wrapper].join('');
-    },
-
-    quote: function(str, quoteChar) {
-      return _s.surround(str, quoteChar || '"');
-    },
-
-    unquote: function(str, quoteChar) {
-      quoteChar = quoteChar || '"';
-      if (str[0] === quoteChar && str[str.length-1] === quoteChar)
-        return str.slice(1,str.length-1);
-      else return str;
-    },
-
-    exports: function() {
-      var result = {};
-
-      for (var prop in this) {
-        if (!this.hasOwnProperty(prop) || prop.match(/^(?:include|contains|reverse)$/)) continue;
-        result[prop] = this[prop];
-      }
-
-      return result;
-    },
-
-    repeat: function(str, qty, separator){
-      if (str == null) return '';
-
-      qty = ~~qty;
-
-      // using faster implementation if separator is not needed;
-      if (separator == null) return strRepeat(String(str), qty);
-
-      // this one is about 300x slower in Google Chrome
-      for (var repeat = []; qty > 0; repeat[--qty] = str) {}
-      return repeat.join(separator);
-    },
-
-    naturalCmp: function(str1, str2){
-      if (str1 == str2) return 0;
-      if (!str1) return -1;
-      if (!str2) return 1;
-
-      var cmpRegex = /(\.\d+)|(\d+)|(\D+)/g,
-        tokens1 = String(str1).toLowerCase().match(cmpRegex),
-        tokens2 = String(str2).toLowerCase().match(cmpRegex),
-        count = Math.min(tokens1.length, tokens2.length);
-
-      for(var i = 0; i < count; i++) {
-        var a = tokens1[i], b = tokens2[i];
-
-        if (a !== b){
-          var num1 = parseInt(a, 10);
-          if (!isNaN(num1)){
-            var num2 = parseInt(b, 10);
-            if (!isNaN(num2) && num1 - num2)
-              return num1 - num2;
-          }
-          return a < b ? -1 : 1;
-        }
-      }
-
-      if (tokens1.length === tokens2.length)
-        return tokens1.length - tokens2.length;
-
-      return str1 < str2 ? -1 : 1;
-    },
-
-    levenshtein: function(str1, str2) {
-      if (str1 == null && str2 == null) return 0;
-      if (str1 == null) return String(str2).length;
-      if (str2 == null) return String(str1).length;
-
-      str1 = String(str1); str2 = String(str2);
-
-      var current = [], prev, value;
-
-      for (var i = 0; i <= str2.length; i++)
-        for (var j = 0; j <= str1.length; j++) {
-          if (i && j)
-            if (str1.charAt(j - 1) === str2.charAt(i - 1))
-              value = prev;
-            else
-              value = Math.min(current[j], current[j - 1], prev) + 1;
-          else
-            value = i + j;
-
-          prev = current[j];
-          current[j] = value;
-        }
-
-      return current.pop();
-    },
-
-    toBoolean: function(str, trueValues, falseValues) {
-      if (typeof str === "number") str = "" + str;
-      if (typeof str !== "string") return !!str;
-      str = _s.trim(str);
-      if (boolMatch(str, trueValues || ["true", "1"])) return true;
-      if (boolMatch(str, falseValues || ["false", "0"])) return false;
-    }
-  };
-
-  // Aliases
-
-  _s.strip    = _s.trim;
-  _s.lstrip   = _s.ltrim;
-  _s.rstrip   = _s.rtrim;
-  _s.center   = _s.lrpad;
-  _s.rjust    = _s.lpad;
-  _s.ljust    = _s.rpad;
-  _s.contains = _s.include;
-  _s.q        = _s.quote;
-  _s.toBool   = _s.toBoolean;
-
-  // Exporting
-
-  // CommonJS module is defined
-  if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports)
-      module.exports = _s;
-
-    exports._s = _s;
-  }
-
-  // Register as a named module with AMD.
-  if (typeof define === 'function' && define.amd)
-    define('underscore.string', [], function(){ return _s; });
-
-
-  // Integrate with Underscore.js if defined
-  // or create our own underscore object.
-  root._ = root._ || {};
-  root._.string = root._.str = _s;
-}(this, String);
 
 ;/**
  * @preserve FastClick: polyfill to remove click delays on browsers with touch UIs.
@@ -21779,6 +23385,265 @@ if (typeof define !== 'undefined' && define.amd) {
 } else {
 	window.FastClick = FastClick;
 }
+
+;/*!
+	Autosize v1.17.8 - 2013-09-07
+	Automatically adjust textarea height based on user input.
+	(c) 2013 Jack Moore - http://www.jacklmoore.com/autosize
+	license: http://www.opensource.org/licenses/mit-license.php
+*/
+(function (factory) {
+	if (typeof define === 'function' && define.amd) {
+		// AMD. Register as an anonymous module.
+		define(['jquery'], factory);
+	} else {
+		// Browser globals: jQuery or jQuery-like library, such as Zepto
+		factory(window.jQuery || window.$);
+	}
+}(function ($) {
+	var
+	defaults = {
+		className: 'autosizejs',
+		append: '',
+		callback: false,
+		resizeDelay: 10
+	},
+
+	// border:0 is unnecessary, but avoids a bug in FireFox on OSX
+	copy = '<textarea tabindex="-1" style="position:absolute; top:-999px; left:0; right:auto; bottom:auto; border:0; padding: 0; -moz-box-sizing:content-box; -webkit-box-sizing:content-box; box-sizing:content-box; word-wrap:break-word; height:0 !important; min-height:0 !important; overflow:hidden; transition:none; -webkit-transition:none; -moz-transition:none;"/>',
+
+	// line-height is conditionally included because IE7/IE8/old Opera do not return the correct value.
+	typographyStyles = [
+		'fontFamily',
+		'fontSize',
+		'fontWeight',
+		'fontStyle',
+		'letterSpacing',
+		'textTransform',
+		'wordSpacing',
+		'textIndent'
+	],
+
+	// to keep track which textarea is being mirrored when adjust() is called.
+	mirrored,
+
+	// the mirror element, which is used to calculate what size the mirrored element should be.
+	mirror = $(copy).data('autosize', true)[0];
+
+	// test that line-height can be accurately copied.
+	mirror.style.lineHeight = '99px';
+	if ($(mirror).css('lineHeight') === '99px') {
+		typographyStyles.push('lineHeight');
+	}
+	mirror.style.lineHeight = '';
+
+	$.fn.autosize = function (options) {
+		if (!this.length) {
+			return this;
+		}
+
+		options = $.extend({}, defaults, options || {});
+
+		if (mirror.parentNode !== document.body) {
+			$(document.body).append(mirror);
+		}
+
+		return this.each(function () {
+			var
+			ta = this,
+			$ta = $(ta),
+			maxHeight,
+			minHeight,
+			boxOffset = 0,
+			callback = $.isFunction(options.callback),
+			originalStyles = {
+				height: ta.style.height,
+				overflow: ta.style.overflow,
+				overflowY: ta.style.overflowY,
+				wordWrap: ta.style.wordWrap,
+				resize: ta.style.resize
+			},
+			timeout,
+			width = $ta.width();
+
+			if ($ta.data('autosize')) {
+				// exit if autosize has already been applied, or if the textarea is the mirror element.
+				return;
+			}
+			$ta.data('autosize', true);
+
+			if ($ta.css('box-sizing') === 'border-box' || $ta.css('-moz-box-sizing') === 'border-box' || $ta.css('-webkit-box-sizing') === 'border-box'){
+				boxOffset = $ta.outerHeight() - $ta.height();
+			}
+
+			// IE8 and lower return 'auto', which parses to NaN, if no min-height is set.
+			minHeight = Math.max(parseInt($ta.css('minHeight'), 10) - boxOffset || 0, $ta.height());
+
+			$ta.css({
+				overflow: 'hidden',
+				overflowY: 'hidden',
+				wordWrap: 'break-word', // horizontal overflow is hidden, so break-word is necessary for handling words longer than the textarea width
+				resize: ($ta.css('resize') === 'none' || $ta.css('resize') === 'vertical') ? 'none' : 'horizontal'
+			});
+
+			// The mirror width must exactly match the textarea width, so using getBoundingClientRect because it doesn't round the sub-pixel value.
+			function setWidth() {
+				var style, width;
+				
+				if ('getComputedStyle' in window) {
+					style = window.getComputedStyle(ta);
+					width = ta.getBoundingClientRect().width;
+
+					$.each(['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'], function(i,val){
+						width -= parseInt(style[val],10);
+					});
+
+					mirror.style.width = width + 'px';
+				}
+				else {
+					// window.getComputedStyle, getBoundingClientRect returning a width are unsupported and unneeded in IE8 and lower.
+					mirror.style.width = Math.max($ta.width(), 0) + 'px';
+				}
+			}
+
+			function initMirror() {
+				var styles = {};
+
+				mirrored = ta;
+				mirror.className = options.className;
+				maxHeight = parseInt($ta.css('maxHeight'), 10);
+
+				// mirror is a duplicate textarea located off-screen that
+				// is automatically updated to contain the same text as the
+				// original textarea.  mirror always has a height of 0.
+				// This gives a cross-browser supported way getting the actual
+				// height of the text, through the scrollTop property.
+				$.each(typographyStyles, function(i,val){
+					styles[val] = $ta.css(val);
+				});
+				$(mirror).css(styles);
+
+				setWidth();
+
+				// Chrome-specific fix:
+				// When the textarea y-overflow is hidden, Chrome doesn't reflow the text to account for the space
+				// made available by removing the scrollbar. This workaround triggers the reflow for Chrome.
+				if (window.chrome) {
+					var width = ta.style.width;
+					ta.style.width = '0px';
+					var ignore = ta.offsetWidth;
+					ta.style.width = width;
+				}
+			}
+
+			// Using mainly bare JS in this function because it is going
+			// to fire very often while typing, and needs to very efficient.
+			function adjust() {
+				var height, original;
+
+				if (mirrored !== ta) {
+					initMirror();
+				} else {
+					setWidth();
+				}
+
+				mirror.value = ta.value + options.append;
+				mirror.style.overflowY = ta.style.overflowY;
+				original = parseInt(ta.style.height,10);
+
+				// Setting scrollTop to zero is needed in IE8 and lower for the next step to be accurately applied
+				mirror.scrollTop = 0;
+
+				mirror.scrollTop = 9e4;
+
+				// Using scrollTop rather than scrollHeight because scrollHeight is non-standard and includes padding.
+				height = mirror.scrollTop;
+
+				if (maxHeight && height > maxHeight) {
+					ta.style.overflowY = 'scroll';
+					height = maxHeight;
+				} else {
+					ta.style.overflowY = 'hidden';
+					if (height < minHeight) {
+						height = minHeight;
+					}
+				}
+
+				height += boxOffset;
+
+				if (original !== height) {
+					ta.style.height = height + 'px';
+					if (callback) {
+						options.callback.call(ta,ta);
+					}
+				}
+			}
+
+			function resize () {
+				clearTimeout(timeout);
+				timeout = setTimeout(function(){
+					var newWidth = $ta.width();
+
+					if (newWidth !== width) {
+						width = newWidth;
+						adjust();
+					}
+				}, parseInt(options.resizeDelay,10));
+			}
+
+			if ('onpropertychange' in ta) {
+				if ('oninput' in ta) {
+					// Detects IE9.  IE9 does not fire onpropertychange or oninput for deletions,
+					// so binding to onkeyup to catch most of those occasions.  There is no way that I
+					// know of to detect something like 'cut' in IE9.
+					$ta.on('input.autosize keyup.autosize', adjust);
+				} else {
+					// IE7 / IE8
+					$ta.on('propertychange.autosize', function(){
+						if(event.propertyName === 'value'){
+							adjust();
+						}
+					});
+				}
+			} else {
+				// Modern Browsers
+				$ta.on('input.autosize', adjust);
+			}
+
+			// Set options.resizeDelay to false if using fixed-width textarea elements.
+			// Uses a timeout and width check to reduce the amount of times adjust needs to be called after window resize.
+
+			if (options.resizeDelay !== false) {
+				$(window).on('resize.autosize', resize);
+			}
+
+			// Event for manual triggering if needed.
+			// Should only be needed when the value of the textarea is changed through JavaScript rather than user input.
+			$ta.on('autosize.resize', adjust);
+
+			// Event for manual triggering that also forces the styles to update as well.
+			// Should only be needed if one of typography styles of the textarea change, and the textarea is already the target of the adjust method.
+			$ta.on('autosize.resizeIncludeStyle', function() {
+				mirrored = null;
+				adjust();
+			});
+
+			$ta.on('autosize.destroy', function(){
+				mirrored = null;
+				clearTimeout(timeout);
+				$(window).off('resize', resize);
+				$ta
+					.off('autosize')
+					.off('.autosize')
+					.css(originalStyles)
+					.removeData('autosize');
+			});
+
+			// Call adjust in case the textarea already contains text.
+			adjust();
+		});
+	};
+}));
 
 ;//! moment.js
 //! version : 2.5.1
@@ -24181,21 +26046,679 @@ if (typeof define !== 'undefined' && define.amd) {
     }
 }).call(this);
 
-;// Console-polyfill. MIT license.
-// https://github.com/paulmillr/console-polyfill
-// Make it safe to do console.log() always.
-(function(con) {
+;//  Underscore.string
+//  (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
+//  Underscore.string is freely distributable under the terms of the MIT license.
+//  Documentation: https://github.com/epeli/underscore.string
+//  Some code is borrowed from MooTools and Alexandru Marasteanu.
+//  Version '2.3.2'
+
+!function(root, String){
   'use strict';
-  var prop, method;
-  var empty = {};
-  var dummy = function() {};
-  var properties = 'memory'.split(',');
-  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
-     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
-     'time,timeEnd,trace,warn').split(',');
-  while (prop = properties.pop()) con[prop] = con[prop] || empty;
-  while (method = methods.pop()) con[method] = con[method] || dummy;
-})(this.console = this.console || {});
+
+  // Defining helper functions.
+
+  var nativeTrim = String.prototype.trim;
+  var nativeTrimRight = String.prototype.trimRight;
+  var nativeTrimLeft = String.prototype.trimLeft;
+
+  var parseNumber = function(source) { return source * 1 || 0; };
+
+  var strRepeat = function(str, qty){
+    if (qty < 1) return '';
+    var result = '';
+    while (qty > 0) {
+      if (qty & 1) result += str;
+      qty >>= 1, str += str;
+    }
+    return result;
+  };
+
+  var slice = [].slice;
+
+  var defaultToWhiteSpace = function(characters) {
+    if (characters == null)
+      return '\\s';
+    else if (characters.source)
+      return characters.source;
+    else
+      return '[' + _s.escapeRegExp(characters) + ']';
+  };
+
+  // Helper for toBoolean
+  function boolMatch(s, matchers) {
+    var i, matcher, down = s.toLowerCase();
+    matchers = [].concat(matchers);
+    for (i = 0; i < matchers.length; i += 1) {
+      matcher = matchers[i];
+      if (!matcher) continue;
+      if (matcher.test && matcher.test(s)) return true;
+      if (matcher.toLowerCase() === down) return true;
+    }
+  }
+
+  var escapeChars = {
+    lt: '<',
+    gt: '>',
+    quot: '"',
+    amp: '&',
+    apos: "'"
+  };
+
+  var reversedEscapeChars = {};
+  for(var key in escapeChars) reversedEscapeChars[escapeChars[key]] = key;
+  reversedEscapeChars["'"] = '#39';
+
+  // sprintf() for JavaScript 0.7-beta1
+  // http://www.diveintojavascript.com/projects/javascript-sprintf
+  //
+  // Copyright (c) Alexandru Marasteanu <alexaholic [at) gmail (dot] com>
+  // All rights reserved.
+
+  var sprintf = (function() {
+    function get_type(variable) {
+      return Object.prototype.toString.call(variable).slice(8, -1).toLowerCase();
+    }
+
+    var str_repeat = strRepeat;
+
+    var str_format = function() {
+      if (!str_format.cache.hasOwnProperty(arguments[0])) {
+        str_format.cache[arguments[0]] = str_format.parse(arguments[0]);
+      }
+      return str_format.format.call(null, str_format.cache[arguments[0]], arguments);
+    };
+
+    str_format.format = function(parse_tree, argv) {
+      var cursor = 1, tree_length = parse_tree.length, node_type = '', arg, output = [], i, k, match, pad, pad_character, pad_length;
+      for (i = 0; i < tree_length; i++) {
+        node_type = get_type(parse_tree[i]);
+        if (node_type === 'string') {
+          output.push(parse_tree[i]);
+        }
+        else if (node_type === 'array') {
+          match = parse_tree[i]; // convenience purposes only
+          if (match[2]) { // keyword argument
+            arg = argv[cursor];
+            for (k = 0; k < match[2].length; k++) {
+              if (!arg.hasOwnProperty(match[2][k])) {
+                throw new Error(sprintf('[_.sprintf] property "%s" does not exist', match[2][k]));
+              }
+              arg = arg[match[2][k]];
+            }
+          } else if (match[1]) { // positional argument (explicit)
+            arg = argv[match[1]];
+          }
+          else { // positional argument (implicit)
+            arg = argv[cursor++];
+          }
+
+          if (/[^s]/.test(match[8]) && (get_type(arg) != 'number')) {
+            throw new Error(sprintf('[_.sprintf] expecting number but found %s', get_type(arg)));
+          }
+          switch (match[8]) {
+            case 'b': arg = arg.toString(2); break;
+            case 'c': arg = String.fromCharCode(arg); break;
+            case 'd': arg = parseInt(arg, 10); break;
+            case 'e': arg = match[7] ? arg.toExponential(match[7]) : arg.toExponential(); break;
+            case 'f': arg = match[7] ? parseFloat(arg).toFixed(match[7]) : parseFloat(arg); break;
+            case 'o': arg = arg.toString(8); break;
+            case 's': arg = ((arg = String(arg)) && match[7] ? arg.substring(0, match[7]) : arg); break;
+            case 'u': arg = Math.abs(arg); break;
+            case 'x': arg = arg.toString(16); break;
+            case 'X': arg = arg.toString(16).toUpperCase(); break;
+          }
+          arg = (/[def]/.test(match[8]) && match[3] && arg >= 0 ? '+'+ arg : arg);
+          pad_character = match[4] ? match[4] == '0' ? '0' : match[4].charAt(1) : ' ';
+          pad_length = match[6] - String(arg).length;
+          pad = match[6] ? str_repeat(pad_character, pad_length) : '';
+          output.push(match[5] ? arg + pad : pad + arg);
+        }
+      }
+      return output.join('');
+    };
+
+    str_format.cache = {};
+
+    str_format.parse = function(fmt) {
+      var _fmt = fmt, match = [], parse_tree = [], arg_names = 0;
+      while (_fmt) {
+        if ((match = /^[^\x25]+/.exec(_fmt)) !== null) {
+          parse_tree.push(match[0]);
+        }
+        else if ((match = /^\x25{2}/.exec(_fmt)) !== null) {
+          parse_tree.push('%');
+        }
+        else if ((match = /^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(_fmt)) !== null) {
+          if (match[2]) {
+            arg_names |= 1;
+            var field_list = [], replacement_field = match[2], field_match = [];
+            if ((field_match = /^([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
+              field_list.push(field_match[1]);
+              while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
+                if ((field_match = /^\.([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
+                  field_list.push(field_match[1]);
+                }
+                else if ((field_match = /^\[(\d+)\]/.exec(replacement_field)) !== null) {
+                  field_list.push(field_match[1]);
+                }
+                else {
+                  throw new Error('[_.sprintf] huh?');
+                }
+              }
+            }
+            else {
+              throw new Error('[_.sprintf] huh?');
+            }
+            match[2] = field_list;
+          }
+          else {
+            arg_names |= 2;
+          }
+          if (arg_names === 3) {
+            throw new Error('[_.sprintf] mixing positional and named placeholders is not (yet) supported');
+          }
+          parse_tree.push(match);
+        }
+        else {
+          throw new Error('[_.sprintf] huh?');
+        }
+        _fmt = _fmt.substring(match[0].length);
+      }
+      return parse_tree;
+    };
+
+    return str_format;
+  })();
+
+
+
+  // Defining underscore.string
+
+  var _s = {
+
+    VERSION: '2.3.0',
+
+    isBlank: function(str){
+      if (str == null) str = '';
+      return (/^\s*$/).test(str);
+    },
+
+    stripTags: function(str){
+      if (str == null) return '';
+      return String(str).replace(/<\/?[^>]+>/g, '');
+    },
+
+    capitalize : function(str){
+      str = str == null ? '' : String(str);
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    },
+
+    chop: function(str, step){
+      if (str == null) return [];
+      str = String(str);
+      step = ~~step;
+      return step > 0 ? str.match(new RegExp('.{1,' + step + '}', 'g')) : [str];
+    },
+
+    clean: function(str){
+      return _s.strip(str).replace(/\s+/g, ' ');
+    },
+
+    count: function(str, substr){
+      if (str == null || substr == null) return 0;
+
+      str = String(str);
+      substr = String(substr);
+
+      var count = 0,
+        pos = 0,
+        length = substr.length;
+
+      while (true) {
+        pos = str.indexOf(substr, pos);
+        if (pos === -1) break;
+        count++;
+        pos += length;
+      }
+
+      return count;
+    },
+
+    chars: function(str) {
+      if (str == null) return [];
+      return String(str).split('');
+    },
+
+    swapCase: function(str) {
+      if (str == null) return '';
+      return String(str).replace(/\S/g, function(c){
+        return c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase();
+      });
+    },
+
+    escapeHTML: function(str) {
+      if (str == null) return '';
+      return String(str).replace(/[&<>"']/g, function(m){ return '&' + reversedEscapeChars[m] + ';'; });
+    },
+
+    unescapeHTML: function(str) {
+      if (str == null) return '';
+      return String(str).replace(/\&([^;]+);/g, function(entity, entityCode){
+        var match;
+
+        if (entityCode in escapeChars) {
+          return escapeChars[entityCode];
+        } else if (match = entityCode.match(/^#x([\da-fA-F]+)$/)) {
+          return String.fromCharCode(parseInt(match[1], 16));
+        } else if (match = entityCode.match(/^#(\d+)$/)) {
+          return String.fromCharCode(~~match[1]);
+        } else {
+          return entity;
+        }
+      });
+    },
+
+    escapeRegExp: function(str){
+      if (str == null) return '';
+      return String(str).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
+    },
+
+    splice: function(str, i, howmany, substr){
+      var arr = _s.chars(str);
+      arr.splice(~~i, ~~howmany, substr);
+      return arr.join('');
+    },
+
+    insert: function(str, i, substr){
+      return _s.splice(str, i, 0, substr);
+    },
+
+    include: function(str, needle){
+      if (needle === '') return true;
+      if (str == null) return false;
+      return String(str).indexOf(needle) !== -1;
+    },
+
+    join: function() {
+      var args = slice.call(arguments),
+        separator = args.shift();
+
+      if (separator == null) separator = '';
+
+      return args.join(separator);
+    },
+
+    lines: function(str) {
+      if (str == null) return [];
+      return String(str).split("\n");
+    },
+
+    reverse: function(str){
+      return _s.chars(str).reverse().join('');
+    },
+
+    startsWith: function(str, starts){
+      if (starts === '') return true;
+      if (str == null || starts == null) return false;
+      str = String(str); starts = String(starts);
+      return str.length >= starts.length && str.slice(0, starts.length) === starts;
+    },
+
+    endsWith: function(str, ends){
+      if (ends === '') return true;
+      if (str == null || ends == null) return false;
+      str = String(str); ends = String(ends);
+      return str.length >= ends.length && str.slice(str.length - ends.length) === ends;
+    },
+
+    succ: function(str){
+      if (str == null) return '';
+      str = String(str);
+      return str.slice(0, -1) + String.fromCharCode(str.charCodeAt(str.length-1) + 1);
+    },
+
+    titleize: function(str){
+      if (str == null) return '';
+      str  = String(str).toLowerCase();
+      return str.replace(/(?:^|\s|-)\S/g, function(c){ return c.toUpperCase(); });
+    },
+
+    camelize: function(str){
+      return _s.trim(str).replace(/[-_\s]+(.)?/g, function(match, c){ return c ? c.toUpperCase() : ""; });
+    },
+
+    underscored: function(str){
+      return _s.trim(str).replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/[-\s]+/g, '_').toLowerCase();
+    },
+
+    dasherize: function(str){
+      return _s.trim(str).replace(/([A-Z])/g, '-$1').replace(/[-_\s]+/g, '-').toLowerCase();
+    },
+
+    classify: function(str){
+      return _s.titleize(String(str).replace(/[\W_]/g, ' ')).replace(/\s/g, '');
+    },
+
+    humanize: function(str){
+      return _s.capitalize(_s.underscored(str).replace(/_id$/,'').replace(/_/g, ' '));
+    },
+
+    trim: function(str, characters){
+      if (str == null) return '';
+      if (!characters && nativeTrim) return nativeTrim.call(str);
+      characters = defaultToWhiteSpace(characters);
+      return String(str).replace(new RegExp('\^' + characters + '+|' + characters + '+$', 'g'), '');
+    },
+
+    ltrim: function(str, characters){
+      if (str == null) return '';
+      if (!characters && nativeTrimLeft) return nativeTrimLeft.call(str);
+      characters = defaultToWhiteSpace(characters);
+      return String(str).replace(new RegExp('^' + characters + '+'), '');
+    },
+
+    rtrim: function(str, characters){
+      if (str == null) return '';
+      if (!characters && nativeTrimRight) return nativeTrimRight.call(str);
+      characters = defaultToWhiteSpace(characters);
+      return String(str).replace(new RegExp(characters + '+$'), '');
+    },
+
+    truncate: function(str, length, truncateStr){
+      if (str == null) return '';
+      str = String(str); truncateStr = truncateStr || '...';
+      length = ~~length;
+      return str.length > length ? str.slice(0, length) + truncateStr : str;
+    },
+
+    /**
+     * _s.prune: a more elegant version of truncate
+     * prune extra chars, never leaving a half-chopped word.
+     * @author github.com/rwz
+     */
+    prune: function(str, length, pruneStr){
+      if (str == null) return '';
+
+      str = String(str); length = ~~length;
+      pruneStr = pruneStr != null ? String(pruneStr) : '...';
+
+      if (str.length <= length) return str;
+
+      var tmpl = function(c){ return c.toUpperCase() !== c.toLowerCase() ? 'A' : ' '; },
+        template = str.slice(0, length+1).replace(/.(?=\W*\w*$)/g, tmpl); // 'Hello, world' -> 'HellAA AAAAA'
+
+      if (template.slice(template.length-2).match(/\w\w/))
+        template = template.replace(/\s*\S+$/, '');
+      else
+        template = _s.rtrim(template.slice(0, template.length-1));
+
+      return (template+pruneStr).length > str.length ? str : str.slice(0, template.length)+pruneStr;
+    },
+
+    words: function(str, delimiter) {
+      if (_s.isBlank(str)) return [];
+      return _s.trim(str, delimiter).split(delimiter || /\s+/);
+    },
+
+    pad: function(str, length, padStr, type) {
+      str = str == null ? '' : String(str);
+      length = ~~length;
+
+      var padlen  = 0;
+
+      if (!padStr)
+        padStr = ' ';
+      else if (padStr.length > 1)
+        padStr = padStr.charAt(0);
+
+      switch(type) {
+        case 'right':
+          padlen = length - str.length;
+          return str + strRepeat(padStr, padlen);
+        case 'both':
+          padlen = length - str.length;
+          return strRepeat(padStr, Math.ceil(padlen/2)) + str
+                  + strRepeat(padStr, Math.floor(padlen/2));
+        default: // 'left'
+          padlen = length - str.length;
+          return strRepeat(padStr, padlen) + str;
+        }
+    },
+
+    lpad: function(str, length, padStr) {
+      return _s.pad(str, length, padStr);
+    },
+
+    rpad: function(str, length, padStr) {
+      return _s.pad(str, length, padStr, 'right');
+    },
+
+    lrpad: function(str, length, padStr) {
+      return _s.pad(str, length, padStr, 'both');
+    },
+
+    sprintf: sprintf,
+
+    vsprintf: function(fmt, argv){
+      argv.unshift(fmt);
+      return sprintf.apply(null, argv);
+    },
+
+    toNumber: function(str, decimals) {
+      if (!str) return 0;
+      str = _s.trim(str);
+      if (!str.match(/^-?\d+(?:\.\d+)?$/)) return NaN;
+      return parseNumber(parseNumber(str).toFixed(~~decimals));
+    },
+
+    numberFormat : function(number, dec, dsep, tsep) {
+      if (isNaN(number) || number == null) return '';
+
+      number = number.toFixed(~~dec);
+      tsep = typeof tsep == 'string' ? tsep : ',';
+
+      var parts = number.split('.'), fnums = parts[0],
+        decimals = parts[1] ? (dsep || '.') + parts[1] : '';
+
+      return fnums.replace(/(\d)(?=(?:\d{3})+$)/g, '$1' + tsep) + decimals;
+    },
+
+    strRight: function(str, sep){
+      if (str == null) return '';
+      str = String(str); sep = sep != null ? String(sep) : sep;
+      var pos = !sep ? -1 : str.indexOf(sep);
+      return ~pos ? str.slice(pos+sep.length, str.length) : str;
+    },
+
+    strRightBack: function(str, sep){
+      if (str == null) return '';
+      str = String(str); sep = sep != null ? String(sep) : sep;
+      var pos = !sep ? -1 : str.lastIndexOf(sep);
+      return ~pos ? str.slice(pos+sep.length, str.length) : str;
+    },
+
+    strLeft: function(str, sep){
+      if (str == null) return '';
+      str = String(str); sep = sep != null ? String(sep) : sep;
+      var pos = !sep ? -1 : str.indexOf(sep);
+      return ~pos ? str.slice(0, pos) : str;
+    },
+
+    strLeftBack: function(str, sep){
+      if (str == null) return '';
+      str += ''; sep = sep != null ? ''+sep : sep;
+      var pos = str.lastIndexOf(sep);
+      return ~pos ? str.slice(0, pos) : str;
+    },
+
+    toSentence: function(array, separator, lastSeparator, serial) {
+      separator = separator || ', ';
+      lastSeparator = lastSeparator || ' and ';
+      var a = array.slice(), lastMember = a.pop();
+
+      if (array.length > 2 && serial) lastSeparator = _s.rtrim(separator) + lastSeparator;
+
+      return a.length ? a.join(separator) + lastSeparator + lastMember : lastMember;
+    },
+
+    toSentenceSerial: function() {
+      var args = slice.call(arguments);
+      args[3] = true;
+      return _s.toSentence.apply(_s, args);
+    },
+
+    slugify: function(str) {
+      if (str == null) return '';
+
+      var from  = "ąàáäâãåæăćęèéëêìíïîłńòóöôõøśșțùúüûñçżź",
+          to    = "aaaaaaaaaceeeeeiiiilnoooooosstuuuunczz",
+          regex = new RegExp(defaultToWhiteSpace(from), 'g');
+
+      str = String(str).toLowerCase().replace(regex, function(c){
+        var index = from.indexOf(c);
+        return to.charAt(index) || '-';
+      });
+
+      return _s.dasherize(str.replace(/[^\w\s-]/g, ''));
+    },
+
+    surround: function(str, wrapper) {
+      return [wrapper, str, wrapper].join('');
+    },
+
+    quote: function(str, quoteChar) {
+      return _s.surround(str, quoteChar || '"');
+    },
+
+    unquote: function(str, quoteChar) {
+      quoteChar = quoteChar || '"';
+      if (str[0] === quoteChar && str[str.length-1] === quoteChar)
+        return str.slice(1,str.length-1);
+      else return str;
+    },
+
+    exports: function() {
+      var result = {};
+
+      for (var prop in this) {
+        if (!this.hasOwnProperty(prop) || prop.match(/^(?:include|contains|reverse)$/)) continue;
+        result[prop] = this[prop];
+      }
+
+      return result;
+    },
+
+    repeat: function(str, qty, separator){
+      if (str == null) return '';
+
+      qty = ~~qty;
+
+      // using faster implementation if separator is not needed;
+      if (separator == null) return strRepeat(String(str), qty);
+
+      // this one is about 300x slower in Google Chrome
+      for (var repeat = []; qty > 0; repeat[--qty] = str) {}
+      return repeat.join(separator);
+    },
+
+    naturalCmp: function(str1, str2){
+      if (str1 == str2) return 0;
+      if (!str1) return -1;
+      if (!str2) return 1;
+
+      var cmpRegex = /(\.\d+)|(\d+)|(\D+)/g,
+        tokens1 = String(str1).toLowerCase().match(cmpRegex),
+        tokens2 = String(str2).toLowerCase().match(cmpRegex),
+        count = Math.min(tokens1.length, tokens2.length);
+
+      for(var i = 0; i < count; i++) {
+        var a = tokens1[i], b = tokens2[i];
+
+        if (a !== b){
+          var num1 = parseInt(a, 10);
+          if (!isNaN(num1)){
+            var num2 = parseInt(b, 10);
+            if (!isNaN(num2) && num1 - num2)
+              return num1 - num2;
+          }
+          return a < b ? -1 : 1;
+        }
+      }
+
+      if (tokens1.length === tokens2.length)
+        return tokens1.length - tokens2.length;
+
+      return str1 < str2 ? -1 : 1;
+    },
+
+    levenshtein: function(str1, str2) {
+      if (str1 == null && str2 == null) return 0;
+      if (str1 == null) return String(str2).length;
+      if (str2 == null) return String(str1).length;
+
+      str1 = String(str1); str2 = String(str2);
+
+      var current = [], prev, value;
+
+      for (var i = 0; i <= str2.length; i++)
+        for (var j = 0; j <= str1.length; j++) {
+          if (i && j)
+            if (str1.charAt(j - 1) === str2.charAt(i - 1))
+              value = prev;
+            else
+              value = Math.min(current[j], current[j - 1], prev) + 1;
+          else
+            value = i + j;
+
+          prev = current[j];
+          current[j] = value;
+        }
+
+      return current.pop();
+    },
+
+    toBoolean: function(str, trueValues, falseValues) {
+      if (typeof str === "number") str = "" + str;
+      if (typeof str !== "string") return !!str;
+      str = _s.trim(str);
+      if (boolMatch(str, trueValues || ["true", "1"])) return true;
+      if (boolMatch(str, falseValues || ["false", "0"])) return false;
+    }
+  };
+
+  // Aliases
+
+  _s.strip    = _s.trim;
+  _s.lstrip   = _s.ltrim;
+  _s.rstrip   = _s.rtrim;
+  _s.center   = _s.lrpad;
+  _s.rjust    = _s.lpad;
+  _s.ljust    = _s.rpad;
+  _s.contains = _s.include;
+  _s.q        = _s.quote;
+  _s.toBool   = _s.toBoolean;
+
+  // Exporting
+
+  // CommonJS module is defined
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports)
+      module.exports = _s;
+
+    exports._s = _s;
+  }
+
+  // Register as a named module with AMD.
+  if (typeof define === 'function' && define.amd)
+    define('underscore.string', [], function(){ return _s; });
+
+
+  // Integrate with Underscore.js if defined
+  // or create our own underscore object.
+  root._ = root._ || {};
+  root._.string = root._.str = _s;
+}(this, String);
 
 ;// MarionetteJS (Backbone.Marionette)
 // ----------------------------------
