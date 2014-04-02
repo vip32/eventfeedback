@@ -8,7 +8,7 @@ namespace Eventfeedback.Web.App.IntegrationTests.UI
 
         public Views()
         {
-            _new = new ClayFactory();
+            _new = new ClayFactory(); // http://weblogs.asp.net/bleroy/archive/2010/08/18/clay-malleable-c-dynamic-objects-part-2.aspx
         }
 
         public dynamic Signin
