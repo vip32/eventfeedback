@@ -42,6 +42,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.Api", "Web.Api\Web.Api.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Identity", "Domain.Identity\Domain.Identity.csproj", "{86E621A4-FEC1-40BA-BCAD-D9DA5BF8AE2B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.App.IntegrationTests", "Web.App.IntegrationTests\Web.App.IntegrationTests.csproj", "{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Azure|Any CPU = Azure|Any CPU
@@ -85,6 +87,12 @@ Global
 		{86E621A4-FEC1-40BA-BCAD-D9DA5BF8AE2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86E621A4-FEC1-40BA-BCAD-D9DA5BF8AE2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86E621A4-FEC1-40BA-BCAD-D9DA5BF8AE2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Azure|Any CPU.ActiveCfg = Release|Any CPU
+		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Azure|Any CPU.Build.0 = Release|Any CPU
+		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
