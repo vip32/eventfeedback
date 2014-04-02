@@ -2,28 +2,28 @@
 
 namespace Eventfeedback.Web.App.IntegrationTests.UI
 {
-    public class HomeTests : BaseTests
+    public class HomeViewTests : BaseViewTests
     {
         public void OnAppStartupTheHomeViewIsShowed()
         {}
     }
 
-    public class AboutTests : BaseTests
+    public class AboutViewTests : BaseViewTests
     { }
 
     [TestFixture]
-    public class SigninTests : BaseTests
+    public class SigninViewTests : BaseViewTests
     {
         [Test]
         public void WithASignedoutUserAndNavigatingToTheEventsViewShowsTheSigninView()
         {
             Do(browser =>
             {
-                browser.Visit(Root + Views.Events.Slug);
+                browser.Visit(Settings.Root + Views.Events.Slug);
 
-                browser.FillIn(Elements.SigninViewUserName.Name).With(UserName);
-                browser.FillIn(Elements.SigninViewPassword.Name).With(Password);
-                browser.ClickButton(Elements.SigninViewSubmit.Text);
+                browser.FillIn(Views.Signin.Elements.UserName.Name).With(Settings.UserName);
+                browser.FillIn(Views.Signin.Elements.Password.Name).With(Settings.Password);
+                browser.ClickButton(Views.Signin.Elements.Submit.Text);
 
                 Assert.IsTrue(browser.FindId(Views.Events.Id).Exists());
             });
@@ -42,7 +42,7 @@ namespace Eventfeedback.Web.App.IntegrationTests.UI
         public void UrlSigninWithInvalidCredentials() { }
     }
 
-    public class EventIndexTests : BaseTests
+    public class EventIndexViewTests : BaseViewTests
     {
         public void EventIndexViewShowsTheActiveEvents(){}
         
@@ -51,12 +51,12 @@ namespace Eventfeedback.Web.App.IntegrationTests.UI
         public void EventIndexViewAndSelectingAnEventShowsTheEventDetailsView() { }
     }
 
-    public class EventDetailsTests : BaseTests
+    public class EventDetailsViewTests : BaseViewTests
     {
         public void WithAnAdminUserTheEventDetailsViewShowsTheEditAndDeleteButton(){}
     }
 
-    public class SessionIndexTests : BaseTests
+    public class SessionIndexViewTests : BaseViewTests
     {
         public void SessionIndexViewShowsTheActiveSessions() { }
 
@@ -65,7 +65,7 @@ namespace Eventfeedback.Web.App.IntegrationTests.UI
         public void SessionIndexViewAndSelectingASessionShowsTheSessionDetailsView() { }
     }
 
-    public class SessionDetailsTests : BaseTests
+    public class SessionDetailsViewTests : BaseViewTests
     {
         public void WithAnAdminUserTheSessionDetailsViewShowsTheEditAndDeleteButton(){}
 
