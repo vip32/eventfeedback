@@ -46,6 +46,31 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.App.IntegrationTests", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B4547435-1D77-4A4A-978D-F1A8E04609CE}"
 EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Chrome.App", "http://localhost:64117", "{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}"
+	ProjectSection(WebsiteProperties) = preProject
+		UseIISExpress = "true"
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_64117"
+		Debug.AspNetCompiler.PhysicalPath = "Chrome.App\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_64117\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_64117"
+		Release.AspNetCompiler.PhysicalPath = "Chrome.App\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_64117\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		SlnRelativePath = "Chrome.App\"
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{F9C3AE0D-8322-4C55-BF84-DF03480251F3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{FA77BAC9-B571-4422-9CA6-CD8F4BE5774D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Azure|Any CPU = Azure|Any CPU
@@ -125,6 +150,16 @@ Global
 		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.Azure|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.Azure|Any CPU.Build.0 = Debug|Any CPU
+		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.AzureDev|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.AzureDev|Any CPU.Build.0 = Debug|Any CPU
+		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.AzureProd|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.AzureProd|Any CPU.Build.0 = Debug|Any CPU
+		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -132,5 +167,11 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{DD9E342F-D7CC-4704-91B4-59D1B4C92F92} = {B4547435-1D77-4A4A-978D-F1A8E04609CE}
 		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10} = {B4547435-1D77-4A4A-978D-F1A8E04609CE}
+		{549FB728-3ABD-4562-A57F-5CFB86F45D92} = {F9C3AE0D-8322-4C55-BF84-DF03480251F3}
+		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E} = {F9C3AE0D-8322-4C55-BF84-DF03480251F3}
+		{10F692CF-164F-48F6-A6A0-147DE9E917B6} = {FA77BAC9-B571-4422-9CA6-CD8F4BE5774D}
+		{86E621A4-FEC1-40BA-BCAD-D9DA5BF8AE2B} = {FA77BAC9-B571-4422-9CA6-CD8F4BE5774D}
+		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6} = {FA77BAC9-B571-4422-9CA6-CD8F4BE5774D}
+		{35B7497D-EF2C-4329-8FE8-440CF8833FD3} = {FA77BAC9-B571-4422-9CA6-CD8F4BE5774D}
 	EndGlobalSection
 EndGlobal
