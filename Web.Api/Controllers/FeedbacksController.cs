@@ -6,6 +6,7 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using System.Web.Http.Description;
 using EventFeedback.Common;
 using EventFeedback.Domain;
@@ -14,6 +15,7 @@ namespace EventFeedback.Web.Api.Controllers
 {
     [Authorize]
     [RoutePrefix("api/v1/feedbacks")] // TODO : routes are defined in Startup.WebApi
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class FeedbacksController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

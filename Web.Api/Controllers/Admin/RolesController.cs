@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using System.Web.Http.Description;
 using EventFeedback.Common;
 using EventFeedback.Domain;
@@ -14,6 +15,7 @@ using Microsoft.AspNet.Identity.EntityFramework;
 namespace EventFeedback.Web.Api.Controllers.Admin
 {
     [Authorize(Roles = "Administrator")]
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class RolesController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using System.Web.Http.Description;
 using EventFeedback.Common;
 using EventFeedback.Domain;
@@ -13,7 +14,8 @@ using EventFeedback.Web.Api.Models;
 namespace EventFeedback.Web.Api.Controllers
 {
     [Authorize(Roles = "Administrator")]
-    [RoutePrefix("api/v1/events/{eventId}/report")] 
+    [RoutePrefix("api/v1/events/{eventId}/report")]
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class EventReportsController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

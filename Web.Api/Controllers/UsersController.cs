@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Security.Claims;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using EventFeedback.Common;
 using EventFeedback.Domain;
 using EventFeedback.Web.Api.Models;
@@ -15,6 +16,7 @@ using Microsoft.Owin.Security;
 namespace EventFeedback.Web.Api.Controllers
 {
     [RoutePrefix("api/v1/user")]
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class UserController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

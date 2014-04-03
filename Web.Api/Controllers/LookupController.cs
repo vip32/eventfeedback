@@ -4,12 +4,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using EventFeedback.Common;
 using EventFeedback.Domain;
 
 namespace EventFeedback.Web.Api.Controllers
 {
     [RoutePrefix("api/v1/lookup")]
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class LookupController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
