@@ -2,7 +2,7 @@ class Config
   apptitle: 'Event|Feedback'
   appcontainer: 'content'
   approot: '/'
-  apiroot: '/api/v1'
+  apiroot: '/api/v1' # https://eventfeedback.azurewebsites.net
   apitimeout: 60000
   hometrigger: 'home:index'
   startuptrigger: 'events:index'

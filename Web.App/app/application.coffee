@@ -26,7 +26,7 @@ class Application extends Backbone.Marionette.Application
       log 'current route:', @currentRoute()
       #@on 'start', =>
         # if @getCurrentRoute() is ''
-        #vent.trigger(config.startuptrigger) 
+        #vent.trigger(config.startuptrigger)
 
     @addInitializer (options) =>
       @layout = new (require config.layout)
@@ -66,7 +66,7 @@ class Application extends Backbone.Marionette.Application
 
     @currentModule = currentModule;
     if(currentModule) then currentModule.start(options)
-    
+
   hookGlobalEvents: ->
     $(window).error (msg, url, line) ->
       message = "'#{msg.originalEvent.message}' at #{msg.originalEvent.filename}:#{msg.originalEvent.lineno}"
