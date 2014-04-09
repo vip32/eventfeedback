@@ -1,26 +1,24 @@
 ﻿using System.Web.Http;
 using EventFeedback.Common;
+using Microsoft.Owin.Security.OAuth;
 using Newtonsoft.Json.Serialization;
-using Owin;
 
 namespace EventFeedback.Web.Api
 {
-    public partial class Startup
+    public static class WebApiConfig
     {
-        public void ConfigureWebApi(IAppBuilder app)
+        public static void Register(HttpConfiguration config)
         {
-            var config = new HttpConfiguration
-            {
-                DependencyResolver =
-                    new Unity.WebApi.UnityDependencyResolver(ContainerBuilder.Build())
-            };
+            // Initialize the dependency resolver
+            config.DependencyResolver =
+                new Unity.WebApi.UnityDependencyResolver(ContainerBuilder.Build());
 
             config.EnableCors();
 
             // Web API configuration and services
             // Configure Web API to use only bearer token authentication.
             config.SuppressDefaultHostAuthentication();
-            config.Filters.Add(new HostAuthenticationFilter(OAuthBearerOptions.AuthenticationType));
+            config.Filters.Add(new HostAuthenticationFilter(new OAuthBearerAuthenticationOptions().AuthenticationType));
 
             //config.Filters.Add(new HandleErrorAttribute());
 
@@ -44,7 +42,7 @@ namespace EventFeedback.Web.Api
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
-                defaults: new {id = RouteParameter.Optional}
+                defaults: new { id = RouteParameter.Optional }
                 );
 
             //config.EnableSystemDiagnosticsTracing();
@@ -63,7 +61,6 @@ namespace EventFeedback.Web.Api
             var json = config.Formatters.JsonFormatter;
             json.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 
-            app.UseWebApi(config);
         }
     }
 }

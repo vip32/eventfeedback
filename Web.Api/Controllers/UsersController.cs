@@ -44,7 +44,7 @@ namespace EventFeedback.Web.Api.Controllers
                 var ticket = new AuthenticationTicket(identity, new AuthenticationProperties());
                 var currentUtc = new SystemClock().UtcNow;
                 ticket.Properties.IssuedUtc = currentUtc;
-                ticket.Properties.ExpiresUtc = currentUtc.Add(TimeSpan.FromMinutes(Startup.ExpireMinutes));
+                ticket.Properties.ExpiresUtc = currentUtc.Add(TimeSpan.FromMinutes(1440));
                 return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new ObjectContent<object>(new

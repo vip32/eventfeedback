@@ -52,10 +52,7 @@
   <ItemGroup>
     <Compile Include="App_Start\ContainerBuilder.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
-    <Compile Include="App_Start\Startup.WebApi.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="App_Start\UnityConfig.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Areas\HelpPage\ApiDescriptionExtensions.cs" />
     <Compile Include="Areas\HelpPage\App_Start\HelpPageConfig.cs" />
     <Compile Include="Areas\HelpPage\Controllers\HelpController.cs" />
@@ -96,6 +93,9 @@
     <Compile Include="Controllers\SessionsController.cs" />
     <Compile Include="Controllers\EventsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
     <Compile Include="Models\FeedbackReportModel.cs" />
     <Compile Include="Models\SessionReportModel.cs" />
     <Compile Include="Models\EventReportModel.cs" />
@@ -108,6 +108,7 @@
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
     <Content Include="favicon.ico" />
+    <Content Include="Global.asax" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

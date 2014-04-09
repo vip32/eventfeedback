@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.Entity;
 using System.Web;
 using EventFeedback.Domain;
 using EventFeedback.Domain.Identity;
