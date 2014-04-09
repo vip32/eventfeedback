@@ -2,6 +2,7 @@ application = require 'application'
 vent = require 'vent'
 settings = require 'settings'
 user = require 'user'
+config = require 'config'
 
 module.exports = class AboutView extends Backbone.Marionette.ItemView
   id: 'about-view'
@@ -19,6 +20,7 @@ module.exports = class AboutView extends Backbone.Marionette.ItemView
     roles: user.roles()
     admin: user.isAdministrator()
     auth: user.isAuthenticated()
+    help: "#{config.approot}help"  
     
   onShow: ->
     scrollTo(0,0)
