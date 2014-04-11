@@ -13,8 +13,8 @@ TODO
 Versions of software the app uses:
 
 * jQuery 2.0.3
-* Backbone 1.0.0
-* Underscore 1.5.2
-* Twitter Bootstrap 3.0.0
-* MarionetteJS 1.1.0
-* MomentJS 2.2.1
+* Backbone 1.1.2
+* Underscore 1.6.0
+* Twitter Bootstrap 3.0.3
+* MarionetteJS 1.6.4
+* MomentJS 2.5.1
