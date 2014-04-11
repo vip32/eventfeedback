@@ -51,6 +51,7 @@ namespace EventFeedback.Web.Api
             //TraceSource.TraceData(TraceEventType.Information, 0, config.Routes.Dump());
             config.MessageHandlers.Add(new RequireHttpsHandler());
 
+            config.Filters.Add(new ValidationActionFilter());
             config.Filters.Add(new ActivityTraceFilterAttribute());
             config.Filters.Add(new ExceptionHandlingAttribute());
             config.Filters.Add(new NullFilter());

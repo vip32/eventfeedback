@@ -14,7 +14,7 @@ class User
   isAuthenticated: ->
     not (_.isEmpty(@token()) or _.isEmpty(@tokenexpires()))
     # TODO: check expiration date (against now) of token
-    
+
   isAdministrator: ->
     return _.intersection(['Administrator'], @roles()).length > 0
   

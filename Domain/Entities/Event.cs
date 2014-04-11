@@ -22,6 +22,7 @@ namespace EventFeedback.Domain
         [StringLength(128)]
         public string DeletedBy { get; set; }
         [StringLength(256)]
+        [Required]
         public string Title { get; set; }
         [StringLength(2048)]
         public string Description { get; set; }
