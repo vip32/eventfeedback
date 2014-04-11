@@ -2630,8 +2630,9 @@ module.exports = Controller = (function(_super) {
         _this.sessions = new Session.Collection();
         _this.eventreports = new EventReport.Collection();
         _this.eventtags = new EventTag.Collection();
-        vent.on('feedback:save', function(feedback) {});
-        return _this.saveFeedback(feedback);
+        return vent.on('feedback:save', function(feedback) {
+          return _this.saveFeedback(feedback);
+        });
       };
     })(this));
   }

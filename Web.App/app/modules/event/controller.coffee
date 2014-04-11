@@ -25,7 +25,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       @eventtags= new EventTag.Collection()
 
       vent.on 'feedback:save', (feedback) =>
-      @saveFeedback feedback
+        @saveFeedback feedback
 
   showEventsIndex: ->
     vent.trigger 'fetch:done' # switch off block
