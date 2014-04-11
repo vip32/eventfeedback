@@ -5,24 +5,28 @@ settings = require 'settings'
 module.exports = class EventEditView extends Backbone.Marionette.ItemView
   id: 'event-report-view'
   template: require './templates/event-edit'
-
   events:
     'click .js-submit': 'onSubmit'
     'click .js-remove': 'onRemove'
 
   initialize: (options) ->
     @resources = options?.resources
+    @definitions = options?.definitions
     vent.trigger 'navigation:back:on'
     vent.on 'navigation:back', @onBack
 
   serializeData: ->
     resources: @resources?.toJSON()
+    definitions: @definitions?.toJSON()
   
   onShow: ->
     scrollTo(0,0)
     
     @form = new Backbone.Form(model: @model)
-    @form.schema.feedbackDefinitionId.options = ['def1', 'def2'] # TODO get defs from API
+    @form.schema.feedbackDefinitionId.options = 
+      @definitions.map (def) ->
+        val: def.get('id'), label: def.get('title')
+       
     @form.initialize()
     @$('#form').append(@form.render().el)
     

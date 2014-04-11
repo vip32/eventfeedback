@@ -2592,7 +2592,7 @@ if (typeof define === 'function' && define.amd) {
 });
 
 ;require.register("modules/event/controller", function(exports, require, module) {
-var Controller, Event, EventReport, EventTag, Feedback, Session, application, config, settings, user, vent,
+var Controller, Event, EventReport, EventTag, Feedback, FeedbackDefinition, Session, application, config, settings, user, vent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -2607,6 +2607,8 @@ settings = require('settings');
 Event = require('../../models/event');
 
 Feedback = require('../../models/feedback');
+
+FeedbackDefinition = require('../../models/feedbackdefinition');
 
 Session = require('../../models/session');
 
@@ -2627,6 +2629,7 @@ module.exports = Controller = (function(_super) {
       return function(options) {
         _this.events = new Event.Collection();
         _this.feedbacks = new Feedback.Collection();
+        _this.feedbackdefinitions = new FeedbackDefinition.Collection();
         _this.sessions = new Session.Collection();
         _this.eventreports = new EventReport.Collection();
         _this.eventtags = new EventTag.Collection();
@@ -2715,7 +2718,7 @@ module.exports = Controller = (function(_super) {
       }
     }).done((function(_this) {
       return function(models) {
-        var View, event, view;
+        var event;
         event = models.get(id);
         if (event == null) {
           event = new Event.Model({
@@ -2724,13 +2727,19 @@ module.exports = Controller = (function(_super) {
           _this.events.add(event);
         }
         vent.trigger('set:active:header', 'events:index', 'edit', 'glyphicon-bookmark');
-        View = require('./views/event-edit-view');
-        view = new View({
-          model: event,
-          collection: _this.events,
-          resources: application.resources
+        return _this.feedbackdefinitions.fetch({
+          reload: true
+        }).done(function(definitions) {
+          var View, view;
+          View = require('./views/event-edit-view');
+          view = new View({
+            model: event,
+            collection: _this.events,
+            definitions: definitions,
+            resources: application.resources
+          });
+          return application.layout.content.show(view);
         });
-        return application.layout.content.show(view);
       };
     })(this));
   };
@@ -3025,14 +3034,16 @@ module.exports = EventEditView = (function(_super) {
 
   EventEditView.prototype.initialize = function(options) {
     this.resources = options != null ? options.resources : void 0;
+    this.definitions = options != null ? options.definitions : void 0;
     vent.trigger('navigation:back:on');
     return vent.on('navigation:back', this.onBack);
   };
 
   EventEditView.prototype.serializeData = function() {
-    var _ref;
+    var _ref, _ref1;
     return {
-      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0
+      resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0,
+      definitions: (_ref1 = this.definitions) != null ? _ref1.toJSON() : void 0
     };
   };
 
@@ -3041,7 +3052,12 @@ module.exports = EventEditView = (function(_super) {
     this.form = new Backbone.Form({
       model: this.model
     });
-    this.form.schema.feedbackDefinitionId.options = ['def1', 'def2'];
+    this.form.schema.feedbackDefinitionId.options = this.definitions.map(function(def) {
+      return {
+        val: def.get('id'),
+        label: def.get('title')
+      };
+    });
     this.form.initialize();
     return this.$('#form').append(this.form.render().el);
   };

@@ -4,6 +4,7 @@ vent = require 'vent'
 settings = require 'settings'
 Event = require '../../models/event'
 Feedback = require '../../models/feedback'
+FeedbackDefinition = require '../../models/feedbackdefinition'
 Session = require '../../models/session'
 EventReport = require '../../models/eventreport'
 EventTag = require '../../models/eventtag'
@@ -20,6 +21,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
 
       @events = new Event.Collection()
       @feedbacks = new Feedback.Collection()
+      @feedbackdefinitions = new FeedbackDefinition.Collection()
       @sessions = new Session.Collection()
       @eventreports = new EventReport.Collection()
       @eventtags= new EventTag.Collection()
@@ -82,10 +84,12 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         event = new Event.Model(active: true)
         @events.add event
       vent.trigger 'set:active:header', 'events:index', 'edit', 'glyphicon-bookmark'
-
-      View = require './views/event-edit-view'
-      view = new View(model: event, collection: @events, resources: application.resources)
-      application.layout.content.show(view)
+      @feedbackdefinitions.fetch(
+          reload: true
+        ).done (definitions) =>
+        View = require './views/event-edit-view'
+        view = new View(model: event, collection: @events, definitions: definitions, resources: application.resources)
+        application.layout.content.show(view)
             
   showEventReport: (id) ->
     settings.set('active-event', id)
