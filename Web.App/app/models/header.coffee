@@ -56,7 +56,7 @@ module.exports.TestData = class TestData
     id: "1cf247f4-4c76-d453-bbec-1c40080e32e4"
     title: "Events"
     authenticated: true
-    roles: ['User', 'Administrator']
+    roles: ['Guest', 'User', 'Administrator']
     resource: 'Title_Events'
     glyphicon: 'glyphicon-bookmark'
     trigger: "events:index"
