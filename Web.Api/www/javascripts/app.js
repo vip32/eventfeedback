@@ -3268,7 +3268,7 @@ module.exports = EventIndexView = (function(_super) {
 });
 
 ;require.register("modules/event/views/session-details-view", function(exports, require, module) {
-var EventDetailsView, application, vent,
+var EventDetailsView, application, user, vent,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3276,6 +3276,8 @@ var EventDetailsView, application, vent,
 application = require('application');
 
 vent = require('vent');
+
+user = require('user');
 
 module.exports = EventDetailsView = (function(_super) {
   __extends(EventDetailsView, _super);
@@ -3309,7 +3311,8 @@ module.exports = EventDetailsView = (function(_super) {
       resources: (_ref = this.resources) != null ? _ref.toJSON() : void 0,
       model: this.model.toJSON(),
       feedback: (_ref1 = this.feedback) != null ? _ref1.toJSON() : void 0,
-      feedbackdefinition: this.model.get('feedbackDefinition')
+      feedbackdefinition: this.model.get('feedbackDefinition'),
+      isGuest: user.isGuest()
     };
   };
 
@@ -4872,6 +4875,15 @@ function program114(depth0,data) {
 function program116(depth0,data) {
   
   var buffer = "", stack1;
+  buffer += "\r\n    ";
+  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.feedbackAllowed), {hash:{},inverse:self.noop,fn:self.program(117, program117, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\r\n    ";
+  return buffer;
+  }
+function program117(depth0,data) {
+  
+  var buffer = "", stack1;
   buffer += "\r\n    <div class=\"row pull-right\">\r\n      <div class=\"col-xs-12\">\r\n        <br/>\r\n        <button class=\"btn btn-danger btn-responsive js-remove\">\r\n          <span class=\"glyphicon glyphicon-remove\"></span>&emsp;"
     + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_Remove)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n        </button>\r\n        <button class=\"btn btn-success btn-responsive js-submit\">\r\n          <span class=\"glyphicon glyphicon-save\"></span>&emsp;"
@@ -4931,7 +4943,7 @@ function program116(depth0,data) {
   stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.feedbackdefinition)),stack1 == null || stack1 === false ? stack1 : stack1.active9), {hash:{},inverse:self.noop,fn:self.program(105, program105, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n\r\n    ";
-  stack1 = helpers['if'].call(depth0, ((stack1 = (depth0 && depth0.model)),stack1 == null || stack1 === false ? stack1 : stack1.feedbackAllowed), {hash:{},inverse:self.noop,fn:self.program(116, program116, data),data:data});
+  stack1 = helpers.unless.call(depth0, (depth0 && depth0.isGuest), {hash:{},inverse:self.noop,fn:self.program(116, program116, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\r\n  </form>\r\n\r\n</div>";
   return buffer;
@@ -5428,6 +5440,10 @@ User = (function() {
 
   User.prototype.isAdministrator = function() {
     return _.intersection(['Administrator'], this.roles()).length > 0;
+  };
+
+  User.prototype.isGuest = function() {
+    return _.intersection(['Guest'], this.roles()).length > 0;
   };
 
   User.prototype.reset = function() {

@@ -58,6 +58,7 @@ namespace EventFeedback.Web.Api.Controllers
 
         [HttpPost]
         [Route("")]
+        [Authorize(Roles = "User,Administrator")]
         [ResponseType(typeof(Feedback))]
         public IHttpActionResult Post([FromBody] Feedback entity)
         {
@@ -90,6 +91,7 @@ namespace EventFeedback.Web.Api.Controllers
         
         [HttpPut]
         [Route("{id:int}")]
+        [Authorize(Roles = "User,Administrator")]
         [ResponseType(typeof(Feedback))]
         public IHttpActionResult Put(int id, [FromBody] Feedback entity)
         {
@@ -136,6 +138,7 @@ namespace EventFeedback.Web.Api.Controllers
 
         [HttpDelete]
         [Route("{id:int}")]
+        [Authorize(Roles = "User,Administrator")]
         public IHttpActionResult Delete(int id)
         {
             Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");

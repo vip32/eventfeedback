@@ -17,6 +17,9 @@ class User
 
   isAdministrator: ->
     return _.intersection(['Administrator'], @roles()).length > 0
+    
+  isGuest: ->
+    return _.intersection(['Guest'], @roles()).length > 0
   
   reset: ->
     settings.destroy('api_token')

@@ -467,6 +467,7 @@
     </div>
     {{/if}}
 
+    {{#unless isGuest}}
     {{#if model.feedbackAllowed}}
     <div class="row pull-right">
       <div class="col-xs-12">
@@ -480,6 +481,7 @@
       </div>
     </div>
     {{/if}}
+    {{/unless}}
   </form>
 
 </div>

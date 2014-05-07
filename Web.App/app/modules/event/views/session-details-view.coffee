@@ -1,5 +1,6 @@
 application = require 'application'
 vent = require 'vent'
+user = require 'user'
 
 module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
   id: 'session-details-view'
@@ -21,6 +22,7 @@ module.exports = class EventDetailsView extends Backbone.Marionette.ItemView
     model: @model.toJSON()
     feedback: @feedback?.toJSON()
     feedbackdefinition: @model.get('feedbackDefinition')
+    isGuest: user.isGuest()
 
   onBack: =>
     log 'back from session-details'
