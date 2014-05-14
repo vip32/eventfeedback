@@ -21656,1995 +21656,6 @@ _.extend(Marionette.Module, {
 
 })(Backbone.Form);
 
-;/**
- * Backbone localStorage Adapter
- * Version 1.1.7
- *
- * https://github.com/jeromegn/Backbone.localStorage
- */
-(function (root, factory) {
-   if (typeof exports === 'object' && typeof require === 'function') {
-     module.exports = factory(require("underscore"), require("backbone"));
-   } else if (typeof define === "function" && define.amd) {
-      // AMD. Register as an anonymous module.
-      define(["underscore","backbone"], function(_, Backbone) {
-        // Use global variables if the locals are undefined.
-        return factory(_ || root._, Backbone || root.Backbone);
-      });
-   } else {
-      // RequireJS isn't being used. Assume underscore and backbone are loaded in <script> tags
-      factory(_, Backbone);
-   }
-}(this, function(_, Backbone) {
-// A simple module to replace `Backbone.sync` with *localStorage*-based
-// persistence. Models are given GUIDS, and saved into a JSON object. Simple
-// as that.
-
-// Hold reference to Underscore.js and Backbone.js in the closure in order
-// to make things work even if they are removed from the global namespace
-
-// Generate four random hex digits.
-function S4() {
-   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-};
-
-// Generate a pseudo-GUID by concatenating random hexadecimal.
-function guid() {
-   return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
-};
-
-// Our Store is represented by a single JS object in *localStorage*. Create it
-// with a meaningful name, like the name you'd give a table.
-// window.Store is deprectated, use Backbone.LocalStorage instead
-Backbone.LocalStorage = window.Store = function(name) {
-  if( !this.localStorage ) {
-    throw "Backbone.localStorage: Environment does not support localStorage."
-  }
-  this.name = name;
-  var store = this.localStorage().getItem(this.name);
-  this.records = (store && store.split(",")) || [];
-};
-
-_.extend(Backbone.LocalStorage.prototype, {
-
-  // Save the current state of the **Store** to *localStorage*.
-  save: function() {
-    this.localStorage().setItem(this.name, this.records.join(","));
-  },
-
-  // Add a model, giving it a (hopefully)-unique GUID, if it doesn't already
-  // have an id of it's own.
-  create: function(model) {
-    if (!model.id) {
-      model.id = guid();
-      model.set(model.idAttribute, model.id);
-    }
-    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
-    this.records.push(model.id.toString());
-    this.save();
-    return this.find(model);
-  },
-
-  // Update a model by replacing its copy in `this.data`.
-  update: function(model) {
-    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
-    if (!_.include(this.records, model.id.toString()))
-      this.records.push(model.id.toString()); this.save();
-    return this.find(model);
-  },
-
-  // Retrieve a model from `this.data` by id.
-  find: function(model) {
-    return this.jsonData(this.localStorage().getItem(this.name+"-"+model.id));
-  },
-
-  // Return the array of all models currently in storage.
-  findAll: function() {
-    // Lodash removed _#chain in v1.0.0-rc.1
-    return (_.chain || _)(this.records)
-      .map(function(id){
-        return this.jsonData(this.localStorage().getItem(this.name+"-"+id));
-      }, this)
-      .compact()
-      .value();
-  },
-
-  // Delete a model from `this.data`, returning it.
-  destroy: function(model) {
-    if (model.isNew())
-      return false
-    this.localStorage().removeItem(this.name+"-"+model.id);
-    this.records = _.reject(this.records, function(id){
-      return id === model.id.toString();
-    });
-    this.save();
-    return model;
-  },
-
-  localStorage: function() {
-    return localStorage;
-  },
-
-  // fix for "illegal access" error on Android when JSON.parse is passed null
-  jsonData: function (data) {
-      return data && JSON.parse(data);
-  },
-
-  // Clear localStorage for specific collection.
-  _clear: function() {
-    var local = this.localStorage(),
-      itemRe = new RegExp("^" + this.name + "-");
-
-    // Remove id-tracking item (e.g., "foo").
-    local.removeItem(this.name);
-
-    // Lodash removed _#chain in v1.0.0-rc.1
-    // Match all data items (e.g., "foo-ID") and remove.
-    (_.chain || _)(local).keys()
-      .filter(function (k) { return itemRe.test(k); })
-      .each(function (k) { local.removeItem(k); });
-
-    this.records.length = 0;
-  },
-
-  // Size of localStorage.
-  _storageSize: function() {
-    return this.localStorage().length;
-  }
-
-});
-
-// localSync delegate to the model or collection's
-// *localStorage* property, which should be an instance of `Store`.
-// window.Store.sync and Backbone.localSync is deprecated, use Backbone.LocalStorage.sync instead
-Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function(method, model, options) {
-  var store = model.localStorage || model.collection.localStorage;
-
-  var resp, errorMessage, syncDfd = Backbone.$.Deferred && Backbone.$.Deferred(); //If $ is having Deferred - use it.
-
-  try {
-
-    switch (method) {
-      case "read":
-        resp = model.id != undefined ? store.find(model) : store.findAll();
-        break;
-      case "create":
-        resp = store.create(model);
-        break;
-      case "update":
-        resp = store.update(model);
-        break;
-      case "delete":
-        resp = store.destroy(model);
-        break;
-    }
-
-  } catch(error) {
-    if (error.code === 22 && store._storageSize() === 0)
-      errorMessage = "Private browsing is unsupported";
-    else
-      errorMessage = error.message;
-  }
-
-  if (resp) {
-    if (options && options.success) {
-      if (Backbone.VERSION === "0.9.10") {
-        options.success(model, resp, options);
-      } else {
-        options.success(resp);
-      }
-    }
-    if (syncDfd) {
-      syncDfd.resolve(resp);
-    }
-
-  } else {
-    errorMessage = errorMessage ? errorMessage
-                                : "Record Not Found";
-
-    if (options && options.error)
-      if (Backbone.VERSION === "0.9.10") {
-        options.error(model, errorMessage, options);
-      } else {
-        options.error(errorMessage);
-      }
-
-    if (syncDfd)
-      syncDfd.reject(errorMessage);
-  }
-
-  // add compatibility with $.ajax
-  // always execute callback for success and error
-  if (options && options.complete) options.complete(resp);
-
-  return syncDfd && syncDfd.promise();
-};
-
-Backbone.ajaxSync = Backbone.sync;
-
-Backbone.getSyncMethod = function(model) {
-  if(model.localStorage || (model.collection && model.collection.localStorage)) {
-    return Backbone.localSync;
-  }
-
-  return Backbone.ajaxSync;
-};
-
-// Override 'Backbone.sync' to default to localSync,
-// the original 'Backbone.sync' is still available in 'Backbone.ajaxSync'
-Backbone.sync = function(method, model, options) {
-  return Backbone.getSyncMethod(model).apply(this, [method, model, options]);
-};
-
-return Backbone.LocalStorage;
-}));
-
-;// Console-polyfill. MIT license.
-// https://github.com/paulmillr/console-polyfill
-// Make it safe to do console.log() always.
-(function(con) {
-  'use strict';
-  var prop, method;
-  var empty = {};
-  var dummy = function() {};
-  var properties = 'memory'.split(',');
-  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
-     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
-     'time,timeEnd,trace,warn').split(',');
-  while (prop = properties.pop()) con[prop] = con[prop] || empty;
-  while (method = methods.pop()) con[method] = con[method] || dummy;
-})(this.console = this.console || {});
-
-;/*!
- * jQuery blockUI plugin
- * Version 2.66.0-2013.10.09
- * Requires jQuery v1.7 or later
- *
- * Examples at: http://malsup.com/jquery/block/
- * Copyright (c) 2007-2013 M. Alsup
- * Dual licensed under the MIT and GPL licenses:
- * http://www.opensource.org/licenses/mit-license.php
- * http://www.gnu.org/licenses/gpl.html
- *
- * Thanks to Amir-Hossein Sobhi for some excellent contributions!
- */
-
-;(function() {
-/*jshint eqeqeq:false curly:false latedef:false */
-"use strict";
-
-	function setup($) {
-		$.fn._fadeIn = $.fn.fadeIn;
-
-		var noOp = $.noop || function() {};
-
-		// this bit is to ensure we don't call setExpression when we shouldn't (with extra muscle to handle
-		// confusing userAgent strings on Vista)
-		var msie = /MSIE/.test(navigator.userAgent);
-		var ie6  = /MSIE 6.0/.test(navigator.userAgent) && ! /MSIE 8.0/.test(navigator.userAgent);
-		var mode = document.documentMode || 0;
-		var setExpr = $.isFunction( document.createElement('div').style.setExpression );
-
-		// global $ methods for blocking/unblocking the entire page
-		$.blockUI   = function(opts) { install(window, opts); };
-		$.unblockUI = function(opts) { remove(window, opts); };
-
-		// convenience method for quick growl-like notifications  (http://www.google.com/search?q=growl)
-		$.growlUI = function(title, message, timeout, onClose) {
-			var $m = $('<div class="growlUI"></div>');
-			if (title) $m.append('<h1>'+title+'</h1>');
-			if (message) $m.append('<h2>'+message+'</h2>');
-			if (timeout === undefined) timeout = 3000;
-
-			// Added by konapun: Set timeout to 30 seconds if this growl is moused over, like normal toast notifications
-			var callBlock = function(opts) {
-				opts = opts || {};
-
-				$.blockUI({
-					message: $m,
-					fadeIn : typeof opts.fadeIn  !== 'undefined' ? opts.fadeIn  : 700,
-					fadeOut: typeof opts.fadeOut !== 'undefined' ? opts.fadeOut : 1000,
-					timeout: typeof opts.timeout !== 'undefined' ? opts.timeout : timeout,
-					centerY: false,
-					showOverlay: false,
-					onUnblock: onClose,
-					css: $.blockUI.defaults.growlCSS
-				});
-			};
-
-			callBlock();
-			var nonmousedOpacity = $m.css('opacity');
-			$m.mouseover(function() {
-				callBlock({
-					fadeIn: 0,
-					timeout: 30000
-				});
-
-				var displayBlock = $('.blockMsg');
-				displayBlock.stop(); // cancel fadeout if it has started
-				displayBlock.fadeTo(300, 1); // make it easier to read the message by removing transparency
-			}).mouseout(function() {
-				$('.blockMsg').fadeOut(1000);
-			});
-			// End konapun additions
-		};
-
-		// plugin method for blocking element content
-		$.fn.block = function(opts) {
-			if ( this[0] === window ) {
-				$.blockUI( opts );
-				return this;
-			}
-			var fullOpts = $.extend({}, $.blockUI.defaults, opts || {});
-			this.each(function() {
-				var $el = $(this);
-				if (fullOpts.ignoreIfBlocked && $el.data('blockUI.isBlocked'))
-					return;
-				$el.unblock({ fadeOut: 0 });
-			});
-
-			return this.each(function() {
-				if ($.css(this,'position') == 'static') {
-					this.style.position = 'relative';
-					$(this).data('blockUI.static', true);
-				}
-				this.style.zoom = 1; // force 'hasLayout' in ie
-				install(this, opts);
-			});
-		};
-
-		// plugin method for unblocking element content
-		$.fn.unblock = function(opts) {
-			if ( this[0] === window ) {
-				$.unblockUI( opts );
-				return this;
-			}
-			return this.each(function() {
-				remove(this, opts);
-			});
-		};
-
-		$.blockUI.version = 2.66; // 2nd generation blocking at no extra cost!
-
-		// override these in your code to change the default behavior and style
-		$.blockUI.defaults = {
-			// message displayed when blocking (use null for no message)
-			message:  '<h1>Please wait...</h1>',
-
-			title: null,		// title string; only used when theme == true
-			draggable: true,	// only used when theme == true (requires jquery-ui.js to be loaded)
-
-			theme: false, // set to true to use with jQuery UI themes
-
-			// styles for the message when blocking; if you wish to disable
-			// these and use an external stylesheet then do this in your code:
-			// $.blockUI.defaults.css = {};
-			css: {
-				padding:	0,
-				margin:		0,
-				width:		'30%',
-				top:		'40%',
-				left:		'35%',
-				textAlign:	'center',
-				color:		'#000',
-				border:		'3px solid #aaa',
-				backgroundColor:'#fff',
-				cursor:		'wait'
-			},
-
-			// minimal style set used when themes are used
-			themedCSS: {
-				width:	'30%',
-				top:	'40%',
-				left:	'35%'
-			},
-
-			// styles for the overlay
-			overlayCSS:  {
-				backgroundColor:	'#000',
-				opacity:			0.6,
-				cursor:				'wait'
-			},
-
-			// style to replace wait cursor before unblocking to correct issue
-			// of lingering wait cursor
-			cursorReset: 'default',
-
-			// styles applied when using $.growlUI
-			growlCSS: {
-				width:		'350px',
-				top:		'10px',
-				left:		'',
-				right:		'10px',
-				border:		'none',
-				padding:	'5px',
-				opacity:	0.6,
-				cursor:		'default',
-				color:		'#fff',
-				backgroundColor: '#000',
-				'-webkit-border-radius':'10px',
-				'-moz-border-radius':	'10px',
-				'border-radius':		'10px'
-			},
-
-			// IE issues: 'about:blank' fails on HTTPS and javascript:false is s-l-o-w
-			// (hat tip to Jorge H. N. de Vasconcelos)
-			/*jshint scripturl:true */
-			iframeSrc: /^https/i.test(window.location.href || '') ? 'javascript:false' : 'about:blank',
-
-			// force usage of iframe in non-IE browsers (handy for blocking applets)
-			forceIframe: false,
-
-			// z-index for the blocking overlay
-			baseZ: 1000,
-
-			// set these to true to have the message automatically centered
-			centerX: true, // <-- only effects element blocking (page block controlled via css above)
-			centerY: true,
-
-			// allow body element to be stetched in ie6; this makes blocking look better
-			// on "short" pages.  disable if you wish to prevent changes to the body height
-			allowBodyStretch: true,
-
-			// enable if you want key and mouse events to be disabled for content that is blocked
-			bindEvents: true,
-
-			// be default blockUI will supress tab navigation from leaving blocking content
-			// (if bindEvents is true)
-			constrainTabKey: true,
-
-			// fadeIn time in millis; set to 0 to disable fadeIn on block
-			fadeIn:  200,
-
-			// fadeOut time in millis; set to 0 to disable fadeOut on unblock
-			fadeOut:  400,
-
-			// time in millis to wait before auto-unblocking; set to 0 to disable auto-unblock
-			timeout: 0,
-
-			// disable if you don't want to show the overlay
-			showOverlay: true,
-
-			// if true, focus will be placed in the first available input field when
-			// page blocking
-			focusInput: true,
-
-            // elements that can receive focus
-            focusableElements: ':input:enabled:visible',
-
-			// suppresses the use of overlay styles on FF/Linux (due to performance issues with opacity)
-			// no longer needed in 2012
-			// applyPlatformOpacityRules: true,
-
-			// callback method invoked when fadeIn has completed and blocking message is visible
-			onBlock: null,
-
-			// callback method invoked when unblocking has completed; the callback is
-			// passed the element that has been unblocked (which is the window object for page
-			// blocks) and the options that were passed to the unblock call:
-			//	onUnblock(element, options)
-			onUnblock: null,
-
-			// callback method invoked when the overlay area is clicked.
-			// setting this will turn the cursor to a pointer, otherwise cursor defined in overlayCss will be used.
-			onOverlayClick: null,
-
-			// don't ask; if you really must know: http://groups.google.com/group/jquery-en/browse_thread/thread/36640a8730503595/2f6a79a77a78e493#2f6a79a77a78e493
-			quirksmodeOffsetHack: 4,
-
-			// class name of the message block
-			blockMsgClass: 'blockMsg',
-
-			// if it is already blocked, then ignore it (don't unblock and reblock)
-			ignoreIfBlocked: false
-		};
-
-		// private data and functions follow...
-
-		var pageBlock = null;
-		var pageBlockEls = [];
-
-		function install(el, opts) {
-			var css, themedCSS;
-			var full = (el == window);
-			var msg = (opts && opts.message !== undefined ? opts.message : undefined);
-			opts = $.extend({}, $.blockUI.defaults, opts || {});
-
-			if (opts.ignoreIfBlocked && $(el).data('blockUI.isBlocked'))
-				return;
-
-			opts.overlayCSS = $.extend({}, $.blockUI.defaults.overlayCSS, opts.overlayCSS || {});
-			css = $.extend({}, $.blockUI.defaults.css, opts.css || {});
-			if (opts.onOverlayClick)
-				opts.overlayCSS.cursor = 'pointer';
-
-			themedCSS = $.extend({}, $.blockUI.defaults.themedCSS, opts.themedCSS || {});
-			msg = msg === undefined ? opts.message : msg;
-
-			// remove the current block (if there is one)
-			if (full && pageBlock)
-				remove(window, {fadeOut:0});
-
-			// if an existing element is being used as the blocking content then we capture
-			// its current place in the DOM (and current display style) so we can restore
-			// it when we unblock
-			if (msg && typeof msg != 'string' && (msg.parentNode || msg.jquery)) {
-				var node = msg.jquery ? msg[0] : msg;
-				var data = {};
-				$(el).data('blockUI.history', data);
-				data.el = node;
-				data.parent = node.parentNode;
-				data.display = node.style.display;
-				data.position = node.style.position;
-				if (data.parent)
-					data.parent.removeChild(node);
-			}
-
-			$(el).data('blockUI.onUnblock', opts.onUnblock);
-			var z = opts.baseZ;
-
-			// blockUI uses 3 layers for blocking, for simplicity they are all used on every platform;
-			// layer1 is the iframe layer which is used to supress bleed through of underlying content
-			// layer2 is the overlay layer which has opacity and a wait cursor (by default)
-			// layer3 is the message content that is displayed while blocking
-			var lyr1, lyr2, lyr3, s;
-			if (msie || opts.forceIframe)
-				lyr1 = $('<iframe class="blockUI" style="z-index:'+ (z++) +';display:none;border:none;margin:0;padding:0;position:absolute;width:100%;height:100%;top:0;left:0" src="'+opts.iframeSrc+'"></iframe>');
-			else
-				lyr1 = $('<div class="blockUI" style="display:none"></div>');
-
-			if (opts.theme)
-				lyr2 = $('<div class="blockUI blockOverlay ui-widget-overlay" style="z-index:'+ (z++) +';display:none"></div>');
-			else
-				lyr2 = $('<div class="blockUI blockOverlay" style="z-index:'+ (z++) +';display:none;border:none;margin:0;padding:0;width:100%;height:100%;top:0;left:0"></div>');
-
-			if (opts.theme && full) {
-				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockPage ui-dialog ui-widget ui-corner-all" style="z-index:'+(z+10)+';display:none;position:fixed">';
-				if ( opts.title ) {
-					s += '<div class="ui-widget-header ui-dialog-titlebar ui-corner-all blockTitle">'+(opts.title || '&nbsp;')+'</div>';
-				}
-				s += '<div class="ui-widget-content ui-dialog-content"></div>';
-				s += '</div>';
-			}
-			else if (opts.theme) {
-				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockElement ui-dialog ui-widget ui-corner-all" style="z-index:'+(z+10)+';display:none;position:absolute">';
-				if ( opts.title ) {
-					s += '<div class="ui-widget-header ui-dialog-titlebar ui-corner-all blockTitle">'+(opts.title || '&nbsp;')+'</div>';
-				}
-				s += '<div class="ui-widget-content ui-dialog-content"></div>';
-				s += '</div>';
-			}
-			else if (full) {
-				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockPage" style="z-index:'+(z+10)+';display:none;position:fixed"></div>';
-			}
-			else {
-				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockElement" style="z-index:'+(z+10)+';display:none;position:absolute"></div>';
-			}
-			lyr3 = $(s);
-
-			// if we have a message, style it
-			if (msg) {
-				if (opts.theme) {
-					lyr3.css(themedCSS);
-					lyr3.addClass('ui-widget-content');
-				}
-				else
-					lyr3.css(css);
-			}
-
-			// style the overlay
-			if (!opts.theme /*&& (!opts.applyPlatformOpacityRules)*/)
-				lyr2.css(opts.overlayCSS);
-			lyr2.css('position', full ? 'fixed' : 'absolute');
-
-			// make iframe layer transparent in IE
-			if (msie || opts.forceIframe)
-				lyr1.css('opacity',0.0);
-
-			//$([lyr1[0],lyr2[0],lyr3[0]]).appendTo(full ? 'body' : el);
-			var layers = [lyr1,lyr2,lyr3], $par = full ? $('body') : $(el);
-			$.each(layers, function() {
-				this.appendTo($par);
-			});
-
-			if (opts.theme && opts.draggable && $.fn.draggable) {
-				lyr3.draggable({
-					handle: '.ui-dialog-titlebar',
-					cancel: 'li'
-				});
-			}
-
-			// ie7 must use absolute positioning in quirks mode and to account for activex issues (when scrolling)
-			var expr = setExpr && (!$.support.boxModel || $('object,embed', full ? null : el).length > 0);
-			if (ie6 || expr) {
-				// give body 100% height
-				if (full && opts.allowBodyStretch && $.support.boxModel)
-					$('html,body').css('height','100%');
-
-				// fix ie6 issue when blocked element has a border width
-				if ((ie6 || !$.support.boxModel) && !full) {
-					var t = sz(el,'borderTopWidth'), l = sz(el,'borderLeftWidth');
-					var fixT = t ? '(0 - '+t+')' : 0;
-					var fixL = l ? '(0 - '+l+')' : 0;
-				}
-
-				// simulate fixed position
-				$.each(layers, function(i,o) {
-					var s = o[0].style;
-					s.position = 'absolute';
-					if (i < 2) {
-						if (full)
-							s.setExpression('height','Math.max(document.body.scrollHeight, document.body.offsetHeight) - (jQuery.support.boxModel?0:'+opts.quirksmodeOffsetHack+') + "px"');
-						else
-							s.setExpression('height','this.parentNode.offsetHeight + "px"');
-						if (full)
-							s.setExpression('width','jQuery.support.boxModel && document.documentElement.clientWidth || document.body.clientWidth + "px"');
-						else
-							s.setExpression('width','this.parentNode.offsetWidth + "px"');
-						if (fixL) s.setExpression('left', fixL);
-						if (fixT) s.setExpression('top', fixT);
-					}
-					else if (opts.centerY) {
-						if (full) s.setExpression('top','(document.documentElement.clientHeight || document.body.clientHeight) / 2 - (this.offsetHeight / 2) + (blah = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + "px"');
-						s.marginTop = 0;
-					}
-					else if (!opts.centerY && full) {
-						var top = (opts.css && opts.css.top) ? parseInt(opts.css.top, 10) : 0;
-						var expression = '((document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + '+top+') + "px"';
-						s.setExpression('top',expression);
-					}
-				});
-			}
-
-			// show the message
-			if (msg) {
-				if (opts.theme)
-					lyr3.find('.ui-widget-content').append(msg);
-				else
-					lyr3.append(msg);
-				if (msg.jquery || msg.nodeType)
-					$(msg).show();
-			}
-
-			if ((msie || opts.forceIframe) && opts.showOverlay)
-				lyr1.show(); // opacity is zero
-			if (opts.fadeIn) {
-				var cb = opts.onBlock ? opts.onBlock : noOp;
-				var cb1 = (opts.showOverlay && !msg) ? cb : noOp;
-				var cb2 = msg ? cb : noOp;
-				if (opts.showOverlay)
-					lyr2._fadeIn(opts.fadeIn, cb1);
-				if (msg)
-					lyr3._fadeIn(opts.fadeIn, cb2);
-			}
-			else {
-				if (opts.showOverlay)
-					lyr2.show();
-				if (msg)
-					lyr3.show();
-				if (opts.onBlock)
-					opts.onBlock();
-			}
-
-			// bind key and mouse events
-			bind(1, el, opts);
-
-			if (full) {
-				pageBlock = lyr3[0];
-				pageBlockEls = $(opts.focusableElements,pageBlock);
-				if (opts.focusInput)
-					setTimeout(focus, 20);
-			}
-			else
-				center(lyr3[0], opts.centerX, opts.centerY);
-
-			if (opts.timeout) {
-				// auto-unblock
-				var to = setTimeout(function() {
-					if (full)
-						$.unblockUI(opts);
-					else
-						$(el).unblock(opts);
-				}, opts.timeout);
-				$(el).data('blockUI.timeout', to);
-			}
-		}
-
-		// remove the block
-		function remove(el, opts) {
-			var count;
-			var full = (el == window);
-			var $el = $(el);
-			var data = $el.data('blockUI.history');
-			var to = $el.data('blockUI.timeout');
-			if (to) {
-				clearTimeout(to);
-				$el.removeData('blockUI.timeout');
-			}
-			opts = $.extend({}, $.blockUI.defaults, opts || {});
-			bind(0, el, opts); // unbind events
-
-			if (opts.onUnblock === null) {
-				opts.onUnblock = $el.data('blockUI.onUnblock');
-				$el.removeData('blockUI.onUnblock');
-			}
-
-			var els;
-			if (full) // crazy selector to handle odd field errors in ie6/7
-				els = $('body').children().filter('.blockUI').add('body > .blockUI');
-			else
-				els = $el.find('>.blockUI');
-
-			// fix cursor issue
-			if ( opts.cursorReset ) {
-				if ( els.length > 1 )
-					els[1].style.cursor = opts.cursorReset;
-				if ( els.length > 2 )
-					els[2].style.cursor = opts.cursorReset;
-			}
-
-			if (full)
-				pageBlock = pageBlockEls = null;
-
-			if (opts.fadeOut) {
-				count = els.length;
-				els.stop().fadeOut(opts.fadeOut, function() {
-					if ( --count === 0)
-						reset(els,data,opts,el);
-				});
-			}
-			else
-				reset(els, data, opts, el);
-		}
-
-		// move blocking element back into the DOM where it started
-		function reset(els,data,opts,el) {
-			var $el = $(el);
-			if ( $el.data('blockUI.isBlocked') )
-				return;
-
-			els.each(function(i,o) {
-				// remove via DOM calls so we don't lose event handlers
-				if (this.parentNode)
-					this.parentNode.removeChild(this);
-			});
-
-			if (data && data.el) {
-				data.el.style.display = data.display;
-				data.el.style.position = data.position;
-				if (data.parent)
-					data.parent.appendChild(data.el);
-				$el.removeData('blockUI.history');
-			}
-
-			if ($el.data('blockUI.static')) {
-				$el.css('position', 'static'); // #22
-			}
-
-			if (typeof opts.onUnblock == 'function')
-				opts.onUnblock(el,opts);
-
-			// fix issue in Safari 6 where block artifacts remain until reflow
-			var body = $(document.body), w = body.width(), cssW = body[0].style.width;
-			body.width(w-1).width(w);
-			body[0].style.width = cssW;
-		}
-
-		// bind/unbind the handler
-		function bind(b, el, opts) {
-			var full = el == window, $el = $(el);
-
-			// don't bother unbinding if there is nothing to unbind
-			if (!b && (full && !pageBlock || !full && !$el.data('blockUI.isBlocked')))
-				return;
-
-			$el.data('blockUI.isBlocked', b);
-
-			// don't bind events when overlay is not in use or if bindEvents is false
-			if (!full || !opts.bindEvents || (b && !opts.showOverlay))
-				return;
-
-			// bind anchors and inputs for mouse and key events
-			var events = 'mousedown mouseup keydown keypress keyup touchstart touchend touchmove';
-			if (b)
-				$(document).bind(events, opts, handler);
-			else
-				$(document).unbind(events, handler);
-
-		// former impl...
-		//		var $e = $('a,:input');
-		//		b ? $e.bind(events, opts, handler) : $e.unbind(events, handler);
-		}
-
-		// event handler to suppress keyboard/mouse events when blocking
-		function handler(e) {
-			// allow tab navigation (conditionally)
-			if (e.type === 'keydown' && e.keyCode && e.keyCode == 9) {
-				if (pageBlock && e.data.constrainTabKey) {
-					var els = pageBlockEls;
-					var fwd = !e.shiftKey && e.target === els[els.length-1];
-					var back = e.shiftKey && e.target === els[0];
-					if (fwd || back) {
-						setTimeout(function(){focus(back);},10);
-						return false;
-					}
-				}
-			}
-			var opts = e.data;
-			var target = $(e.target);
-			if (target.hasClass('blockOverlay') && opts.onOverlayClick)
-				opts.onOverlayClick(e);
-
-			// allow events within the message content
-			if (target.parents('div.' + opts.blockMsgClass).length > 0)
-				return true;
-
-			// allow events for content that is not being blocked
-			return target.parents().children().filter('div.blockUI').length === 0;
-		}
-
-		function focus(back) {
-			if (!pageBlockEls)
-				return;
-			var e = pageBlockEls[back===true ? pageBlockEls.length-1 : 0];
-			if (e)
-				e.focus();
-		}
-
-		function center(el, x, y) {
-			var p = el.parentNode, s = el.style;
-			var l = ((p.offsetWidth - el.offsetWidth)/2) - sz(p,'borderLeftWidth');
-			var t = ((p.offsetHeight - el.offsetHeight)/2) - sz(p,'borderTopWidth');
-			if (x) s.left = l > 0 ? (l+'px') : '0';
-			if (y) s.top  = t > 0 ? (t+'px') : '0';
-		}
-
-		function sz(el, p) {
-			return parseInt($.css(el,p),10)||0;
-		}
-
-	}
-
-
-	/*global define:true */
-	if (typeof define === 'function' && define.amd && define.amd.jQuery) {
-		define(['jquery'], setup);
-	} else {
-		setup(jQuery);
-	}
-
-})();
-
-;/**
- * Copyright (c) 2011-2013 Felix Gnass
- * Licensed under the MIT license
- */
-
-/*
-
-Basic Usage:
-============
-
-$('#el').spin(); // Creates a default Spinner using the text color of #el.
-$('#el').spin({ ... }); // Creates a Spinner using the provided options.
-
-$('#el').spin(false); // Stops and removes the spinner.
-
-Using Presets:
-==============
-
-$('#el').spin('small'); // Creates a 'small' Spinner using the text color of #el.
-$('#el').spin('large', '#fff'); // Creates a 'large' white Spinner.
-
-Adding a custom preset:
-=======================
-
-$.fn.spin.presets.flower = {
-  lines: 9
-  length: 10
-  width: 20
-  radius: 0
-}
-
-$('#el').spin('flower', 'red');
-
-*/
-
-(function(factory) {
-
-  if (typeof exports == 'object') {
-    // CommonJS
-    factory(require('jquery'), require('spin'))
-  }
-  else if (typeof define == 'function' && define.amd) {
-    // AMD, register as anonymous module
-    define(['jquery', 'spin'], factory)
-  }
-  else {
-    // Browser globals
-    if (!window.Spinner) throw new Error('Spin.js not present')
-    factory(window.jQuery, window.Spinner)
-  }
-
-}(function($, Spinner) {
-
-  $.fn.spin = function(opts, color) {
-
-    return this.each(function() {
-      var $this = $(this),
-        data = $this.data();
-
-      if (data.spinner) {
-        data.spinner.stop();
-        delete data.spinner;
-      }
-      if (opts !== false) {
-        opts = $.extend(
-          { color: color || $this.css('color') },
-          $.fn.spin.presets[opts] || opts
-        )
-        data.spinner = new Spinner(opts).spin(this)
-      }
-    })
-  }
-
-  $.fn.spin.presets = {
-    tiny: { lines: 8, length: 2, width: 2, radius: 3 },
-    small: { lines: 8, length: 4, width: 3, radius: 5 },
-    large: { lines: 10, length: 8, width: 4, radius: 8 }
-  }
-
-}));
-
-;/**
- * @preserve FastClick: polyfill to remove click delays on browsers with touch UIs.
- *
- * @version 0.6.12
- * @codingstandard ftlabs-jsv2
- * @copyright The Financial Times Limited [All Rights Reserved]
- * @license MIT License (see LICENSE.txt)
- */
-
-/*jslint browser:true, node:true*/
-/*global define, Event, Node*/
-
-
-/**
- * Instantiate fast-clicking listeners on the specificed layer.
- *
- * @constructor
- * @param {Element} layer The layer to listen on
- */
-function FastClick(layer) {
-	'use strict';
-	var oldOnClick, self = this;
-
-
-	/**
-	 * Whether a click is currently being tracked.
-	 *
-	 * @type boolean
-	 */
-	this.trackingClick = false;
-
-
-	/**
-	 * Timestamp for when when click tracking started.
-	 *
-	 * @type number
-	 */
-	this.trackingClickStart = 0;
-
-
-	/**
-	 * The element being tracked for a click.
-	 *
-	 * @type EventTarget
-	 */
-	this.targetElement = null;
-
-
-	/**
-	 * X-coordinate of touch start event.
-	 *
-	 * @type number
-	 */
-	this.touchStartX = 0;
-
-
-	/**
-	 * Y-coordinate of touch start event.
-	 *
-	 * @type number
-	 */
-	this.touchStartY = 0;
-
-
-	/**
-	 * ID of the last touch, retrieved from Touch.identifier.
-	 *
-	 * @type number
-	 */
-	this.lastTouchIdentifier = 0;
-
-
-	/**
-	 * Touchmove boundary, beyond which a click will be cancelled.
-	 *
-	 * @type number
-	 */
-	this.touchBoundary = 10;
-
-
-	/**
-	 * The FastClick layer.
-	 *
-	 * @type Element
-	 */
-	this.layer = layer;
-
-	if (!layer || !layer.nodeType) {
-		throw new TypeError('Layer must be a document node');
-	}
-
-	/** @type function() */
-	this.onClick = function() { return FastClick.prototype.onClick.apply(self, arguments); };
-
-	/** @type function() */
-	this.onMouse = function() { return FastClick.prototype.onMouse.apply(self, arguments); };
-
-	/** @type function() */
-	this.onTouchStart = function() { return FastClick.prototype.onTouchStart.apply(self, arguments); };
-
-	/** @type function() */
-	this.onTouchMove = function() { return FastClick.prototype.onTouchMove.apply(self, arguments); };
-
-	/** @type function() */
-	this.onTouchEnd = function() { return FastClick.prototype.onTouchEnd.apply(self, arguments); };
-
-	/** @type function() */
-	this.onTouchCancel = function() { return FastClick.prototype.onTouchCancel.apply(self, arguments); };
-
-	if (FastClick.notNeeded(layer)) {
-		return;
-	}
-
-	// Set up event handlers as required
-	if (this.deviceIsAndroid) {
-		layer.addEventListener('mouseover', this.onMouse, true);
-		layer.addEventListener('mousedown', this.onMouse, true);
-		layer.addEventListener('mouseup', this.onMouse, true);
-	}
-
-	layer.addEventListener('click', this.onClick, true);
-	layer.addEventListener('touchstart', this.onTouchStart, false);
-	layer.addEventListener('touchmove', this.onTouchMove, false);
-	layer.addEventListener('touchend', this.onTouchEnd, false);
-	layer.addEventListener('touchcancel', this.onTouchCancel, false);
-
-	// Hack is required for browsers that don't support Event#stopImmediatePropagation (e.g. Android 2)
-	// which is how FastClick normally stops click events bubbling to callbacks registered on the FastClick
-	// layer when they are cancelled.
-	if (!Event.prototype.stopImmediatePropagation) {
-		layer.removeEventListener = function(type, callback, capture) {
-			var rmv = Node.prototype.removeEventListener;
-			if (type === 'click') {
-				rmv.call(layer, type, callback.hijacked || callback, capture);
-			} else {
-				rmv.call(layer, type, callback, capture);
-			}
-		};
-
-		layer.addEventListener = function(type, callback, capture) {
-			var adv = Node.prototype.addEventListener;
-			if (type === 'click') {
-				adv.call(layer, type, callback.hijacked || (callback.hijacked = function(event) {
-					if (!event.propagationStopped) {
-						callback(event);
-					}
-				}), capture);
-			} else {
-				adv.call(layer, type, callback, capture);
-			}
-		};
-	}
-
-	// If a handler is already declared in the element's onclick attribute, it will be fired before
-	// FastClick's onClick handler. Fix this by pulling out the user-defined handler function and
-	// adding it as listener.
-	if (typeof layer.onclick === 'function') {
-
-		// Android browser on at least 3.2 requires a new reference to the function in layer.onclick
-		// - the old one won't work if passed to addEventListener directly.
-		oldOnClick = layer.onclick;
-		layer.addEventListener('click', function(event) {
-			oldOnClick(event);
-		}, false);
-		layer.onclick = null;
-	}
-}
-
-
-/**
- * Android requires exceptions.
- *
- * @type boolean
- */
-FastClick.prototype.deviceIsAndroid = navigator.userAgent.indexOf('Android') > 0;
-
-
-/**
- * iOS requires exceptions.
- *
- * @type boolean
- */
-FastClick.prototype.deviceIsIOS = /iP(ad|hone|od)/.test(navigator.userAgent);
-
-
-/**
- * iOS 4 requires an exception for select elements.
- *
- * @type boolean
- */
-FastClick.prototype.deviceIsIOS4 = FastClick.prototype.deviceIsIOS && (/OS 4_\d(_\d)?/).test(navigator.userAgent);
-
-
-/**
- * iOS 6.0(+?) requires the target element to be manually derived
- *
- * @type boolean
- */
-FastClick.prototype.deviceIsIOSWithBadTarget = FastClick.prototype.deviceIsIOS && (/OS ([6-9]|\d{2})_\d/).test(navigator.userAgent);
-
-
-/**
- * Determine whether a given element requires a native click.
- *
- * @param {EventTarget|Element} target Target DOM element
- * @returns {boolean} Returns true if the element needs a native click
- */
-FastClick.prototype.needsClick = function(target) {
-	'use strict';
-	switch (target.nodeName.toLowerCase()) {
-
-	// Don't send a synthetic click to disabled inputs (issue #62)
-	case 'button':
-	case 'select':
-	case 'textarea':
-		if (target.disabled) {
-			return true;
-		}
-
-		break;
-	case 'input':
-
-		// File inputs need real clicks on iOS 6 due to a browser bug (issue #68)
-		if ((this.deviceIsIOS && target.type === 'file') || target.disabled) {
-			return true;
-		}
-
-		break;
-	case 'label':
-	case 'video':
-		return true;
-	}
-
-	return (/\bneedsclick\b/).test(target.className);
-};
-
-
-/**
- * Determine whether a given element requires a call to focus to simulate click into element.
- *
- * @param {EventTarget|Element} target Target DOM element
- * @returns {boolean} Returns true if the element requires a call to focus to simulate native click.
- */
-FastClick.prototype.needsFocus = function(target) {
-	'use strict';
-	switch (target.nodeName.toLowerCase()) {
-	case 'textarea':
-		return true;
-	case 'select':
-		return !this.deviceIsAndroid;
-	case 'input':
-		switch (target.type) {
-		case 'button':
-		case 'checkbox':
-		case 'file':
-		case 'image':
-		case 'radio':
-		case 'submit':
-			return false;
-		}
-
-		// No point in attempting to focus disabled inputs
-		return !target.disabled && !target.readOnly;
-	default:
-		return (/\bneedsfocus\b/).test(target.className);
-	}
-};
-
-
-/**
- * Send a click event to the specified element.
- *
- * @param {EventTarget|Element} targetElement
- * @param {Event} event
- */
-FastClick.prototype.sendClick = function(targetElement, event) {
-	'use strict';
-	var clickEvent, touch;
-
-	// On some Android devices activeElement needs to be blurred otherwise the synthetic click will have no effect (#24)
-	if (document.activeElement && document.activeElement !== targetElement) {
-		document.activeElement.blur();
-	}
-
-	touch = event.changedTouches[0];
-
-	// Synthesise a click event, with an extra attribute so it can be tracked
-	clickEvent = document.createEvent('MouseEvents');
-	clickEvent.initMouseEvent(this.determineEventType(targetElement), true, true, window, 1, touch.screenX, touch.screenY, touch.clientX, touch.clientY, false, false, false, false, 0, null);
-	clickEvent.forwardedTouchEvent = true;
-	targetElement.dispatchEvent(clickEvent);
-};
-
-FastClick.prototype.determineEventType = function(targetElement) {
-	'use strict';
-
-	//Issue #159: Android Chrome Select Box does not open with a synthetic click event
-	if (this.deviceIsAndroid && targetElement.tagName.toLowerCase() === 'select') {
-		return 'mousedown';
-	}
-
-	return 'click';
-};
-
-
-/**
- * @param {EventTarget|Element} targetElement
- */
-FastClick.prototype.focus = function(targetElement) {
-	'use strict';
-	var length;
-
-	// Issue #160: on iOS 7, some input elements (e.g. date datetime) throw a vague TypeError on setSelectionRange. These elements don't have an integer value for the selectionStart and selectionEnd properties, but unfortunately that can't be used for detection because accessing the properties also throws a TypeError. Just check the type instead. Filed as Apple bug #15122724.
-	if (this.deviceIsIOS && targetElement.setSelectionRange && targetElement.type.indexOf('date') !== 0 && targetElement.type !== 'time') {
-		length = targetElement.value.length;
-		targetElement.setSelectionRange(length, length);
-	} else {
-		targetElement.focus();
-	}
-};
-
-
-/**
- * Check whether the given target element is a child of a scrollable layer and if so, set a flag on it.
- *
- * @param {EventTarget|Element} targetElement
- */
-FastClick.prototype.updateScrollParent = function(targetElement) {
-	'use strict';
-	var scrollParent, parentElement;
-
-	scrollParent = targetElement.fastClickScrollParent;
-
-	// Attempt to discover whether the target element is contained within a scrollable layer. Re-check if the
-	// target element was moved to another parent.
-	if (!scrollParent || !scrollParent.contains(targetElement)) {
-		parentElement = targetElement;
-		do {
-			if (parentElement.scrollHeight > parentElement.offsetHeight) {
-				scrollParent = parentElement;
-				targetElement.fastClickScrollParent = parentElement;
-				break;
-			}
-
-			parentElement = parentElement.parentElement;
-		} while (parentElement);
-	}
-
-	// Always update the scroll top tracker if possible.
-	if (scrollParent) {
-		scrollParent.fastClickLastScrollTop = scrollParent.scrollTop;
-	}
-};
-
-
-/**
- * @param {EventTarget} targetElement
- * @returns {Element|EventTarget}
- */
-FastClick.prototype.getTargetElementFromEventTarget = function(eventTarget) {
-	'use strict';
-
-	// On some older browsers (notably Safari on iOS 4.1 - see issue #56) the event target may be a text node.
-	if (eventTarget.nodeType === Node.TEXT_NODE) {
-		return eventTarget.parentNode;
-	}
-
-	return eventTarget;
-};
-
-
-/**
- * On touch start, record the position and scroll offset.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onTouchStart = function(event) {
-	'use strict';
-	var targetElement, touch, selection;
-
-	// Ignore multiple touches, otherwise pinch-to-zoom is prevented if both fingers are on the FastClick element (issue #111).
-	if (event.targetTouches.length > 1) {
-		return true;
-	}
-
-	targetElement = this.getTargetElementFromEventTarget(event.target);
-	touch = event.targetTouches[0];
-
-	if (this.deviceIsIOS) {
-
-		// Only trusted events will deselect text on iOS (issue #49)
-		selection = window.getSelection();
-		if (selection.rangeCount && !selection.isCollapsed) {
-			return true;
-		}
-
-		if (!this.deviceIsIOS4) {
-
-			// Weird things happen on iOS when an alert or confirm dialog is opened from a click event callback (issue #23):
-			// when the user next taps anywhere else on the page, new touchstart and touchend events are dispatched
-			// with the same identifier as the touch event that previously triggered the click that triggered the alert.
-			// Sadly, there is an issue on iOS 4 that causes some normal touch events to have the same identifier as an
-			// immediately preceeding touch event (issue #52), so this fix is unavailable on that platform.
-			if (touch.identifier === this.lastTouchIdentifier) {
-				event.preventDefault();
-				return false;
-			}
-
-			this.lastTouchIdentifier = touch.identifier;
-
-			// If the target element is a child of a scrollable layer (using -webkit-overflow-scrolling: touch) and:
-			// 1) the user does a fling scroll on the scrollable layer
-			// 2) the user stops the fling scroll with another tap
-			// then the event.target of the last 'touchend' event will be the element that was under the user's finger
-			// when the fling scroll was started, causing FastClick to send a click event to that layer - unless a check
-			// is made to ensure that a parent layer was not scrolled before sending a synthetic click (issue #42).
-			this.updateScrollParent(targetElement);
-		}
-	}
-
-	this.trackingClick = true;
-	this.trackingClickStart = event.timeStamp;
-	this.targetElement = targetElement;
-
-	this.touchStartX = touch.pageX;
-	this.touchStartY = touch.pageY;
-
-	// Prevent phantom clicks on fast double-tap (issue #36)
-	if ((event.timeStamp - this.lastClickTime) < 200) {
-		event.preventDefault();
-	}
-
-	return true;
-};
-
-
-/**
- * Based on a touchmove event object, check whether the touch has moved past a boundary since it started.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.touchHasMoved = function(event) {
-	'use strict';
-	var touch = event.changedTouches[0], boundary = this.touchBoundary;
-
-	if (Math.abs(touch.pageX - this.touchStartX) > boundary || Math.abs(touch.pageY - this.touchStartY) > boundary) {
-		return true;
-	}
-
-	return false;
-};
-
-
-/**
- * Update the last position.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onTouchMove = function(event) {
-	'use strict';
-	if (!this.trackingClick) {
-		return true;
-	}
-
-	// If the touch has moved, cancel the click tracking
-	if (this.targetElement !== this.getTargetElementFromEventTarget(event.target) || this.touchHasMoved(event)) {
-		this.trackingClick = false;
-		this.targetElement = null;
-	}
-
-	return true;
-};
-
-
-/**
- * Attempt to find the labelled control for the given label element.
- *
- * @param {EventTarget|HTMLLabelElement} labelElement
- * @returns {Element|null}
- */
-FastClick.prototype.findControl = function(labelElement) {
-	'use strict';
-
-	// Fast path for newer browsers supporting the HTML5 control attribute
-	if (labelElement.control !== undefined) {
-		return labelElement.control;
-	}
-
-	// All browsers under test that support touch events also support the HTML5 htmlFor attribute
-	if (labelElement.htmlFor) {
-		return document.getElementById(labelElement.htmlFor);
-	}
-
-	// If no for attribute exists, attempt to retrieve the first labellable descendant element
-	// the list of which is defined here: http://www.w3.org/TR/html5/forms.html#category-label
-	return labelElement.querySelector('button, input:not([type=hidden]), keygen, meter, output, progress, select, textarea');
-};
-
-
-/**
- * On touch end, determine whether to send a click event at once.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onTouchEnd = function(event) {
-	'use strict';
-	var forElement, trackingClickStart, targetTagName, scrollParent, touch, targetElement = this.targetElement;
-
-	if (!this.trackingClick) {
-		return true;
-	}
-
-	// Prevent phantom clicks on fast double-tap (issue #36)
-	if ((event.timeStamp - this.lastClickTime) < 200) {
-		this.cancelNextClick = true;
-		return true;
-	}
-
-	// Reset to prevent wrong click cancel on input (issue #156).
-	this.cancelNextClick = false;
-
-	this.lastClickTime = event.timeStamp;
-
-	trackingClickStart = this.trackingClickStart;
-	this.trackingClick = false;
-	this.trackingClickStart = 0;
-
-	// On some iOS devices, the targetElement supplied with the event is invalid if the layer
-	// is performing a transition or scroll, and has to be re-detected manually. Note that
-	// for this to function correctly, it must be called *after* the event target is checked!
-	// See issue #57; also filed as rdar://13048589 .
-	if (this.deviceIsIOSWithBadTarget) {
-		touch = event.changedTouches[0];
-
-		// In certain cases arguments of elementFromPoint can be negative, so prevent setting targetElement to null
-		targetElement = document.elementFromPoint(touch.pageX - window.pageXOffset, touch.pageY - window.pageYOffset) || targetElement;
-		targetElement.fastClickScrollParent = this.targetElement.fastClickScrollParent;
-	}
-
-	targetTagName = targetElement.tagName.toLowerCase();
-	if (targetTagName === 'label') {
-		forElement = this.findControl(targetElement);
-		if (forElement) {
-			this.focus(targetElement);
-			if (this.deviceIsAndroid) {
-				return false;
-			}
-
-			targetElement = forElement;
-		}
-	} else if (this.needsFocus(targetElement)) {
-
-		// Case 1: If the touch started a while ago (best guess is 100ms based on tests for issue #36) then focus will be triggered anyway. Return early and unset the target element reference so that the subsequent click will be allowed through.
-		// Case 2: Without this exception for input elements tapped when the document is contained in an iframe, then any inputted text won't be visible even though the value attribute is updated as the user types (issue #37).
-		if ((event.timeStamp - trackingClickStart) > 100 || (this.deviceIsIOS && window.top !== window && targetTagName === 'input')) {
-			this.targetElement = null;
-			return false;
-		}
-
-		this.focus(targetElement);
-		this.sendClick(targetElement, event);
-
-		// Select elements need the event to go through on iOS 4, otherwise the selector menu won't open.
-		if (!this.deviceIsIOS4 || targetTagName !== 'select') {
-			this.targetElement = null;
-			event.preventDefault();
-		}
-
-		return false;
-	}
-
-	if (this.deviceIsIOS && !this.deviceIsIOS4) {
-
-		// Don't send a synthetic click event if the target element is contained within a parent layer that was scrolled
-		// and this tap is being used to stop the scrolling (usually initiated by a fling - issue #42).
-		scrollParent = targetElement.fastClickScrollParent;
-		if (scrollParent && scrollParent.fastClickLastScrollTop !== scrollParent.scrollTop) {
-			return true;
-		}
-	}
-
-	// Prevent the actual click from going though - unless the target node is marked as requiring
-	// real clicks or if it is in the whitelist in which case only non-programmatic clicks are permitted.
-	if (!this.needsClick(targetElement)) {
-		event.preventDefault();
-		this.sendClick(targetElement, event);
-	}
-
-	return false;
-};
-
-
-/**
- * On touch cancel, stop tracking the click.
- *
- * @returns {void}
- */
-FastClick.prototype.onTouchCancel = function() {
-	'use strict';
-	this.trackingClick = false;
-	this.targetElement = null;
-};
-
-
-/**
- * Determine mouse events which should be permitted.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onMouse = function(event) {
-	'use strict';
-
-	// If a target element was never set (because a touch event was never fired) allow the event
-	if (!this.targetElement) {
-		return true;
-	}
-
-	if (event.forwardedTouchEvent) {
-		return true;
-	}
-
-	// Programmatically generated events targeting a specific element should be permitted
-	if (!event.cancelable) {
-		return true;
-	}
-
-	// Derive and check the target element to see whether the mouse event needs to be permitted;
-	// unless explicitly enabled, prevent non-touch click events from triggering actions,
-	// to prevent ghost/doubleclicks.
-	if (!this.needsClick(this.targetElement) || this.cancelNextClick) {
-
-		// Prevent any user-added listeners declared on FastClick element from being fired.
-		if (event.stopImmediatePropagation) {
-			event.stopImmediatePropagation();
-		} else {
-
-			// Part of the hack for browsers that don't support Event#stopImmediatePropagation (e.g. Android 2)
-			event.propagationStopped = true;
-		}
-
-		// Cancel the event
-		event.stopPropagation();
-		event.preventDefault();
-
-		return false;
-	}
-
-	// If the mouse event is permitted, return true for the action to go through.
-	return true;
-};
-
-
-/**
- * On actual clicks, determine whether this is a touch-generated click, a click action occurring
- * naturally after a delay after a touch (which needs to be cancelled to avoid duplication), or
- * an actual click which should be permitted.
- *
- * @param {Event} event
- * @returns {boolean}
- */
-FastClick.prototype.onClick = function(event) {
-	'use strict';
-	var permitted;
-
-	// It's possible for another FastClick-like library delivered with third-party code to fire a click event before FastClick does (issue #44). In that case, set the click-tracking flag back to false and return early. This will cause onTouchEnd to return early.
-	if (this.trackingClick) {
-		this.targetElement = null;
-		this.trackingClick = false;
-		return true;
-	}
-
-	// Very odd behaviour on iOS (issue #18): if a submit element is present inside a form and the user hits enter in the iOS simulator or clicks the Go button on the pop-up OS keyboard the a kind of 'fake' click event will be triggered with the submit-type input element as the target.
-	if (event.target.type === 'submit' && event.detail === 0) {
-		return true;
-	}
-
-	permitted = this.onMouse(event);
-
-	// Only unset targetElement if the click is not permitted. This will ensure that the check for !targetElement in onMouse fails and the browser's click doesn't go through.
-	if (!permitted) {
-		this.targetElement = null;
-	}
-
-	// If clicks are permitted, return true for the action to go through.
-	return permitted;
-};
-
-
-/**
- * Remove all FastClick's event listeners.
- *
- * @returns {void}
- */
-FastClick.prototype.destroy = function() {
-	'use strict';
-	var layer = this.layer;
-
-	if (this.deviceIsAndroid) {
-		layer.removeEventListener('mouseover', this.onMouse, true);
-		layer.removeEventListener('mousedown', this.onMouse, true);
-		layer.removeEventListener('mouseup', this.onMouse, true);
-	}
-
-	layer.removeEventListener('click', this.onClick, true);
-	layer.removeEventListener('touchstart', this.onTouchStart, false);
-	layer.removeEventListener('touchmove', this.onTouchMove, false);
-	layer.removeEventListener('touchend', this.onTouchEnd, false);
-	layer.removeEventListener('touchcancel', this.onTouchCancel, false);
-};
-
-
-/**
- * Check whether FastClick is needed.
- *
- * @param {Element} layer The layer to listen on
- */
-FastClick.notNeeded = function(layer) {
-	'use strict';
-	var metaViewport;
-	var chromeVersion;
-
-	// Devices that don't support touch don't need FastClick
-	if (typeof window.ontouchstart === 'undefined') {
-		return true;
-	}
-
-	// Chrome version - zero for other browsers
-	chromeVersion = +(/Chrome\/([0-9]+)/.exec(navigator.userAgent) || [,0])[1];
-
-	if (chromeVersion) {
-
-		if (FastClick.prototype.deviceIsAndroid) {
-			metaViewport = document.querySelector('meta[name=viewport]');
-			
-			if (metaViewport) {
-				// Chrome on Android with user-scalable="no" doesn't need FastClick (issue #89)
-				if (metaViewport.content.indexOf('user-scalable=no') !== -1) {
-					return true;
-				}
-				// Chrome 32 and above with width=device-width or less don't need FastClick
-				if (chromeVersion > 31 && window.innerWidth <= window.screen.width) {
-					return true;
-				}
-			}
-
-		// Chrome desktop doesn't need FastClick (issue #15)
-		} else {
-			return true;
-		}
-	}
-
-	// IE10 with -ms-touch-action: none, which disables double-tap-to-zoom (issue #97)
-	if (layer.style.msTouchAction === 'none') {
-		return true;
-	}
-
-	return false;
-};
-
-
-/**
- * Factory method for creating a FastClick object
- *
- * @param {Element} layer The layer to listen on
- */
-FastClick.attach = function(layer) {
-	'use strict';
-	return new FastClick(layer);
-};
-
-
-if (typeof define !== 'undefined' && define.amd) {
-
-	// AMD. Register as an anonymous module.
-	define(function() {
-		'use strict';
-		return FastClick;
-	});
-} else if (typeof module !== 'undefined' && module.exports) {
-	module.exports = FastClick.attach;
-	module.exports.FastClick = FastClick;
-} else {
-	window.FastClick = FastClick;
-}
-
-;/*!
-	Autosize v1.17.8 - 2013-09-07
-	Automatically adjust textarea height based on user input.
-	(c) 2013 Jack Moore - http://www.jacklmoore.com/autosize
-	license: http://www.opensource.org/licenses/mit-license.php
-*/
-(function (factory) {
-	if (typeof define === 'function' && define.amd) {
-		// AMD. Register as an anonymous module.
-		define(['jquery'], factory);
-	} else {
-		// Browser globals: jQuery or jQuery-like library, such as Zepto
-		factory(window.jQuery || window.$);
-	}
-}(function ($) {
-	var
-	defaults = {
-		className: 'autosizejs',
-		append: '',
-		callback: false,
-		resizeDelay: 10
-	},
-
-	// border:0 is unnecessary, but avoids a bug in FireFox on OSX
-	copy = '<textarea tabindex="-1" style="position:absolute; top:-999px; left:0; right:auto; bottom:auto; border:0; padding: 0; -moz-box-sizing:content-box; -webkit-box-sizing:content-box; box-sizing:content-box; word-wrap:break-word; height:0 !important; min-height:0 !important; overflow:hidden; transition:none; -webkit-transition:none; -moz-transition:none;"/>',
-
-	// line-height is conditionally included because IE7/IE8/old Opera do not return the correct value.
-	typographyStyles = [
-		'fontFamily',
-		'fontSize',
-		'fontWeight',
-		'fontStyle',
-		'letterSpacing',
-		'textTransform',
-		'wordSpacing',
-		'textIndent'
-	],
-
-	// to keep track which textarea is being mirrored when adjust() is called.
-	mirrored,
-
-	// the mirror element, which is used to calculate what size the mirrored element should be.
-	mirror = $(copy).data('autosize', true)[0];
-
-	// test that line-height can be accurately copied.
-	mirror.style.lineHeight = '99px';
-	if ($(mirror).css('lineHeight') === '99px') {
-		typographyStyles.push('lineHeight');
-	}
-	mirror.style.lineHeight = '';
-
-	$.fn.autosize = function (options) {
-		if (!this.length) {
-			return this;
-		}
-
-		options = $.extend({}, defaults, options || {});
-
-		if (mirror.parentNode !== document.body) {
-			$(document.body).append(mirror);
-		}
-
-		return this.each(function () {
-			var
-			ta = this,
-			$ta = $(ta),
-			maxHeight,
-			minHeight,
-			boxOffset = 0,
-			callback = $.isFunction(options.callback),
-			originalStyles = {
-				height: ta.style.height,
-				overflow: ta.style.overflow,
-				overflowY: ta.style.overflowY,
-				wordWrap: ta.style.wordWrap,
-				resize: ta.style.resize
-			},
-			timeout,
-			width = $ta.width();
-
-			if ($ta.data('autosize')) {
-				// exit if autosize has already been applied, or if the textarea is the mirror element.
-				return;
-			}
-			$ta.data('autosize', true);
-
-			if ($ta.css('box-sizing') === 'border-box' || $ta.css('-moz-box-sizing') === 'border-box' || $ta.css('-webkit-box-sizing') === 'border-box'){
-				boxOffset = $ta.outerHeight() - $ta.height();
-			}
-
-			// IE8 and lower return 'auto', which parses to NaN, if no min-height is set.
-			minHeight = Math.max(parseInt($ta.css('minHeight'), 10) - boxOffset || 0, $ta.height());
-
-			$ta.css({
-				overflow: 'hidden',
-				overflowY: 'hidden',
-				wordWrap: 'break-word', // horizontal overflow is hidden, so break-word is necessary for handling words longer than the textarea width
-				resize: ($ta.css('resize') === 'none' || $ta.css('resize') === 'vertical') ? 'none' : 'horizontal'
-			});
-
-			// The mirror width must exactly match the textarea width, so using getBoundingClientRect because it doesn't round the sub-pixel value.
-			function setWidth() {
-				var style, width;
-				
-				if ('getComputedStyle' in window) {
-					style = window.getComputedStyle(ta);
-					width = ta.getBoundingClientRect().width;
-
-					$.each(['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'], function(i,val){
-						width -= parseInt(style[val],10);
-					});
-
-					mirror.style.width = width + 'px';
-				}
-				else {
-					// window.getComputedStyle, getBoundingClientRect returning a width are unsupported and unneeded in IE8 and lower.
-					mirror.style.width = Math.max($ta.width(), 0) + 'px';
-				}
-			}
-
-			function initMirror() {
-				var styles = {};
-
-				mirrored = ta;
-				mirror.className = options.className;
-				maxHeight = parseInt($ta.css('maxHeight'), 10);
-
-				// mirror is a duplicate textarea located off-screen that
-				// is automatically updated to contain the same text as the
-				// original textarea.  mirror always has a height of 0.
-				// This gives a cross-browser supported way getting the actual
-				// height of the text, through the scrollTop property.
-				$.each(typographyStyles, function(i,val){
-					styles[val] = $ta.css(val);
-				});
-				$(mirror).css(styles);
-
-				setWidth();
-
-				// Chrome-specific fix:
-				// When the textarea y-overflow is hidden, Chrome doesn't reflow the text to account for the space
-				// made available by removing the scrollbar. This workaround triggers the reflow for Chrome.
-				if (window.chrome) {
-					var width = ta.style.width;
-					ta.style.width = '0px';
-					var ignore = ta.offsetWidth;
-					ta.style.width = width;
-				}
-			}
-
-			// Using mainly bare JS in this function because it is going
-			// to fire very often while typing, and needs to very efficient.
-			function adjust() {
-				var height, original;
-
-				if (mirrored !== ta) {
-					initMirror();
-				} else {
-					setWidth();
-				}
-
-				mirror.value = ta.value + options.append;
-				mirror.style.overflowY = ta.style.overflowY;
-				original = parseInt(ta.style.height,10);
-
-				// Setting scrollTop to zero is needed in IE8 and lower for the next step to be accurately applied
-				mirror.scrollTop = 0;
-
-				mirror.scrollTop = 9e4;
-
-				// Using scrollTop rather than scrollHeight because scrollHeight is non-standard and includes padding.
-				height = mirror.scrollTop;
-
-				if (maxHeight && height > maxHeight) {
-					ta.style.overflowY = 'scroll';
-					height = maxHeight;
-				} else {
-					ta.style.overflowY = 'hidden';
-					if (height < minHeight) {
-						height = minHeight;
-					}
-				}
-
-				height += boxOffset;
-
-				if (original !== height) {
-					ta.style.height = height + 'px';
-					if (callback) {
-						options.callback.call(ta,ta);
-					}
-				}
-			}
-
-			function resize () {
-				clearTimeout(timeout);
-				timeout = setTimeout(function(){
-					var newWidth = $ta.width();
-
-					if (newWidth !== width) {
-						width = newWidth;
-						adjust();
-					}
-				}, parseInt(options.resizeDelay,10));
-			}
-
-			if ('onpropertychange' in ta) {
-				if ('oninput' in ta) {
-					// Detects IE9.  IE9 does not fire onpropertychange or oninput for deletions,
-					// so binding to onkeyup to catch most of those occasions.  There is no way that I
-					// know of to detect something like 'cut' in IE9.
-					$ta.on('input.autosize keyup.autosize', adjust);
-				} else {
-					// IE7 / IE8
-					$ta.on('propertychange.autosize', function(){
-						if(event.propertyName === 'value'){
-							adjust();
-						}
-					});
-				}
-			} else {
-				// Modern Browsers
-				$ta.on('input.autosize', adjust);
-			}
-
-			// Set options.resizeDelay to false if using fixed-width textarea elements.
-			// Uses a timeout and width check to reduce the amount of times adjust needs to be called after window resize.
-
-			if (options.resizeDelay !== false) {
-				$(window).on('resize.autosize', resize);
-			}
-
-			// Event for manual triggering if needed.
-			// Should only be needed when the value of the textarea is changed through JavaScript rather than user input.
-			$ta.on('autosize.resize', adjust);
-
-			// Event for manual triggering that also forces the styles to update as well.
-			// Should only be needed if one of typography styles of the textarea change, and the textarea is already the target of the adjust method.
-			$ta.on('autosize.resizeIncludeStyle', function() {
-				mirrored = null;
-				adjust();
-			});
-
-			$ta.on('autosize.destroy', function(){
-				mirrored = null;
-				clearTimeout(timeout);
-				$(window).off('resize', resize);
-				$ta
-					.off('autosize')
-					.off('.autosize')
-					.css(originalStyles)
-					.removeData('autosize');
-			});
-
-			// Call adjust in case the textarea already contains text.
-			adjust();
-		});
-	};
-}));
-
 ;//! moment.js
 //! version : 2.5.1
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -26046,6 +24057,1772 @@ if (typeof define !== 'undefined' && define.amd) {
     }
 }).call(this);
 
+;// Console-polyfill. MIT license.
+// https://github.com/paulmillr/console-polyfill
+// Make it safe to do console.log() always.
+(function(con) {
+  'use strict';
+  var prop, method;
+  var empty = {};
+  var dummy = function() {};
+  var properties = 'memory'.split(',');
+  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
+     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
+     'time,timeEnd,trace,warn').split(',');
+  while (prop = properties.pop()) con[prop] = con[prop] || empty;
+  while (method = methods.pop()) con[method] = con[method] || dummy;
+})(this.console = this.console || {});
+
+;/*!
+ * jQuery blockUI plugin
+ * Version 2.66.0-2013.10.09
+ * Requires jQuery v1.7 or later
+ *
+ * Examples at: http://malsup.com/jquery/block/
+ * Copyright (c) 2007-2013 M. Alsup
+ * Dual licensed under the MIT and GPL licenses:
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
+ *
+ * Thanks to Amir-Hossein Sobhi for some excellent contributions!
+ */
+
+;(function() {
+/*jshint eqeqeq:false curly:false latedef:false */
+"use strict";
+
+	function setup($) {
+		$.fn._fadeIn = $.fn.fadeIn;
+
+		var noOp = $.noop || function() {};
+
+		// this bit is to ensure we don't call setExpression when we shouldn't (with extra muscle to handle
+		// confusing userAgent strings on Vista)
+		var msie = /MSIE/.test(navigator.userAgent);
+		var ie6  = /MSIE 6.0/.test(navigator.userAgent) && ! /MSIE 8.0/.test(navigator.userAgent);
+		var mode = document.documentMode || 0;
+		var setExpr = $.isFunction( document.createElement('div').style.setExpression );
+
+		// global $ methods for blocking/unblocking the entire page
+		$.blockUI   = function(opts) { install(window, opts); };
+		$.unblockUI = function(opts) { remove(window, opts); };
+
+		// convenience method for quick growl-like notifications  (http://www.google.com/search?q=growl)
+		$.growlUI = function(title, message, timeout, onClose) {
+			var $m = $('<div class="growlUI"></div>');
+			if (title) $m.append('<h1>'+title+'</h1>');
+			if (message) $m.append('<h2>'+message+'</h2>');
+			if (timeout === undefined) timeout = 3000;
+
+			// Added by konapun: Set timeout to 30 seconds if this growl is moused over, like normal toast notifications
+			var callBlock = function(opts) {
+				opts = opts || {};
+
+				$.blockUI({
+					message: $m,
+					fadeIn : typeof opts.fadeIn  !== 'undefined' ? opts.fadeIn  : 700,
+					fadeOut: typeof opts.fadeOut !== 'undefined' ? opts.fadeOut : 1000,
+					timeout: typeof opts.timeout !== 'undefined' ? opts.timeout : timeout,
+					centerY: false,
+					showOverlay: false,
+					onUnblock: onClose,
+					css: $.blockUI.defaults.growlCSS
+				});
+			};
+
+			callBlock();
+			var nonmousedOpacity = $m.css('opacity');
+			$m.mouseover(function() {
+				callBlock({
+					fadeIn: 0,
+					timeout: 30000
+				});
+
+				var displayBlock = $('.blockMsg');
+				displayBlock.stop(); // cancel fadeout if it has started
+				displayBlock.fadeTo(300, 1); // make it easier to read the message by removing transparency
+			}).mouseout(function() {
+				$('.blockMsg').fadeOut(1000);
+			});
+			// End konapun additions
+		};
+
+		// plugin method for blocking element content
+		$.fn.block = function(opts) {
+			if ( this[0] === window ) {
+				$.blockUI( opts );
+				return this;
+			}
+			var fullOpts = $.extend({}, $.blockUI.defaults, opts || {});
+			this.each(function() {
+				var $el = $(this);
+				if (fullOpts.ignoreIfBlocked && $el.data('blockUI.isBlocked'))
+					return;
+				$el.unblock({ fadeOut: 0 });
+			});
+
+			return this.each(function() {
+				if ($.css(this,'position') == 'static') {
+					this.style.position = 'relative';
+					$(this).data('blockUI.static', true);
+				}
+				this.style.zoom = 1; // force 'hasLayout' in ie
+				install(this, opts);
+			});
+		};
+
+		// plugin method for unblocking element content
+		$.fn.unblock = function(opts) {
+			if ( this[0] === window ) {
+				$.unblockUI( opts );
+				return this;
+			}
+			return this.each(function() {
+				remove(this, opts);
+			});
+		};
+
+		$.blockUI.version = 2.66; // 2nd generation blocking at no extra cost!
+
+		// override these in your code to change the default behavior and style
+		$.blockUI.defaults = {
+			// message displayed when blocking (use null for no message)
+			message:  '<h1>Please wait...</h1>',
+
+			title: null,		// title string; only used when theme == true
+			draggable: true,	// only used when theme == true (requires jquery-ui.js to be loaded)
+
+			theme: false, // set to true to use with jQuery UI themes
+
+			// styles for the message when blocking; if you wish to disable
+			// these and use an external stylesheet then do this in your code:
+			// $.blockUI.defaults.css = {};
+			css: {
+				padding:	0,
+				margin:		0,
+				width:		'30%',
+				top:		'40%',
+				left:		'35%',
+				textAlign:	'center',
+				color:		'#000',
+				border:		'3px solid #aaa',
+				backgroundColor:'#fff',
+				cursor:		'wait'
+			},
+
+			// minimal style set used when themes are used
+			themedCSS: {
+				width:	'30%',
+				top:	'40%',
+				left:	'35%'
+			},
+
+			// styles for the overlay
+			overlayCSS:  {
+				backgroundColor:	'#000',
+				opacity:			0.6,
+				cursor:				'wait'
+			},
+
+			// style to replace wait cursor before unblocking to correct issue
+			// of lingering wait cursor
+			cursorReset: 'default',
+
+			// styles applied when using $.growlUI
+			growlCSS: {
+				width:		'350px',
+				top:		'10px',
+				left:		'',
+				right:		'10px',
+				border:		'none',
+				padding:	'5px',
+				opacity:	0.6,
+				cursor:		'default',
+				color:		'#fff',
+				backgroundColor: '#000',
+				'-webkit-border-radius':'10px',
+				'-moz-border-radius':	'10px',
+				'border-radius':		'10px'
+			},
+
+			// IE issues: 'about:blank' fails on HTTPS and javascript:false is s-l-o-w
+			// (hat tip to Jorge H. N. de Vasconcelos)
+			/*jshint scripturl:true */
+			iframeSrc: /^https/i.test(window.location.href || '') ? 'javascript:false' : 'about:blank',
+
+			// force usage of iframe in non-IE browsers (handy for blocking applets)
+			forceIframe: false,
+
+			// z-index for the blocking overlay
+			baseZ: 1000,
+
+			// set these to true to have the message automatically centered
+			centerX: true, // <-- only effects element blocking (page block controlled via css above)
+			centerY: true,
+
+			// allow body element to be stetched in ie6; this makes blocking look better
+			// on "short" pages.  disable if you wish to prevent changes to the body height
+			allowBodyStretch: true,
+
+			// enable if you want key and mouse events to be disabled for content that is blocked
+			bindEvents: true,
+
+			// be default blockUI will supress tab navigation from leaving blocking content
+			// (if bindEvents is true)
+			constrainTabKey: true,
+
+			// fadeIn time in millis; set to 0 to disable fadeIn on block
+			fadeIn:  200,
+
+			// fadeOut time in millis; set to 0 to disable fadeOut on unblock
+			fadeOut:  400,
+
+			// time in millis to wait before auto-unblocking; set to 0 to disable auto-unblock
+			timeout: 0,
+
+			// disable if you don't want to show the overlay
+			showOverlay: true,
+
+			// if true, focus will be placed in the first available input field when
+			// page blocking
+			focusInput: true,
+
+            // elements that can receive focus
+            focusableElements: ':input:enabled:visible',
+
+			// suppresses the use of overlay styles on FF/Linux (due to performance issues with opacity)
+			// no longer needed in 2012
+			// applyPlatformOpacityRules: true,
+
+			// callback method invoked when fadeIn has completed and blocking message is visible
+			onBlock: null,
+
+			// callback method invoked when unblocking has completed; the callback is
+			// passed the element that has been unblocked (which is the window object for page
+			// blocks) and the options that were passed to the unblock call:
+			//	onUnblock(element, options)
+			onUnblock: null,
+
+			// callback method invoked when the overlay area is clicked.
+			// setting this will turn the cursor to a pointer, otherwise cursor defined in overlayCss will be used.
+			onOverlayClick: null,
+
+			// don't ask; if you really must know: http://groups.google.com/group/jquery-en/browse_thread/thread/36640a8730503595/2f6a79a77a78e493#2f6a79a77a78e493
+			quirksmodeOffsetHack: 4,
+
+			// class name of the message block
+			blockMsgClass: 'blockMsg',
+
+			// if it is already blocked, then ignore it (don't unblock and reblock)
+			ignoreIfBlocked: false
+		};
+
+		// private data and functions follow...
+
+		var pageBlock = null;
+		var pageBlockEls = [];
+
+		function install(el, opts) {
+			var css, themedCSS;
+			var full = (el == window);
+			var msg = (opts && opts.message !== undefined ? opts.message : undefined);
+			opts = $.extend({}, $.blockUI.defaults, opts || {});
+
+			if (opts.ignoreIfBlocked && $(el).data('blockUI.isBlocked'))
+				return;
+
+			opts.overlayCSS = $.extend({}, $.blockUI.defaults.overlayCSS, opts.overlayCSS || {});
+			css = $.extend({}, $.blockUI.defaults.css, opts.css || {});
+			if (opts.onOverlayClick)
+				opts.overlayCSS.cursor = 'pointer';
+
+			themedCSS = $.extend({}, $.blockUI.defaults.themedCSS, opts.themedCSS || {});
+			msg = msg === undefined ? opts.message : msg;
+
+			// remove the current block (if there is one)
+			if (full && pageBlock)
+				remove(window, {fadeOut:0});
+
+			// if an existing element is being used as the blocking content then we capture
+			// its current place in the DOM (and current display style) so we can restore
+			// it when we unblock
+			if (msg && typeof msg != 'string' && (msg.parentNode || msg.jquery)) {
+				var node = msg.jquery ? msg[0] : msg;
+				var data = {};
+				$(el).data('blockUI.history', data);
+				data.el = node;
+				data.parent = node.parentNode;
+				data.display = node.style.display;
+				data.position = node.style.position;
+				if (data.parent)
+					data.parent.removeChild(node);
+			}
+
+			$(el).data('blockUI.onUnblock', opts.onUnblock);
+			var z = opts.baseZ;
+
+			// blockUI uses 3 layers for blocking, for simplicity they are all used on every platform;
+			// layer1 is the iframe layer which is used to supress bleed through of underlying content
+			// layer2 is the overlay layer which has opacity and a wait cursor (by default)
+			// layer3 is the message content that is displayed while blocking
+			var lyr1, lyr2, lyr3, s;
+			if (msie || opts.forceIframe)
+				lyr1 = $('<iframe class="blockUI" style="z-index:'+ (z++) +';display:none;border:none;margin:0;padding:0;position:absolute;width:100%;height:100%;top:0;left:0" src="'+opts.iframeSrc+'"></iframe>');
+			else
+				lyr1 = $('<div class="blockUI" style="display:none"></div>');
+
+			if (opts.theme)
+				lyr2 = $('<div class="blockUI blockOverlay ui-widget-overlay" style="z-index:'+ (z++) +';display:none"></div>');
+			else
+				lyr2 = $('<div class="blockUI blockOverlay" style="z-index:'+ (z++) +';display:none;border:none;margin:0;padding:0;width:100%;height:100%;top:0;left:0"></div>');
+
+			if (opts.theme && full) {
+				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockPage ui-dialog ui-widget ui-corner-all" style="z-index:'+(z+10)+';display:none;position:fixed">';
+				if ( opts.title ) {
+					s += '<div class="ui-widget-header ui-dialog-titlebar ui-corner-all blockTitle">'+(opts.title || '&nbsp;')+'</div>';
+				}
+				s += '<div class="ui-widget-content ui-dialog-content"></div>';
+				s += '</div>';
+			}
+			else if (opts.theme) {
+				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockElement ui-dialog ui-widget ui-corner-all" style="z-index:'+(z+10)+';display:none;position:absolute">';
+				if ( opts.title ) {
+					s += '<div class="ui-widget-header ui-dialog-titlebar ui-corner-all blockTitle">'+(opts.title || '&nbsp;')+'</div>';
+				}
+				s += '<div class="ui-widget-content ui-dialog-content"></div>';
+				s += '</div>';
+			}
+			else if (full) {
+				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockPage" style="z-index:'+(z+10)+';display:none;position:fixed"></div>';
+			}
+			else {
+				s = '<div class="blockUI ' + opts.blockMsgClass + ' blockElement" style="z-index:'+(z+10)+';display:none;position:absolute"></div>';
+			}
+			lyr3 = $(s);
+
+			// if we have a message, style it
+			if (msg) {
+				if (opts.theme) {
+					lyr3.css(themedCSS);
+					lyr3.addClass('ui-widget-content');
+				}
+				else
+					lyr3.css(css);
+			}
+
+			// style the overlay
+			if (!opts.theme /*&& (!opts.applyPlatformOpacityRules)*/)
+				lyr2.css(opts.overlayCSS);
+			lyr2.css('position', full ? 'fixed' : 'absolute');
+
+			// make iframe layer transparent in IE
+			if (msie || opts.forceIframe)
+				lyr1.css('opacity',0.0);
+
+			//$([lyr1[0],lyr2[0],lyr3[0]]).appendTo(full ? 'body' : el);
+			var layers = [lyr1,lyr2,lyr3], $par = full ? $('body') : $(el);
+			$.each(layers, function() {
+				this.appendTo($par);
+			});
+
+			if (opts.theme && opts.draggable && $.fn.draggable) {
+				lyr3.draggable({
+					handle: '.ui-dialog-titlebar',
+					cancel: 'li'
+				});
+			}
+
+			// ie7 must use absolute positioning in quirks mode and to account for activex issues (when scrolling)
+			var expr = setExpr && (!$.support.boxModel || $('object,embed', full ? null : el).length > 0);
+			if (ie6 || expr) {
+				// give body 100% height
+				if (full && opts.allowBodyStretch && $.support.boxModel)
+					$('html,body').css('height','100%');
+
+				// fix ie6 issue when blocked element has a border width
+				if ((ie6 || !$.support.boxModel) && !full) {
+					var t = sz(el,'borderTopWidth'), l = sz(el,'borderLeftWidth');
+					var fixT = t ? '(0 - '+t+')' : 0;
+					var fixL = l ? '(0 - '+l+')' : 0;
+				}
+
+				// simulate fixed position
+				$.each(layers, function(i,o) {
+					var s = o[0].style;
+					s.position = 'absolute';
+					if (i < 2) {
+						if (full)
+							s.setExpression('height','Math.max(document.body.scrollHeight, document.body.offsetHeight) - (jQuery.support.boxModel?0:'+opts.quirksmodeOffsetHack+') + "px"');
+						else
+							s.setExpression('height','this.parentNode.offsetHeight + "px"');
+						if (full)
+							s.setExpression('width','jQuery.support.boxModel && document.documentElement.clientWidth || document.body.clientWidth + "px"');
+						else
+							s.setExpression('width','this.parentNode.offsetWidth + "px"');
+						if (fixL) s.setExpression('left', fixL);
+						if (fixT) s.setExpression('top', fixT);
+					}
+					else if (opts.centerY) {
+						if (full) s.setExpression('top','(document.documentElement.clientHeight || document.body.clientHeight) / 2 - (this.offsetHeight / 2) + (blah = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + "px"');
+						s.marginTop = 0;
+					}
+					else if (!opts.centerY && full) {
+						var top = (opts.css && opts.css.top) ? parseInt(opts.css.top, 10) : 0;
+						var expression = '((document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + '+top+') + "px"';
+						s.setExpression('top',expression);
+					}
+				});
+			}
+
+			// show the message
+			if (msg) {
+				if (opts.theme)
+					lyr3.find('.ui-widget-content').append(msg);
+				else
+					lyr3.append(msg);
+				if (msg.jquery || msg.nodeType)
+					$(msg).show();
+			}
+
+			if ((msie || opts.forceIframe) && opts.showOverlay)
+				lyr1.show(); // opacity is zero
+			if (opts.fadeIn) {
+				var cb = opts.onBlock ? opts.onBlock : noOp;
+				var cb1 = (opts.showOverlay && !msg) ? cb : noOp;
+				var cb2 = msg ? cb : noOp;
+				if (opts.showOverlay)
+					lyr2._fadeIn(opts.fadeIn, cb1);
+				if (msg)
+					lyr3._fadeIn(opts.fadeIn, cb2);
+			}
+			else {
+				if (opts.showOverlay)
+					lyr2.show();
+				if (msg)
+					lyr3.show();
+				if (opts.onBlock)
+					opts.onBlock();
+			}
+
+			// bind key and mouse events
+			bind(1, el, opts);
+
+			if (full) {
+				pageBlock = lyr3[0];
+				pageBlockEls = $(opts.focusableElements,pageBlock);
+				if (opts.focusInput)
+					setTimeout(focus, 20);
+			}
+			else
+				center(lyr3[0], opts.centerX, opts.centerY);
+
+			if (opts.timeout) {
+				// auto-unblock
+				var to = setTimeout(function() {
+					if (full)
+						$.unblockUI(opts);
+					else
+						$(el).unblock(opts);
+				}, opts.timeout);
+				$(el).data('blockUI.timeout', to);
+			}
+		}
+
+		// remove the block
+		function remove(el, opts) {
+			var count;
+			var full = (el == window);
+			var $el = $(el);
+			var data = $el.data('blockUI.history');
+			var to = $el.data('blockUI.timeout');
+			if (to) {
+				clearTimeout(to);
+				$el.removeData('blockUI.timeout');
+			}
+			opts = $.extend({}, $.blockUI.defaults, opts || {});
+			bind(0, el, opts); // unbind events
+
+			if (opts.onUnblock === null) {
+				opts.onUnblock = $el.data('blockUI.onUnblock');
+				$el.removeData('blockUI.onUnblock');
+			}
+
+			var els;
+			if (full) // crazy selector to handle odd field errors in ie6/7
+				els = $('body').children().filter('.blockUI').add('body > .blockUI');
+			else
+				els = $el.find('>.blockUI');
+
+			// fix cursor issue
+			if ( opts.cursorReset ) {
+				if ( els.length > 1 )
+					els[1].style.cursor = opts.cursorReset;
+				if ( els.length > 2 )
+					els[2].style.cursor = opts.cursorReset;
+			}
+
+			if (full)
+				pageBlock = pageBlockEls = null;
+
+			if (opts.fadeOut) {
+				count = els.length;
+				els.stop().fadeOut(opts.fadeOut, function() {
+					if ( --count === 0)
+						reset(els,data,opts,el);
+				});
+			}
+			else
+				reset(els, data, opts, el);
+		}
+
+		// move blocking element back into the DOM where it started
+		function reset(els,data,opts,el) {
+			var $el = $(el);
+			if ( $el.data('blockUI.isBlocked') )
+				return;
+
+			els.each(function(i,o) {
+				// remove via DOM calls so we don't lose event handlers
+				if (this.parentNode)
+					this.parentNode.removeChild(this);
+			});
+
+			if (data && data.el) {
+				data.el.style.display = data.display;
+				data.el.style.position = data.position;
+				if (data.parent)
+					data.parent.appendChild(data.el);
+				$el.removeData('blockUI.history');
+			}
+
+			if ($el.data('blockUI.static')) {
+				$el.css('position', 'static'); // #22
+			}
+
+			if (typeof opts.onUnblock == 'function')
+				opts.onUnblock(el,opts);
+
+			// fix issue in Safari 6 where block artifacts remain until reflow
+			var body = $(document.body), w = body.width(), cssW = body[0].style.width;
+			body.width(w-1).width(w);
+			body[0].style.width = cssW;
+		}
+
+		// bind/unbind the handler
+		function bind(b, el, opts) {
+			var full = el == window, $el = $(el);
+
+			// don't bother unbinding if there is nothing to unbind
+			if (!b && (full && !pageBlock || !full && !$el.data('blockUI.isBlocked')))
+				return;
+
+			$el.data('blockUI.isBlocked', b);
+
+			// don't bind events when overlay is not in use or if bindEvents is false
+			if (!full || !opts.bindEvents || (b && !opts.showOverlay))
+				return;
+
+			// bind anchors and inputs for mouse and key events
+			var events = 'mousedown mouseup keydown keypress keyup touchstart touchend touchmove';
+			if (b)
+				$(document).bind(events, opts, handler);
+			else
+				$(document).unbind(events, handler);
+
+		// former impl...
+		//		var $e = $('a,:input');
+		//		b ? $e.bind(events, opts, handler) : $e.unbind(events, handler);
+		}
+
+		// event handler to suppress keyboard/mouse events when blocking
+		function handler(e) {
+			// allow tab navigation (conditionally)
+			if (e.type === 'keydown' && e.keyCode && e.keyCode == 9) {
+				if (pageBlock && e.data.constrainTabKey) {
+					var els = pageBlockEls;
+					var fwd = !e.shiftKey && e.target === els[els.length-1];
+					var back = e.shiftKey && e.target === els[0];
+					if (fwd || back) {
+						setTimeout(function(){focus(back);},10);
+						return false;
+					}
+				}
+			}
+			var opts = e.data;
+			var target = $(e.target);
+			if (target.hasClass('blockOverlay') && opts.onOverlayClick)
+				opts.onOverlayClick(e);
+
+			// allow events within the message content
+			if (target.parents('div.' + opts.blockMsgClass).length > 0)
+				return true;
+
+			// allow events for content that is not being blocked
+			return target.parents().children().filter('div.blockUI').length === 0;
+		}
+
+		function focus(back) {
+			if (!pageBlockEls)
+				return;
+			var e = pageBlockEls[back===true ? pageBlockEls.length-1 : 0];
+			if (e)
+				e.focus();
+		}
+
+		function center(el, x, y) {
+			var p = el.parentNode, s = el.style;
+			var l = ((p.offsetWidth - el.offsetWidth)/2) - sz(p,'borderLeftWidth');
+			var t = ((p.offsetHeight - el.offsetHeight)/2) - sz(p,'borderTopWidth');
+			if (x) s.left = l > 0 ? (l+'px') : '0';
+			if (y) s.top  = t > 0 ? (t+'px') : '0';
+		}
+
+		function sz(el, p) {
+			return parseInt($.css(el,p),10)||0;
+		}
+
+	}
+
+
+	/*global define:true */
+	if (typeof define === 'function' && define.amd && define.amd.jQuery) {
+		define(['jquery'], setup);
+	} else {
+		setup(jQuery);
+	}
+
+})();
+
+;/**
+ * Copyright (c) 2011-2013 Felix Gnass
+ * Licensed under the MIT license
+ */
+
+/*
+
+Basic Usage:
+============
+
+$('#el').spin(); // Creates a default Spinner using the text color of #el.
+$('#el').spin({ ... }); // Creates a Spinner using the provided options.
+
+$('#el').spin(false); // Stops and removes the spinner.
+
+Using Presets:
+==============
+
+$('#el').spin('small'); // Creates a 'small' Spinner using the text color of #el.
+$('#el').spin('large', '#fff'); // Creates a 'large' white Spinner.
+
+Adding a custom preset:
+=======================
+
+$.fn.spin.presets.flower = {
+  lines: 9
+  length: 10
+  width: 20
+  radius: 0
+}
+
+$('#el').spin('flower', 'red');
+
+*/
+
+(function(factory) {
+
+  if (typeof exports == 'object') {
+    // CommonJS
+    factory(require('jquery'), require('spin'))
+  }
+  else if (typeof define == 'function' && define.amd) {
+    // AMD, register as anonymous module
+    define(['jquery', 'spin'], factory)
+  }
+  else {
+    // Browser globals
+    if (!window.Spinner) throw new Error('Spin.js not present')
+    factory(window.jQuery, window.Spinner)
+  }
+
+}(function($, Spinner) {
+
+  $.fn.spin = function(opts, color) {
+
+    return this.each(function() {
+      var $this = $(this),
+        data = $this.data();
+
+      if (data.spinner) {
+        data.spinner.stop();
+        delete data.spinner;
+      }
+      if (opts !== false) {
+        opts = $.extend(
+          { color: color || $this.css('color') },
+          $.fn.spin.presets[opts] || opts
+        )
+        data.spinner = new Spinner(opts).spin(this)
+      }
+    })
+  }
+
+  $.fn.spin.presets = {
+    tiny: { lines: 8, length: 2, width: 2, radius: 3 },
+    small: { lines: 8, length: 4, width: 3, radius: 5 },
+    large: { lines: 10, length: 8, width: 4, radius: 8 }
+  }
+
+}));
+
+;/**
+ * @preserve FastClick: polyfill to remove click delays on browsers with touch UIs.
+ *
+ * @version 0.6.12
+ * @codingstandard ftlabs-jsv2
+ * @copyright The Financial Times Limited [All Rights Reserved]
+ * @license MIT License (see LICENSE.txt)
+ */
+
+/*jslint browser:true, node:true*/
+/*global define, Event, Node*/
+
+
+/**
+ * Instantiate fast-clicking listeners on the specificed layer.
+ *
+ * @constructor
+ * @param {Element} layer The layer to listen on
+ */
+function FastClick(layer) {
+	'use strict';
+	var oldOnClick, self = this;
+
+
+	/**
+	 * Whether a click is currently being tracked.
+	 *
+	 * @type boolean
+	 */
+	this.trackingClick = false;
+
+
+	/**
+	 * Timestamp for when when click tracking started.
+	 *
+	 * @type number
+	 */
+	this.trackingClickStart = 0;
+
+
+	/**
+	 * The element being tracked for a click.
+	 *
+	 * @type EventTarget
+	 */
+	this.targetElement = null;
+
+
+	/**
+	 * X-coordinate of touch start event.
+	 *
+	 * @type number
+	 */
+	this.touchStartX = 0;
+
+
+	/**
+	 * Y-coordinate of touch start event.
+	 *
+	 * @type number
+	 */
+	this.touchStartY = 0;
+
+
+	/**
+	 * ID of the last touch, retrieved from Touch.identifier.
+	 *
+	 * @type number
+	 */
+	this.lastTouchIdentifier = 0;
+
+
+	/**
+	 * Touchmove boundary, beyond which a click will be cancelled.
+	 *
+	 * @type number
+	 */
+	this.touchBoundary = 10;
+
+
+	/**
+	 * The FastClick layer.
+	 *
+	 * @type Element
+	 */
+	this.layer = layer;
+
+	if (!layer || !layer.nodeType) {
+		throw new TypeError('Layer must be a document node');
+	}
+
+	/** @type function() */
+	this.onClick = function() { return FastClick.prototype.onClick.apply(self, arguments); };
+
+	/** @type function() */
+	this.onMouse = function() { return FastClick.prototype.onMouse.apply(self, arguments); };
+
+	/** @type function() */
+	this.onTouchStart = function() { return FastClick.prototype.onTouchStart.apply(self, arguments); };
+
+	/** @type function() */
+	this.onTouchMove = function() { return FastClick.prototype.onTouchMove.apply(self, arguments); };
+
+	/** @type function() */
+	this.onTouchEnd = function() { return FastClick.prototype.onTouchEnd.apply(self, arguments); };
+
+	/** @type function() */
+	this.onTouchCancel = function() { return FastClick.prototype.onTouchCancel.apply(self, arguments); };
+
+	if (FastClick.notNeeded(layer)) {
+		return;
+	}
+
+	// Set up event handlers as required
+	if (this.deviceIsAndroid) {
+		layer.addEventListener('mouseover', this.onMouse, true);
+		layer.addEventListener('mousedown', this.onMouse, true);
+		layer.addEventListener('mouseup', this.onMouse, true);
+	}
+
+	layer.addEventListener('click', this.onClick, true);
+	layer.addEventListener('touchstart', this.onTouchStart, false);
+	layer.addEventListener('touchmove', this.onTouchMove, false);
+	layer.addEventListener('touchend', this.onTouchEnd, false);
+	layer.addEventListener('touchcancel', this.onTouchCancel, false);
+
+	// Hack is required for browsers that don't support Event#stopImmediatePropagation (e.g. Android 2)
+	// which is how FastClick normally stops click events bubbling to callbacks registered on the FastClick
+	// layer when they are cancelled.
+	if (!Event.prototype.stopImmediatePropagation) {
+		layer.removeEventListener = function(type, callback, capture) {
+			var rmv = Node.prototype.removeEventListener;
+			if (type === 'click') {
+				rmv.call(layer, type, callback.hijacked || callback, capture);
+			} else {
+				rmv.call(layer, type, callback, capture);
+			}
+		};
+
+		layer.addEventListener = function(type, callback, capture) {
+			var adv = Node.prototype.addEventListener;
+			if (type === 'click') {
+				adv.call(layer, type, callback.hijacked || (callback.hijacked = function(event) {
+					if (!event.propagationStopped) {
+						callback(event);
+					}
+				}), capture);
+			} else {
+				adv.call(layer, type, callback, capture);
+			}
+		};
+	}
+
+	// If a handler is already declared in the element's onclick attribute, it will be fired before
+	// FastClick's onClick handler. Fix this by pulling out the user-defined handler function and
+	// adding it as listener.
+	if (typeof layer.onclick === 'function') {
+
+		// Android browser on at least 3.2 requires a new reference to the function in layer.onclick
+		// - the old one won't work if passed to addEventListener directly.
+		oldOnClick = layer.onclick;
+		layer.addEventListener('click', function(event) {
+			oldOnClick(event);
+		}, false);
+		layer.onclick = null;
+	}
+}
+
+
+/**
+ * Android requires exceptions.
+ *
+ * @type boolean
+ */
+FastClick.prototype.deviceIsAndroid = navigator.userAgent.indexOf('Android') > 0;
+
+
+/**
+ * iOS requires exceptions.
+ *
+ * @type boolean
+ */
+FastClick.prototype.deviceIsIOS = /iP(ad|hone|od)/.test(navigator.userAgent);
+
+
+/**
+ * iOS 4 requires an exception for select elements.
+ *
+ * @type boolean
+ */
+FastClick.prototype.deviceIsIOS4 = FastClick.prototype.deviceIsIOS && (/OS 4_\d(_\d)?/).test(navigator.userAgent);
+
+
+/**
+ * iOS 6.0(+?) requires the target element to be manually derived
+ *
+ * @type boolean
+ */
+FastClick.prototype.deviceIsIOSWithBadTarget = FastClick.prototype.deviceIsIOS && (/OS ([6-9]|\d{2})_\d/).test(navigator.userAgent);
+
+
+/**
+ * Determine whether a given element requires a native click.
+ *
+ * @param {EventTarget|Element} target Target DOM element
+ * @returns {boolean} Returns true if the element needs a native click
+ */
+FastClick.prototype.needsClick = function(target) {
+	'use strict';
+	switch (target.nodeName.toLowerCase()) {
+
+	// Don't send a synthetic click to disabled inputs (issue #62)
+	case 'button':
+	case 'select':
+	case 'textarea':
+		if (target.disabled) {
+			return true;
+		}
+
+		break;
+	case 'input':
+
+		// File inputs need real clicks on iOS 6 due to a browser bug (issue #68)
+		if ((this.deviceIsIOS && target.type === 'file') || target.disabled) {
+			return true;
+		}
+
+		break;
+	case 'label':
+	case 'video':
+		return true;
+	}
+
+	return (/\bneedsclick\b/).test(target.className);
+};
+
+
+/**
+ * Determine whether a given element requires a call to focus to simulate click into element.
+ *
+ * @param {EventTarget|Element} target Target DOM element
+ * @returns {boolean} Returns true if the element requires a call to focus to simulate native click.
+ */
+FastClick.prototype.needsFocus = function(target) {
+	'use strict';
+	switch (target.nodeName.toLowerCase()) {
+	case 'textarea':
+		return true;
+	case 'select':
+		return !this.deviceIsAndroid;
+	case 'input':
+		switch (target.type) {
+		case 'button':
+		case 'checkbox':
+		case 'file':
+		case 'image':
+		case 'radio':
+		case 'submit':
+			return false;
+		}
+
+		// No point in attempting to focus disabled inputs
+		return !target.disabled && !target.readOnly;
+	default:
+		return (/\bneedsfocus\b/).test(target.className);
+	}
+};
+
+
+/**
+ * Send a click event to the specified element.
+ *
+ * @param {EventTarget|Element} targetElement
+ * @param {Event} event
+ */
+FastClick.prototype.sendClick = function(targetElement, event) {
+	'use strict';
+	var clickEvent, touch;
+
+	// On some Android devices activeElement needs to be blurred otherwise the synthetic click will have no effect (#24)
+	if (document.activeElement && document.activeElement !== targetElement) {
+		document.activeElement.blur();
+	}
+
+	touch = event.changedTouches[0];
+
+	// Synthesise a click event, with an extra attribute so it can be tracked
+	clickEvent = document.createEvent('MouseEvents');
+	clickEvent.initMouseEvent(this.determineEventType(targetElement), true, true, window, 1, touch.screenX, touch.screenY, touch.clientX, touch.clientY, false, false, false, false, 0, null);
+	clickEvent.forwardedTouchEvent = true;
+	targetElement.dispatchEvent(clickEvent);
+};
+
+FastClick.prototype.determineEventType = function(targetElement) {
+	'use strict';
+
+	//Issue #159: Android Chrome Select Box does not open with a synthetic click event
+	if (this.deviceIsAndroid && targetElement.tagName.toLowerCase() === 'select') {
+		return 'mousedown';
+	}
+
+	return 'click';
+};
+
+
+/**
+ * @param {EventTarget|Element} targetElement
+ */
+FastClick.prototype.focus = function(targetElement) {
+	'use strict';
+	var length;
+
+	// Issue #160: on iOS 7, some input elements (e.g. date datetime) throw a vague TypeError on setSelectionRange. These elements don't have an integer value for the selectionStart and selectionEnd properties, but unfortunately that can't be used for detection because accessing the properties also throws a TypeError. Just check the type instead. Filed as Apple bug #15122724.
+	if (this.deviceIsIOS && targetElement.setSelectionRange && targetElement.type.indexOf('date') !== 0 && targetElement.type !== 'time') {
+		length = targetElement.value.length;
+		targetElement.setSelectionRange(length, length);
+	} else {
+		targetElement.focus();
+	}
+};
+
+
+/**
+ * Check whether the given target element is a child of a scrollable layer and if so, set a flag on it.
+ *
+ * @param {EventTarget|Element} targetElement
+ */
+FastClick.prototype.updateScrollParent = function(targetElement) {
+	'use strict';
+	var scrollParent, parentElement;
+
+	scrollParent = targetElement.fastClickScrollParent;
+
+	// Attempt to discover whether the target element is contained within a scrollable layer. Re-check if the
+	// target element was moved to another parent.
+	if (!scrollParent || !scrollParent.contains(targetElement)) {
+		parentElement = targetElement;
+		do {
+			if (parentElement.scrollHeight > parentElement.offsetHeight) {
+				scrollParent = parentElement;
+				targetElement.fastClickScrollParent = parentElement;
+				break;
+			}
+
+			parentElement = parentElement.parentElement;
+		} while (parentElement);
+	}
+
+	// Always update the scroll top tracker if possible.
+	if (scrollParent) {
+		scrollParent.fastClickLastScrollTop = scrollParent.scrollTop;
+	}
+};
+
+
+/**
+ * @param {EventTarget} targetElement
+ * @returns {Element|EventTarget}
+ */
+FastClick.prototype.getTargetElementFromEventTarget = function(eventTarget) {
+	'use strict';
+
+	// On some older browsers (notably Safari on iOS 4.1 - see issue #56) the event target may be a text node.
+	if (eventTarget.nodeType === Node.TEXT_NODE) {
+		return eventTarget.parentNode;
+	}
+
+	return eventTarget;
+};
+
+
+/**
+ * On touch start, record the position and scroll offset.
+ *
+ * @param {Event} event
+ * @returns {boolean}
+ */
+FastClick.prototype.onTouchStart = function(event) {
+	'use strict';
+	var targetElement, touch, selection;
+
+	// Ignore multiple touches, otherwise pinch-to-zoom is prevented if both fingers are on the FastClick element (issue #111).
+	if (event.targetTouches.length > 1) {
+		return true;
+	}
+
+	targetElement = this.getTargetElementFromEventTarget(event.target);
+	touch = event.targetTouches[0];
+
+	if (this.deviceIsIOS) {
+
+		// Only trusted events will deselect text on iOS (issue #49)
+		selection = window.getSelection();
+		if (selection.rangeCount && !selection.isCollapsed) {
+			return true;
+		}
+
+		if (!this.deviceIsIOS4) {
+
+			// Weird things happen on iOS when an alert or confirm dialog is opened from a click event callback (issue #23):
+			// when the user next taps anywhere else on the page, new touchstart and touchend events are dispatched
+			// with the same identifier as the touch event that previously triggered the click that triggered the alert.
+			// Sadly, there is an issue on iOS 4 that causes some normal touch events to have the same identifier as an
+			// immediately preceeding touch event (issue #52), so this fix is unavailable on that platform.
+			if (touch.identifier === this.lastTouchIdentifier) {
+				event.preventDefault();
+				return false;
+			}
+
+			this.lastTouchIdentifier = touch.identifier;
+
+			// If the target element is a child of a scrollable layer (using -webkit-overflow-scrolling: touch) and:
+			// 1) the user does a fling scroll on the scrollable layer
+			// 2) the user stops the fling scroll with another tap
+			// then the event.target of the last 'touchend' event will be the element that was under the user's finger
+			// when the fling scroll was started, causing FastClick to send a click event to that layer - unless a check
+			// is made to ensure that a parent layer was not scrolled before sending a synthetic click (issue #42).
+			this.updateScrollParent(targetElement);
+		}
+	}
+
+	this.trackingClick = true;
+	this.trackingClickStart = event.timeStamp;
+	this.targetElement = targetElement;
+
+	this.touchStartX = touch.pageX;
+	this.touchStartY = touch.pageY;
+
+	// Prevent phantom clicks on fast double-tap (issue #36)
+	if ((event.timeStamp - this.lastClickTime) < 200) {
+		event.preventDefault();
+	}
+
+	return true;
+};
+
+
+/**
+ * Based on a touchmove event object, check whether the touch has moved past a boundary since it started.
+ *
+ * @param {Event} event
+ * @returns {boolean}
+ */
+FastClick.prototype.touchHasMoved = function(event) {
+	'use strict';
+	var touch = event.changedTouches[0], boundary = this.touchBoundary;
+
+	if (Math.abs(touch.pageX - this.touchStartX) > boundary || Math.abs(touch.pageY - this.touchStartY) > boundary) {
+		return true;
+	}
+
+	return false;
+};
+
+
+/**
+ * Update the last position.
+ *
+ * @param {Event} event
+ * @returns {boolean}
+ */
+FastClick.prototype.onTouchMove = function(event) {
+	'use strict';
+	if (!this.trackingClick) {
+		return true;
+	}
+
+	// If the touch has moved, cancel the click tracking
+	if (this.targetElement !== this.getTargetElementFromEventTarget(event.target) || this.touchHasMoved(event)) {
+		this.trackingClick = false;
+		this.targetElement = null;
+	}
+
+	return true;
+};
+
+
+/**
+ * Attempt to find the labelled control for the given label element.
+ *
+ * @param {EventTarget|HTMLLabelElement} labelElement
+ * @returns {Element|null}
+ */
+FastClick.prototype.findControl = function(labelElement) {
+	'use strict';
+
+	// Fast path for newer browsers supporting the HTML5 control attribute
+	if (labelElement.control !== undefined) {
+		return labelElement.control;
+	}
+
+	// All browsers under test that support touch events also support the HTML5 htmlFor attribute
+	if (labelElement.htmlFor) {
+		return document.getElementById(labelElement.htmlFor);
+	}
+
+	// If no for attribute exists, attempt to retrieve the first labellable descendant element
+	// the list of which is defined here: http://www.w3.org/TR/html5/forms.html#category-label
+	return labelElement.querySelector('button, input:not([type=hidden]), keygen, meter, output, progress, select, textarea');
+};
+
+
+/**
+ * On touch end, determine whether to send a click event at once.
+ *
+ * @param {Event} event
+ * @returns {boolean}
+ */
+FastClick.prototype.onTouchEnd = function(event) {
+	'use strict';
+	var forElement, trackingClickStart, targetTagName, scrollParent, touch, targetElement = this.targetElement;
+
+	if (!this.trackingClick) {
+		return true;
+	}
+
+	// Prevent phantom clicks on fast double-tap (issue #36)
+	if ((event.timeStamp - this.lastClickTime) < 200) {
+		this.cancelNextClick = true;
+		return true;
+	}
+
+	// Reset to prevent wrong click cancel on input (issue #156).
+	this.cancelNextClick = false;
+
+	this.lastClickTime = event.timeStamp;
+
+	trackingClickStart = this.trackingClickStart;
+	this.trackingClick = false;
+	this.trackingClickStart = 0;
+
+	// On some iOS devices, the targetElement supplied with the event is invalid if the layer
+	// is performing a transition or scroll, and has to be re-detected manually. Note that
+	// for this to function correctly, it must be called *after* the event target is checked!
+	// See issue #57; also filed as rdar://13048589 .
+	if (this.deviceIsIOSWithBadTarget) {
+		touch = event.changedTouches[0];
+
+		// In certain cases arguments of elementFromPoint can be negative, so prevent setting targetElement to null
+		targetElement = document.elementFromPoint(touch.pageX - window.pageXOffset, touch.pageY - window.pageYOffset) || targetElement;
+		targetElement.fastClickScrollParent = this.targetElement.fastClickScrollParent;
+	}
+
+	targetTagName = targetElement.tagName.toLowerCase();
+	if (targetTagName === 'label') {
+		forElement = this.findControl(targetElement);
+		if (forElement) {
+			this.focus(targetElement);
+			if (this.deviceIsAndroid) {
+				return false;
+			}
+
+			targetElement = forElement;
+		}
+	} else if (this.needsFocus(targetElement)) {
+
+		// Case 1: If the touch started a while ago (best guess is 100ms based on tests for issue #36) then focus will be triggered anyway. Return early and unset the target element reference so that the subsequent click will be allowed through.
+		// Case 2: Without this exception for input elements tapped when the document is contained in an iframe, then any inputted text won't be visible even though the value attribute is updated as the user types (issue #37).
+		if ((event.timeStamp - trackingClickStart) > 100 || (this.deviceIsIOS && window.top !== window && targetTagName === 'input')) {
+			this.targetElement = null;
+			return false;
+		}
+
+		this.focus(targetElement);
+		this.sendClick(targetElement, event);
+
+		// Select elements need the event to go through on iOS 4, otherwise the selector menu won't open.
+		if (!this.deviceIsIOS4 || targetTagName !== 'select') {
+			this.targetElement = null;
+			event.preventDefault();
+		}
+
+		return false;
+	}
+
+	if (this.deviceIsIOS && !this.deviceIsIOS4) {
+
+		// Don't send a synthetic click event if the target element is contained within a parent layer that was scrolled
+		// and this tap is being used to stop the scrolling (usually initiated by a fling - issue #42).
+		scrollParent = targetElement.fastClickScrollParent;
+		if (scrollParent && scrollParent.fastClickLastScrollTop !== scrollParent.scrollTop) {
+			return true;
+		}
+	}
+
+	// Prevent the actual click from going though - unless the target node is marked as requiring
+	// real clicks or if it is in the whitelist in which case only non-programmatic clicks are permitted.
+	if (!this.needsClick(targetElement)) {
+		event.preventDefault();
+		this.sendClick(targetElement, event);
+	}
+
+	return false;
+};
+
+
+/**
+ * On touch cancel, stop tracking the click.
+ *
+ * @returns {void}
+ */
+FastClick.prototype.onTouchCancel = function() {
+	'use strict';
+	this.trackingClick = false;
+	this.targetElement = null;
+};
+
+
+/**
+ * Determine mouse events which should be permitted.
+ *
+ * @param {Event} event
+ * @returns {boolean}
+ */
+FastClick.prototype.onMouse = function(event) {
+	'use strict';
+
+	// If a target element was never set (because a touch event was never fired) allow the event
+	if (!this.targetElement) {
+		return true;
+	}
+
+	if (event.forwardedTouchEvent) {
+		return true;
+	}
+
+	// Programmatically generated events targeting a specific element should be permitted
+	if (!event.cancelable) {
+		return true;
+	}
+
+	// Derive and check the target element to see whether the mouse event needs to be permitted;
+	// unless explicitly enabled, prevent non-touch click events from triggering actions,
+	// to prevent ghost/doubleclicks.
+	if (!this.needsClick(this.targetElement) || this.cancelNextClick) {
+
+		// Prevent any user-added listeners declared on FastClick element from being fired.
+		if (event.stopImmediatePropagation) {
+			event.stopImmediatePropagation();
+		} else {
+
+			// Part of the hack for browsers that don't support Event#stopImmediatePropagation (e.g. Android 2)
+			event.propagationStopped = true;
+		}
+
+		// Cancel the event
+		event.stopPropagation();
+		event.preventDefault();
+
+		return false;
+	}
+
+	// If the mouse event is permitted, return true for the action to go through.
+	return true;
+};
+
+
+/**
+ * On actual clicks, determine whether this is a touch-generated click, a click action occurring
+ * naturally after a delay after a touch (which needs to be cancelled to avoid duplication), or
+ * an actual click which should be permitted.
+ *
+ * @param {Event} event
+ * @returns {boolean}
+ */
+FastClick.prototype.onClick = function(event) {
+	'use strict';
+	var permitted;
+
+	// It's possible for another FastClick-like library delivered with third-party code to fire a click event before FastClick does (issue #44). In that case, set the click-tracking flag back to false and return early. This will cause onTouchEnd to return early.
+	if (this.trackingClick) {
+		this.targetElement = null;
+		this.trackingClick = false;
+		return true;
+	}
+
+	// Very odd behaviour on iOS (issue #18): if a submit element is present inside a form and the user hits enter in the iOS simulator or clicks the Go button on the pop-up OS keyboard the a kind of 'fake' click event will be triggered with the submit-type input element as the target.
+	if (event.target.type === 'submit' && event.detail === 0) {
+		return true;
+	}
+
+	permitted = this.onMouse(event);
+
+	// Only unset targetElement if the click is not permitted. This will ensure that the check for !targetElement in onMouse fails and the browser's click doesn't go through.
+	if (!permitted) {
+		this.targetElement = null;
+	}
+
+	// If clicks are permitted, return true for the action to go through.
+	return permitted;
+};
+
+
+/**
+ * Remove all FastClick's event listeners.
+ *
+ * @returns {void}
+ */
+FastClick.prototype.destroy = function() {
+	'use strict';
+	var layer = this.layer;
+
+	if (this.deviceIsAndroid) {
+		layer.removeEventListener('mouseover', this.onMouse, true);
+		layer.removeEventListener('mousedown', this.onMouse, true);
+		layer.removeEventListener('mouseup', this.onMouse, true);
+	}
+
+	layer.removeEventListener('click', this.onClick, true);
+	layer.removeEventListener('touchstart', this.onTouchStart, false);
+	layer.removeEventListener('touchmove', this.onTouchMove, false);
+	layer.removeEventListener('touchend', this.onTouchEnd, false);
+	layer.removeEventListener('touchcancel', this.onTouchCancel, false);
+};
+
+
+/**
+ * Check whether FastClick is needed.
+ *
+ * @param {Element} layer The layer to listen on
+ */
+FastClick.notNeeded = function(layer) {
+	'use strict';
+	var metaViewport;
+	var chromeVersion;
+
+	// Devices that don't support touch don't need FastClick
+	if (typeof window.ontouchstart === 'undefined') {
+		return true;
+	}
+
+	// Chrome version - zero for other browsers
+	chromeVersion = +(/Chrome\/([0-9]+)/.exec(navigator.userAgent) || [,0])[1];
+
+	if (chromeVersion) {
+
+		if (FastClick.prototype.deviceIsAndroid) {
+			metaViewport = document.querySelector('meta[name=viewport]');
+			
+			if (metaViewport) {
+				// Chrome on Android with user-scalable="no" doesn't need FastClick (issue #89)
+				if (metaViewport.content.indexOf('user-scalable=no') !== -1) {
+					return true;
+				}
+				// Chrome 32 and above with width=device-width or less don't need FastClick
+				if (chromeVersion > 31 && window.innerWidth <= window.screen.width) {
+					return true;
+				}
+			}
+
+		// Chrome desktop doesn't need FastClick (issue #15)
+		} else {
+			return true;
+		}
+	}
+
+	// IE10 with -ms-touch-action: none, which disables double-tap-to-zoom (issue #97)
+	if (layer.style.msTouchAction === 'none') {
+		return true;
+	}
+
+	return false;
+};
+
+
+/**
+ * Factory method for creating a FastClick object
+ *
+ * @param {Element} layer The layer to listen on
+ */
+FastClick.attach = function(layer) {
+	'use strict';
+	return new FastClick(layer);
+};
+
+
+if (typeof define !== 'undefined' && define.amd) {
+
+	// AMD. Register as an anonymous module.
+	define(function() {
+		'use strict';
+		return FastClick;
+	});
+} else if (typeof module !== 'undefined' && module.exports) {
+	module.exports = FastClick.attach;
+	module.exports.FastClick = FastClick;
+} else {
+	window.FastClick = FastClick;
+}
+
+;/*!
+	Autosize v1.17.8 - 2013-09-07
+	Automatically adjust textarea height based on user input.
+	(c) 2013 Jack Moore - http://www.jacklmoore.com/autosize
+	license: http://www.opensource.org/licenses/mit-license.php
+*/
+(function (factory) {
+	if (typeof define === 'function' && define.amd) {
+		// AMD. Register as an anonymous module.
+		define(['jquery'], factory);
+	} else {
+		// Browser globals: jQuery or jQuery-like library, such as Zepto
+		factory(window.jQuery || window.$);
+	}
+}(function ($) {
+	var
+	defaults = {
+		className: 'autosizejs',
+		append: '',
+		callback: false,
+		resizeDelay: 10
+	},
+
+	// border:0 is unnecessary, but avoids a bug in FireFox on OSX
+	copy = '<textarea tabindex="-1" style="position:absolute; top:-999px; left:0; right:auto; bottom:auto; border:0; padding: 0; -moz-box-sizing:content-box; -webkit-box-sizing:content-box; box-sizing:content-box; word-wrap:break-word; height:0 !important; min-height:0 !important; overflow:hidden; transition:none; -webkit-transition:none; -moz-transition:none;"/>',
+
+	// line-height is conditionally included because IE7/IE8/old Opera do not return the correct value.
+	typographyStyles = [
+		'fontFamily',
+		'fontSize',
+		'fontWeight',
+		'fontStyle',
+		'letterSpacing',
+		'textTransform',
+		'wordSpacing',
+		'textIndent'
+	],
+
+	// to keep track which textarea is being mirrored when adjust() is called.
+	mirrored,
+
+	// the mirror element, which is used to calculate what size the mirrored element should be.
+	mirror = $(copy).data('autosize', true)[0];
+
+	// test that line-height can be accurately copied.
+	mirror.style.lineHeight = '99px';
+	if ($(mirror).css('lineHeight') === '99px') {
+		typographyStyles.push('lineHeight');
+	}
+	mirror.style.lineHeight = '';
+
+	$.fn.autosize = function (options) {
+		if (!this.length) {
+			return this;
+		}
+
+		options = $.extend({}, defaults, options || {});
+
+		if (mirror.parentNode !== document.body) {
+			$(document.body).append(mirror);
+		}
+
+		return this.each(function () {
+			var
+			ta = this,
+			$ta = $(ta),
+			maxHeight,
+			minHeight,
+			boxOffset = 0,
+			callback = $.isFunction(options.callback),
+			originalStyles = {
+				height: ta.style.height,
+				overflow: ta.style.overflow,
+				overflowY: ta.style.overflowY,
+				wordWrap: ta.style.wordWrap,
+				resize: ta.style.resize
+			},
+			timeout,
+			width = $ta.width();
+
+			if ($ta.data('autosize')) {
+				// exit if autosize has already been applied, or if the textarea is the mirror element.
+				return;
+			}
+			$ta.data('autosize', true);
+
+			if ($ta.css('box-sizing') === 'border-box' || $ta.css('-moz-box-sizing') === 'border-box' || $ta.css('-webkit-box-sizing') === 'border-box'){
+				boxOffset = $ta.outerHeight() - $ta.height();
+			}
+
+			// IE8 and lower return 'auto', which parses to NaN, if no min-height is set.
+			minHeight = Math.max(parseInt($ta.css('minHeight'), 10) - boxOffset || 0, $ta.height());
+
+			$ta.css({
+				overflow: 'hidden',
+				overflowY: 'hidden',
+				wordWrap: 'break-word', // horizontal overflow is hidden, so break-word is necessary for handling words longer than the textarea width
+				resize: ($ta.css('resize') === 'none' || $ta.css('resize') === 'vertical') ? 'none' : 'horizontal'
+			});
+
+			// The mirror width must exactly match the textarea width, so using getBoundingClientRect because it doesn't round the sub-pixel value.
+			function setWidth() {
+				var style, width;
+				
+				if ('getComputedStyle' in window) {
+					style = window.getComputedStyle(ta);
+					width = ta.getBoundingClientRect().width;
+
+					$.each(['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'], function(i,val){
+						width -= parseInt(style[val],10);
+					});
+
+					mirror.style.width = width + 'px';
+				}
+				else {
+					// window.getComputedStyle, getBoundingClientRect returning a width are unsupported and unneeded in IE8 and lower.
+					mirror.style.width = Math.max($ta.width(), 0) + 'px';
+				}
+			}
+
+			function initMirror() {
+				var styles = {};
+
+				mirrored = ta;
+				mirror.className = options.className;
+				maxHeight = parseInt($ta.css('maxHeight'), 10);
+
+				// mirror is a duplicate textarea located off-screen that
+				// is automatically updated to contain the same text as the
+				// original textarea.  mirror always has a height of 0.
+				// This gives a cross-browser supported way getting the actual
+				// height of the text, through the scrollTop property.
+				$.each(typographyStyles, function(i,val){
+					styles[val] = $ta.css(val);
+				});
+				$(mirror).css(styles);
+
+				setWidth();
+
+				// Chrome-specific fix:
+				// When the textarea y-overflow is hidden, Chrome doesn't reflow the text to account for the space
+				// made available by removing the scrollbar. This workaround triggers the reflow for Chrome.
+				if (window.chrome) {
+					var width = ta.style.width;
+					ta.style.width = '0px';
+					var ignore = ta.offsetWidth;
+					ta.style.width = width;
+				}
+			}
+
+			// Using mainly bare JS in this function because it is going
+			// to fire very often while typing, and needs to very efficient.
+			function adjust() {
+				var height, original;
+
+				if (mirrored !== ta) {
+					initMirror();
+				} else {
+					setWidth();
+				}
+
+				mirror.value = ta.value + options.append;
+				mirror.style.overflowY = ta.style.overflowY;
+				original = parseInt(ta.style.height,10);
+
+				// Setting scrollTop to zero is needed in IE8 and lower for the next step to be accurately applied
+				mirror.scrollTop = 0;
+
+				mirror.scrollTop = 9e4;
+
+				// Using scrollTop rather than scrollHeight because scrollHeight is non-standard and includes padding.
+				height = mirror.scrollTop;
+
+				if (maxHeight && height > maxHeight) {
+					ta.style.overflowY = 'scroll';
+					height = maxHeight;
+				} else {
+					ta.style.overflowY = 'hidden';
+					if (height < minHeight) {
+						height = minHeight;
+					}
+				}
+
+				height += boxOffset;
+
+				if (original !== height) {
+					ta.style.height = height + 'px';
+					if (callback) {
+						options.callback.call(ta,ta);
+					}
+				}
+			}
+
+			function resize () {
+				clearTimeout(timeout);
+				timeout = setTimeout(function(){
+					var newWidth = $ta.width();
+
+					if (newWidth !== width) {
+						width = newWidth;
+						adjust();
+					}
+				}, parseInt(options.resizeDelay,10));
+			}
+
+			if ('onpropertychange' in ta) {
+				if ('oninput' in ta) {
+					// Detects IE9.  IE9 does not fire onpropertychange or oninput for deletions,
+					// so binding to onkeyup to catch most of those occasions.  There is no way that I
+					// know of to detect something like 'cut' in IE9.
+					$ta.on('input.autosize keyup.autosize', adjust);
+				} else {
+					// IE7 / IE8
+					$ta.on('propertychange.autosize', function(){
+						if(event.propertyName === 'value'){
+							adjust();
+						}
+					});
+				}
+			} else {
+				// Modern Browsers
+				$ta.on('input.autosize', adjust);
+			}
+
+			// Set options.resizeDelay to false if using fixed-width textarea elements.
+			// Uses a timeout and width check to reduce the amount of times adjust needs to be called after window resize.
+
+			if (options.resizeDelay !== false) {
+				$(window).on('resize.autosize', resize);
+			}
+
+			// Event for manual triggering if needed.
+			// Should only be needed when the value of the textarea is changed through JavaScript rather than user input.
+			$ta.on('autosize.resize', adjust);
+
+			// Event for manual triggering that also forces the styles to update as well.
+			// Should only be needed if one of typography styles of the textarea change, and the textarea is already the target of the adjust method.
+			$ta.on('autosize.resizeIncludeStyle', function() {
+				mirrored = null;
+				adjust();
+			});
+
+			$ta.on('autosize.destroy', function(){
+				mirrored = null;
+				clearTimeout(timeout);
+				$(window).off('resize', resize);
+				$ta
+					.off('autosize')
+					.off('.autosize')
+					.css(originalStyles)
+					.removeData('autosize');
+			});
+
+			// Call adjust in case the textarea already contains text.
+			adjust();
+		});
+	};
+}));
+
 ;//  Underscore.string
 //  (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
 //  Underscore.string is freely distributable under the terms of the MIT license.
@@ -26719,6 +26496,229 @@ if (typeof define !== 'undefined' && define.amd) {
   root._ = root._ || {};
   root._.string = root._.str = _s;
 }(this, String);
+
+;/**
+ * Backbone localStorage Adapter
+ * Version 1.1.7
+ *
+ * https://github.com/jeromegn/Backbone.localStorage
+ */
+(function (root, factory) {
+   if (typeof exports === 'object' && typeof require === 'function') {
+     module.exports = factory(require("underscore"), require("backbone"));
+   } else if (typeof define === "function" && define.amd) {
+      // AMD. Register as an anonymous module.
+      define(["underscore","backbone"], function(_, Backbone) {
+        // Use global variables if the locals are undefined.
+        return factory(_ || root._, Backbone || root.Backbone);
+      });
+   } else {
+      // RequireJS isn't being used. Assume underscore and backbone are loaded in <script> tags
+      factory(_, Backbone);
+   }
+}(this, function(_, Backbone) {
+// A simple module to replace `Backbone.sync` with *localStorage*-based
+// persistence. Models are given GUIDS, and saved into a JSON object. Simple
+// as that.
+
+// Hold reference to Underscore.js and Backbone.js in the closure in order
+// to make things work even if they are removed from the global namespace
+
+// Generate four random hex digits.
+function S4() {
+   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+};
+
+// Generate a pseudo-GUID by concatenating random hexadecimal.
+function guid() {
+   return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+};
+
+// Our Store is represented by a single JS object in *localStorage*. Create it
+// with a meaningful name, like the name you'd give a table.
+// window.Store is deprectated, use Backbone.LocalStorage instead
+Backbone.LocalStorage = window.Store = function(name) {
+  if( !this.localStorage ) {
+    throw "Backbone.localStorage: Environment does not support localStorage."
+  }
+  this.name = name;
+  var store = this.localStorage().getItem(this.name);
+  this.records = (store && store.split(",")) || [];
+};
+
+_.extend(Backbone.LocalStorage.prototype, {
+
+  // Save the current state of the **Store** to *localStorage*.
+  save: function() {
+    this.localStorage().setItem(this.name, this.records.join(","));
+  },
+
+  // Add a model, giving it a (hopefully)-unique GUID, if it doesn't already
+  // have an id of it's own.
+  create: function(model) {
+    if (!model.id) {
+      model.id = guid();
+      model.set(model.idAttribute, model.id);
+    }
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    this.records.push(model.id.toString());
+    this.save();
+    return this.find(model);
+  },
+
+  // Update a model by replacing its copy in `this.data`.
+  update: function(model) {
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    if (!_.include(this.records, model.id.toString()))
+      this.records.push(model.id.toString()); this.save();
+    return this.find(model);
+  },
+
+  // Retrieve a model from `this.data` by id.
+  find: function(model) {
+    return this.jsonData(this.localStorage().getItem(this.name+"-"+model.id));
+  },
+
+  // Return the array of all models currently in storage.
+  findAll: function() {
+    // Lodash removed _#chain in v1.0.0-rc.1
+    return (_.chain || _)(this.records)
+      .map(function(id){
+        return this.jsonData(this.localStorage().getItem(this.name+"-"+id));
+      }, this)
+      .compact()
+      .value();
+  },
+
+  // Delete a model from `this.data`, returning it.
+  destroy: function(model) {
+    if (model.isNew())
+      return false
+    this.localStorage().removeItem(this.name+"-"+model.id);
+    this.records = _.reject(this.records, function(id){
+      return id === model.id.toString();
+    });
+    this.save();
+    return model;
+  },
+
+  localStorage: function() {
+    return localStorage;
+  },
+
+  // fix for "illegal access" error on Android when JSON.parse is passed null
+  jsonData: function (data) {
+      return data && JSON.parse(data);
+  },
+
+  // Clear localStorage for specific collection.
+  _clear: function() {
+    var local = this.localStorage(),
+      itemRe = new RegExp("^" + this.name + "-");
+
+    // Remove id-tracking item (e.g., "foo").
+    local.removeItem(this.name);
+
+    // Lodash removed _#chain in v1.0.0-rc.1
+    // Match all data items (e.g., "foo-ID") and remove.
+    (_.chain || _)(local).keys()
+      .filter(function (k) { return itemRe.test(k); })
+      .each(function (k) { local.removeItem(k); });
+
+    this.records.length = 0;
+  },
+
+  // Size of localStorage.
+  _storageSize: function() {
+    return this.localStorage().length;
+  }
+
+});
+
+// localSync delegate to the model or collection's
+// *localStorage* property, which should be an instance of `Store`.
+// window.Store.sync and Backbone.localSync is deprecated, use Backbone.LocalStorage.sync instead
+Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function(method, model, options) {
+  var store = model.localStorage || model.collection.localStorage;
+
+  var resp, errorMessage, syncDfd = Backbone.$.Deferred && Backbone.$.Deferred(); //If $ is having Deferred - use it.
+
+  try {
+
+    switch (method) {
+      case "read":
+        resp = model.id != undefined ? store.find(model) : store.findAll();
+        break;
+      case "create":
+        resp = store.create(model);
+        break;
+      case "update":
+        resp = store.update(model);
+        break;
+      case "delete":
+        resp = store.destroy(model);
+        break;
+    }
+
+  } catch(error) {
+    if (error.code === 22 && store._storageSize() === 0)
+      errorMessage = "Private browsing is unsupported";
+    else
+      errorMessage = error.message;
+  }
+
+  if (resp) {
+    if (options && options.success) {
+      if (Backbone.VERSION === "0.9.10") {
+        options.success(model, resp, options);
+      } else {
+        options.success(resp);
+      }
+    }
+    if (syncDfd) {
+      syncDfd.resolve(resp);
+    }
+
+  } else {
+    errorMessage = errorMessage ? errorMessage
+                                : "Record Not Found";
+
+    if (options && options.error)
+      if (Backbone.VERSION === "0.9.10") {
+        options.error(model, errorMessage, options);
+      } else {
+        options.error(errorMessage);
+      }
+
+    if (syncDfd)
+      syncDfd.reject(errorMessage);
+  }
+
+  // add compatibility with $.ajax
+  // always execute callback for success and error
+  if (options && options.complete) options.complete(resp);
+
+  return syncDfd && syncDfd.promise();
+};
+
+Backbone.ajaxSync = Backbone.sync;
+
+Backbone.getSyncMethod = function(model) {
+  if(model.localStorage || (model.collection && model.collection.localStorage)) {
+    return Backbone.localSync;
+  }
+
+  return Backbone.ajaxSync;
+};
+
+// Override 'Backbone.sync' to default to localSync,
+// the original 'Backbone.sync' is still available in 'Backbone.ajaxSync'
+Backbone.sync = function(method, model, options) {
+  return Backbone.getSyncMethod(model).apply(this, [method, model, options]);
+};
+
+return Backbone.LocalStorage;
+}));
 
 ;// MarionetteJS (Backbone.Marionette)
 // ----------------------------------

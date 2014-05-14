@@ -4884,9 +4884,9 @@ function program116(depth0,data) {
 function program117(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\r\n    <div class=\"row pull-right\">\r\n      <div class=\"col-xs-12\">\r\n        <br/>\r\n        <button class=\"btn btn-danger btn-responsive js-remove\">\r\n          <span class=\"glyphicon glyphicon-remove\"></span>&emsp;"
+  buffer += "\r\n    <div class=\"row pull-right\">\r\n      <div class=\"col-xs-12\">\r\n        <br/>\r\n        <!--<button class=\"btn btn-danger btn-responsive js-remove\">\r\n          <span class=\"glyphicon glyphicon-remove\"></span>&emsp;"
     + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_Remove)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\r\n        </button>\r\n        <button class=\"btn btn-success btn-responsive js-submit\">\r\n          <span class=\"glyphicon glyphicon-save\"></span>&emsp;"
+    + "\r\n        </button>-->\r\n        <button class=\"btn btn-success btn-responsive js-submit\">\r\n          <span class=\"glyphicon glyphicon-save\"></span>&emsp;"
     + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0.resources)),stack1 == null || stack1 === false ? stack1 : stack1.Text_Save)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
     + "\r\n        </button>\r\n      </div>\r\n    </div>\r\n    ";
   return buffer;

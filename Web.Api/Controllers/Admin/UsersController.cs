@@ -67,6 +67,8 @@ namespace EventFeedback.Web.Api.Controllers.Admin
             if(result.Succeeded && !string.IsNullOrEmpty(entity.Roles))
                 foreach(var role in entity.Roles.Split(' '))
                     _userService.AddUserToRole(user, role);
+            else
+                return BadRequest(string.Format("errors: {0}", string.Join(", ", result.Errors)));
 
             // set the other properties
             if (entity.ActiveFrom != null) user.ActiveFromDate = entity.ActiveFrom.Value;
