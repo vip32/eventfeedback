@@ -2771,6 +2771,7 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showSessionDetails = function(id) {
+    id = parseInt(id);
     return this.sessions.fetch().done((function(_this) {
       return function(models) {
         var View, feedback, session, view;
@@ -2780,10 +2781,14 @@ module.exports = Controller = (function(_super) {
         } else {
           vent.trigger('set:active:header', 'events:index', session.get('title'), 'icon-comment');
           settings.set('active-session', id);
+          console.log('>>>>>> FEEDBACKS', _this.feedbacks);
           feedback = _this.feedbacks.find(function(item) {
+            console.log('>>>>>>', item.get('sessionId') === id, item.get('sessionId'), id, item);
             return item.get('sessionId') === id;
           });
+          console.log('>>>>>>>>>>1', feedback);
           if (feedback == null) {
+            console.log('>>>>>>>>>>>>>>>> NEW feedback');
             feedback = new Feedback.Model({
               sessionId: id,
               feedbackDefinitionId: session.get('feedbackDefinitionId')
@@ -2791,6 +2796,7 @@ module.exports = Controller = (function(_super) {
             feedback.set('active', false);
             _this.feedbacks.add(feedback);
           }
+          console.log('>>>>>>>>>>2', feedback);
           View = require('./views/session-details-view');
           view = new View({
             model: session,

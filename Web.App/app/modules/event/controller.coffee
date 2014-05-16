@@ -108,6 +108,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       application.layout.content.show(view)
 
   showSessionDetails: (id) ->
+    id = parseInt(id) # ET2.2014 quickfix
     @sessions.fetch().done (models) =>
       session = models.get(id)
       if not session?
@@ -117,13 +118,19 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         settings.set('active-session', id)
 
         # prepare the feedback for this session, expects feedbacks to be fetched
+        console.log '>>>>>> FEEDBACKS', @feedbacks
         feedback = @feedbacks.find (item) ->
+          console.log '>>>>>>', item.get('sessionId') is id, item.get('sessionId'), id, item
           item.get('sessionId') is id
+        console.log '>>>>>>>>>>1', feedback
+        
         if not feedback?
+          console.log '>>>>>>>>>>>>>>>> NEW feedback'
           feedback = new Feedback.Model(sessionId: id, feedbackDefinitionId: session.get('feedbackDefinitionId'))
           feedback.set('active', false)
           @feedbacks.add(feedback)
 
+        console.log '>>>>>>>>>>2', feedback
         View = require './views/session-details-view'
         view = new View(model: session, feedback: feedback, resources: application.resources)
         application.layout.content.show(view)
