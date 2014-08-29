@@ -30,16 +30,19 @@ namespace EventFeedback.Web.Api.Controllers
         [ResponseType(typeof(IEnumerable<ResourceText>))]
         public IHttpActionResult Get([FromUri] string filter = "", [FromUri] string language = "en-US")
         {
-            IEnumerable<ResourceText> result;
+            using (new TraceLogicalScope(_traceSource, "ResourceTextsController:Put"))
+            {
+                IEnumerable<ResourceText> result;
 
-            if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
-                result = _context.ResourceTexts.OrderBy(e => e.Key);
-            else
-                result = _context.ResourceTexts.OrderBy(e => e.Key) 
-                                 .Where(d => d.Language.Equals(language, StringComparison.CurrentCultureIgnoreCase))
-                                 .Where(d => !(d.Active != null && !(bool)d.Active))
-                                 .Where(d => !(d.Deleted != null && (bool)d.Deleted));
-            return Ok(result);
+                if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))
+                    result = _context.ResourceTexts.OrderBy(e => e.Key);
+                else
+                    result = _context.ResourceTexts.OrderBy(e => e.Key)
+                        .Where(d => d.Language.Equals(language, StringComparison.CurrentCultureIgnoreCase))
+                        .Where(d => !(d.Active != null && !(bool) d.Active))
+                        .Where(d => !(d.Deleted != null && (bool) d.Deleted));
+                return Ok(result);
+            }
         }
 
         [HttpPost]
@@ -48,12 +51,15 @@ namespace EventFeedback.Web.Api.Controllers
         [ResponseType(typeof(ResourceText))]
         public IHttpActionResult Post([FromBody]ResourceText entity)
         {
-            Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
-            Guard.Against<ArgumentException>(entity.Id != 0, "entity.id must be empty");
+            using (new TraceLogicalScope(_traceSource, "ResourceTextsController:Post"))
+            {
+                Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
+                Guard.Against<ArgumentException>(entity.Id != 0, "entity.id must be empty");
 
-            _context.ResourceTexts.Add(entity);
-            _context.SaveChanges();
-            return Ok(entity);
+                _context.ResourceTexts.Add(entity);
+                _context.SaveChanges();
+                return Ok(entity);
+            }
         }
 
         [HttpPut]
@@ -62,22 +68,25 @@ namespace EventFeedback.Web.Api.Controllers
         [ResponseType(typeof(ResourceText))]
         public IHttpActionResult Put(int id, [FromBody]ResourceText entity)
         {
-            Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
-            Guard.Against<ArgumentException>(entity.Id == 0 && id == 0, "entity.id or id must be set");
-            Guard.Against<ArgumentException>(entity.Id == 0, "entity.id must be set");
-            
-            if (entity.Id == 0 && id != 0) entity.Id = id;
-            if (!_context.Events.Any(f => f.Id == entity.Id))
-                return StatusCode(HttpStatusCode.NotFound);
-
-            var entry = _context.Entry(entity);
-            if (entry.State == System.Data.Entity.EntityState.Detached)
+            using (new TraceLogicalScope(_traceSource, "ResourceTextsController:Put"))
             {
-                _context.ResourceTexts.Attach(entity);
-                entry.State = System.Data.Entity.EntityState.Modified;
+                Guard.Against<ArgumentException>(entity == null, "entity cannot be empty");
+                Guard.Against<ArgumentException>(entity.Id == 0 && id == 0, "entity.id or id must be set");
+                Guard.Against<ArgumentException>(entity.Id == 0, "entity.id must be set");
+
+                if (entity.Id == 0 && id != 0) entity.Id = id;
+                if (!_context.Events.Any(f => f.Id == entity.Id))
+                    return StatusCode(HttpStatusCode.NotFound);
+
+                var entry = _context.Entry(entity);
+                if (entry.State == System.Data.Entity.EntityState.Detached)
+                {
+                    _context.ResourceTexts.Attach(entity);
+                    entry.State = System.Data.Entity.EntityState.Modified;
+                }
+                _context.SaveChanges();
+                return Ok(entity);
             }
-            _context.SaveChanges();
-            return Ok(entity);
         }
 
         [HttpDelete]
@@ -85,15 +94,18 @@ namespace EventFeedback.Web.Api.Controllers
         [Authorize(Roles = "Administrator")]
         public IHttpActionResult Delete(int id)
         {
-            Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");
+            using (new TraceLogicalScope(_traceSource, "ResourceTextsController:Delete"))
+            {
+                Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");
 
-            var entity = _context.ResourceTexts.FirstOrDefault(x => x.Id == id);
-            if (entity == null) return StatusCode(HttpStatusCode.NotFound);
-            entity.Deleted = true;
-            entity.DeleteDate = SystemTime.Now();
-            entity.DeletedBy = User.Identity.Name;
-            _context.SaveChanges();
-            return StatusCode(HttpStatusCode.NoContent);
+                var entity = _context.ResourceTexts.FirstOrDefault(x => x.Id == id);
+                if (entity == null) return StatusCode(HttpStatusCode.NotFound);
+                entity.Deleted = true;
+                entity.DeleteDate = SystemTime.Now();
+                entity.DeletedBy = User.Identity.Name;
+                _context.SaveChanges();
+                return StatusCode(HttpStatusCode.NoContent);
+            }
         }
     }
 }

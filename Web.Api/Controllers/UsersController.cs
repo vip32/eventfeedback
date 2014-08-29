@@ -32,50 +32,57 @@ namespace EventFeedback.Web.Api.Controllers
         [Route("token")]
         public HttpResponseMessage Token(LoginBindingModel login)
         {
-            Guard.Against<ArgumentException>(login == null, "login cannot be empty be null");
-
-            var user = _userService.FindUser(login.UserName, login.Password);
-            if (user != null && user.IsActive())
+            using (new TraceLogicalScope(_traceSource, "UserController:Token"))
             {
-                //_userService.HideSensitiveData(user);
-                var identity = _userService.CreateIdentity(user, Startup.OAuthBearerOptions.AuthenticationType);
-                identity.AddClaim(new Claim(ClaimTypes.Name, login.UserName));
-                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
-                var ticket = new AuthenticationTicket(identity, new AuthenticationProperties());
-                var currentUtc = new SystemClock().UtcNow;
-                ticket.Properties.IssuedUtc = currentUtc;
-                ticket.Properties.ExpiresUtc = currentUtc.Add(TimeSpan.FromMinutes(1440));
-                return new HttpResponseMessage(HttpStatusCode.OK)
+                Guard.Against<ArgumentException>(login == null, "login cannot be empty be null");
+
+                var user = _userService.FindUser(login.UserName, login.Password);
+                if (user != null && user.IsActive())
                 {
-                    Content = new ObjectContent<object>(new
+                    //_userService.HideSensitiveData(user);
+                    var identity = _userService.CreateIdentity(user, Startup.OAuthBearerOptions.AuthenticationType);
+                    identity.AddClaim(new Claim(ClaimTypes.Name, login.UserName));
+                    identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
+                    var ticket = new AuthenticationTicket(identity, new AuthenticationProperties());
+                    var currentUtc = new SystemClock().UtcNow;
+                    ticket.Properties.IssuedUtc = currentUtc;
+                    ticket.Properties.ExpiresUtc = currentUtc.Add(TimeSpan.FromMinutes(1440));
+                    return new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        UserName = identity.GetUserName(),
-                        AccessToken = Startup.OAuthBearerOptions.AccessTokenFormat.Protect(ticket),
-                        Issued = DateTime.UtcNow,
-                        Expires = ticket.Properties.ExpiresUtc
-                    }, Configuration.Formatters.JsonFormatter)
-                };
+                        Content = new ObjectContent<object>(new
+                        {
+                            UserName = identity.GetUserName(),
+                            AccessToken = Startup.OAuthBearerOptions.AccessTokenFormat.Protect(ticket),
+                            Issued = DateTime.UtcNow,
+                            Expires = ticket.Properties.ExpiresUtc
+                        }, Configuration.Formatters.JsonFormatter)
+                    };
+                }
+                return new HttpResponseMessage(HttpStatusCode.Unauthorized);
             }
-            return new HttpResponseMessage(HttpStatusCode.Unauthorized);
         }
+
         [HttpGet]
         [Route("profile")]
         [Authorize]
         public HttpResponseMessage Profile()
         {
-            var user = _userService.FindUserByName(User.Identity.Name);
-            if (user == null || !user.IsActive()) return new HttpResponseMessage(HttpStatusCode.Unauthorized);
-            var roles = _userService.UserRoles(user);
-            _userService.HideSensitiveData(user);
-            return new HttpResponseMessage(HttpStatusCode.OK)
+            using (new TraceLogicalScope(_traceSource, "UserController:Profile"))
             {
-                Content = new ObjectContent<object>(new
+                var user = _userService.FindUserByName(User.Identity.Name);
+                if (user == null || !user.IsActive()) return new HttpResponseMessage(HttpStatusCode.Unauthorized);
+                var roles = _userService.UserRoles(user);
+                _userService.HideSensitiveData(user);
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    UserName = User.Identity.Name,
-                    Profile = user,
-                    Roles = roles
-                }, Configuration.Formatters.JsonFormatter)
-            };
+                    Content = new ObjectContent<object>(new
+                    {
+                        UserName = User.Identity.Name,
+                        Profile = user,
+                        Roles = roles
+                    }, Configuration.Formatters.JsonFormatter)
+                };
+            }
         }
     }
 }
