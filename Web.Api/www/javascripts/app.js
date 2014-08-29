@@ -157,6 +157,7 @@ Application = (function(_super) {
       };
     })(this));
     settings.set('last-visit', moment());
+    appInsights.logEvent('event/appStart');
     return this.start();
   };
 
@@ -167,6 +168,7 @@ Application = (function(_super) {
   Application.prototype.navigate = function(route, options) {
     log("==========================| " + route + " |========================");
     log('navigate', route, options);
+    appInsights.logPageView(route);
     options = options || {};
     options.trigger = true;
     if (!_.isEmpty(options != null ? options.returnroute : void 0)) {
@@ -200,6 +202,9 @@ Application = (function(_super) {
       var message;
       message = "'" + msg.originalEvent.message + "' at " + msg.originalEvent.filename + ":" + msg.originalEvent.lineno;
       log('ERROR:', message);
+      appInsights.logEvent('error', {
+        message: message
+      });
       if (msg == null) {
         alert(message);
         return vent.trigger('about:index');
@@ -2009,7 +2014,8 @@ module.exports = Controller = (function(_super) {
   Controller.prototype.doSignout = function() {
     user.reset();
     vent.trigger('header:refresh');
-    return vent.trigger(config.hometrigger);
+    vent.trigger(config.hometrigger);
+    return appInsights.logEvent('event/signout');
   };
 
   Controller.prototype.doSignin = function(username, password, returnroute) {
@@ -2023,11 +2029,13 @@ module.exports = Controller = (function(_super) {
       success: (function(_this) {
         return function(model, response, options) {
           var profile;
+          appInsights.logEvent('event/signin/success');
           user.token(userToken.get('accessToken'));
           user.tokenexpires(userToken.get('expires'));
           profile = new UserProfile.Model();
           return profile.fetch({
             success: function(model, response, options) {
+              appInsights.logEvent('event/profile/success');
               user.set('api_userroles', model.get('roles'));
               vent.trigger('message:success:show', 'signed in ' + username);
               vent.trigger('header:refresh');
@@ -2038,12 +2046,14 @@ module.exports = Controller = (function(_super) {
               }
             },
             error: function(model, xhr, options) {
+              appInsights.logEvent('event/profile/failed');
               return vent.trigger('header:refresh');
             }
           });
         };
       })(this),
       error: function(model, xhr, options) {
+        appInsights.logEvent('event/signin/failed');
         vent.trigger('message:error:show', 'sign in failed');
         vent.trigger('header:refresh');
         return vent.trigger('fetch:fail');
@@ -2641,6 +2651,7 @@ module.exports = Controller = (function(_super) {
   }
 
   Controller.prototype.showEventsIndex = function() {
+    appInsights.logEvent('event/showEventsIndex');
     vent.trigger('fetch:done');
     return this.events.fetch({
       reload: true,
@@ -2664,6 +2675,9 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showEventDetails = function(id) {
+    appInsights.logEvent('event/showEventDetails', {
+      eventId: id
+    });
     return this.events.fetch({
       data: {
         filter: this.resourceFilter
@@ -2770,6 +2784,9 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showSessionDetails = function(id) {
+    appInsights.logEvent('event/showSessionDetails', {
+      sessionId: id
+    });
     return this.sessions.fetch().done((function(_this) {
       return function(models) {
         var View, feedback, session, view;
@@ -2808,6 +2825,7 @@ module.exports = Controller = (function(_super) {
     return feedback.save(null, {
       success: (function(_this) {
         return function(model, response, options) {
+          appInsights.logEvent('event/saveFeedback');
           vent.trigger('message:success:show', application.resources.key('Feedback_Saved_Success'));
           vent.trigger('fetch:done');
           return vent.trigger('event:details', settings.get('active-event'));
