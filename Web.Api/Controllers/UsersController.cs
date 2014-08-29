@@ -47,6 +47,7 @@ namespace EventFeedback.Web.Api.Controllers
                     var currentUtc = new SystemClock().UtcNow;
                     ticket.Properties.IssuedUtc = currentUtc;
                     ticket.Properties.ExpiresUtc = currentUtc.Add(TimeSpan.FromMinutes(1440));
+                    _traceSource.Warn("login success");
                     return new HttpResponseMessage(HttpStatusCode.OK)
                     {
                         Content = new ObjectContent<object>(new
@@ -58,6 +59,7 @@ namespace EventFeedback.Web.Api.Controllers
                         }, Configuration.Formatters.JsonFormatter)
                     };
                 }
+                _traceSource.Warn("login failed");
                 return new HttpResponseMessage(HttpStatusCode.Unauthorized);
             }
         }
