@@ -21,6 +21,7 @@ module.exports = class AboutView extends Backbone.Marionette.ItemView
     admin: user.isAdministrator()
     auth: user.isAuthenticated()
     help: "#{config.approot}help"  
+    swagger: "#{config.approot}swagger"  
     
   onShow: ->
     scrollTo(0,0)
