@@ -10,3 +10,5 @@ a .NET Webapi with a coffeescript based SPA.
 - coffeescript
 - c#
 - entity framework
+
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://azuredeploy.net/)
