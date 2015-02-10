@@ -16,9 +16,9 @@ namespace EventFeedback.Common
         /// <param name="message">string. The exception message to throw.</param>
         public static void Against<TException>(bool assertion, string message) where TException : Exception
         {
-            if (assertion)
+            if (assertion) 
             {
-                throw (TException)Activator.CreateInstance(typeof(TException), message);
+                throw (TException)Activator.CreateInstance(typeof(TException), message);  
             }
         }
 
