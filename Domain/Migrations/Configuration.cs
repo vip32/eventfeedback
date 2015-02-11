@@ -14,7 +14,7 @@ namespace EventFeedback.Domain.Migrations
 
         protected override void Seed(EventFeedback.Domain.DataContext context)
         {
-            TestData.Seed(context);
+            //  TestData.Seed(context);
             //  This method will be called after migrating to the latest version.
 
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method 
