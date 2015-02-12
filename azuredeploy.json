@@ -130,7 +130,7 @@
             "connectionStrings": [
               {
                 "ConnectionString": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', parameters('sqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', parameters('siteName'), ';User Id=', parameters('sqlAdministratorLogin'), '@', parameters('sqlServerName'), ';Password=', parameters('sqlAdministratorPassword'), ';')]",
-                "Name": "Jabbr",
+                "Name": "DefaultConnection",
                 "Type": 2
               }
             ],
