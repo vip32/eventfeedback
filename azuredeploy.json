@@ -30,7 +30,7 @@
       ],
       "defaultValue": "0"
     },
-    "appSettings1": {
+    "env": {
       "type": "string",
       "defaultValue": "[Enter your Environment here]"
     },
