@@ -32,7 +32,16 @@
     },
     "env": {
       "type": "string",
-      "defaultValue": "[Enter your Environment here]"
+      "defaultValue": "TEST"
+    },
+    "sqlServerName": {
+      "type": "string"
+    },
+    "sqlAdministratorLogin": {
+      "type": "string"
+    },
+    "sqlAdministratorPassword": {
+      "type": "securestring"
     },
     "repoUrl": {
       "type": "string"
@@ -42,6 +51,46 @@
     }
   },
   "resources": [
+    {
+      "name": "[parameters('sqlServerName')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[parameters('siteLocation')]",
+      "apiVersion": "2.0",
+      "properties": {
+        "administratorLogin": "[parameters('sqlAdministratorLogin')]",
+        "administratorLoginPassword": "[parameters('sqlAdministratorPassword')]"
+      },
+      "resources": [
+        {
+          "name": "[parameters('siteName')]",
+          "type": "databases",
+          "location": "[parameters('siteLocation')]",
+          "apiVersion": "2.0",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', parameters('sqlServerName'))]"
+          ],
+          "properties": {
+            "edition": "Web",
+            "collation": "SQL_Latin1_General_CP1_CI_AS",
+            "maxSizeBytes": "1073741824",
+            "requestedServiceObjectiveId": "910b4fcb-8a29-4c3e-958f-f7ba794388b2"
+          }
+        },
+        {
+          "apiVersion": "2.0",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', parameters('sqlServerName'))]"
+          ],
+          "location": "[parameters('siteLocation')]",
+          "name": "AllowAllWindowsAzureIps",
+          "properties": {
+            "endIpAddress": "0.0.0.0",
+            "startIpAddress": "0.0.0.0"
+          },
+          "type": "firewallrules"
+        }
+      ]
+    },
     {
       "apiVersion": "2014-06-01",
       "name": "[parameters('hostingPlanName')]",
@@ -78,11 +127,18 @@
             "[concat('Microsoft.Web/Sites/', parameters('siteName'))]"
           ],
           "properties": {
-            "appSettings": [
+            "connectionStrings": [
+              {
+                "ConnectionString": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', parameters('sqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', parameters('siteName'), ';User Id=', parameters('sqlAdministratorLogin'), '@', parameters('sqlServerName'), ';Password=', parameters('sqlAdministratorPassword'), ';')]",
+                "Name": "Jabbr",
+                "Type": 2
+              },
+              "appSettings": [
               {
                 "name": "Environment",
                 "value": "[parameters('env')]"
               }
+            ]
             ]
           }
         },
@@ -101,6 +157,6 @@
           }
         }
       ]
-    }
+    },
   ]
 }
