@@ -30,13 +30,9 @@
       ],
       "defaultValue": "0"
     },
-    "appSettings1": {
+    "env": {
       "type": "string",
-      "defaultValue": "[Enter your Appsettings1 here]"
-    },
-    "appSettings2": {
-      "type": "string",
-      "defaultValue": "[Enter your Appsettings2 here]"
+      "defaultValue": "[Enter your Environment here]"
     },
     "repoUrl": {
       "type": "string"
@@ -84,12 +80,8 @@
           "properties": {
             "appSettings": [
               {
-                "name": "AppSettings1",
-                "value": "[parameters('appSettings1')]"
-              },
-              {
-                "name": "AppSettings2",
-                "value": "[parameters('appSettings2')]"
+                "name": "Environment",
+                "value": "[parameters('env')]"
               }
             ]
           }
