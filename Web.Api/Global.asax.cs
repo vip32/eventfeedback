@@ -1,4 +1,6 @@
-﻿using System.Web.Http;
+﻿using System.Configuration;
+using System.Data.Entity.Migrations;
+using System.Web.Http;
 using System.Web.Mvc;
 
 namespace EventFeedback.Web.Api
@@ -10,7 +12,13 @@ namespace EventFeedback.Web.Api
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
 
-            // TODO: update database migration here
+            // update database migration here
+            if (bool.Parse(ConfigurationManager.AppSettings["MigrateDatabaseToLatestVersion"]))
+            {
+                var configuration = new Domain.Migrations.Configuration();
+                var migrator = new DbMigrator(configuration);
+                migrator.Update();
+            }
         }
 	}
 }
