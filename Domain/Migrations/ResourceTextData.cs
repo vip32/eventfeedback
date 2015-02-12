@@ -15,8 +15,6 @@ namespace EventFeedback.Domain
         /// <param name="context">The context.</param>
         public static void Seed(DataContext context)
         {
-            TraceSource.TraceInformation("seeding database");
-
             if (!context.ResourceTexts.Any())
             {
                 context.ResourceTexts.AddOrUpdate(
