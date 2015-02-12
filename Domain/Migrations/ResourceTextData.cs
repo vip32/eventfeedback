@@ -7,7 +7,7 @@ namespace EventFeedback.Domain
 {
     public static class ResourceTextData
     {
-        private static readonly TraceSource TraceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
+        //private static readonly TraceSource TraceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
 
         /// <summary>
         /// Seeds the specified context.
@@ -15,6 +15,8 @@ namespace EventFeedback.Domain
         /// <param name="context">The context.</param>
         public static void Seed(DataContext context)
         {
+            //TraceSource.TraceInformation("seeding database");
+
             if (!context.ResourceTexts.Any())
             {
                 context.ResourceTexts.AddOrUpdate(
