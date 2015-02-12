@@ -9,6 +9,8 @@ namespace EventFeedback.Web.Api
         {
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
+
+            // TODO: update database migration here
         }
 	}
 }
