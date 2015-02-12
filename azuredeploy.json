@@ -132,13 +132,13 @@
                 "ConnectionString": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', parameters('sqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', parameters('siteName'), ';User Id=', parameters('sqlAdministratorLogin'), '@', parameters('sqlServerName'), ';Password=', parameters('sqlAdministratorPassword'), ';')]",
                 "Name": "Jabbr",
                 "Type": 2
-              },
-              "appSettings": [
+              }
+            ],
+            "appSettings": [
               {
                 "name": "Environment",
                 "value": "[parameters('env')]"
               }
-            ]
             ]
           }
         },
@@ -157,6 +157,6 @@
           }
         }
       ]
-    },
+    }
   ]
 }
