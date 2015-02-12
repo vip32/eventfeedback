@@ -15,6 +15,7 @@ namespace EventFeedback.Web.Api
             // update database migration here
             if (bool.Parse(ConfigurationManager.AppSettings["MigrateDatabaseToLatestVersion"]))
             {
+                System.Diagnostics.Trace.Write("starting db migrations upgrade");
                 var configuration = new Domain.Migrations.Configuration();
                 var migrator = new DbMigrator(configuration);
                 migrator.Update();
