@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Migrations;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -37,7 +38,8 @@ namespace EventFeedback.Web.Api.Controllers
                         TimeSpan.TicksPerDay*version.Build + // days since 1 January 2000
                         TimeSpan.TicksPerSecond*2*version.Revision)),
                     // seconds since midnight, (multiply by 2 to get original)
-                    Environment = Environment.GetEnvironmentVariable("APPSETTING_env")
+                    Environment = Environment.GetEnvironmentVariable("APPSETTING_env"),
+                    Migrations = new DbMigrator(new Domain.Migrations.Configuration()).GetDatabaseMigrations()
                 });
             }
         }
