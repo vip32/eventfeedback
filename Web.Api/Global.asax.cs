@@ -24,6 +24,7 @@ namespace EventFeedback.Web.Api
                 var migrator = new DbMigrator(configuration);
                 migrator.Update();
             }
+            TraceSource.TraceInformation("application started");
         }
 	}
 }
