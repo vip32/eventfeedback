@@ -5,12 +5,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using System.Web.Http.Description;
 using EventFeedback.Common;
 using EventFeedback.Domain;
+using Microsoft.ApplicationInsights;
 
 namespace EventFeedback.Web.Api.Controllers
 {
@@ -21,6 +21,7 @@ namespace EventFeedback.Web.Api.Controllers
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
         private readonly DataContext _context;
+        private readonly TelemetryClient _telemetry = new TelemetryClient();
 
         public SessionsController(DataContext context)
         {
@@ -35,6 +36,7 @@ namespace EventFeedback.Web.Api.Controllers
         {
             using (new TraceLogicalScope(_traceSource, "SessionsController:Get"))
             {
+                _telemetry.TrackEvent("API:Sessions/Get");
                 _traceSource.Verbose("eventId={0}, filter={1}" ,eventId, filter);
                 Guard.Against<ArgumentException>(eventId == 0, "eventid cannot be empty or zero");
 

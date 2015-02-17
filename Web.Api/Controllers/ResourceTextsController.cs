@@ -9,6 +9,7 @@ using System.Web.Http.Cors;
 using System.Web.Http.Description;
 using EventFeedback.Common;
 using EventFeedback.Domain;
+using Microsoft.ApplicationInsights;
 
 namespace EventFeedback.Web.Api.Controllers
 {
@@ -18,6 +19,7 @@ namespace EventFeedback.Web.Api.Controllers
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
         private readonly DataContext _context;
+        private readonly TelemetryClient _telemetry = new TelemetryClient();
 
         public ResourceTextsController(DataContext context)
         {
@@ -32,6 +34,7 @@ namespace EventFeedback.Web.Api.Controllers
         {
             using (new TraceLogicalScope(_traceSource, "ResourceTextsController:Put"))
             {
+                _telemetry.TrackEvent("API:Resources/Get");
                 IEnumerable<ResourceText> result;
 
                 if (filter.Equals("all", StringComparison.CurrentCultureIgnoreCase) && User.IsInRole("Administrator"))

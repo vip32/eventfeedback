@@ -4,12 +4,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using System.Web.Http.Description;
 using EventFeedback.Common;
 using EventFeedback.Domain;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 
 namespace EventFeedback.Web.Api.Controllers
 {
@@ -21,6 +22,7 @@ namespace EventFeedback.Web.Api.Controllers
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
         private readonly DataContext _context;
         private readonly UserService _userService;
+        private readonly TelemetryClient _telemetry = new TelemetryClient();
 
         public FeedbacksController(DataContext context, UserService userService)
         {
@@ -77,6 +79,10 @@ namespace EventFeedback.Web.Api.Controllers
                 Guard.Against<ArgumentException>(entity.EventId.HasValue && entity.SessionId.HasValue,
                     "entity.eventid or entity.sessionid should be set, not both");
 
+                var et = new EventTelemetry("API:Feedbacks/Post");
+                et.Properties.Add("username", User.Identity.Name);
+                _telemetry.TrackEvent(et);
+
                 var user = _userService.FindUserByName(User.Identity.Name);
                 if (user == null || !user.IsActive()) return StatusCode(HttpStatusCode.Unauthorized);
 
@@ -111,6 +117,10 @@ namespace EventFeedback.Web.Api.Controllers
                 Guard.Against<ArgumentException>(entity.Id == 0 && id == 0, "entity.id or id must be set");
                 //Guard.Against<ArgumentException>(!entity.EventId.HasValue && !entity.SessionId.HasValue, "entity.eventid or entity.sessionid should be set");
                 //Guard.Against<ArgumentException>(entity.EventId.HasValue && entity.SessionId.HasValue, "entity.eventid or entity.sessionid should be set, not both");
+
+                var et = new EventTelemetry("API:Feedbacks/Put");
+                et.Properties.Add("username", User.Identity.Name);
+                _telemetry.TrackEvent(et);
 
                 if (entity.Id == 0 && id != 0) entity.Id = id;
                 var user = _userService.FindUserByName(User.Identity.Name);

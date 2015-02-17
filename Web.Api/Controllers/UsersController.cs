@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
@@ -9,6 +10,8 @@ using System.Web.Http.Cors;
 using EventFeedback.Common;
 using EventFeedback.Domain;
 using EventFeedback.Web.Api.Models;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNet.Identity;
 using Microsoft.Owin.Infrastructure;
 using Microsoft.Owin.Security;
@@ -21,6 +24,7 @@ namespace EventFeedback.Web.Api.Controllers
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
         private readonly UserService _userService;
+        private readonly TelemetryClient _telemetry = new TelemetryClient();
 
         public UserController(UserService userService)
         {
@@ -35,6 +39,9 @@ namespace EventFeedback.Web.Api.Controllers
             using (new TraceLogicalScope(_traceSource, "UserController:Token"))
             {
                 Guard.Against<ArgumentException>(login == null, "login cannot be empty be null");
+                var et = new EventTelemetry("API:Users/Login");
+                et.Properties.Add("username", login.UserName);
+                _telemetry.TrackEvent(et);
 
                 var user = _userService.FindUser(login.UserName, login.Password);
                 if (user != null && user.IsActive())

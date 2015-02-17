@@ -6,12 +6,14 @@ using System.Net.Http.Formatting;
 using System.Reflection;
 using System.Web.Http;
 using System.Web.Http.Filters;
+using Microsoft.ApplicationInsights;
 
 namespace EventFeedback.Common
 {
     public class ExceptionHandlingAttribute : ExceptionFilterAttribute
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
+        private readonly TelemetryClient _telemetry = new TelemetryClient();
 
         public override void OnException(HttpActionExecutedContext context)
         {
@@ -21,6 +23,7 @@ namespace EventFeedback.Common
                                         context.Request.RequestUri.AbsoluteUri);
             _traceSource.TraceEvent(TraceEventType.Error, 0, context.Exception.Message);
             _traceSource.TraceData(TraceEventType.Error, 0, context.Exception);
+            _telemetry.TrackException(context.Exception);
 
             if (context.Exception is ArgumentException)
             {
