@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Migrations;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -27,15 +28,20 @@ namespace EventFeedback.Web.Api.Controllers
         [Route("apiinfo")]
         public IHttpActionResult ApiInfo()
         {
-            var version = Assembly.GetExecutingAssembly().GetName().Version;
-            return Ok(new
+            using (new TraceLogicalScope(_traceSource, "LookupController:ApiInfo"))
+            {
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                return Ok(new
                 {
                     Version = version.ToString(),
                     BuildDate = new DateTime(2000, 1, 1).Add(new TimeSpan(
                         TimeSpan.TicksPerDay*version.Build + // days since 1 January 2000
-                        TimeSpan.TicksPerSecond*2*version.Revision)) // seconds since midnight, (multiply by 2 to get original)
-                }
-            );
+                        TimeSpan.TicksPerSecond*2*version.Revision)),
+                    // seconds since midnight, (multiply by 2 to get original)
+                    Environment = Environment.GetEnvironmentVariable("APPSETTING_Environment"),
+                    DbMigrations = new DbMigrator(new Domain.Migrations.Configuration()).GetDatabaseMigrations()
+                });
+            }
         }
 
         [HttpGet]

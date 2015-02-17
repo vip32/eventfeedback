@@ -2,7 +2,7 @@ namespace EventFeedback.Domain.Migrations
 {
     using System.Data.Entity.Migrations;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<DataContext>
+    public sealed class Configuration : DbMigrationsConfiguration<DataContext>
     {
         public Configuration()
         {
@@ -12,6 +12,7 @@ namespace EventFeedback.Domain.Migrations
         protected override void Seed(EventFeedback.Domain.DataContext context)
         {
             // TestData.Seed(context);
+            ResourceTextData.Seed(context);
         }
     }
 }

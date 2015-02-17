@@ -115,6 +115,7 @@
       <DependentUpon>201404101344472_TitleRequired.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Migrations\ResourceTextData.cs" />
     <Compile Include="Migrations\TestData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Entities\Session.cs" />
