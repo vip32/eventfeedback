@@ -157,7 +157,7 @@ Application = (function(_super) {
       };
     })(this));
     settings.set('last-visit', moment());
-    appInsights.logEvent('event/appStart');
+    appInsights.trackEvent('event/appStart');
     return this.start();
   };
 
@@ -168,7 +168,7 @@ Application = (function(_super) {
   Application.prototype.navigate = function(route, options) {
     log("==========================| " + route + " |========================");
     log('navigate', route, options);
-    appInsights.logPageView(route);
+    appInsights.trackPageView(route);
     options = options || {};
     options.trigger = true;
     if (!_.isEmpty(options != null ? options.returnroute : void 0)) {
@@ -202,7 +202,7 @@ Application = (function(_super) {
       var message;
       message = "'" + msg.originalEvent.message + "' at " + msg.originalEvent.filename + ":" + msg.originalEvent.lineno;
       log('ERROR:', message);
-      appInsights.logEvent('error', {
+      appInsights.trackEvent('error', {
         message: message
       });
       if (msg == null) {
@@ -2015,7 +2015,7 @@ module.exports = Controller = (function(_super) {
     user.reset();
     vent.trigger('header:refresh');
     vent.trigger(config.hometrigger);
-    return appInsights.logEvent('event/signout');
+    return appInsights.trackEvent('event/signout');
   };
 
   Controller.prototype.doSignin = function(username, password, returnroute) {
@@ -2029,13 +2029,13 @@ module.exports = Controller = (function(_super) {
       success: (function(_this) {
         return function(model, response, options) {
           var profile;
-          appInsights.logEvent('event/signin/success');
+          appInsights.trackEvent('event/signin/success');
           user.token(userToken.get('accessToken'));
           user.tokenexpires(userToken.get('expires'));
           profile = new UserProfile.Model();
           return profile.fetch({
             success: function(model, response, options) {
-              appInsights.logEvent('event/profile/success');
+              appInsights.trackEvent('event/profile/success');
               user.set('api_userroles', model.get('roles'));
               vent.trigger('message:success:show', 'signed in ' + username);
               vent.trigger('header:refresh');
@@ -2046,14 +2046,14 @@ module.exports = Controller = (function(_super) {
               }
             },
             error: function(model, xhr, options) {
-              appInsights.logEvent('event/profile/failed');
+              appInsights.trackEvent('event/profile/failed');
               return vent.trigger('header:refresh');
             }
           });
         };
       })(this),
       error: function(model, xhr, options) {
-        appInsights.logEvent('event/signin/failed');
+        appInsights.trackEvent('event/signin/failed');
         vent.trigger('message:error:show', 'sign in failed');
         vent.trigger('header:refresh');
         return vent.trigger('fetch:fail');
@@ -2656,7 +2656,7 @@ module.exports = Controller = (function(_super) {
   }
 
   Controller.prototype.showEventsIndex = function() {
-    appInsights.logEvent('event/showEventsIndex');
+    appInsights.trackEvent('event/showEventsIndex');
     vent.trigger('fetch:done');
     return this.events.fetch({
       reload: true,
@@ -2680,7 +2680,7 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showEventDetails = function(id) {
-    appInsights.logEvent('event/showEventDetails', {
+    appInsights.trackEvent('event/showEventDetails', {
       eventId: id
     });
     return this.events.fetch({
@@ -2789,7 +2789,7 @@ module.exports = Controller = (function(_super) {
   };
 
   Controller.prototype.showSessionDetails = function(id) {
-    appInsights.logEvent('event/showSessionDetails', {
+    appInsights.trackEvent('event/showSessionDetails', {
       sessionId: id
     });
     return this.sessions.fetch().done((function(_this) {
@@ -2830,7 +2830,7 @@ module.exports = Controller = (function(_super) {
     return feedback.save(null, {
       success: (function(_this) {
         return function(model, response, options) {
-          appInsights.logEvent('event/saveFeedback');
+          appInsights.trackEvent('event/saveFeedback');
           vent.trigger('message:success:show', application.resources.key('Feedback_Saved_Success'));
           vent.trigger('fetch:done');
           return vent.trigger('event:details', settings.get('active-event'));

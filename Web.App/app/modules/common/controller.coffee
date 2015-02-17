@@ -70,7 +70,7 @@ module.exports = class Controller extends Controller
     user.reset()
     vent.trigger 'header:refresh'
     vent.trigger config.hometrigger
-    appInsights.logEvent('event/signout')
+    appInsights.trackEvent('event/signout')
 
   doSignin: (username, password, returnroute) ->
     # get the accesstoken
@@ -81,14 +81,14 @@ module.exports = class Controller extends Controller
       password: password
     userToken.save null, # POST
       success:  (model, response, options) =>
-        appInsights.logEvent('event/signin/success')
+        appInsights.trackEvent('event/signin/success')
         user.token(userToken.get('accessToken'))
         user.tokenexpires(userToken.get('expires'))
         # get the userprofile
         profile = new UserProfile.Model()
         profile.fetch
           success: (model, response, options) =>
-            appInsights.logEvent('event/profile/success')
+            appInsights.trackEvent('event/profile/success')
             user.set('api_userroles', model.get('roles'))
             vent.trigger 'message:success:show', 'signed in ' + username
             vent.trigger 'header:refresh'
@@ -98,10 +98,10 @@ module.exports = class Controller extends Controller
               application.navigate returnroute
           error: (model, xhr, options) ->
             # vent.trigger 'message:error:show', 'profile fetch failed'
-            appInsights.logEvent('event/profile/failed')
+            appInsights.trackEvent('event/profile/failed')
             vent.trigger 'header:refresh'
       error: (model, xhr, options) ->
-        appInsights.logEvent('event/signin/failed')
+        appInsights.trackEvent('event/signin/failed')
         vent.trigger 'message:error:show', 'sign in failed'
         vent.trigger 'header:refresh'
         vent.trigger 'fetch:fail' # stop save() spinner

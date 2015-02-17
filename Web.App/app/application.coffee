@@ -40,7 +40,7 @@ class Application extends Backbone.Marionette.Application
       vent.trigger 'resources:loaded'
 
     settings.set('last-visit', moment())
-    appInsights.logEvent('event/appStart')
+    appInsights.trackEvent('event/appStart')
     @start()
 
   checkauth: (trigger) ->
@@ -50,7 +50,7 @@ class Application extends Backbone.Marionette.Application
   navigate: (route, options) ->
     log "==========================| #{route} |========================"
     log 'navigate', route, options
-    appInsights.logPageView(route);
+    appInsights.trackPageView(route);
     options = options or {}
     options.trigger = true # this causes the router (approutes) to react on url changes
     if not _.isEmpty(options?.returnroute)
@@ -73,7 +73,7 @@ class Application extends Backbone.Marionette.Application
     $(window).error (msg, url, line) ->
       message = "'#{msg.originalEvent.message}' at #{msg.originalEvent.filename}:#{msg.originalEvent.lineno}"
       log 'ERROR:', message
-      appInsights.logEvent('error', {message: message})
+      appInsights.trackEvent('error', {message: message})
       if not msg?
         alert message
         vent.trigger 'about:index' # todo: maybe redirect to error view

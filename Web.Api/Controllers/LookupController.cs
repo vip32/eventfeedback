@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity.Migrations;
+using Microsoft.ApplicationInsights;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -17,6 +18,7 @@ namespace EventFeedback.Web.Api.Controllers
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
         private readonly DataContext _context;
+        private readonly TelemetryClient _telemetry = new TelemetryClient();
 
         public LookupController(DataContext context)
         {
@@ -30,6 +32,7 @@ namespace EventFeedback.Web.Api.Controllers
         {
             using (new TraceLogicalScope(_traceSource, "LookupController:ApiInfo"))
             {
+                _telemetry.TrackEvent("API:ApiInfo");
                 var version = Assembly.GetExecutingAssembly().GetName().Version;
                 return Ok(new
                 {

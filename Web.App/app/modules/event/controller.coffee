@@ -30,7 +30,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         @saveFeedback feedback
 
   showEventsIndex: ->
-    appInsights.logEvent('event/showEventsIndex')
+    appInsights.trackEvent('event/showEventsIndex')
     vent.trigger 'fetch:done' # switch off block
     @events.fetch(
       reload: true # needed after login, otherwise FAIL on fetch
@@ -45,7 +45,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
         application.layout.content.show(view)
 
   showEventDetails: (id) ->
-    appInsights.logEvent('event/showEventDetails', {eventId: id})
+    appInsights.trackEvent('event/showEventDetails', {eventId: id})
     @events.fetch(
       data: filter: @resourceFilter
     ).done (models) =>
@@ -109,7 +109,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
       application.layout.content.show(view)
 
   showSessionDetails: (id) ->
-    appInsights.logEvent('event/showSessionDetails', {sessionId: id})
+    appInsights.trackEvent('event/showSessionDetails', {sessionId: id})
     @sessions.fetch().done (models) =>
       session = models.get(id)
       if not session?
@@ -136,7 +136,7 @@ module.exports = class Controller extends Backbone.Marionette.Controller
     vent.trigger 'fetch:start'
     feedback.save null,
       success: (model, response, options) =>
-        appInsights.logEvent('event/saveFeedback');
+        appInsights.trackEvent('event/saveFeedback');
         vent.trigger 'message:success:show', application.resources.key('Feedback_Saved_Success')
         vent.trigger 'fetch:done'
         vent.trigger 'event:details', settings.get('active-event')
