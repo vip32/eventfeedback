@@ -1,2 +1,2 @@
 [config]
-project = Web.Api/Web.Api.csproj
+command = deploy.cmd
