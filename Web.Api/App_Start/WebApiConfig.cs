@@ -14,6 +14,7 @@ namespace EventFeedback.Web.Api
                 new Unity.WebApi.UnityDependencyResolver(ContainerBuilder.Build());
 
             config.EnableCors();
+            config.EnableSystemDiagnosticsTracing();
 
             // Web API configuration and services
             // Configure Web API to use only bearer token authentication.
