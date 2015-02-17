@@ -369,9 +369,6 @@
     <Content Include="www\stylesheets\app.css.map" />
     <Content Include="www\fonts\webhostinghub-glyphs.eot" />
     <Content Include="www\fonts\webhostinghub-glyphs.ttf" />
-    <None Include="Web.Azure.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">

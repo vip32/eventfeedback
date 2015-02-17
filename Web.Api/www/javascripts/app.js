@@ -219,6 +219,147 @@ Application = (function(_super) {
 module.exports = new Application();
 });
 
+;require.register("application", function(exports, require, module) {
+﻿(function() {
+  var Application, Resource, config, settings, vent,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  require('lib/marionette-renderer');
+
+  require('lib/string-helper');
+
+  require('lib/view-helper');
+
+  config = require('config');
+
+  settings = require('settings');
+
+  vent = require('vent');
+
+  Resource = require('../../models/resource');
+
+  Application = (function(_super) {
+    __extends(Application, _super);
+
+    function Application() {
+      this.initialize = __bind(this.initialize, this);
+      return Application.__super__.constructor.apply(this, arguments);
+    }
+
+    Application.prototype.routers = {};
+
+    Application.prototype.initialize = function() {
+      log('application:initialize');
+      vent.setup();
+      this.hookGlobalEvents();
+      this.on("initialize:after", (function(_this) {
+        return function(options) {
+          var module, name, router, _ref;
+          log('application init after');
+          _ref = config.modules;
+          for (name in _ref) {
+            module = _ref[name];
+            log('=== module', name);
+            router = new (require(module));
+            _this.routers[name] = router;
+          }
+          log('routers:', _this.routers);
+          Backbone.history.start();
+          return log('current route:', _this.currentRoute());
+        };
+      })(this));
+      this.addInitializer((function(_this) {
+        return function(options) {
+          _this.layout = new (require(config.layout));
+          return _this.layout.render();
+        };
+      })(this));
+      this.resources = new Resource.Collection();
+      this.resources.fetch({
+        data: {
+          language: 'de-DE'
+        }
+      }).done((function(_this) {
+        return function(resources) {
+          return vent.trigger('resources:loaded');
+        };
+      })(this));
+      settings.set('last-visit', moment());
+      appInsights.trackEvent('event/appStart');
+      return this.start();
+    };
+
+    Application.prototype.checkauth = function(trigger) {
+      return log('checkauth', trigger);
+    };
+
+    Application.prototype.navigate = function(route, options) {
+      log("==========================| " + route + " |========================");
+      log('navigate', route, options);
+      appInsights.trackPageView(route);
+      options = options || {};
+      options.trigger = true;
+      if (!_.isEmpty(options != null ? options.returnroute : void 0)) {
+        route = "" + route + "?returnroute=" + options.returnroute;
+      }
+      return Backbone.history.navigate(route, options);
+    };
+
+    Application.prototype.currentRoute = function() {
+      return Backbone.history.fragment;
+    };
+
+    Application.prototype.startModule = function(name, options) {
+      var currentModule;
+      log('startmodule', route);
+      currentModule = name || this.module(name) || null;
+      if (ContactManager.currentModule === currentModule) {
+        return;
+      }
+      if (this.currentModule != null) {
+        this.currentModule.stop();
+      }
+      this.currentModule = currentModule;
+      if (currentModule) {
+        return currentModule.start(options);
+      }
+    };
+
+    Application.prototype.hookGlobalEvents = function() {
+      return $(window).error(function(msg, url, line) {
+        var message;
+        message = "'" + msg.originalEvent.message + "' at " + msg.originalEvent.filename + ":" + msg.originalEvent.lineno;
+        log('ERROR:', message);
+        appInsights.trackEvent('error', {
+          message: message
+        });
+        if (msg == null) {
+          alert(message);
+          return vent.trigger('about:index');
+        }
+      });
+    };
+
+    return Application;
+
+  })(Backbone.Marionette.Application);
+
+  module.exports = new Application();
+
+}).call(this);
+
+//# sourceMappingURL=application.js.map
+
+});
+
+;require.register("application.min", function(exports, require, module) {
+﻿(function(){var i,r,t,u,n,f=function(n,t){return function(){return n.apply(t,arguments)}},e={}.hasOwnProperty,o=function(n,t){function r(){this.constructor=n}for(var i in t)e.call(t,i)&&(n[i]=t[i]);return r.prototype=t.prototype,n.prototype=new r,n.__super__=t.prototype,n};require("lib/marionette-renderer");require("lib/string-helper");require("lib/view-helper");t=require("config");u=require("settings");n=require("vent");r=require("../../models/resource");i=function(i){function e(){return this.initialize=f(this.initialize,this),e.__super__.constructor.apply(this,arguments)}return o(e,i),e.prototype.routers={},e.prototype.initialize=function(){log("application:initialize");n.setup();this.hookGlobalEvents();this.on("initialize:after",function(n){return function(){var u,i,f,r;log("application init after");r=t.modules;for(i in r)u=r[i],log("=== module",i),f=new(require(u)),n.routers[i]=f;return log("routers:",n.routers),Backbone.history.start(),log("current route:",n.currentRoute())}}(this));return this.addInitializer(function(n){return function(){return n.layout=new(require(t.layout)),n.layout.render()}}(this)),this.resources=new r.Collection,this.resources.fetch({data:{language:"de-DE"}}).done(function(){return function(){return n.trigger("resources:loaded")}}(this)),u.set("last-visit",moment()),appInsights.trackEvent("event/appStart"),this.start()},e.prototype.checkauth=function(n){return log("checkauth",n)},e.prototype.navigate=function(n,t){return log("==========================| "+n+" |========================"),log("navigate",n,t),appInsights.trackPageView(n),t=t||{},t.trigger=!0,_.isEmpty(t!=null?t.returnroute:void 0)||(n=""+n+"?returnroute="+t.returnroute),Backbone.history.navigate(n,t)},e.prototype.currentRoute=function(){return Backbone.history.fragment},e.prototype.startModule=function(n,t){var i;if(log("startmodule",route),i=n||this.module(n)||null,ContactManager.currentModule!==i)return this.currentModule!=null&&this.currentModule.stop(),this.currentModule=i,i?i.start(t):void 0},e.prototype.hookGlobalEvents=function(){return $(window).error(function(t){var i;return i="'"+t.originalEvent.message+"' at "+t.originalEvent.filename+":"+t.originalEvent.lineno,log("ERROR:",i),appInsights.trackEvent("error",{message:i}),t==null?(alert(i),n.trigger("about:index")):void 0})},e}(Backbone.Marionette.Application);module.exports=new i}).call(this);
+//# sourceMappingURL=application.min.js.map
+
+});
+
 ;require.register("config", function(exports, require, module) {
 var Config;
 
@@ -2189,7 +2330,8 @@ module.exports = AboutView = (function(_super) {
       admin: user.isAdministrator(),
       auth: user.isAuthenticated(),
       help: "" + config.approot + "help",
-      swagger: "" + config.approot + "swagger"
+      swagger: "" + config.approot + "swagger",
+      apiinfo: "" + config.apiroot + "/lookup/apiinfo"
     };
   };
 
@@ -2445,6 +2587,10 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
 
   buffer += "<div class=\"container\">\r\n  <div class=\"row\">\r\n    <div class=\"col-sm-6 col-md-6\">\r\n      <h3>App</h3>\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.App\" target=\"_blank\">\r\n          <i class=\"icon-circlegithub\"></i>\r\n          &emsp;Sources\r\n        </a>\r\n      </p>\r\n      <ul>\r\n        <li>Backbone 1.1.0</li>\r\n        <li>Underscore 1.5.2</li>\r\n        <li>Twitter Bootstrap 3.0.0</li>\r\n        <li>MarionetteJS 1.2.2</li>\r\n        <!--<li>MomentJS 2.2.1</li>-->\r\n        <li>jQuery 2.0.3</li>\r\n        <li>JQuery RateIt 1.0.19</li>\r\n        <li>Fastclick 0.6.10</li>\r\n        <li>Pace 0.4.15</li>\r\n      </ul>\r\n    </div>\r\n    <div class=\"col-md-6\">\r\n      <h3>Api</h3>\r\n      <p>\r\n        <a class=\"btn btn-lg btn-success\" href=\"https://github.com/vip32/eventfeedback/tree/master/Web.Api\" target=\"_blank\">\r\n          <i class=\"icon-circlegithub\"></i>\r\n          &emsp;Sources\r\n        </a>\r\n      </p>\r\n      <ul>\r\n        <li><a href=\"";
+  if (helper = helpers.apiinfo) { stack1 = helper.call(depth0, {hash:{},data:data}); }
+  else { helper = (depth0 && depth0.apiinfo); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
+  buffer += escapeExpression(stack1)
+    + "\">ApiInfo</a></li>\r\n        <li><a href=\"";
   if (helper = helpers.help) { stack1 = helper.call(depth0, {hash:{},data:data}); }
   else { helper = (depth0 && depth0.help); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)

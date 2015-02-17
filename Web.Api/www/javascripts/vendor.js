@@ -90,1351 +90,7 @@
   globals.require.list = list;
   globals.require.brunch = true;
 })();
-//     Underscore.js 1.6.0
-//     http://underscorejs.org
-//     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-//     Underscore may be freely distributed under the MIT license.
-
-(function() {
-
-  // Baseline setup
-  // --------------
-
-  // Establish the root object, `window` in the browser, or `exports` on the server.
-  var root = this;
-
-  // Save the previous value of the `_` variable.
-  var previousUnderscore = root._;
-
-  // Establish the object that gets returned to break out of a loop iteration.
-  var breaker = {};
-
-  // Save bytes in the minified (but not gzipped) version:
-  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
-
-  // Create quick reference variables for speed access to core prototypes.
-  var
-    push             = ArrayProto.push,
-    slice            = ArrayProto.slice,
-    concat           = ArrayProto.concat,
-    toString         = ObjProto.toString,
-    hasOwnProperty   = ObjProto.hasOwnProperty;
-
-  // All **ECMAScript 5** native function implementations that we hope to use
-  // are declared here.
-  var
-    nativeForEach      = ArrayProto.forEach,
-    nativeMap          = ArrayProto.map,
-    nativeReduce       = ArrayProto.reduce,
-    nativeReduceRight  = ArrayProto.reduceRight,
-    nativeFilter       = ArrayProto.filter,
-    nativeEvery        = ArrayProto.every,
-    nativeSome         = ArrayProto.some,
-    nativeIndexOf      = ArrayProto.indexOf,
-    nativeLastIndexOf  = ArrayProto.lastIndexOf,
-    nativeIsArray      = Array.isArray,
-    nativeKeys         = Object.keys,
-    nativeBind         = FuncProto.bind;
-
-  // Create a safe reference to the Underscore object for use below.
-  var _ = function(obj) {
-    if (obj instanceof _) return obj;
-    if (!(this instanceof _)) return new _(obj);
-    this._wrapped = obj;
-  };
-
-  // Export the Underscore object for **Node.js**, with
-  // backwards-compatibility for the old `require()` API. If we're in
-  // the browser, add `_` as a global object via a string identifier,
-  // for Closure Compiler "advanced" mode.
-  if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = _;
-    }
-    exports._ = _;
-  } else {
-    root._ = _;
-  }
-
-  // Current version.
-  _.VERSION = '1.6.0';
-
-  // Collection Functions
-  // --------------------
-
-  // The cornerstone, an `each` implementation, aka `forEach`.
-  // Handles objects with the built-in `forEach`, arrays, and raw objects.
-  // Delegates to **ECMAScript 5**'s native `forEach` if available.
-  var each = _.each = _.forEach = function(obj, iterator, context) {
-    if (obj == null) return obj;
-    if (nativeForEach && obj.forEach === nativeForEach) {
-      obj.forEach(iterator, context);
-    } else if (obj.length === +obj.length) {
-      for (var i = 0, length = obj.length; i < length; i++) {
-        if (iterator.call(context, obj[i], i, obj) === breaker) return;
-      }
-    } else {
-      var keys = _.keys(obj);
-      for (var i = 0, length = keys.length; i < length; i++) {
-        if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
-      }
-    }
-    return obj;
-  };
-
-  // Return the results of applying the iterator to each element.
-  // Delegates to **ECMAScript 5**'s native `map` if available.
-  _.map = _.collect = function(obj, iterator, context) {
-    var results = [];
-    if (obj == null) return results;
-    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
-    each(obj, function(value, index, list) {
-      results.push(iterator.call(context, value, index, list));
-    });
-    return results;
-  };
-
-  var reduceError = 'Reduce of empty array with no initial value';
-
-  // **Reduce** builds up a single result from a list of values, aka `inject`,
-  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
-  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
-    var initial = arguments.length > 2;
-    if (obj == null) obj = [];
-    if (nativeReduce && obj.reduce === nativeReduce) {
-      if (context) iterator = _.bind(iterator, context);
-      return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
-    }
-    each(obj, function(value, index, list) {
-      if (!initial) {
-        memo = value;
-        initial = true;
-      } else {
-        memo = iterator.call(context, memo, value, index, list);
-      }
-    });
-    if (!initial) throw new TypeError(reduceError);
-    return memo;
-  };
-
-  // The right-associative version of reduce, also known as `foldr`.
-  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
-  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
-    var initial = arguments.length > 2;
-    if (obj == null) obj = [];
-    if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
-      if (context) iterator = _.bind(iterator, context);
-      return initial ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
-    }
-    var length = obj.length;
-    if (length !== +length) {
-      var keys = _.keys(obj);
-      length = keys.length;
-    }
-    each(obj, function(value, index, list) {
-      index = keys ? keys[--length] : --length;
-      if (!initial) {
-        memo = obj[index];
-        initial = true;
-      } else {
-        memo = iterator.call(context, memo, obj[index], index, list);
-      }
-    });
-    if (!initial) throw new TypeError(reduceError);
-    return memo;
-  };
-
-  // Return the first value which passes a truth test. Aliased as `detect`.
-  _.find = _.detect = function(obj, predicate, context) {
-    var result;
-    any(obj, function(value, index, list) {
-      if (predicate.call(context, value, index, list)) {
-        result = value;
-        return true;
-      }
-    });
-    return result;
-  };
-
-  // Return all the elements that pass a truth test.
-  // Delegates to **ECMAScript 5**'s native `filter` if available.
-  // Aliased as `select`.
-  _.filter = _.select = function(obj, predicate, context) {
-    var results = [];
-    if (obj == null) return results;
-    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(predicate, context);
-    each(obj, function(value, index, list) {
-      if (predicate.call(context, value, index, list)) results.push(value);
-    });
-    return results;
-  };
-
-  // Return all the elements for which a truth test fails.
-  _.reject = function(obj, predicate, context) {
-    return _.filter(obj, function(value, index, list) {
-      return !predicate.call(context, value, index, list);
-    }, context);
-  };
-
-  // Determine whether all of the elements match a truth test.
-  // Delegates to **ECMAScript 5**'s native `every` if available.
-  // Aliased as `all`.
-  _.every = _.all = function(obj, predicate, context) {
-    predicate || (predicate = _.identity);
-    var result = true;
-    if (obj == null) return result;
-    if (nativeEvery && obj.every === nativeEvery) return obj.every(predicate, context);
-    each(obj, function(value, index, list) {
-      if (!(result = result && predicate.call(context, value, index, list))) return breaker;
-    });
-    return !!result;
-  };
-
-  // Determine if at least one element in the object matches a truth test.
-  // Delegates to **ECMAScript 5**'s native `some` if available.
-  // Aliased as `any`.
-  var any = _.some = _.any = function(obj, predicate, context) {
-    predicate || (predicate = _.identity);
-    var result = false;
-    if (obj == null) return result;
-    if (nativeSome && obj.some === nativeSome) return obj.some(predicate, context);
-    each(obj, function(value, index, list) {
-      if (result || (result = predicate.call(context, value, index, list))) return breaker;
-    });
-    return !!result;
-  };
-
-  // Determine if the array or object contains a given value (using `===`).
-  // Aliased as `include`.
-  _.contains = _.include = function(obj, target) {
-    if (obj == null) return false;
-    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
-    return any(obj, function(value) {
-      return value === target;
-    });
-  };
-
-  // Invoke a method (with arguments) on every item in a collection.
-  _.invoke = function(obj, method) {
-    var args = slice.call(arguments, 2);
-    var isFunc = _.isFunction(method);
-    return _.map(obj, function(value) {
-      return (isFunc ? method : value[method]).apply(value, args);
-    });
-  };
-
-  // Convenience version of a common use case of `map`: fetching a property.
-  _.pluck = function(obj, key) {
-    return _.map(obj, _.property(key));
-  };
-
-  // Convenience version of a common use case of `filter`: selecting only objects
-  // containing specific `key:value` pairs.
-  _.where = function(obj, attrs) {
-    return _.filter(obj, _.matches(attrs));
-  };
-
-  // Convenience version of a common use case of `find`: getting the first object
-  // containing specific `key:value` pairs.
-  _.findWhere = function(obj, attrs) {
-    return _.find(obj, _.matches(attrs));
-  };
-
-  // Return the maximum element or (element-based computation).
-  // Can't optimize arrays of integers longer than 65,535 elements.
-  // See [WebKit Bug 80797](https://bugs.webkit.org/show_bug.cgi?id=80797)
-  _.max = function(obj, iterator, context) {
-    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-      return Math.max.apply(Math, obj);
-    }
-    var result = -Infinity, lastComputed = -Infinity;
-    each(obj, function(value, index, list) {
-      var computed = iterator ? iterator.call(context, value, index, list) : value;
-      if (computed > lastComputed) {
-        result = value;
-        lastComputed = computed;
-      }
-    });
-    return result;
-  };
-
-  // Return the minimum element (or element-based computation).
-  _.min = function(obj, iterator, context) {
-    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-      return Math.min.apply(Math, obj);
-    }
-    var result = Infinity, lastComputed = Infinity;
-    each(obj, function(value, index, list) {
-      var computed = iterator ? iterator.call(context, value, index, list) : value;
-      if (computed < lastComputed) {
-        result = value;
-        lastComputed = computed;
-      }
-    });
-    return result;
-  };
-
-  // Shuffle an array, using the modern version of the
-  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
-  _.shuffle = function(obj) {
-    var rand;
-    var index = 0;
-    var shuffled = [];
-    each(obj, function(value) {
-      rand = _.random(index++);
-      shuffled[index - 1] = shuffled[rand];
-      shuffled[rand] = value;
-    });
-    return shuffled;
-  };
-
-  // Sample **n** random values from a collection.
-  // If **n** is not specified, returns a single random element.
-  // The internal `guard` argument allows it to work with `map`.
-  _.sample = function(obj, n, guard) {
-    if (n == null || guard) {
-      if (obj.length !== +obj.length) obj = _.values(obj);
-      return obj[_.random(obj.length - 1)];
-    }
-    return _.shuffle(obj).slice(0, Math.max(0, n));
-  };
-
-  // An internal function to generate lookup iterators.
-  var lookupIterator = function(value) {
-    if (value == null) return _.identity;
-    if (_.isFunction(value)) return value;
-    return _.property(value);
-  };
-
-  // Sort the object's values by a criterion produced by an iterator.
-  _.sortBy = function(obj, iterator, context) {
-    iterator = lookupIterator(iterator);
-    return _.pluck(_.map(obj, function(value, index, list) {
-      return {
-        value: value,
-        index: index,
-        criteria: iterator.call(context, value, index, list)
-      };
-    }).sort(function(left, right) {
-      var a = left.criteria;
-      var b = right.criteria;
-      if (a !== b) {
-        if (a > b || a === void 0) return 1;
-        if (a < b || b === void 0) return -1;
-      }
-      return left.index - right.index;
-    }), 'value');
-  };
-
-  // An internal function used for aggregate "group by" operations.
-  var group = function(behavior) {
-    return function(obj, iterator, context) {
-      var result = {};
-      iterator = lookupIterator(iterator);
-      each(obj, function(value, index) {
-        var key = iterator.call(context, value, index, obj);
-        behavior(result, key, value);
-      });
-      return result;
-    };
-  };
-
-  // Groups the object's values by a criterion. Pass either a string attribute
-  // to group by, or a function that returns the criterion.
-  _.groupBy = group(function(result, key, value) {
-    _.has(result, key) ? result[key].push(value) : result[key] = [value];
-  });
-
-  // Indexes the object's values by a criterion, similar to `groupBy`, but for
-  // when you know that your index values will be unique.
-  _.indexBy = group(function(result, key, value) {
-    result[key] = value;
-  });
-
-  // Counts instances of an object that group by a certain criterion. Pass
-  // either a string attribute to count by, or a function that returns the
-  // criterion.
-  _.countBy = group(function(result, key) {
-    _.has(result, key) ? result[key]++ : result[key] = 1;
-  });
-
-  // Use a comparator function to figure out the smallest index at which
-  // an object should be inserted so as to maintain order. Uses binary search.
-  _.sortedIndex = function(array, obj, iterator, context) {
-    iterator = lookupIterator(iterator);
-    var value = iterator.call(context, obj);
-    var low = 0, high = array.length;
-    while (low < high) {
-      var mid = (low + high) >>> 1;
-      iterator.call(context, array[mid]) < value ? low = mid + 1 : high = mid;
-    }
-    return low;
-  };
-
-  // Safely create a real, live array from anything iterable.
-  _.toArray = function(obj) {
-    if (!obj) return [];
-    if (_.isArray(obj)) return slice.call(obj);
-    if (obj.length === +obj.length) return _.map(obj, _.identity);
-    return _.values(obj);
-  };
-
-  // Return the number of elements in an object.
-  _.size = function(obj) {
-    if (obj == null) return 0;
-    return (obj.length === +obj.length) ? obj.length : _.keys(obj).length;
-  };
-
-  // Array Functions
-  // ---------------
-
-  // Get the first element of an array. Passing **n** will return the first N
-  // values in the array. Aliased as `head` and `take`. The **guard** check
-  // allows it to work with `_.map`.
-  _.first = _.head = _.take = function(array, n, guard) {
-    if (array == null) return void 0;
-    if ((n == null) || guard) return array[0];
-    if (n < 0) return [];
-    return slice.call(array, 0, n);
-  };
-
-  // Returns everything but the last entry of the array. Especially useful on
-  // the arguments object. Passing **n** will return all the values in
-  // the array, excluding the last N. The **guard** check allows it to work with
-  // `_.map`.
-  _.initial = function(array, n, guard) {
-    return slice.call(array, 0, array.length - ((n == null) || guard ? 1 : n));
-  };
-
-  // Get the last element of an array. Passing **n** will return the last N
-  // values in the array. The **guard** check allows it to work with `_.map`.
-  _.last = function(array, n, guard) {
-    if (array == null) return void 0;
-    if ((n == null) || guard) return array[array.length - 1];
-    return slice.call(array, Math.max(array.length - n, 0));
-  };
-
-  // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
-  // Especially useful on the arguments object. Passing an **n** will return
-  // the rest N values in the array. The **guard**
-  // check allows it to work with `_.map`.
-  _.rest = _.tail = _.drop = function(array, n, guard) {
-    return slice.call(array, (n == null) || guard ? 1 : n);
-  };
-
-  // Trim out all falsy values from an array.
-  _.compact = function(array) {
-    return _.filter(array, _.identity);
-  };
-
-  // Internal implementation of a recursive `flatten` function.
-  var flatten = function(input, shallow, output) {
-    if (shallow && _.every(input, _.isArray)) {
-      return concat.apply(output, input);
-    }
-    each(input, function(value) {
-      if (_.isArray(value) || _.isArguments(value)) {
-        shallow ? push.apply(output, value) : flatten(value, shallow, output);
-      } else {
-        output.push(value);
-      }
-    });
-    return output;
-  };
-
-  // Flatten out an array, either recursively (by default), or just one level.
-  _.flatten = function(array, shallow) {
-    return flatten(array, shallow, []);
-  };
-
-  // Return a version of the array that does not contain the specified value(s).
-  _.without = function(array) {
-    return _.difference(array, slice.call(arguments, 1));
-  };
-
-  // Split an array into two arrays: one whose elements all satisfy the given
-  // predicate, and one whose elements all do not satisfy the predicate.
-  _.partition = function(array, predicate) {
-    var pass = [], fail = [];
-    each(array, function(elem) {
-      (predicate(elem) ? pass : fail).push(elem);
-    });
-    return [pass, fail];
-  };
-
-  // Produce a duplicate-free version of the array. If the array has already
-  // been sorted, you have the option of using a faster algorithm.
-  // Aliased as `unique`.
-  _.uniq = _.unique = function(array, isSorted, iterator, context) {
-    if (_.isFunction(isSorted)) {
-      context = iterator;
-      iterator = isSorted;
-      isSorted = false;
-    }
-    var initial = iterator ? _.map(array, iterator, context) : array;
-    var results = [];
-    var seen = [];
-    each(initial, function(value, index) {
-      if (isSorted ? (!index || seen[seen.length - 1] !== value) : !_.contains(seen, value)) {
-        seen.push(value);
-        results.push(array[index]);
-      }
-    });
-    return results;
-  };
-
-  // Produce an array that contains the union: each distinct element from all of
-  // the passed-in arrays.
-  _.union = function() {
-    return _.uniq(_.flatten(arguments, true));
-  };
-
-  // Produce an array that contains every item shared between all the
-  // passed-in arrays.
-  _.intersection = function(array) {
-    var rest = slice.call(arguments, 1);
-    return _.filter(_.uniq(array), function(item) {
-      return _.every(rest, function(other) {
-        return _.contains(other, item);
-      });
-    });
-  };
-
-  // Take the difference between one array and a number of other arrays.
-  // Only the elements present in just the first array will remain.
-  _.difference = function(array) {
-    var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
-    return _.filter(array, function(value){ return !_.contains(rest, value); });
-  };
-
-  // Zip together multiple lists into a single array -- elements that share
-  // an index go together.
-  _.zip = function() {
-    var length = _.max(_.pluck(arguments, 'length').concat(0));
-    var results = new Array(length);
-    for (var i = 0; i < length; i++) {
-      results[i] = _.pluck(arguments, '' + i);
-    }
-    return results;
-  };
-
-  // Converts lists into objects. Pass either a single array of `[key, value]`
-  // pairs, or two parallel arrays of the same length -- one of keys, and one of
-  // the corresponding values.
-  _.object = function(list, values) {
-    if (list == null) return {};
-    var result = {};
-    for (var i = 0, length = list.length; i < length; i++) {
-      if (values) {
-        result[list[i]] = values[i];
-      } else {
-        result[list[i][0]] = list[i][1];
-      }
-    }
-    return result;
-  };
-
-  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
-  // we need this function. Return the position of the first occurrence of an
-  // item in an array, or -1 if the item is not included in the array.
-  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
-  // If the array is large and already in sort order, pass `true`
-  // for **isSorted** to use binary search.
-  _.indexOf = function(array, item, isSorted) {
-    if (array == null) return -1;
-    var i = 0, length = array.length;
-    if (isSorted) {
-      if (typeof isSorted == 'number') {
-        i = (isSorted < 0 ? Math.max(0, length + isSorted) : isSorted);
-      } else {
-        i = _.sortedIndex(array, item);
-        return array[i] === item ? i : -1;
-      }
-    }
-    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
-    for (; i < length; i++) if (array[i] === item) return i;
-    return -1;
-  };
-
-  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
-  _.lastIndexOf = function(array, item, from) {
-    if (array == null) return -1;
-    var hasIndex = from != null;
-    if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) {
-      return hasIndex ? array.lastIndexOf(item, from) : array.lastIndexOf(item);
-    }
-    var i = (hasIndex ? from : array.length);
-    while (i--) if (array[i] === item) return i;
-    return -1;
-  };
-
-  // Generate an integer Array containing an arithmetic progression. A port of
-  // the native Python `range()` function. See
-  // [the Python documentation](http://docs.python.org/library/functions.html#range).
-  _.range = function(start, stop, step) {
-    if (arguments.length <= 1) {
-      stop = start || 0;
-      start = 0;
-    }
-    step = arguments[2] || 1;
-
-    var length = Math.max(Math.ceil((stop - start) / step), 0);
-    var idx = 0;
-    var range = new Array(length);
-
-    while(idx < length) {
-      range[idx++] = start;
-      start += step;
-    }
-
-    return range;
-  };
-
-  // Function (ahem) Functions
-  // ------------------
-
-  // Reusable constructor function for prototype setting.
-  var ctor = function(){};
-
-  // Create a function bound to a given object (assigning `this`, and arguments,
-  // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
-  // available.
-  _.bind = function(func, context) {
-    var args, bound;
-    if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
-    if (!_.isFunction(func)) throw new TypeError;
-    args = slice.call(arguments, 2);
-    return bound = function() {
-      if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
-      ctor.prototype = func.prototype;
-      var self = new ctor;
-      ctor.prototype = null;
-      var result = func.apply(self, args.concat(slice.call(arguments)));
-      if (Object(result) === result) return result;
-      return self;
-    };
-  };
-
-  // Partially apply a function by creating a version that has had some of its
-  // arguments pre-filled, without changing its dynamic `this` context. _ acts
-  // as a placeholder, allowing any combination of arguments to be pre-filled.
-  _.partial = function(func) {
-    var boundArgs = slice.call(arguments, 1);
-    return function() {
-      var position = 0;
-      var args = boundArgs.slice();
-      for (var i = 0, length = args.length; i < length; i++) {
-        if (args[i] === _) args[i] = arguments[position++];
-      }
-      while (position < arguments.length) args.push(arguments[position++]);
-      return func.apply(this, args);
-    };
-  };
-
-  // Bind a number of an object's methods to that object. Remaining arguments
-  // are the method names to be bound. Useful for ensuring that all callbacks
-  // defined on an object belong to it.
-  _.bindAll = function(obj) {
-    var funcs = slice.call(arguments, 1);
-    if (funcs.length === 0) throw new Error('bindAll must be passed function names');
-    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
-    return obj;
-  };
-
-  // Memoize an expensive function by storing its results.
-  _.memoize = function(func, hasher) {
-    var memo = {};
-    hasher || (hasher = _.identity);
-    return function() {
-      var key = hasher.apply(this, arguments);
-      return _.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
-    };
-  };
-
-  // Delays a function for the given number of milliseconds, and then calls
-  // it with the arguments supplied.
-  _.delay = function(func, wait) {
-    var args = slice.call(arguments, 2);
-    return setTimeout(function(){ return func.apply(null, args); }, wait);
-  };
-
-  // Defers a function, scheduling it to run after the current call stack has
-  // cleared.
-  _.defer = function(func) {
-    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
-  };
-
-  // Returns a function, that, when invoked, will only be triggered at most once
-  // during a given window of time. Normally, the throttled function will run
-  // as much as it can, without ever going more than once per `wait` duration;
-  // but if you'd like to disable the execution on the leading edge, pass
-  // `{leading: false}`. To disable execution on the trailing edge, ditto.
-  _.throttle = function(func, wait, options) {
-    var context, args, result;
-    var timeout = null;
-    var previous = 0;
-    options || (options = {});
-    var later = function() {
-      previous = options.leading === false ? 0 : _.now();
-      timeout = null;
-      result = func.apply(context, args);
-      context = args = null;
-    };
-    return function() {
-      var now = _.now();
-      if (!previous && options.leading === false) previous = now;
-      var remaining = wait - (now - previous);
-      context = this;
-      args = arguments;
-      if (remaining <= 0) {
-        clearTimeout(timeout);
-        timeout = null;
-        previous = now;
-        result = func.apply(context, args);
-        context = args = null;
-      } else if (!timeout && options.trailing !== false) {
-        timeout = setTimeout(later, remaining);
-      }
-      return result;
-    };
-  };
-
-  // Returns a function, that, as long as it continues to be invoked, will not
-  // be triggered. The function will be called after it stops being called for
-  // N milliseconds. If `immediate` is passed, trigger the function on the
-  // leading edge, instead of the trailing.
-  _.debounce = function(func, wait, immediate) {
-    var timeout, args, context, timestamp, result;
-
-    var later = function() {
-      var last = _.now() - timestamp;
-      if (last < wait) {
-        timeout = setTimeout(later, wait - last);
-      } else {
-        timeout = null;
-        if (!immediate) {
-          result = func.apply(context, args);
-          context = args = null;
-        }
-      }
-    };
-
-    return function() {
-      context = this;
-      args = arguments;
-      timestamp = _.now();
-      var callNow = immediate && !timeout;
-      if (!timeout) {
-        timeout = setTimeout(later, wait);
-      }
-      if (callNow) {
-        result = func.apply(context, args);
-        context = args = null;
-      }
-
-      return result;
-    };
-  };
-
-  // Returns a function that will be executed at most one time, no matter how
-  // often you call it. Useful for lazy initialization.
-  _.once = function(func) {
-    var ran = false, memo;
-    return function() {
-      if (ran) return memo;
-      ran = true;
-      memo = func.apply(this, arguments);
-      func = null;
-      return memo;
-    };
-  };
-
-  // Returns the first function passed as an argument to the second,
-  // allowing you to adjust arguments, run code before and after, and
-  // conditionally execute the original function.
-  _.wrap = function(func, wrapper) {
-    return _.partial(wrapper, func);
-  };
-
-  // Returns a function that is the composition of a list of functions, each
-  // consuming the return value of the function that follows.
-  _.compose = function() {
-    var funcs = arguments;
-    return function() {
-      var args = arguments;
-      for (var i = funcs.length - 1; i >= 0; i--) {
-        args = [funcs[i].apply(this, args)];
-      }
-      return args[0];
-    };
-  };
-
-  // Returns a function that will only be executed after being called N times.
-  _.after = function(times, func) {
-    return function() {
-      if (--times < 1) {
-        return func.apply(this, arguments);
-      }
-    };
-  };
-
-  // Object Functions
-  // ----------------
-
-  // Retrieve the names of an object's properties.
-  // Delegates to **ECMAScript 5**'s native `Object.keys`
-  _.keys = function(obj) {
-    if (!_.isObject(obj)) return [];
-    if (nativeKeys) return nativeKeys(obj);
-    var keys = [];
-    for (var key in obj) if (_.has(obj, key)) keys.push(key);
-    return keys;
-  };
-
-  // Retrieve the values of an object's properties.
-  _.values = function(obj) {
-    var keys = _.keys(obj);
-    var length = keys.length;
-    var values = new Array(length);
-    for (var i = 0; i < length; i++) {
-      values[i] = obj[keys[i]];
-    }
-    return values;
-  };
-
-  // Convert an object into a list of `[key, value]` pairs.
-  _.pairs = function(obj) {
-    var keys = _.keys(obj);
-    var length = keys.length;
-    var pairs = new Array(length);
-    for (var i = 0; i < length; i++) {
-      pairs[i] = [keys[i], obj[keys[i]]];
-    }
-    return pairs;
-  };
-
-  // Invert the keys and values of an object. The values must be serializable.
-  _.invert = function(obj) {
-    var result = {};
-    var keys = _.keys(obj);
-    for (var i = 0, length = keys.length; i < length; i++) {
-      result[obj[keys[i]]] = keys[i];
-    }
-    return result;
-  };
-
-  // Return a sorted list of the function names available on the object.
-  // Aliased as `methods`
-  _.functions = _.methods = function(obj) {
-    var names = [];
-    for (var key in obj) {
-      if (_.isFunction(obj[key])) names.push(key);
-    }
-    return names.sort();
-  };
-
-  // Extend a given object with all the properties in passed-in object(s).
-  _.extend = function(obj) {
-    each(slice.call(arguments, 1), function(source) {
-      if (source) {
-        for (var prop in source) {
-          obj[prop] = source[prop];
-        }
-      }
-    });
-    return obj;
-  };
-
-  // Return a copy of the object only containing the whitelisted properties.
-  _.pick = function(obj) {
-    var copy = {};
-    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
-    each(keys, function(key) {
-      if (key in obj) copy[key] = obj[key];
-    });
-    return copy;
-  };
-
-   // Return a copy of the object without the blacklisted properties.
-  _.omit = function(obj) {
-    var copy = {};
-    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
-    for (var key in obj) {
-      if (!_.contains(keys, key)) copy[key] = obj[key];
-    }
-    return copy;
-  };
-
-  // Fill in a given object with default properties.
-  _.defaults = function(obj) {
-    each(slice.call(arguments, 1), function(source) {
-      if (source) {
-        for (var prop in source) {
-          if (obj[prop] === void 0) obj[prop] = source[prop];
-        }
-      }
-    });
-    return obj;
-  };
-
-  // Create a (shallow-cloned) duplicate of an object.
-  _.clone = function(obj) {
-    if (!_.isObject(obj)) return obj;
-    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
-  };
-
-  // Invokes interceptor with the obj, and then returns obj.
-  // The primary purpose of this method is to "tap into" a method chain, in
-  // order to perform operations on intermediate results within the chain.
-  _.tap = function(obj, interceptor) {
-    interceptor(obj);
-    return obj;
-  };
-
-  // Internal recursive comparison function for `isEqual`.
-  var eq = function(a, b, aStack, bStack) {
-    // Identical objects are equal. `0 === -0`, but they aren't identical.
-    // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
-    if (a === b) return a !== 0 || 1 / a == 1 / b;
-    // A strict comparison is necessary because `null == undefined`.
-    if (a == null || b == null) return a === b;
-    // Unwrap any wrapped objects.
-    if (a instanceof _) a = a._wrapped;
-    if (b instanceof _) b = b._wrapped;
-    // Compare `[[Class]]` names.
-    var className = toString.call(a);
-    if (className != toString.call(b)) return false;
-    switch (className) {
-      // Strings, numbers, dates, and booleans are compared by value.
-      case '[object String]':
-        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
-        // equivalent to `new String("5")`.
-        return a == String(b);
-      case '[object Number]':
-        // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
-        // other numeric values.
-        return a != +a ? b != +b : (a == 0 ? 1 / a == 1 / b : a == +b);
-      case '[object Date]':
-      case '[object Boolean]':
-        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
-        // millisecond representations. Note that invalid dates with millisecond representations
-        // of `NaN` are not equivalent.
-        return +a == +b;
-      // RegExps are compared by their source patterns and flags.
-      case '[object RegExp]':
-        return a.source == b.source &&
-               a.global == b.global &&
-               a.multiline == b.multiline &&
-               a.ignoreCase == b.ignoreCase;
-    }
-    if (typeof a != 'object' || typeof b != 'object') return false;
-    // Assume equality for cyclic structures. The algorithm for detecting cyclic
-    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
-    var length = aStack.length;
-    while (length--) {
-      // Linear search. Performance is inversely proportional to the number of
-      // unique nested structures.
-      if (aStack[length] == a) return bStack[length] == b;
-    }
-    // Objects with different constructors are not equivalent, but `Object`s
-    // from different frames are.
-    var aCtor = a.constructor, bCtor = b.constructor;
-    if (aCtor !== bCtor && !(_.isFunction(aCtor) && (aCtor instanceof aCtor) &&
-                             _.isFunction(bCtor) && (bCtor instanceof bCtor))
-                        && ('constructor' in a && 'constructor' in b)) {
-      return false;
-    }
-    // Add the first object to the stack of traversed objects.
-    aStack.push(a);
-    bStack.push(b);
-    var size = 0, result = true;
-    // Recursively compare objects and arrays.
-    if (className == '[object Array]') {
-      // Compare array lengths to determine if a deep comparison is necessary.
-      size = a.length;
-      result = size == b.length;
-      if (result) {
-        // Deep compare the contents, ignoring non-numeric properties.
-        while (size--) {
-          if (!(result = eq(a[size], b[size], aStack, bStack))) break;
-        }
-      }
-    } else {
-      // Deep compare objects.
-      for (var key in a) {
-        if (_.has(a, key)) {
-          // Count the expected number of properties.
-          size++;
-          // Deep compare each member.
-          if (!(result = _.has(b, key) && eq(a[key], b[key], aStack, bStack))) break;
-        }
-      }
-      // Ensure that both objects contain the same number of properties.
-      if (result) {
-        for (key in b) {
-          if (_.has(b, key) && !(size--)) break;
-        }
-        result = !size;
-      }
-    }
-    // Remove the first object from the stack of traversed objects.
-    aStack.pop();
-    bStack.pop();
-    return result;
-  };
-
-  // Perform a deep comparison to check if two objects are equal.
-  _.isEqual = function(a, b) {
-    return eq(a, b, [], []);
-  };
-
-  // Is a given array, string, or object empty?
-  // An "empty" object has no enumerable own-properties.
-  _.isEmpty = function(obj) {
-    if (obj == null) return true;
-    if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
-    for (var key in obj) if (_.has(obj, key)) return false;
-    return true;
-  };
-
-  // Is a given value a DOM element?
-  _.isElement = function(obj) {
-    return !!(obj && obj.nodeType === 1);
-  };
-
-  // Is a given value an array?
-  // Delegates to ECMA5's native Array.isArray
-  _.isArray = nativeIsArray || function(obj) {
-    return toString.call(obj) == '[object Array]';
-  };
-
-  // Is a given variable an object?
-  _.isObject = function(obj) {
-    return obj === Object(obj);
-  };
-
-  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp.
-  each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function(name) {
-    _['is' + name] = function(obj) {
-      return toString.call(obj) == '[object ' + name + ']';
-    };
-  });
-
-  // Define a fallback version of the method in browsers (ahem, IE), where
-  // there isn't any inspectable "Arguments" type.
-  if (!_.isArguments(arguments)) {
-    _.isArguments = function(obj) {
-      return !!(obj && _.has(obj, 'callee'));
-    };
-  }
-
-  // Optimize `isFunction` if appropriate.
-  if (typeof (/./) !== 'function') {
-    _.isFunction = function(obj) {
-      return typeof obj === 'function';
-    };
-  }
-
-  // Is a given object a finite number?
-  _.isFinite = function(obj) {
-    return isFinite(obj) && !isNaN(parseFloat(obj));
-  };
-
-  // Is the given value `NaN`? (NaN is the only number which does not equal itself).
-  _.isNaN = function(obj) {
-    return _.isNumber(obj) && obj != +obj;
-  };
-
-  // Is a given value a boolean?
-  _.isBoolean = function(obj) {
-    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
-  };
-
-  // Is a given value equal to null?
-  _.isNull = function(obj) {
-    return obj === null;
-  };
-
-  // Is a given variable undefined?
-  _.isUndefined = function(obj) {
-    return obj === void 0;
-  };
-
-  // Shortcut function for checking if an object has a given property directly
-  // on itself (in other words, not on a prototype).
-  _.has = function(obj, key) {
-    return hasOwnProperty.call(obj, key);
-  };
-
-  // Utility Functions
-  // -----------------
-
-  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
-  // previous owner. Returns a reference to the Underscore object.
-  _.noConflict = function() {
-    root._ = previousUnderscore;
-    return this;
-  };
-
-  // Keep the identity function around for default iterators.
-  _.identity = function(value) {
-    return value;
-  };
-
-  _.constant = function(value) {
-    return function () {
-      return value;
-    };
-  };
-
-  _.property = function(key) {
-    return function(obj) {
-      return obj[key];
-    };
-  };
-
-  // Returns a predicate for checking whether an object has a given set of `key:value` pairs.
-  _.matches = function(attrs) {
-    return function(obj) {
-      if (obj === attrs) return true; //avoid comparing an object to itself.
-      for (var key in attrs) {
-        if (attrs[key] !== obj[key])
-          return false;
-      }
-      return true;
-    }
-  };
-
-  // Run a function **n** times.
-  _.times = function(n, iterator, context) {
-    var accum = Array(Math.max(0, n));
-    for (var i = 0; i < n; i++) accum[i] = iterator.call(context, i);
-    return accum;
-  };
-
-  // Return a random integer between min and max (inclusive).
-  _.random = function(min, max) {
-    if (max == null) {
-      max = min;
-      min = 0;
-    }
-    return min + Math.floor(Math.random() * (max - min + 1));
-  };
-
-  // A (possibly faster) way to get the current timestamp as an integer.
-  _.now = Date.now || function() { return new Date().getTime(); };
-
-  // List of HTML entities for escaping.
-  var entityMap = {
-    escape: {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;'
-    }
-  };
-  entityMap.unescape = _.invert(entityMap.escape);
-
-  // Regexes containing the keys and values listed immediately above.
-  var entityRegexes = {
-    escape:   new RegExp('[' + _.keys(entityMap.escape).join('') + ']', 'g'),
-    unescape: new RegExp('(' + _.keys(entityMap.unescape).join('|') + ')', 'g')
-  };
-
-  // Functions for escaping and unescaping strings to/from HTML interpolation.
-  _.each(['escape', 'unescape'], function(method) {
-    _[method] = function(string) {
-      if (string == null) return '';
-      return ('' + string).replace(entityRegexes[method], function(match) {
-        return entityMap[method][match];
-      });
-    };
-  });
-
-  // If the value of the named `property` is a function then invoke it with the
-  // `object` as context; otherwise, return it.
-  _.result = function(object, property) {
-    if (object == null) return void 0;
-    var value = object[property];
-    return _.isFunction(value) ? value.call(object) : value;
-  };
-
-  // Add your own custom functions to the Underscore object.
-  _.mixin = function(obj) {
-    each(_.functions(obj), function(name) {
-      var func = _[name] = obj[name];
-      _.prototype[name] = function() {
-        var args = [this._wrapped];
-        push.apply(args, arguments);
-        return result.call(this, func.apply(_, args));
-      };
-    });
-  };
-
-  // Generate a unique integer id (unique within the entire client session).
-  // Useful for temporary DOM ids.
-  var idCounter = 0;
-  _.uniqueId = function(prefix) {
-    var id = ++idCounter + '';
-    return prefix ? prefix + id : id;
-  };
-
-  // By default, Underscore uses ERB-style template delimiters, change the
-  // following template settings to use alternative delimiters.
-  _.templateSettings = {
-    evaluate    : /<%([\s\S]+?)%>/g,
-    interpolate : /<%=([\s\S]+?)%>/g,
-    escape      : /<%-([\s\S]+?)%>/g
-  };
-
-  // When customizing `templateSettings`, if you don't want to define an
-  // interpolation, evaluation or escaping regex, we need one that is
-  // guaranteed not to match.
-  var noMatch = /(.)^/;
-
-  // Certain characters need to be escaped so that they can be put into a
-  // string literal.
-  var escapes = {
-    "'":      "'",
-    '\\':     '\\',
-    '\r':     'r',
-    '\n':     'n',
-    '\t':     't',
-    '\u2028': 'u2028',
-    '\u2029': 'u2029'
-  };
-
-  var escaper = /\\|'|\r|\n|\t|\u2028|\u2029/g;
-
-  // JavaScript micro-templating, similar to John Resig's implementation.
-  // Underscore templating handles arbitrary delimiters, preserves whitespace,
-  // and correctly escapes quotes within interpolated code.
-  _.template = function(text, data, settings) {
-    var render;
-    settings = _.defaults({}, settings, _.templateSettings);
-
-    // Combine delimiters into one regular expression via alternation.
-    var matcher = new RegExp([
-      (settings.escape || noMatch).source,
-      (settings.interpolate || noMatch).source,
-      (settings.evaluate || noMatch).source
-    ].join('|') + '|$', 'g');
-
-    // Compile the template source, escaping string literals appropriately.
-    var index = 0;
-    var source = "__p+='";
-    text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
-      source += text.slice(index, offset)
-        .replace(escaper, function(match) { return '\\' + escapes[match]; });
-
-      if (escape) {
-        source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
-      }
-      if (interpolate) {
-        source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
-      }
-      if (evaluate) {
-        source += "';\n" + evaluate + "\n__p+='";
-      }
-      index = offset + match.length;
-      return match;
-    });
-    source += "';\n";
-
-    // If a variable is not specified, place data values in local scope.
-    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
-
-    source = "var __t,__p='',__j=Array.prototype.join," +
-      "print=function(){__p+=__j.call(arguments,'');};\n" +
-      source + "return __p;\n";
-
-    try {
-      render = new Function(settings.variable || 'obj', '_', source);
-    } catch (e) {
-      e.source = source;
-      throw e;
-    }
-
-    if (data) return render(data, _);
-    var template = function(data) {
-      return render.call(this, data, _);
-    };
-
-    // Provide the compiled function source as a convenience for precompilation.
-    template.source = 'function(' + (settings.variable || 'obj') + '){\n' + source + '}';
-
-    return template;
-  };
-
-  // Add a "chain" function, which will delegate to the wrapper.
-  _.chain = function(obj) {
-    return _(obj).chain();
-  };
-
-  // OOP
-  // ---------------
-  // If Underscore is called as a function, it returns a wrapped object that
-  // can be used OO-style. This wrapper holds altered versions of all the
-  // underscore functions. Wrapped objects may be chained.
-
-  // Helper function to continue chaining intermediate results.
-  var result = function(obj) {
-    return this._chain ? _(obj).chain() : obj;
-  };
-
-  // Add all of the Underscore functions to the wrapper object.
-  _.mixin(_);
-
-  // Add all mutator Array functions to the wrapper.
-  each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
-    var method = ArrayProto[name];
-    _.prototype[name] = function() {
-      var obj = this._wrapped;
-      method.apply(obj, arguments);
-      if ((name == 'shift' || name == 'splice') && obj.length === 0) delete obj[0];
-      return result.call(this, obj);
-    };
-  });
-
-  // Add all accessor Array functions to the wrapper.
-  each(['concat', 'join', 'slice'], function(name) {
-    var method = ArrayProto[name];
-    _.prototype[name] = function() {
-      return result.call(this, method.apply(this._wrapped, arguments));
-    };
-  });
-
-  _.extend(_.prototype, {
-
-    // Start chaining a wrapped Underscore object.
-    chain: function() {
-      this._chain = true;
-      return this;
-    },
-
-    // Extracts the result from a wrapped and chained object.
-    value: function() {
-      return this._wrapped;
-    }
-
-  });
-
-  // AMD registration happens at the end for compatibility with AMD loaders
-  // that may not enforce next-turn semantics on modules. Even though general
-  // practice for AMD registration is to be anonymous, underscore registers
-  // as a named module because, like jQuery, it is a base library that is
-  // popular enough to be bundled in a third party lib, but not be part of
-  // an AMD load request. Those cases could generate an error when an
-  // anonymous define() is called outside of a loader request.
-  if (typeof define === 'function' && define.amd) {
-    define('underscore', [], function() {
-      return _;
-    });
-  }
-}).call(this);
-
-;/*!
+/*!
  * jQuery JavaScript Library v1.9.1
  * http://jquery.com/
  *
@@ -11031,7 +9687,1351 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 }
 
 })( window );
-;//     Backbone.js 1.1.2
+//     Underscore.js 1.6.0
+//     http://underscorejs.org
+//     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+//     Underscore may be freely distributed under the MIT license.
+
+(function() {
+
+  // Baseline setup
+  // --------------
+
+  // Establish the root object, `window` in the browser, or `exports` on the server.
+  var root = this;
+
+  // Save the previous value of the `_` variable.
+  var previousUnderscore = root._;
+
+  // Establish the object that gets returned to break out of a loop iteration.
+  var breaker = {};
+
+  // Save bytes in the minified (but not gzipped) version:
+  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
+
+  // Create quick reference variables for speed access to core prototypes.
+  var
+    push             = ArrayProto.push,
+    slice            = ArrayProto.slice,
+    concat           = ArrayProto.concat,
+    toString         = ObjProto.toString,
+    hasOwnProperty   = ObjProto.hasOwnProperty;
+
+  // All **ECMAScript 5** native function implementations that we hope to use
+  // are declared here.
+  var
+    nativeForEach      = ArrayProto.forEach,
+    nativeMap          = ArrayProto.map,
+    nativeReduce       = ArrayProto.reduce,
+    nativeReduceRight  = ArrayProto.reduceRight,
+    nativeFilter       = ArrayProto.filter,
+    nativeEvery        = ArrayProto.every,
+    nativeSome         = ArrayProto.some,
+    nativeIndexOf      = ArrayProto.indexOf,
+    nativeLastIndexOf  = ArrayProto.lastIndexOf,
+    nativeIsArray      = Array.isArray,
+    nativeKeys         = Object.keys,
+    nativeBind         = FuncProto.bind;
+
+  // Create a safe reference to the Underscore object for use below.
+  var _ = function(obj) {
+    if (obj instanceof _) return obj;
+    if (!(this instanceof _)) return new _(obj);
+    this._wrapped = obj;
+  };
+
+  // Export the Underscore object for **Node.js**, with
+  // backwards-compatibility for the old `require()` API. If we're in
+  // the browser, add `_` as a global object via a string identifier,
+  // for Closure Compiler "advanced" mode.
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = _;
+    }
+    exports._ = _;
+  } else {
+    root._ = _;
+  }
+
+  // Current version.
+  _.VERSION = '1.6.0';
+
+  // Collection Functions
+  // --------------------
+
+  // The cornerstone, an `each` implementation, aka `forEach`.
+  // Handles objects with the built-in `forEach`, arrays, and raw objects.
+  // Delegates to **ECMAScript 5**'s native `forEach` if available.
+  var each = _.each = _.forEach = function(obj, iterator, context) {
+    if (obj == null) return obj;
+    if (nativeForEach && obj.forEach === nativeForEach) {
+      obj.forEach(iterator, context);
+    } else if (obj.length === +obj.length) {
+      for (var i = 0, length = obj.length; i < length; i++) {
+        if (iterator.call(context, obj[i], i, obj) === breaker) return;
+      }
+    } else {
+      var keys = _.keys(obj);
+      for (var i = 0, length = keys.length; i < length; i++) {
+        if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
+      }
+    }
+    return obj;
+  };
+
+  // Return the results of applying the iterator to each element.
+  // Delegates to **ECMAScript 5**'s native `map` if available.
+  _.map = _.collect = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
+    each(obj, function(value, index, list) {
+      results.push(iterator.call(context, value, index, list));
+    });
+    return results;
+  };
+
+  var reduceError = 'Reduce of empty array with no initial value';
+
+  // **Reduce** builds up a single result from a list of values, aka `inject`,
+  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
+  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
+    var initial = arguments.length > 2;
+    if (obj == null) obj = [];
+    if (nativeReduce && obj.reduce === nativeReduce) {
+      if (context) iterator = _.bind(iterator, context);
+      return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
+    }
+    each(obj, function(value, index, list) {
+      if (!initial) {
+        memo = value;
+        initial = true;
+      } else {
+        memo = iterator.call(context, memo, value, index, list);
+      }
+    });
+    if (!initial) throw new TypeError(reduceError);
+    return memo;
+  };
+
+  // The right-associative version of reduce, also known as `foldr`.
+  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
+  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
+    var initial = arguments.length > 2;
+    if (obj == null) obj = [];
+    if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
+      if (context) iterator = _.bind(iterator, context);
+      return initial ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
+    }
+    var length = obj.length;
+    if (length !== +length) {
+      var keys = _.keys(obj);
+      length = keys.length;
+    }
+    each(obj, function(value, index, list) {
+      index = keys ? keys[--length] : --length;
+      if (!initial) {
+        memo = obj[index];
+        initial = true;
+      } else {
+        memo = iterator.call(context, memo, obj[index], index, list);
+      }
+    });
+    if (!initial) throw new TypeError(reduceError);
+    return memo;
+  };
+
+  // Return the first value which passes a truth test. Aliased as `detect`.
+  _.find = _.detect = function(obj, predicate, context) {
+    var result;
+    any(obj, function(value, index, list) {
+      if (predicate.call(context, value, index, list)) {
+        result = value;
+        return true;
+      }
+    });
+    return result;
+  };
+
+  // Return all the elements that pass a truth test.
+  // Delegates to **ECMAScript 5**'s native `filter` if available.
+  // Aliased as `select`.
+  _.filter = _.select = function(obj, predicate, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(predicate, context);
+    each(obj, function(value, index, list) {
+      if (predicate.call(context, value, index, list)) results.push(value);
+    });
+    return results;
+  };
+
+  // Return all the elements for which a truth test fails.
+  _.reject = function(obj, predicate, context) {
+    return _.filter(obj, function(value, index, list) {
+      return !predicate.call(context, value, index, list);
+    }, context);
+  };
+
+  // Determine whether all of the elements match a truth test.
+  // Delegates to **ECMAScript 5**'s native `every` if available.
+  // Aliased as `all`.
+  _.every = _.all = function(obj, predicate, context) {
+    predicate || (predicate = _.identity);
+    var result = true;
+    if (obj == null) return result;
+    if (nativeEvery && obj.every === nativeEvery) return obj.every(predicate, context);
+    each(obj, function(value, index, list) {
+      if (!(result = result && predicate.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
+  };
+
+  // Determine if at least one element in the object matches a truth test.
+  // Delegates to **ECMAScript 5**'s native `some` if available.
+  // Aliased as `any`.
+  var any = _.some = _.any = function(obj, predicate, context) {
+    predicate || (predicate = _.identity);
+    var result = false;
+    if (obj == null) return result;
+    if (nativeSome && obj.some === nativeSome) return obj.some(predicate, context);
+    each(obj, function(value, index, list) {
+      if (result || (result = predicate.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
+  };
+
+  // Determine if the array or object contains a given value (using `===`).
+  // Aliased as `include`.
+  _.contains = _.include = function(obj, target) {
+    if (obj == null) return false;
+    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
+    return any(obj, function(value) {
+      return value === target;
+    });
+  };
+
+  // Invoke a method (with arguments) on every item in a collection.
+  _.invoke = function(obj, method) {
+    var args = slice.call(arguments, 2);
+    var isFunc = _.isFunction(method);
+    return _.map(obj, function(value) {
+      return (isFunc ? method : value[method]).apply(value, args);
+    });
+  };
+
+  // Convenience version of a common use case of `map`: fetching a property.
+  _.pluck = function(obj, key) {
+    return _.map(obj, _.property(key));
+  };
+
+  // Convenience version of a common use case of `filter`: selecting only objects
+  // containing specific `key:value` pairs.
+  _.where = function(obj, attrs) {
+    return _.filter(obj, _.matches(attrs));
+  };
+
+  // Convenience version of a common use case of `find`: getting the first object
+  // containing specific `key:value` pairs.
+  _.findWhere = function(obj, attrs) {
+    return _.find(obj, _.matches(attrs));
+  };
+
+  // Return the maximum element or (element-based computation).
+  // Can't optimize arrays of integers longer than 65,535 elements.
+  // See [WebKit Bug 80797](https://bugs.webkit.org/show_bug.cgi?id=80797)
+  _.max = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+      return Math.max.apply(Math, obj);
+    }
+    var result = -Infinity, lastComputed = -Infinity;
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      if (computed > lastComputed) {
+        result = value;
+        lastComputed = computed;
+      }
+    });
+    return result;
+  };
+
+  // Return the minimum element (or element-based computation).
+  _.min = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+      return Math.min.apply(Math, obj);
+    }
+    var result = Infinity, lastComputed = Infinity;
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      if (computed < lastComputed) {
+        result = value;
+        lastComputed = computed;
+      }
+    });
+    return result;
+  };
+
+  // Shuffle an array, using the modern version of the
+  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
+  _.shuffle = function(obj) {
+    var rand;
+    var index = 0;
+    var shuffled = [];
+    each(obj, function(value) {
+      rand = _.random(index++);
+      shuffled[index - 1] = shuffled[rand];
+      shuffled[rand] = value;
+    });
+    return shuffled;
+  };
+
+  // Sample **n** random values from a collection.
+  // If **n** is not specified, returns a single random element.
+  // The internal `guard` argument allows it to work with `map`.
+  _.sample = function(obj, n, guard) {
+    if (n == null || guard) {
+      if (obj.length !== +obj.length) obj = _.values(obj);
+      return obj[_.random(obj.length - 1)];
+    }
+    return _.shuffle(obj).slice(0, Math.max(0, n));
+  };
+
+  // An internal function to generate lookup iterators.
+  var lookupIterator = function(value) {
+    if (value == null) return _.identity;
+    if (_.isFunction(value)) return value;
+    return _.property(value);
+  };
+
+  // Sort the object's values by a criterion produced by an iterator.
+  _.sortBy = function(obj, iterator, context) {
+    iterator = lookupIterator(iterator);
+    return _.pluck(_.map(obj, function(value, index, list) {
+      return {
+        value: value,
+        index: index,
+        criteria: iterator.call(context, value, index, list)
+      };
+    }).sort(function(left, right) {
+      var a = left.criteria;
+      var b = right.criteria;
+      if (a !== b) {
+        if (a > b || a === void 0) return 1;
+        if (a < b || b === void 0) return -1;
+      }
+      return left.index - right.index;
+    }), 'value');
+  };
+
+  // An internal function used for aggregate "group by" operations.
+  var group = function(behavior) {
+    return function(obj, iterator, context) {
+      var result = {};
+      iterator = lookupIterator(iterator);
+      each(obj, function(value, index) {
+        var key = iterator.call(context, value, index, obj);
+        behavior(result, key, value);
+      });
+      return result;
+    };
+  };
+
+  // Groups the object's values by a criterion. Pass either a string attribute
+  // to group by, or a function that returns the criterion.
+  _.groupBy = group(function(result, key, value) {
+    _.has(result, key) ? result[key].push(value) : result[key] = [value];
+  });
+
+  // Indexes the object's values by a criterion, similar to `groupBy`, but for
+  // when you know that your index values will be unique.
+  _.indexBy = group(function(result, key, value) {
+    result[key] = value;
+  });
+
+  // Counts instances of an object that group by a certain criterion. Pass
+  // either a string attribute to count by, or a function that returns the
+  // criterion.
+  _.countBy = group(function(result, key) {
+    _.has(result, key) ? result[key]++ : result[key] = 1;
+  });
+
+  // Use a comparator function to figure out the smallest index at which
+  // an object should be inserted so as to maintain order. Uses binary search.
+  _.sortedIndex = function(array, obj, iterator, context) {
+    iterator = lookupIterator(iterator);
+    var value = iterator.call(context, obj);
+    var low = 0, high = array.length;
+    while (low < high) {
+      var mid = (low + high) >>> 1;
+      iterator.call(context, array[mid]) < value ? low = mid + 1 : high = mid;
+    }
+    return low;
+  };
+
+  // Safely create a real, live array from anything iterable.
+  _.toArray = function(obj) {
+    if (!obj) return [];
+    if (_.isArray(obj)) return slice.call(obj);
+    if (obj.length === +obj.length) return _.map(obj, _.identity);
+    return _.values(obj);
+  };
+
+  // Return the number of elements in an object.
+  _.size = function(obj) {
+    if (obj == null) return 0;
+    return (obj.length === +obj.length) ? obj.length : _.keys(obj).length;
+  };
+
+  // Array Functions
+  // ---------------
+
+  // Get the first element of an array. Passing **n** will return the first N
+  // values in the array. Aliased as `head` and `take`. The **guard** check
+  // allows it to work with `_.map`.
+  _.first = _.head = _.take = function(array, n, guard) {
+    if (array == null) return void 0;
+    if ((n == null) || guard) return array[0];
+    if (n < 0) return [];
+    return slice.call(array, 0, n);
+  };
+
+  // Returns everything but the last entry of the array. Especially useful on
+  // the arguments object. Passing **n** will return all the values in
+  // the array, excluding the last N. The **guard** check allows it to work with
+  // `_.map`.
+  _.initial = function(array, n, guard) {
+    return slice.call(array, 0, array.length - ((n == null) || guard ? 1 : n));
+  };
+
+  // Get the last element of an array. Passing **n** will return the last N
+  // values in the array. The **guard** check allows it to work with `_.map`.
+  _.last = function(array, n, guard) {
+    if (array == null) return void 0;
+    if ((n == null) || guard) return array[array.length - 1];
+    return slice.call(array, Math.max(array.length - n, 0));
+  };
+
+  // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
+  // Especially useful on the arguments object. Passing an **n** will return
+  // the rest N values in the array. The **guard**
+  // check allows it to work with `_.map`.
+  _.rest = _.tail = _.drop = function(array, n, guard) {
+    return slice.call(array, (n == null) || guard ? 1 : n);
+  };
+
+  // Trim out all falsy values from an array.
+  _.compact = function(array) {
+    return _.filter(array, _.identity);
+  };
+
+  // Internal implementation of a recursive `flatten` function.
+  var flatten = function(input, shallow, output) {
+    if (shallow && _.every(input, _.isArray)) {
+      return concat.apply(output, input);
+    }
+    each(input, function(value) {
+      if (_.isArray(value) || _.isArguments(value)) {
+        shallow ? push.apply(output, value) : flatten(value, shallow, output);
+      } else {
+        output.push(value);
+      }
+    });
+    return output;
+  };
+
+  // Flatten out an array, either recursively (by default), or just one level.
+  _.flatten = function(array, shallow) {
+    return flatten(array, shallow, []);
+  };
+
+  // Return a version of the array that does not contain the specified value(s).
+  _.without = function(array) {
+    return _.difference(array, slice.call(arguments, 1));
+  };
+
+  // Split an array into two arrays: one whose elements all satisfy the given
+  // predicate, and one whose elements all do not satisfy the predicate.
+  _.partition = function(array, predicate) {
+    var pass = [], fail = [];
+    each(array, function(elem) {
+      (predicate(elem) ? pass : fail).push(elem);
+    });
+    return [pass, fail];
+  };
+
+  // Produce a duplicate-free version of the array. If the array has already
+  // been sorted, you have the option of using a faster algorithm.
+  // Aliased as `unique`.
+  _.uniq = _.unique = function(array, isSorted, iterator, context) {
+    if (_.isFunction(isSorted)) {
+      context = iterator;
+      iterator = isSorted;
+      isSorted = false;
+    }
+    var initial = iterator ? _.map(array, iterator, context) : array;
+    var results = [];
+    var seen = [];
+    each(initial, function(value, index) {
+      if (isSorted ? (!index || seen[seen.length - 1] !== value) : !_.contains(seen, value)) {
+        seen.push(value);
+        results.push(array[index]);
+      }
+    });
+    return results;
+  };
+
+  // Produce an array that contains the union: each distinct element from all of
+  // the passed-in arrays.
+  _.union = function() {
+    return _.uniq(_.flatten(arguments, true));
+  };
+
+  // Produce an array that contains every item shared between all the
+  // passed-in arrays.
+  _.intersection = function(array) {
+    var rest = slice.call(arguments, 1);
+    return _.filter(_.uniq(array), function(item) {
+      return _.every(rest, function(other) {
+        return _.contains(other, item);
+      });
+    });
+  };
+
+  // Take the difference between one array and a number of other arrays.
+  // Only the elements present in just the first array will remain.
+  _.difference = function(array) {
+    var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
+    return _.filter(array, function(value){ return !_.contains(rest, value); });
+  };
+
+  // Zip together multiple lists into a single array -- elements that share
+  // an index go together.
+  _.zip = function() {
+    var length = _.max(_.pluck(arguments, 'length').concat(0));
+    var results = new Array(length);
+    for (var i = 0; i < length; i++) {
+      results[i] = _.pluck(arguments, '' + i);
+    }
+    return results;
+  };
+
+  // Converts lists into objects. Pass either a single array of `[key, value]`
+  // pairs, or two parallel arrays of the same length -- one of keys, and one of
+  // the corresponding values.
+  _.object = function(list, values) {
+    if (list == null) return {};
+    var result = {};
+    for (var i = 0, length = list.length; i < length; i++) {
+      if (values) {
+        result[list[i]] = values[i];
+      } else {
+        result[list[i][0]] = list[i][1];
+      }
+    }
+    return result;
+  };
+
+  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
+  // we need this function. Return the position of the first occurrence of an
+  // item in an array, or -1 if the item is not included in the array.
+  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
+  // If the array is large and already in sort order, pass `true`
+  // for **isSorted** to use binary search.
+  _.indexOf = function(array, item, isSorted) {
+    if (array == null) return -1;
+    var i = 0, length = array.length;
+    if (isSorted) {
+      if (typeof isSorted == 'number') {
+        i = (isSorted < 0 ? Math.max(0, length + isSorted) : isSorted);
+      } else {
+        i = _.sortedIndex(array, item);
+        return array[i] === item ? i : -1;
+      }
+    }
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
+    for (; i < length; i++) if (array[i] === item) return i;
+    return -1;
+  };
+
+  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
+  _.lastIndexOf = function(array, item, from) {
+    if (array == null) return -1;
+    var hasIndex = from != null;
+    if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) {
+      return hasIndex ? array.lastIndexOf(item, from) : array.lastIndexOf(item);
+    }
+    var i = (hasIndex ? from : array.length);
+    while (i--) if (array[i] === item) return i;
+    return -1;
+  };
+
+  // Generate an integer Array containing an arithmetic progression. A port of
+  // the native Python `range()` function. See
+  // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  _.range = function(start, stop, step) {
+    if (arguments.length <= 1) {
+      stop = start || 0;
+      start = 0;
+    }
+    step = arguments[2] || 1;
+
+    var length = Math.max(Math.ceil((stop - start) / step), 0);
+    var idx = 0;
+    var range = new Array(length);
+
+    while(idx < length) {
+      range[idx++] = start;
+      start += step;
+    }
+
+    return range;
+  };
+
+  // Function (ahem) Functions
+  // ------------------
+
+  // Reusable constructor function for prototype setting.
+  var ctor = function(){};
+
+  // Create a function bound to a given object (assigning `this`, and arguments,
+  // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
+  // available.
+  _.bind = function(func, context) {
+    var args, bound;
+    if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
+    if (!_.isFunction(func)) throw new TypeError;
+    args = slice.call(arguments, 2);
+    return bound = function() {
+      if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
+      ctor.prototype = func.prototype;
+      var self = new ctor;
+      ctor.prototype = null;
+      var result = func.apply(self, args.concat(slice.call(arguments)));
+      if (Object(result) === result) return result;
+      return self;
+    };
+  };
+
+  // Partially apply a function by creating a version that has had some of its
+  // arguments pre-filled, without changing its dynamic `this` context. _ acts
+  // as a placeholder, allowing any combination of arguments to be pre-filled.
+  _.partial = function(func) {
+    var boundArgs = slice.call(arguments, 1);
+    return function() {
+      var position = 0;
+      var args = boundArgs.slice();
+      for (var i = 0, length = args.length; i < length; i++) {
+        if (args[i] === _) args[i] = arguments[position++];
+      }
+      while (position < arguments.length) args.push(arguments[position++]);
+      return func.apply(this, args);
+    };
+  };
+
+  // Bind a number of an object's methods to that object. Remaining arguments
+  // are the method names to be bound. Useful for ensuring that all callbacks
+  // defined on an object belong to it.
+  _.bindAll = function(obj) {
+    var funcs = slice.call(arguments, 1);
+    if (funcs.length === 0) throw new Error('bindAll must be passed function names');
+    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
+    return obj;
+  };
+
+  // Memoize an expensive function by storing its results.
+  _.memoize = function(func, hasher) {
+    var memo = {};
+    hasher || (hasher = _.identity);
+    return function() {
+      var key = hasher.apply(this, arguments);
+      return _.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
+    };
+  };
+
+  // Delays a function for the given number of milliseconds, and then calls
+  // it with the arguments supplied.
+  _.delay = function(func, wait) {
+    var args = slice.call(arguments, 2);
+    return setTimeout(function(){ return func.apply(null, args); }, wait);
+  };
+
+  // Defers a function, scheduling it to run after the current call stack has
+  // cleared.
+  _.defer = function(func) {
+    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
+  };
+
+  // Returns a function, that, when invoked, will only be triggered at most once
+  // during a given window of time. Normally, the throttled function will run
+  // as much as it can, without ever going more than once per `wait` duration;
+  // but if you'd like to disable the execution on the leading edge, pass
+  // `{leading: false}`. To disable execution on the trailing edge, ditto.
+  _.throttle = function(func, wait, options) {
+    var context, args, result;
+    var timeout = null;
+    var previous = 0;
+    options || (options = {});
+    var later = function() {
+      previous = options.leading === false ? 0 : _.now();
+      timeout = null;
+      result = func.apply(context, args);
+      context = args = null;
+    };
+    return function() {
+      var now = _.now();
+      if (!previous && options.leading === false) previous = now;
+      var remaining = wait - (now - previous);
+      context = this;
+      args = arguments;
+      if (remaining <= 0) {
+        clearTimeout(timeout);
+        timeout = null;
+        previous = now;
+        result = func.apply(context, args);
+        context = args = null;
+      } else if (!timeout && options.trailing !== false) {
+        timeout = setTimeout(later, remaining);
+      }
+      return result;
+    };
+  };
+
+  // Returns a function, that, as long as it continues to be invoked, will not
+  // be triggered. The function will be called after it stops being called for
+  // N milliseconds. If `immediate` is passed, trigger the function on the
+  // leading edge, instead of the trailing.
+  _.debounce = function(func, wait, immediate) {
+    var timeout, args, context, timestamp, result;
+
+    var later = function() {
+      var last = _.now() - timestamp;
+      if (last < wait) {
+        timeout = setTimeout(later, wait - last);
+      } else {
+        timeout = null;
+        if (!immediate) {
+          result = func.apply(context, args);
+          context = args = null;
+        }
+      }
+    };
+
+    return function() {
+      context = this;
+      args = arguments;
+      timestamp = _.now();
+      var callNow = immediate && !timeout;
+      if (!timeout) {
+        timeout = setTimeout(later, wait);
+      }
+      if (callNow) {
+        result = func.apply(context, args);
+        context = args = null;
+      }
+
+      return result;
+    };
+  };
+
+  // Returns a function that will be executed at most one time, no matter how
+  // often you call it. Useful for lazy initialization.
+  _.once = function(func) {
+    var ran = false, memo;
+    return function() {
+      if (ran) return memo;
+      ran = true;
+      memo = func.apply(this, arguments);
+      func = null;
+      return memo;
+    };
+  };
+
+  // Returns the first function passed as an argument to the second,
+  // allowing you to adjust arguments, run code before and after, and
+  // conditionally execute the original function.
+  _.wrap = function(func, wrapper) {
+    return _.partial(wrapper, func);
+  };
+
+  // Returns a function that is the composition of a list of functions, each
+  // consuming the return value of the function that follows.
+  _.compose = function() {
+    var funcs = arguments;
+    return function() {
+      var args = arguments;
+      for (var i = funcs.length - 1; i >= 0; i--) {
+        args = [funcs[i].apply(this, args)];
+      }
+      return args[0];
+    };
+  };
+
+  // Returns a function that will only be executed after being called N times.
+  _.after = function(times, func) {
+    return function() {
+      if (--times < 1) {
+        return func.apply(this, arguments);
+      }
+    };
+  };
+
+  // Object Functions
+  // ----------------
+
+  // Retrieve the names of an object's properties.
+  // Delegates to **ECMAScript 5**'s native `Object.keys`
+  _.keys = function(obj) {
+    if (!_.isObject(obj)) return [];
+    if (nativeKeys) return nativeKeys(obj);
+    var keys = [];
+    for (var key in obj) if (_.has(obj, key)) keys.push(key);
+    return keys;
+  };
+
+  // Retrieve the values of an object's properties.
+  _.values = function(obj) {
+    var keys = _.keys(obj);
+    var length = keys.length;
+    var values = new Array(length);
+    for (var i = 0; i < length; i++) {
+      values[i] = obj[keys[i]];
+    }
+    return values;
+  };
+
+  // Convert an object into a list of `[key, value]` pairs.
+  _.pairs = function(obj) {
+    var keys = _.keys(obj);
+    var length = keys.length;
+    var pairs = new Array(length);
+    for (var i = 0; i < length; i++) {
+      pairs[i] = [keys[i], obj[keys[i]]];
+    }
+    return pairs;
+  };
+
+  // Invert the keys and values of an object. The values must be serializable.
+  _.invert = function(obj) {
+    var result = {};
+    var keys = _.keys(obj);
+    for (var i = 0, length = keys.length; i < length; i++) {
+      result[obj[keys[i]]] = keys[i];
+    }
+    return result;
+  };
+
+  // Return a sorted list of the function names available on the object.
+  // Aliased as `methods`
+  _.functions = _.methods = function(obj) {
+    var names = [];
+    for (var key in obj) {
+      if (_.isFunction(obj[key])) names.push(key);
+    }
+    return names.sort();
+  };
+
+  // Extend a given object with all the properties in passed-in object(s).
+  _.extend = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      if (source) {
+        for (var prop in source) {
+          obj[prop] = source[prop];
+        }
+      }
+    });
+    return obj;
+  };
+
+  // Return a copy of the object only containing the whitelisted properties.
+  _.pick = function(obj) {
+    var copy = {};
+    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
+    each(keys, function(key) {
+      if (key in obj) copy[key] = obj[key];
+    });
+    return copy;
+  };
+
+   // Return a copy of the object without the blacklisted properties.
+  _.omit = function(obj) {
+    var copy = {};
+    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
+    for (var key in obj) {
+      if (!_.contains(keys, key)) copy[key] = obj[key];
+    }
+    return copy;
+  };
+
+  // Fill in a given object with default properties.
+  _.defaults = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      if (source) {
+        for (var prop in source) {
+          if (obj[prop] === void 0) obj[prop] = source[prop];
+        }
+      }
+    });
+    return obj;
+  };
+
+  // Create a (shallow-cloned) duplicate of an object.
+  _.clone = function(obj) {
+    if (!_.isObject(obj)) return obj;
+    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
+  };
+
+  // Invokes interceptor with the obj, and then returns obj.
+  // The primary purpose of this method is to "tap into" a method chain, in
+  // order to perform operations on intermediate results within the chain.
+  _.tap = function(obj, interceptor) {
+    interceptor(obj);
+    return obj;
+  };
+
+  // Internal recursive comparison function for `isEqual`.
+  var eq = function(a, b, aStack, bStack) {
+    // Identical objects are equal. `0 === -0`, but they aren't identical.
+    // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
+    if (a === b) return a !== 0 || 1 / a == 1 / b;
+    // A strict comparison is necessary because `null == undefined`.
+    if (a == null || b == null) return a === b;
+    // Unwrap any wrapped objects.
+    if (a instanceof _) a = a._wrapped;
+    if (b instanceof _) b = b._wrapped;
+    // Compare `[[Class]]` names.
+    var className = toString.call(a);
+    if (className != toString.call(b)) return false;
+    switch (className) {
+      // Strings, numbers, dates, and booleans are compared by value.
+      case '[object String]':
+        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
+        // equivalent to `new String("5")`.
+        return a == String(b);
+      case '[object Number]':
+        // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
+        // other numeric values.
+        return a != +a ? b != +b : (a == 0 ? 1 / a == 1 / b : a == +b);
+      case '[object Date]':
+      case '[object Boolean]':
+        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
+        // millisecond representations. Note that invalid dates with millisecond representations
+        // of `NaN` are not equivalent.
+        return +a == +b;
+      // RegExps are compared by their source patterns and flags.
+      case '[object RegExp]':
+        return a.source == b.source &&
+               a.global == b.global &&
+               a.multiline == b.multiline &&
+               a.ignoreCase == b.ignoreCase;
+    }
+    if (typeof a != 'object' || typeof b != 'object') return false;
+    // Assume equality for cyclic structures. The algorithm for detecting cyclic
+    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+    var length = aStack.length;
+    while (length--) {
+      // Linear search. Performance is inversely proportional to the number of
+      // unique nested structures.
+      if (aStack[length] == a) return bStack[length] == b;
+    }
+    // Objects with different constructors are not equivalent, but `Object`s
+    // from different frames are.
+    var aCtor = a.constructor, bCtor = b.constructor;
+    if (aCtor !== bCtor && !(_.isFunction(aCtor) && (aCtor instanceof aCtor) &&
+                             _.isFunction(bCtor) && (bCtor instanceof bCtor))
+                        && ('constructor' in a && 'constructor' in b)) {
+      return false;
+    }
+    // Add the first object to the stack of traversed objects.
+    aStack.push(a);
+    bStack.push(b);
+    var size = 0, result = true;
+    // Recursively compare objects and arrays.
+    if (className == '[object Array]') {
+      // Compare array lengths to determine if a deep comparison is necessary.
+      size = a.length;
+      result = size == b.length;
+      if (result) {
+        // Deep compare the contents, ignoring non-numeric properties.
+        while (size--) {
+          if (!(result = eq(a[size], b[size], aStack, bStack))) break;
+        }
+      }
+    } else {
+      // Deep compare objects.
+      for (var key in a) {
+        if (_.has(a, key)) {
+          // Count the expected number of properties.
+          size++;
+          // Deep compare each member.
+          if (!(result = _.has(b, key) && eq(a[key], b[key], aStack, bStack))) break;
+        }
+      }
+      // Ensure that both objects contain the same number of properties.
+      if (result) {
+        for (key in b) {
+          if (_.has(b, key) && !(size--)) break;
+        }
+        result = !size;
+      }
+    }
+    // Remove the first object from the stack of traversed objects.
+    aStack.pop();
+    bStack.pop();
+    return result;
+  };
+
+  // Perform a deep comparison to check if two objects are equal.
+  _.isEqual = function(a, b) {
+    return eq(a, b, [], []);
+  };
+
+  // Is a given array, string, or object empty?
+  // An "empty" object has no enumerable own-properties.
+  _.isEmpty = function(obj) {
+    if (obj == null) return true;
+    if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
+    for (var key in obj) if (_.has(obj, key)) return false;
+    return true;
+  };
+
+  // Is a given value a DOM element?
+  _.isElement = function(obj) {
+    return !!(obj && obj.nodeType === 1);
+  };
+
+  // Is a given value an array?
+  // Delegates to ECMA5's native Array.isArray
+  _.isArray = nativeIsArray || function(obj) {
+    return toString.call(obj) == '[object Array]';
+  };
+
+  // Is a given variable an object?
+  _.isObject = function(obj) {
+    return obj === Object(obj);
+  };
+
+  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp.
+  each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function(name) {
+    _['is' + name] = function(obj) {
+      return toString.call(obj) == '[object ' + name + ']';
+    };
+  });
+
+  // Define a fallback version of the method in browsers (ahem, IE), where
+  // there isn't any inspectable "Arguments" type.
+  if (!_.isArguments(arguments)) {
+    _.isArguments = function(obj) {
+      return !!(obj && _.has(obj, 'callee'));
+    };
+  }
+
+  // Optimize `isFunction` if appropriate.
+  if (typeof (/./) !== 'function') {
+    _.isFunction = function(obj) {
+      return typeof obj === 'function';
+    };
+  }
+
+  // Is a given object a finite number?
+  _.isFinite = function(obj) {
+    return isFinite(obj) && !isNaN(parseFloat(obj));
+  };
+
+  // Is the given value `NaN`? (NaN is the only number which does not equal itself).
+  _.isNaN = function(obj) {
+    return _.isNumber(obj) && obj != +obj;
+  };
+
+  // Is a given value a boolean?
+  _.isBoolean = function(obj) {
+    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
+  };
+
+  // Is a given value equal to null?
+  _.isNull = function(obj) {
+    return obj === null;
+  };
+
+  // Is a given variable undefined?
+  _.isUndefined = function(obj) {
+    return obj === void 0;
+  };
+
+  // Shortcut function for checking if an object has a given property directly
+  // on itself (in other words, not on a prototype).
+  _.has = function(obj, key) {
+    return hasOwnProperty.call(obj, key);
+  };
+
+  // Utility Functions
+  // -----------------
+
+  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
+  // previous owner. Returns a reference to the Underscore object.
+  _.noConflict = function() {
+    root._ = previousUnderscore;
+    return this;
+  };
+
+  // Keep the identity function around for default iterators.
+  _.identity = function(value) {
+    return value;
+  };
+
+  _.constant = function(value) {
+    return function () {
+      return value;
+    };
+  };
+
+  _.property = function(key) {
+    return function(obj) {
+      return obj[key];
+    };
+  };
+
+  // Returns a predicate for checking whether an object has a given set of `key:value` pairs.
+  _.matches = function(attrs) {
+    return function(obj) {
+      if (obj === attrs) return true; //avoid comparing an object to itself.
+      for (var key in attrs) {
+        if (attrs[key] !== obj[key])
+          return false;
+      }
+      return true;
+    }
+  };
+
+  // Run a function **n** times.
+  _.times = function(n, iterator, context) {
+    var accum = Array(Math.max(0, n));
+    for (var i = 0; i < n; i++) accum[i] = iterator.call(context, i);
+    return accum;
+  };
+
+  // Return a random integer between min and max (inclusive).
+  _.random = function(min, max) {
+    if (max == null) {
+      max = min;
+      min = 0;
+    }
+    return min + Math.floor(Math.random() * (max - min + 1));
+  };
+
+  // A (possibly faster) way to get the current timestamp as an integer.
+  _.now = Date.now || function() { return new Date().getTime(); };
+
+  // List of HTML entities for escaping.
+  var entityMap = {
+    escape: {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;'
+    }
+  };
+  entityMap.unescape = _.invert(entityMap.escape);
+
+  // Regexes containing the keys and values listed immediately above.
+  var entityRegexes = {
+    escape:   new RegExp('[' + _.keys(entityMap.escape).join('') + ']', 'g'),
+    unescape: new RegExp('(' + _.keys(entityMap.unescape).join('|') + ')', 'g')
+  };
+
+  // Functions for escaping and unescaping strings to/from HTML interpolation.
+  _.each(['escape', 'unescape'], function(method) {
+    _[method] = function(string) {
+      if (string == null) return '';
+      return ('' + string).replace(entityRegexes[method], function(match) {
+        return entityMap[method][match];
+      });
+    };
+  });
+
+  // If the value of the named `property` is a function then invoke it with the
+  // `object` as context; otherwise, return it.
+  _.result = function(object, property) {
+    if (object == null) return void 0;
+    var value = object[property];
+    return _.isFunction(value) ? value.call(object) : value;
+  };
+
+  // Add your own custom functions to the Underscore object.
+  _.mixin = function(obj) {
+    each(_.functions(obj), function(name) {
+      var func = _[name] = obj[name];
+      _.prototype[name] = function() {
+        var args = [this._wrapped];
+        push.apply(args, arguments);
+        return result.call(this, func.apply(_, args));
+      };
+    });
+  };
+
+  // Generate a unique integer id (unique within the entire client session).
+  // Useful for temporary DOM ids.
+  var idCounter = 0;
+  _.uniqueId = function(prefix) {
+    var id = ++idCounter + '';
+    return prefix ? prefix + id : id;
+  };
+
+  // By default, Underscore uses ERB-style template delimiters, change the
+  // following template settings to use alternative delimiters.
+  _.templateSettings = {
+    evaluate    : /<%([\s\S]+?)%>/g,
+    interpolate : /<%=([\s\S]+?)%>/g,
+    escape      : /<%-([\s\S]+?)%>/g
+  };
+
+  // When customizing `templateSettings`, if you don't want to define an
+  // interpolation, evaluation or escaping regex, we need one that is
+  // guaranteed not to match.
+  var noMatch = /(.)^/;
+
+  // Certain characters need to be escaped so that they can be put into a
+  // string literal.
+  var escapes = {
+    "'":      "'",
+    '\\':     '\\',
+    '\r':     'r',
+    '\n':     'n',
+    '\t':     't',
+    '\u2028': 'u2028',
+    '\u2029': 'u2029'
+  };
+
+  var escaper = /\\|'|\r|\n|\t|\u2028|\u2029/g;
+
+  // JavaScript micro-templating, similar to John Resig's implementation.
+  // Underscore templating handles arbitrary delimiters, preserves whitespace,
+  // and correctly escapes quotes within interpolated code.
+  _.template = function(text, data, settings) {
+    var render;
+    settings = _.defaults({}, settings, _.templateSettings);
+
+    // Combine delimiters into one regular expression via alternation.
+    var matcher = new RegExp([
+      (settings.escape || noMatch).source,
+      (settings.interpolate || noMatch).source,
+      (settings.evaluate || noMatch).source
+    ].join('|') + '|$', 'g');
+
+    // Compile the template source, escaping string literals appropriately.
+    var index = 0;
+    var source = "__p+='";
+    text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
+      source += text.slice(index, offset)
+        .replace(escaper, function(match) { return '\\' + escapes[match]; });
+
+      if (escape) {
+        source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
+      }
+      if (interpolate) {
+        source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
+      }
+      if (evaluate) {
+        source += "';\n" + evaluate + "\n__p+='";
+      }
+      index = offset + match.length;
+      return match;
+    });
+    source += "';\n";
+
+    // If a variable is not specified, place data values in local scope.
+    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
+
+    source = "var __t,__p='',__j=Array.prototype.join," +
+      "print=function(){__p+=__j.call(arguments,'');};\n" +
+      source + "return __p;\n";
+
+    try {
+      render = new Function(settings.variable || 'obj', '_', source);
+    } catch (e) {
+      e.source = source;
+      throw e;
+    }
+
+    if (data) return render(data, _);
+    var template = function(data) {
+      return render.call(this, data, _);
+    };
+
+    // Provide the compiled function source as a convenience for precompilation.
+    template.source = 'function(' + (settings.variable || 'obj') + '){\n' + source + '}';
+
+    return template;
+  };
+
+  // Add a "chain" function, which will delegate to the wrapper.
+  _.chain = function(obj) {
+    return _(obj).chain();
+  };
+
+  // OOP
+  // ---------------
+  // If Underscore is called as a function, it returns a wrapped object that
+  // can be used OO-style. This wrapper holds altered versions of all the
+  // underscore functions. Wrapped objects may be chained.
+
+  // Helper function to continue chaining intermediate results.
+  var result = function(obj) {
+    return this._chain ? _(obj).chain() : obj;
+  };
+
+  // Add all of the Underscore functions to the wrapper object.
+  _.mixin(_);
+
+  // Add all mutator Array functions to the wrapper.
+  each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
+    var method = ArrayProto[name];
+    _.prototype[name] = function() {
+      var obj = this._wrapped;
+      method.apply(obj, arguments);
+      if ((name == 'shift' || name == 'splice') && obj.length === 0) delete obj[0];
+      return result.call(this, obj);
+    };
+  });
+
+  // Add all accessor Array functions to the wrapper.
+  each(['concat', 'join', 'slice'], function(name) {
+    var method = ArrayProto[name];
+    _.prototype[name] = function() {
+      return result.call(this, method.apply(this._wrapped, arguments));
+    };
+  });
+
+  _.extend(_.prototype, {
+
+    // Start chaining a wrapped Underscore object.
+    chain: function() {
+      this._chain = true;
+      return this;
+    },
+
+    // Extracts the result from a wrapped and chained object.
+    value: function() {
+      return this._wrapped;
+    }
+
+  });
+
+  // AMD registration happens at the end for compatibility with AMD loaders
+  // that may not enforce next-turn semantics on modules. Even though general
+  // practice for AMD registration is to be anonymous, underscore registers
+  // as a named module because, like jQuery, it is a base library that is
+  // popular enough to be bundled in a third party lib, but not be part of
+  // an AMD load request. Those cases could generate an error when an
+  // anonymous define() is called outside of a loader request.
+  if (typeof define === 'function' && define.amd) {
+    define('underscore', [], function() {
+      return _;
+    });
+  }
+}).call(this);
+
+//     Backbone.js 1.1.2
 
 //     (c) 2010-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 //     Backbone may be freely distributed under the MIT license.
@@ -12640,7 +12640,7 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 
 }));
 
-;// Backbone.Wreqr (Backbone.Marionette)
+// Backbone.Wreqr (Backbone.Marionette)
 // ----------------------------------
 // v1.0.0
 //
@@ -12907,2014 +12907,230 @@ Wreqr.EventAggregator = (function(Backbone, _){
   return Wreqr;
 })(Backbone, Backbone.Marionette, _);
 
-;/*!
- * Bootstrap v3.0.3 (http://getbootstrap.com)
- * Copyright 2013 Twitter, Inc.
- * Licensed under http://www.apache.org/licenses/LICENSE-2.0
+/**
+ * Backbone localStorage Adapter
+ * Version 1.1.7
+ *
+ * https://github.com/jeromegn/Backbone.localStorage
  */
+(function (root, factory) {
+   if (typeof exports === 'object' && typeof require === 'function') {
+     module.exports = factory(require("underscore"), require("backbone"));
+   } else if (typeof define === "function" && define.amd) {
+      // AMD. Register as an anonymous module.
+      define(["underscore","backbone"], function(_, Backbone) {
+        // Use global variables if the locals are undefined.
+        return factory(_ || root._, Backbone || root.Backbone);
+      });
+   } else {
+      // RequireJS isn't being used. Assume underscore and backbone are loaded in <script> tags
+      factory(_, Backbone);
+   }
+}(this, function(_, Backbone) {
+// A simple module to replace `Backbone.sync` with *localStorage*-based
+// persistence. Models are given GUIDS, and saved into a JSON object. Simple
+// as that.
 
-if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery") }
+// Hold reference to Underscore.js and Backbone.js in the closure in order
+// to make things work even if they are removed from the global namespace
 
-/* ========================================================================
- * Bootstrap: transition.js v3.0.3
- * http://getbootstrap.com/javascript/#transitions
- * ========================================================================
- * Copyright 2013 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ======================================================================== */
+// Generate four random hex digits.
+function S4() {
+   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+};
 
+// Generate a pseudo-GUID by concatenating random hexadecimal.
+function guid() {
+   return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+};
 
-+function ($) { "use strict";
+// Our Store is represented by a single JS object in *localStorage*. Create it
+// with a meaningful name, like the name you'd give a table.
+// window.Store is deprectated, use Backbone.LocalStorage instead
+Backbone.LocalStorage = window.Store = function(name) {
+  if( !this.localStorage ) {
+    throw "Backbone.localStorage: Environment does not support localStorage."
+  }
+  this.name = name;
+  var store = this.localStorage().getItem(this.name);
+  this.records = (store && store.split(",")) || [];
+};
 
-  // CSS TRANSITION SUPPORT (Shoutout: http://www.modernizr.com/)
-  // ============================================================
+_.extend(Backbone.LocalStorage.prototype, {
 
-  function transitionEnd() {
-    var el = document.createElement('bootstrap')
+  // Save the current state of the **Store** to *localStorage*.
+  save: function() {
+    this.localStorage().setItem(this.name, this.records.join(","));
+  },
 
-    var transEndEventNames = {
-      'WebkitTransition' : 'webkitTransitionEnd'
-    , 'MozTransition'    : 'transitionend'
-    , 'OTransition'      : 'oTransitionEnd otransitionend'
-    , 'transition'       : 'transitionend'
+  // Add a model, giving it a (hopefully)-unique GUID, if it doesn't already
+  // have an id of it's own.
+  create: function(model) {
+    if (!model.id) {
+      model.id = guid();
+      model.set(model.idAttribute, model.id);
+    }
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    this.records.push(model.id.toString());
+    this.save();
+    return this.find(model);
+  },
+
+  // Update a model by replacing its copy in `this.data`.
+  update: function(model) {
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    if (!_.include(this.records, model.id.toString()))
+      this.records.push(model.id.toString()); this.save();
+    return this.find(model);
+  },
+
+  // Retrieve a model from `this.data` by id.
+  find: function(model) {
+    return this.jsonData(this.localStorage().getItem(this.name+"-"+model.id));
+  },
+
+  // Return the array of all models currently in storage.
+  findAll: function() {
+    // Lodash removed _#chain in v1.0.0-rc.1
+    return (_.chain || _)(this.records)
+      .map(function(id){
+        return this.jsonData(this.localStorage().getItem(this.name+"-"+id));
+      }, this)
+      .compact()
+      .value();
+  },
+
+  // Delete a model from `this.data`, returning it.
+  destroy: function(model) {
+    if (model.isNew())
+      return false
+    this.localStorage().removeItem(this.name+"-"+model.id);
+    this.records = _.reject(this.records, function(id){
+      return id === model.id.toString();
+    });
+    this.save();
+    return model;
+  },
+
+  localStorage: function() {
+    return localStorage;
+  },
+
+  // fix for "illegal access" error on Android when JSON.parse is passed null
+  jsonData: function (data) {
+      return data && JSON.parse(data);
+  },
+
+  // Clear localStorage for specific collection.
+  _clear: function() {
+    var local = this.localStorage(),
+      itemRe = new RegExp("^" + this.name + "-");
+
+    // Remove id-tracking item (e.g., "foo").
+    local.removeItem(this.name);
+
+    // Lodash removed _#chain in v1.0.0-rc.1
+    // Match all data items (e.g., "foo-ID") and remove.
+    (_.chain || _)(local).keys()
+      .filter(function (k) { return itemRe.test(k); })
+      .each(function (k) { local.removeItem(k); });
+
+    this.records.length = 0;
+  },
+
+  // Size of localStorage.
+  _storageSize: function() {
+    return this.localStorage().length;
+  }
+
+});
+
+// localSync delegate to the model or collection's
+// *localStorage* property, which should be an instance of `Store`.
+// window.Store.sync and Backbone.localSync is deprecated, use Backbone.LocalStorage.sync instead
+Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function(method, model, options) {
+  var store = model.localStorage || model.collection.localStorage;
+
+  var resp, errorMessage, syncDfd = Backbone.$.Deferred && Backbone.$.Deferred(); //If $ is having Deferred - use it.
+
+  try {
+
+    switch (method) {
+      case "read":
+        resp = model.id != undefined ? store.find(model) : store.findAll();
+        break;
+      case "create":
+        resp = store.create(model);
+        break;
+      case "update":
+        resp = store.update(model);
+        break;
+      case "delete":
+        resp = store.destroy(model);
+        break;
     }
 
-    for (var name in transEndEventNames) {
-      if (el.style[name] !== undefined) {
-        return { end: transEndEventNames[name] }
-      }
-    }
-  }
-
-  // http://blog.alexmaccaw.com/css-transitions
-  $.fn.emulateTransitionEnd = function (duration) {
-    var called = false, $el = this
-    $(this).one($.support.transition.end, function () { called = true })
-    var callback = function () { if (!called) $($el).trigger($.support.transition.end) }
-    setTimeout(callback, duration)
-    return this
-  }
-
-  $(function () {
-    $.support.transition = transitionEnd()
-  })
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: alert.js v3.0.3
- * http://getbootstrap.com/javascript/#alerts
- * ========================================================================
- * Copyright 2013 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ======================================================================== */
-
-
-+function ($) { "use strict";
-
-  // ALERT CLASS DEFINITION
-  // ======================
-
-  var dismiss = '[data-dismiss="alert"]'
-  var Alert   = function (el) {
-    $(el).on('click', dismiss, this.close)
-  }
-
-  Alert.prototype.close = function (e) {
-    var $this    = $(this)
-    var selector = $this.attr('data-target')
-
-    if (!selector) {
-      selector = $this.attr('href')
-      selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
-    }
-
-    var $parent = $(selector)
-
-    if (e) e.preventDefault()
-
-    if (!$parent.length) {
-      $parent = $this.hasClass('alert') ? $this : $this.parent()
-    }
-
-    $parent.trigger(e = $.Event('close.bs.alert'))
-
-    if (e.isDefaultPrevented()) return
-
-    $parent.removeClass('in')
-
-    function removeElement() {
-      $parent.trigger('closed.bs.alert').remove()
-    }
-
-    $.support.transition && $parent.hasClass('fade') ?
-      $parent
-        .one($.support.transition.end, removeElement)
-        .emulateTransitionEnd(150) :
-      removeElement()
-  }
-
-
-  // ALERT PLUGIN DEFINITION
-  // =======================
-
-  var old = $.fn.alert
-
-  $.fn.alert = function (option) {
-    return this.each(function () {
-      var $this = $(this)
-      var data  = $this.data('bs.alert')
-
-      if (!data) $this.data('bs.alert', (data = new Alert(this)))
-      if (typeof option == 'string') data[option].call($this)
-    })
-  }
-
-  $.fn.alert.Constructor = Alert
-
-
-  // ALERT NO CONFLICT
-  // =================
-
-  $.fn.alert.noConflict = function () {
-    $.fn.alert = old
-    return this
-  }
-
-
-  // ALERT DATA-API
-  // ==============
-
-  $(document).on('click.bs.alert.data-api', dismiss, Alert.prototype.close)
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: button.js v3.0.3
- * http://getbootstrap.com/javascript/#buttons
- * ========================================================================
- * Copyright 2013 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ======================================================================== */
-
-
-+function ($) { "use strict";
-
-  // BUTTON PUBLIC CLASS DEFINITION
-  // ==============================
-
-  var Button = function (element, options) {
-    this.$element = $(element)
-    this.options  = $.extend({}, Button.DEFAULTS, options)
-  }
-
-  Button.DEFAULTS = {
-    loadingText: 'loading...'
-  }
-
-  Button.prototype.setState = function (state) {
-    var d    = 'disabled'
-    var $el  = this.$element
-    var val  = $el.is('input') ? 'val' : 'html'
-    var data = $el.data()
-
-    state = state + 'Text'
-
-    if (!data.resetText) $el.data('resetText', $el[val]())
-
-    $el[val](data[state] || this.options[state])
-
-    // push to event loop to allow forms to submit
-    setTimeout(function () {
-      state == 'loadingText' ?
-        $el.addClass(d).attr(d, d) :
-        $el.removeClass(d).removeAttr(d);
-    }, 0)
-  }
-
-  Button.prototype.toggle = function () {
-    var $parent = this.$element.closest('[data-toggle="buttons"]')
-    var changed = true
-
-    if ($parent.length) {
-      var $input = this.$element.find('input')
-      if ($input.prop('type') === 'radio') {
-        // see if clicking on current one
-        if ($input.prop('checked') && this.$element.hasClass('active'))
-          changed = false
-        else
-          $parent.find('.active').removeClass('active')
-      }
-      if (changed) $input.prop('checked', !this.$element.hasClass('active')).trigger('change')
-    }
-
-    if (changed) this.$element.toggleClass('active')
-  }
-
-
-  // BUTTON PLUGIN DEFINITION
-  // ========================
-
-  var old = $.fn.button
-
-  $.fn.button = function (option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.button')
-      var options = typeof option == 'object' && option
-
-      if (!data) $this.data('bs.button', (data = new Button(this, options)))
-
-      if (option == 'toggle') data.toggle()
-      else if (option) data.setState(option)
-    })
-  }
-
-  $.fn.button.Constructor = Button
-
-
-  // BUTTON NO CONFLICT
-  // ==================
-
-  $.fn.button.noConflict = function () {
-    $.fn.button = old
-    return this
-  }
-
-
-  // BUTTON DATA-API
-  // ===============
-
-  $(document).on('click.bs.button.data-api', '[data-toggle^=button]', function (e) {
-    var $btn = $(e.target)
-    if (!$btn.hasClass('btn')) $btn = $btn.closest('.btn')
-    $btn.button('toggle')
-    e.preventDefault()
-  })
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: carousel.js v3.0.3
- * http://getbootstrap.com/javascript/#carousel
- * ========================================================================
- * Copyright 2013 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ======================================================================== */
-
-
-+function ($) { "use strict";
-
-  // CAROUSEL CLASS DEFINITION
-  // =========================
-
-  var Carousel = function (element, options) {
-    this.$element    = $(element)
-    this.$indicators = this.$element.find('.carousel-indicators')
-    this.options     = options
-    this.paused      =
-    this.sliding     =
-    this.interval    =
-    this.$active     =
-    this.$items      = null
-
-    this.options.pause == 'hover' && this.$element
-      .on('mouseenter', $.proxy(this.pause, this))
-      .on('mouseleave', $.proxy(this.cycle, this))
-  }
-
-  Carousel.DEFAULTS = {
-    interval: 5000
-  , pause: 'hover'
-  , wrap: true
-  }
-
-  Carousel.prototype.cycle =  function (e) {
-    e || (this.paused = false)
-
-    this.interval && clearInterval(this.interval)
-
-    this.options.interval
-      && !this.paused
-      && (this.interval = setInterval($.proxy(this.next, this), this.options.interval))
-
-    return this
-  }
-
-  Carousel.prototype.getActiveIndex = function () {
-    this.$active = this.$element.find('.item.active')
-    this.$items  = this.$active.parent().children()
-
-    return this.$items.index(this.$active)
-  }
-
-  Carousel.prototype.to = function (pos) {
-    var that        = this
-    var activeIndex = this.getActiveIndex()
-
-    if (pos > (this.$items.length - 1) || pos < 0) return
-
-    if (this.sliding)       return this.$element.one('slid.bs.carousel', function () { that.to(pos) })
-    if (activeIndex == pos) return this.pause().cycle()
-
-    return this.slide(pos > activeIndex ? 'next' : 'prev', $(this.$items[pos]))
-  }
-
-  Carousel.prototype.pause = function (e) {
-    e || (this.paused = true)
-
-    if (this.$element.find('.next, .prev').length && $.support.transition.end) {
-      this.$element.trigger($.support.transition.end)
-      this.cycle(true)
-    }
-
-    this.interval = clearInterval(this.interval)
-
-    return this
-  }
-
-  Carousel.prototype.next = function () {
-    if (this.sliding) return
-    return this.slide('next')
-  }
-
-  Carousel.prototype.prev = function () {
-    if (this.sliding) return
-    return this.slide('prev')
-  }
-
-  Carousel.prototype.slide = function (type, next) {
-    var $active   = this.$element.find('.item.active')
-    var $next     = next || $active[type]()
-    var isCycling = this.interval
-    var direction = type == 'next' ? 'left' : 'right'
-    var fallback  = type == 'next' ? 'first' : 'last'
-    var that      = this
-
-    if (!$next.length) {
-      if (!this.options.wrap) return
-      $next = this.$element.find('.item')[fallback]()
-    }
-
-    this.sliding = true
-
-    isCycling && this.pause()
-
-    var e = $.Event('slide.bs.carousel', { relatedTarget: $next[0], direction: direction })
-
-    if ($next.hasClass('active')) return
-
-    if (this.$indicators.length) {
-      this.$indicators.find('.active').removeClass('active')
-      this.$element.one('slid.bs.carousel', function () {
-        var $nextIndicator = $(that.$indicators.children()[that.getActiveIndex()])
-        $nextIndicator && $nextIndicator.addClass('active')
-      })
-    }
-
-    if ($.support.transition && this.$element.hasClass('slide')) {
-      this.$element.trigger(e)
-      if (e.isDefaultPrevented()) return
-      $next.addClass(type)
-      $next[0].offsetWidth // force reflow
-      $active.addClass(direction)
-      $next.addClass(direction)
-      $active
-        .one($.support.transition.end, function () {
-          $next.removeClass([type, direction].join(' ')).addClass('active')
-          $active.removeClass(['active', direction].join(' '))
-          that.sliding = false
-          setTimeout(function () { that.$element.trigger('slid.bs.carousel') }, 0)
-        })
-        .emulateTransitionEnd(600)
-    } else {
-      this.$element.trigger(e)
-      if (e.isDefaultPrevented()) return
-      $active.removeClass('active')
-      $next.addClass('active')
-      this.sliding = false
-      this.$element.trigger('slid.bs.carousel')
-    }
-
-    isCycling && this.cycle()
-
-    return this
-  }
-
-
-  // CAROUSEL PLUGIN DEFINITION
-  // ==========================
-
-  var old = $.fn.carousel
-
-  $.fn.carousel = function (option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.carousel')
-      var options = $.extend({}, Carousel.DEFAULTS, $this.data(), typeof option == 'object' && option)
-      var action  = typeof option == 'string' ? option : options.slide
-
-      if (!data) $this.data('bs.carousel', (data = new Carousel(this, options)))
-      if (typeof option == 'number') data.to(option)
-      else if (action) data[action]()
-      else if (options.interval) data.pause().cycle()
-    })
-  }
-
-  $.fn.carousel.Constructor = Carousel
-
-
-  // CAROUSEL NO CONFLICT
-  // ====================
-
-  $.fn.carousel.noConflict = function () {
-    $.fn.carousel = old
-    return this
-  }
-
-
-  // CAROUSEL DATA-API
-  // =================
-
-  $(document).on('click.bs.carousel.data-api', '[data-slide], [data-slide-to]', function (e) {
-    var $this   = $(this), href
-    var $target = $($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '')) //strip for ie7
-    var options = $.extend({}, $target.data(), $this.data())
-    var slideIndex = $this.attr('data-slide-to')
-    if (slideIndex) options.interval = false
-
-    $target.carousel(options)
-
-    if (slideIndex = $this.attr('data-slide-to')) {
-      $target.data('bs.carousel').to(slideIndex)
-    }
-
-    e.preventDefault()
-  })
-
-  $(window).on('load', function () {
-    $('[data-ride="carousel"]').each(function () {
-      var $carousel = $(this)
-      $carousel.carousel($carousel.data())
-    })
-  })
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: collapse.js v3.0.3
- * http://getbootstrap.com/javascript/#collapse
- * ========================================================================
- * Copyright 2013 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ======================================================================== */
-
-
-+function ($) { "use strict";
-
-  // COLLAPSE PUBLIC CLASS DEFINITION
-  // ================================
-
-  var Collapse = function (element, options) {
-    this.$element      = $(element)
-    this.options       = $.extend({}, Collapse.DEFAULTS, options)
-    this.transitioning = null
-
-    if (this.options.parent) this.$parent = $(this.options.parent)
-    if (this.options.toggle) this.toggle()
-  }
-
-  Collapse.DEFAULTS = {
-    toggle: true
-  }
-
-  Collapse.prototype.dimension = function () {
-    var hasWidth = this.$element.hasClass('width')
-    return hasWidth ? 'width' : 'height'
-  }
-
-  Collapse.prototype.show = function () {
-    if (this.transitioning || this.$element.hasClass('in')) return
-
-    var startEvent = $.Event('show.bs.collapse')
-    this.$element.trigger(startEvent)
-    if (startEvent.isDefaultPrevented()) return
-
-    var actives = this.$parent && this.$parent.find('> .panel > .in')
-
-    if (actives && actives.length) {
-      var hasData = actives.data('bs.collapse')
-      if (hasData && hasData.transitioning) return
-      actives.collapse('hide')
-      hasData || actives.data('bs.collapse', null)
-    }
-
-    var dimension = this.dimension()
-
-    this.$element
-      .removeClass('collapse')
-      .addClass('collapsing')
-      [dimension](0)
-
-    this.transitioning = 1
-
-    var complete = function () {
-      this.$element
-        .removeClass('collapsing')
-        .addClass('in')
-        [dimension]('auto')
-      this.transitioning = 0
-      this.$element.trigger('shown.bs.collapse')
-    }
-
-    if (!$.support.transition) return complete.call(this)
-
-    var scrollSize = $.camelCase(['scroll', dimension].join('-'))
-
-    this.$element
-      .one($.support.transition.end, $.proxy(complete, this))
-      .emulateTransitionEnd(350)
-      [dimension](this.$element[0][scrollSize])
-  }
-
-  Collapse.prototype.hide = function () {
-    if (this.transitioning || !this.$element.hasClass('in')) return
-
-    var startEvent = $.Event('hide.bs.collapse')
-    this.$element.trigger(startEvent)
-    if (startEvent.isDefaultPrevented()) return
-
-    var dimension = this.dimension()
-
-    this.$element
-      [dimension](this.$element[dimension]())
-      [0].offsetHeight
-
-    this.$element
-      .addClass('collapsing')
-      .removeClass('collapse')
-      .removeClass('in')
-
-    this.transitioning = 1
-
-    var complete = function () {
-      this.transitioning = 0
-      this.$element
-        .trigger('hidden.bs.collapse')
-        .removeClass('collapsing')
-        .addClass('collapse')
-    }
-
-    if (!$.support.transition) return complete.call(this)
-
-    this.$element
-      [dimension](0)
-      .one($.support.transition.end, $.proxy(complete, this))
-      .emulateTransitionEnd(350)
-  }
-
-  Collapse.prototype.toggle = function () {
-    this[this.$element.hasClass('in') ? 'hide' : 'show']()
-  }
-
-
-  // COLLAPSE PLUGIN DEFINITION
-  // ==========================
-
-  var old = $.fn.collapse
-
-  $.fn.collapse = function (option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.collapse')
-      var options = $.extend({}, Collapse.DEFAULTS, $this.data(), typeof option == 'object' && option)
-
-      if (!data) $this.data('bs.collapse', (data = new Collapse(this, options)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  $.fn.collapse.Constructor = Collapse
-
-
-  // COLLAPSE NO CONFLICT
-  // ====================
-
-  $.fn.collapse.noConflict = function () {
-    $.fn.collapse = old
-    return this
-  }
-
-
-  // COLLAPSE DATA-API
-  // =================
-
-  $(document).on('click.bs.collapse.data-api', '[data-toggle=collapse]', function (e) {
-    var $this   = $(this), href
-    var target  = $this.attr('data-target')
-        || e.preventDefault()
-        || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '') //strip for ie7
-    var $target = $(target)
-    var data    = $target.data('bs.collapse')
-    var option  = data ? 'toggle' : $this.data()
-    var parent  = $this.attr('data-parent')
-    var $parent = parent && $(parent)
-
-    if (!data || !data.transitioning) {
-      if ($parent) $parent.find('[data-toggle=collapse][data-parent="' + parent + '"]').not($this).addClass('collapsed')
-      $this[$target.hasClass('in') ? 'addClass' : 'removeClass']('collapsed')
-    }
-
-    $target.collapse(option)
-  })
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: dropdown.js v3.0.3
- * http://getbootstrap.com/javascript/#dropdowns
- * ========================================================================
- * Copyright 2013 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ======================================================================== */
-
-
-+function ($) { "use strict";
-
-  // DROPDOWN CLASS DEFINITION
-  // =========================
-
-  var backdrop = '.dropdown-backdrop'
-  var toggle   = '[data-toggle=dropdown]'
-  var Dropdown = function (element) {
-    $(element).on('click.bs.dropdown', this.toggle)
-  }
-
-  Dropdown.prototype.toggle = function (e) {
-    var $this = $(this)
-
-    if ($this.is('.disabled, :disabled')) return
-
-    var $parent  = getParent($this)
-    var isActive = $parent.hasClass('open')
-
-    clearMenus()
-
-    if (!isActive) {
-      if ('ontouchstart' in document.documentElement && !$parent.closest('.navbar-nav').length) {
-        // if mobile we use a backdrop because click events don't delegate
-        $('<div class="dropdown-backdrop"/>').insertAfter($(this)).on('click', clearMenus)
-      }
-
-      $parent.trigger(e = $.Event('show.bs.dropdown'))
-
-      if (e.isDefaultPrevented()) return
-
-      $parent
-        .toggleClass('open')
-        .trigger('shown.bs.dropdown')
-
-      $this.focus()
-    }
-
-    return false
-  }
-
-  Dropdown.prototype.keydown = function (e) {
-    if (!/(38|40|27)/.test(e.keyCode)) return
-
-    var $this = $(this)
-
-    e.preventDefault()
-    e.stopPropagation()
-
-    if ($this.is('.disabled, :disabled')) return
-
-    var $parent  = getParent($this)
-    var isActive = $parent.hasClass('open')
-
-    if (!isActive || (isActive && e.keyCode == 27)) {
-      if (e.which == 27) $parent.find(toggle).focus()
-      return $this.click()
-    }
-
-    var $items = $('[role=menu] li:not(.divider):visible a', $parent)
-
-    if (!$items.length) return
-
-    var index = $items.index($items.filter(':focus'))
-
-    if (e.keyCode == 38 && index > 0)                 index--                        // up
-    if (e.keyCode == 40 && index < $items.length - 1) index++                        // down
-    if (!~index)                                      index=0
-
-    $items.eq(index).focus()
-  }
-
-  function clearMenus() {
-    $(backdrop).remove()
-    $(toggle).each(function (e) {
-      var $parent = getParent($(this))
-      if (!$parent.hasClass('open')) return
-      $parent.trigger(e = $.Event('hide.bs.dropdown'))
-      if (e.isDefaultPrevented()) return
-      $parent.removeClass('open').trigger('hidden.bs.dropdown')
-    })
-  }
-
-  function getParent($this) {
-    var selector = $this.attr('data-target')
-
-    if (!selector) {
-      selector = $this.attr('href')
-      selector = selector && /#/.test(selector) && selector.replace(/.*(?=#[^\s]*$)/, '') //strip for ie7
-    }
-
-    var $parent = selector && $(selector)
-
-    return $parent && $parent.length ? $parent : $this.parent()
-  }
-
-
-  // DROPDOWN PLUGIN DEFINITION
-  // ==========================
-
-  var old = $.fn.dropdown
-
-  $.fn.dropdown = function (option) {
-    return this.each(function () {
-      var $this = $(this)
-      var data  = $this.data('bs.dropdown')
-
-      if (!data) $this.data('bs.dropdown', (data = new Dropdown(this)))
-      if (typeof option == 'string') data[option].call($this)
-    })
-  }
-
-  $.fn.dropdown.Constructor = Dropdown
-
-
-  // DROPDOWN NO CONFLICT
-  // ====================
-
-  $.fn.dropdown.noConflict = function () {
-    $.fn.dropdown = old
-    return this
-  }
-
-
-  // APPLY TO STANDARD DROPDOWN ELEMENTS
-  // ===================================
-
-  $(document)
-    .on('click.bs.dropdown.data-api', clearMenus)
-    .on('click.bs.dropdown.data-api', '.dropdown form', function (e) { e.stopPropagation() })
-    .on('click.bs.dropdown.data-api'  , toggle, Dropdown.prototype.toggle)
-    .on('keydown.bs.dropdown.data-api', toggle + ', [role=menu]' , Dropdown.prototype.keydown)
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: modal.js v3.0.3
- * http://getbootstrap.com/javascript/#modals
- * ========================================================================
- * Copyright 2013 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ======================================================================== */
-
-
-+function ($) { "use strict";
-
-  // MODAL CLASS DEFINITION
-  // ======================
-
-  var Modal = function (element, options) {
-    this.options   = options
-    this.$element  = $(element)
-    this.$backdrop =
-    this.isShown   = null
-
-    if (this.options.remote) this.$element.load(this.options.remote)
-  }
-
-  Modal.DEFAULTS = {
-      backdrop: true
-    , keyboard: true
-    , show: true
-  }
-
-  Modal.prototype.toggle = function (_relatedTarget) {
-    return this[!this.isShown ? 'show' : 'hide'](_relatedTarget)
-  }
-
-  Modal.prototype.show = function (_relatedTarget) {
-    var that = this
-    var e    = $.Event('show.bs.modal', { relatedTarget: _relatedTarget })
-
-    this.$element.trigger(e)
-
-    if (this.isShown || e.isDefaultPrevented()) return
-
-    this.isShown = true
-
-    this.escape()
-
-    this.$element.on('click.dismiss.modal', '[data-dismiss="modal"]', $.proxy(this.hide, this))
-
-    this.backdrop(function () {
-      var transition = $.support.transition && that.$element.hasClass('fade')
-
-      if (!that.$element.parent().length) {
-        that.$element.appendTo(document.body) // don't move modals dom position
-      }
-
-      that.$element.show()
-
-      if (transition) {
-        that.$element[0].offsetWidth // force reflow
-      }
-
-      that.$element
-        .addClass('in')
-        .attr('aria-hidden', false)
-
-      that.enforceFocus()
-
-      var e = $.Event('shown.bs.modal', { relatedTarget: _relatedTarget })
-
-      transition ?
-        that.$element.find('.modal-dialog') // wait for modal to slide in
-          .one($.support.transition.end, function () {
-            that.$element.focus().trigger(e)
-          })
-          .emulateTransitionEnd(300) :
-        that.$element.focus().trigger(e)
-    })
-  }
-
-  Modal.prototype.hide = function (e) {
-    if (e) e.preventDefault()
-
-    e = $.Event('hide.bs.modal')
-
-    this.$element.trigger(e)
-
-    if (!this.isShown || e.isDefaultPrevented()) return
-
-    this.isShown = false
-
-    this.escape()
-
-    $(document).off('focusin.bs.modal')
-
-    this.$element
-      .removeClass('in')
-      .attr('aria-hidden', true)
-      .off('click.dismiss.modal')
-
-    $.support.transition && this.$element.hasClass('fade') ?
-      this.$element
-        .one($.support.transition.end, $.proxy(this.hideModal, this))
-        .emulateTransitionEnd(300) :
-      this.hideModal()
-  }
-
-  Modal.prototype.enforceFocus = function () {
-    $(document)
-      .off('focusin.bs.modal') // guard against infinite focus loop
-      .on('focusin.bs.modal', $.proxy(function (e) {
-        if (this.$element[0] !== e.target && !this.$element.has(e.target).length) {
-          this.$element.focus()
-        }
-      }, this))
-  }
-
-  Modal.prototype.escape = function () {
-    if (this.isShown && this.options.keyboard) {
-      this.$element.on('keyup.dismiss.bs.modal', $.proxy(function (e) {
-        e.which == 27 && this.hide()
-      }, this))
-    } else if (!this.isShown) {
-      this.$element.off('keyup.dismiss.bs.modal')
-    }
-  }
-
-  Modal.prototype.hideModal = function () {
-    var that = this
-    this.$element.hide()
-    this.backdrop(function () {
-      that.removeBackdrop()
-      that.$element.trigger('hidden.bs.modal')
-    })
-  }
-
-  Modal.prototype.removeBackdrop = function () {
-    this.$backdrop && this.$backdrop.remove()
-    this.$backdrop = null
-  }
-
-  Modal.prototype.backdrop = function (callback) {
-    var that    = this
-    var animate = this.$element.hasClass('fade') ? 'fade' : ''
-
-    if (this.isShown && this.options.backdrop) {
-      var doAnimate = $.support.transition && animate
-
-      this.$backdrop = $('<div class="modal-backdrop ' + animate + '" />')
-        .appendTo(document.body)
-
-      this.$element.on('click.dismiss.modal', $.proxy(function (e) {
-        if (e.target !== e.currentTarget) return
-        this.options.backdrop == 'static'
-          ? this.$element[0].focus.call(this.$element[0])
-          : this.hide.call(this)
-      }, this))
-
-      if (doAnimate) this.$backdrop[0].offsetWidth // force reflow
-
-      this.$backdrop.addClass('in')
-
-      if (!callback) return
-
-      doAnimate ?
-        this.$backdrop
-          .one($.support.transition.end, callback)
-          .emulateTransitionEnd(150) :
-        callback()
-
-    } else if (!this.isShown && this.$backdrop) {
-      this.$backdrop.removeClass('in')
-
-      $.support.transition && this.$element.hasClass('fade')?
-        this.$backdrop
-          .one($.support.transition.end, callback)
-          .emulateTransitionEnd(150) :
-        callback()
-
-    } else if (callback) {
-      callback()
-    }
-  }
-
-
-  // MODAL PLUGIN DEFINITION
-  // =======================
-
-  var old = $.fn.modal
-
-  $.fn.modal = function (option, _relatedTarget) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.modal')
-      var options = $.extend({}, Modal.DEFAULTS, $this.data(), typeof option == 'object' && option)
-
-      if (!data) $this.data('bs.modal', (data = new Modal(this, options)))
-      if (typeof option == 'string') data[option](_relatedTarget)
-      else if (options.show) data.show(_relatedTarget)
-    })
-  }
-
-  $.fn.modal.Constructor = Modal
-
-
-  // MODAL NO CONFLICT
-  // =================
-
-  $.fn.modal.noConflict = function () {
-    $.fn.modal = old
-    return this
-  }
-
-
-  // MODAL DATA-API
-  // ==============
-
-  $(document).on('click.bs.modal.data-api', '[data-toggle="modal"]', function (e) {
-    var $this   = $(this)
-    var href    = $this.attr('href')
-    var $target = $($this.attr('data-target') || (href && href.replace(/.*(?=#[^\s]+$)/, ''))) //strip for ie7
-    var option  = $target.data('modal') ? 'toggle' : $.extend({ remote: !/#/.test(href) && href }, $target.data(), $this.data())
-
-    e.preventDefault()
-
-    $target
-      .modal(option, this)
-      .one('hide', function () {
-        $this.is(':visible') && $this.focus()
-      })
-  })
-
-  $(document)
-    .on('show.bs.modal',  '.modal', function () { $(document.body).addClass('modal-open') })
-    .on('hidden.bs.modal', '.modal', function () { $(document.body).removeClass('modal-open') })
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: tooltip.js v3.0.3
- * http://getbootstrap.com/javascript/#tooltip
- * Inspired by the original jQuery.tipsy by Jason Frame
- * ========================================================================
- * Copyright 2013 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ======================================================================== */
-
-
-+function ($) { "use strict";
-
-  // TOOLTIP PUBLIC CLASS DEFINITION
-  // ===============================
-
-  var Tooltip = function (element, options) {
-    this.type       =
-    this.options    =
-    this.enabled    =
-    this.timeout    =
-    this.hoverState =
-    this.$element   = null
-
-    this.init('tooltip', element, options)
-  }
-
-  Tooltip.DEFAULTS = {
-    animation: true
-  , placement: 'top'
-  , selector: false
-  , template: '<div class="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
-  , trigger: 'hover focus'
-  , title: ''
-  , delay: 0
-  , html: false
-  , container: false
-  }
-
-  Tooltip.prototype.init = function (type, element, options) {
-    this.enabled  = true
-    this.type     = type
-    this.$element = $(element)
-    this.options  = this.getOptions(options)
-
-    var triggers = this.options.trigger.split(' ')
-
-    for (var i = triggers.length; i--;) {
-      var trigger = triggers[i]
-
-      if (trigger == 'click') {
-        this.$element.on('click.' + this.type, this.options.selector, $.proxy(this.toggle, this))
-      } else if (trigger != 'manual') {
-        var eventIn  = trigger == 'hover' ? 'mouseenter' : 'focus'
-        var eventOut = trigger == 'hover' ? 'mouseleave' : 'blur'
-
-        this.$element.on(eventIn  + '.' + this.type, this.options.selector, $.proxy(this.enter, this))
-        this.$element.on(eventOut + '.' + this.type, this.options.selector, $.proxy(this.leave, this))
-      }
-    }
-
-    this.options.selector ?
-      (this._options = $.extend({}, this.options, { trigger: 'manual', selector: '' })) :
-      this.fixTitle()
-  }
-
-  Tooltip.prototype.getDefaults = function () {
-    return Tooltip.DEFAULTS
-  }
-
-  Tooltip.prototype.getOptions = function (options) {
-    options = $.extend({}, this.getDefaults(), this.$element.data(), options)
-
-    if (options.delay && typeof options.delay == 'number') {
-      options.delay = {
-        show: options.delay
-      , hide: options.delay
-      }
-    }
-
-    return options
-  }
-
-  Tooltip.prototype.getDelegateOptions = function () {
-    var options  = {}
-    var defaults = this.getDefaults()
-
-    this._options && $.each(this._options, function (key, value) {
-      if (defaults[key] != value) options[key] = value
-    })
-
-    return options
-  }
-
-  Tooltip.prototype.enter = function (obj) {
-    var self = obj instanceof this.constructor ?
-      obj : $(obj.currentTarget)[this.type](this.getDelegateOptions()).data('bs.' + this.type)
-
-    clearTimeout(self.timeout)
-
-    self.hoverState = 'in'
-
-    if (!self.options.delay || !self.options.delay.show) return self.show()
-
-    self.timeout = setTimeout(function () {
-      if (self.hoverState == 'in') self.show()
-    }, self.options.delay.show)
-  }
-
-  Tooltip.prototype.leave = function (obj) {
-    var self = obj instanceof this.constructor ?
-      obj : $(obj.currentTarget)[this.type](this.getDelegateOptions()).data('bs.' + this.type)
-
-    clearTimeout(self.timeout)
-
-    self.hoverState = 'out'
-
-    if (!self.options.delay || !self.options.delay.hide) return self.hide()
-
-    self.timeout = setTimeout(function () {
-      if (self.hoverState == 'out') self.hide()
-    }, self.options.delay.hide)
-  }
-
-  Tooltip.prototype.show = function () {
-    var e = $.Event('show.bs.'+ this.type)
-
-    if (this.hasContent() && this.enabled) {
-      this.$element.trigger(e)
-
-      if (e.isDefaultPrevented()) return
-
-      var $tip = this.tip()
-
-      this.setContent()
-
-      if (this.options.animation) $tip.addClass('fade')
-
-      var placement = typeof this.options.placement == 'function' ?
-        this.options.placement.call(this, $tip[0], this.$element[0]) :
-        this.options.placement
-
-      var autoToken = /\s?auto?\s?/i
-      var autoPlace = autoToken.test(placement)
-      if (autoPlace) placement = placement.replace(autoToken, '') || 'top'
-
-      $tip
-        .detach()
-        .css({ top: 0, left: 0, display: 'block' })
-        .addClass(placement)
-
-      this.options.container ? $tip.appendTo(this.options.container) : $tip.insertAfter(this.$element)
-
-      var pos          = this.getPosition()
-      var actualWidth  = $tip[0].offsetWidth
-      var actualHeight = $tip[0].offsetHeight
-
-      if (autoPlace) {
-        var $parent = this.$element.parent()
-
-        var orgPlacement = placement
-        var docScroll    = document.documentElement.scrollTop || document.body.scrollTop
-        var parentWidth  = this.options.container == 'body' ? window.innerWidth  : $parent.outerWidth()
-        var parentHeight = this.options.container == 'body' ? window.innerHeight : $parent.outerHeight()
-        var parentLeft   = this.options.container == 'body' ? 0 : $parent.offset().left
-
-        placement = placement == 'bottom' && pos.top   + pos.height  + actualHeight - docScroll > parentHeight  ? 'top'    :
-                    placement == 'top'    && pos.top   - docScroll   - actualHeight < 0                         ? 'bottom' :
-                    placement == 'right'  && pos.right + actualWidth > parentWidth                              ? 'left'   :
-                    placement == 'left'   && pos.left  - actualWidth < parentLeft                               ? 'right'  :
-                    placement
-
-        $tip
-          .removeClass(orgPlacement)
-          .addClass(placement)
-      }
-
-      var calculatedOffset = this.getCalculatedOffset(placement, pos, actualWidth, actualHeight)
-
-      this.applyPlacement(calculatedOffset, placement)
-      this.$element.trigger('shown.bs.' + this.type)
-    }
-  }
-
-  Tooltip.prototype.applyPlacement = function(offset, placement) {
-    var replace
-    var $tip   = this.tip()
-    var width  = $tip[0].offsetWidth
-    var height = $tip[0].offsetHeight
-
-    // manually read margins because getBoundingClientRect includes difference
-    var marginTop = parseInt($tip.css('margin-top'), 10)
-    var marginLeft = parseInt($tip.css('margin-left'), 10)
-
-    // we must check for NaN for ie 8/9
-    if (isNaN(marginTop))  marginTop  = 0
-    if (isNaN(marginLeft)) marginLeft = 0
-
-    offset.top  = offset.top  + marginTop
-    offset.left = offset.left + marginLeft
-
-    $tip
-      .offset(offset)
-      .addClass('in')
-
-    // check to see if placing tip in new offset caused the tip to resize itself
-    var actualWidth  = $tip[0].offsetWidth
-    var actualHeight = $tip[0].offsetHeight
-
-    if (placement == 'top' && actualHeight != height) {
-      replace = true
-      offset.top = offset.top + height - actualHeight
-    }
-
-    if (/bottom|top/.test(placement)) {
-      var delta = 0
-
-      if (offset.left < 0) {
-        delta       = offset.left * -2
-        offset.left = 0
-
-        $tip.offset(offset)
-
-        actualWidth  = $tip[0].offsetWidth
-        actualHeight = $tip[0].offsetHeight
-      }
-
-      this.replaceArrow(delta - width + actualWidth, actualWidth, 'left')
-    } else {
-      this.replaceArrow(actualHeight - height, actualHeight, 'top')
-    }
-
-    if (replace) $tip.offset(offset)
-  }
-
-  Tooltip.prototype.replaceArrow = function(delta, dimension, position) {
-    this.arrow().css(position, delta ? (50 * (1 - delta / dimension) + "%") : '')
-  }
-
-  Tooltip.prototype.setContent = function () {
-    var $tip  = this.tip()
-    var title = this.getTitle()
-
-    $tip.find('.tooltip-inner')[this.options.html ? 'html' : 'text'](title)
-    $tip.removeClass('fade in top bottom left right')
-  }
-
-  Tooltip.prototype.hide = function () {
-    var that = this
-    var $tip = this.tip()
-    var e    = $.Event('hide.bs.' + this.type)
-
-    function complete() {
-      if (that.hoverState != 'in') $tip.detach()
-    }
-
-    this.$element.trigger(e)
-
-    if (e.isDefaultPrevented()) return
-
-    $tip.removeClass('in')
-
-    $.support.transition && this.$tip.hasClass('fade') ?
-      $tip
-        .one($.support.transition.end, complete)
-        .emulateTransitionEnd(150) :
-      complete()
-
-    this.$element.trigger('hidden.bs.' + this.type)
-
-    return this
-  }
-
-  Tooltip.prototype.fixTitle = function () {
-    var $e = this.$element
-    if ($e.attr('title') || typeof($e.attr('data-original-title')) != 'string') {
-      $e.attr('data-original-title', $e.attr('title') || '').attr('title', '')
-    }
-  }
-
-  Tooltip.prototype.hasContent = function () {
-    return this.getTitle()
-  }
-
-  Tooltip.prototype.getPosition = function () {
-    var el = this.$element[0]
-    return $.extend({}, (typeof el.getBoundingClientRect == 'function') ? el.getBoundingClientRect() : {
-      width: el.offsetWidth
-    , height: el.offsetHeight
-    }, this.$element.offset())
-  }
-
-  Tooltip.prototype.getCalculatedOffset = function (placement, pos, actualWidth, actualHeight) {
-    return placement == 'bottom' ? { top: pos.top + pos.height,   left: pos.left + pos.width / 2 - actualWidth / 2  } :
-           placement == 'top'    ? { top: pos.top - actualHeight, left: pos.left + pos.width / 2 - actualWidth / 2  } :
-           placement == 'left'   ? { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth } :
-        /* placement == 'right' */ { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width   }
-  }
-
-  Tooltip.prototype.getTitle = function () {
-    var title
-    var $e = this.$element
-    var o  = this.options
-
-    title = $e.attr('data-original-title')
-      || (typeof o.title == 'function' ? o.title.call($e[0]) :  o.title)
-
-    return title
-  }
-
-  Tooltip.prototype.tip = function () {
-    return this.$tip = this.$tip || $(this.options.template)
-  }
-
-  Tooltip.prototype.arrow = function () {
-    return this.$arrow = this.$arrow || this.tip().find('.tooltip-arrow')
-  }
-
-  Tooltip.prototype.validate = function () {
-    if (!this.$element[0].parentNode) {
-      this.hide()
-      this.$element = null
-      this.options  = null
-    }
-  }
-
-  Tooltip.prototype.enable = function () {
-    this.enabled = true
-  }
-
-  Tooltip.prototype.disable = function () {
-    this.enabled = false
-  }
-
-  Tooltip.prototype.toggleEnabled = function () {
-    this.enabled = !this.enabled
-  }
-
-  Tooltip.prototype.toggle = function (e) {
-    var self = e ? $(e.currentTarget)[this.type](this.getDelegateOptions()).data('bs.' + this.type) : this
-    self.tip().hasClass('in') ? self.leave(self) : self.enter(self)
-  }
-
-  Tooltip.prototype.destroy = function () {
-    this.hide().$element.off('.' + this.type).removeData('bs.' + this.type)
-  }
-
-
-  // TOOLTIP PLUGIN DEFINITION
-  // =========================
-
-  var old = $.fn.tooltip
-
-  $.fn.tooltip = function (option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.tooltip')
-      var options = typeof option == 'object' && option
-
-      if (!data) $this.data('bs.tooltip', (data = new Tooltip(this, options)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  $.fn.tooltip.Constructor = Tooltip
-
-
-  // TOOLTIP NO CONFLICT
-  // ===================
-
-  $.fn.tooltip.noConflict = function () {
-    $.fn.tooltip = old
-    return this
-  }
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: popover.js v3.0.3
- * http://getbootstrap.com/javascript/#popovers
- * ========================================================================
- * Copyright 2013 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ======================================================================== */
-
-
-+function ($) { "use strict";
-
-  // POPOVER PUBLIC CLASS DEFINITION
-  // ===============================
-
-  var Popover = function (element, options) {
-    this.init('popover', element, options)
-  }
-
-  if (!$.fn.tooltip) throw new Error('Popover requires tooltip.js')
-
-  Popover.DEFAULTS = $.extend({} , $.fn.tooltip.Constructor.DEFAULTS, {
-    placement: 'right'
-  , trigger: 'click'
-  , content: ''
-  , template: '<div class="popover"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
-  })
-
-
-  // NOTE: POPOVER EXTENDS tooltip.js
-  // ================================
-
-  Popover.prototype = $.extend({}, $.fn.tooltip.Constructor.prototype)
-
-  Popover.prototype.constructor = Popover
-
-  Popover.prototype.getDefaults = function () {
-    return Popover.DEFAULTS
-  }
-
-  Popover.prototype.setContent = function () {
-    var $tip    = this.tip()
-    var title   = this.getTitle()
-    var content = this.getContent()
-
-    $tip.find('.popover-title')[this.options.html ? 'html' : 'text'](title)
-    $tip.find('.popover-content')[this.options.html ? 'html' : 'text'](content)
-
-    $tip.removeClass('fade top bottom left right in')
-
-    // IE8 doesn't accept hiding via the `:empty` pseudo selector, we have to do
-    // this manually by checking the contents.
-    if (!$tip.find('.popover-title').html()) $tip.find('.popover-title').hide()
-  }
-
-  Popover.prototype.hasContent = function () {
-    return this.getTitle() || this.getContent()
-  }
-
-  Popover.prototype.getContent = function () {
-    var $e = this.$element
-    var o  = this.options
-
-    return $e.attr('data-content')
-      || (typeof o.content == 'function' ?
-            o.content.call($e[0]) :
-            o.content)
-  }
-
-  Popover.prototype.arrow = function () {
-    return this.$arrow = this.$arrow || this.tip().find('.arrow')
-  }
-
-  Popover.prototype.tip = function () {
-    if (!this.$tip) this.$tip = $(this.options.template)
-    return this.$tip
-  }
-
-
-  // POPOVER PLUGIN DEFINITION
-  // =========================
-
-  var old = $.fn.popover
-
-  $.fn.popover = function (option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.popover')
-      var options = typeof option == 'object' && option
-
-      if (!data) $this.data('bs.popover', (data = new Popover(this, options)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  $.fn.popover.Constructor = Popover
-
-
-  // POPOVER NO CONFLICT
-  // ===================
-
-  $.fn.popover.noConflict = function () {
-    $.fn.popover = old
-    return this
-  }
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: scrollspy.js v3.0.3
- * http://getbootstrap.com/javascript/#scrollspy
- * ========================================================================
- * Copyright 2013 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ======================================================================== */
-
-
-+function ($) { "use strict";
-
-  // SCROLLSPY CLASS DEFINITION
-  // ==========================
-
-  function ScrollSpy(element, options) {
-    var href
-    var process  = $.proxy(this.process, this)
-
-    this.$element       = $(element).is('body') ? $(window) : $(element)
-    this.$body          = $('body')
-    this.$scrollElement = this.$element.on('scroll.bs.scroll-spy.data-api', process)
-    this.options        = $.extend({}, ScrollSpy.DEFAULTS, options)
-    this.selector       = (this.options.target
-      || ((href = $(element).attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '')) //strip for ie7
-      || '') + ' .nav li > a'
-    this.offsets        = $([])
-    this.targets        = $([])
-    this.activeTarget   = null
-
-    this.refresh()
-    this.process()
-  }
-
-  ScrollSpy.DEFAULTS = {
-    offset: 10
-  }
-
-  ScrollSpy.prototype.refresh = function () {
-    var offsetMethod = this.$element[0] == window ? 'offset' : 'position'
-
-    this.offsets = $([])
-    this.targets = $([])
-
-    var self     = this
-    var $targets = this.$body
-      .find(this.selector)
-      .map(function () {
-        var $el   = $(this)
-        var href  = $el.data('target') || $el.attr('href')
-        var $href = /^#\w/.test(href) && $(href)
-
-        return ($href
-          && $href.length
-          && [[ $href[offsetMethod]().top + (!$.isWindow(self.$scrollElement.get(0)) && self.$scrollElement.scrollTop()), href ]]) || null
-      })
-      .sort(function (a, b) { return a[0] - b[0] })
-      .each(function () {
-        self.offsets.push(this[0])
-        self.targets.push(this[1])
-      })
-  }
-
-  ScrollSpy.prototype.process = function () {
-    var scrollTop    = this.$scrollElement.scrollTop() + this.options.offset
-    var scrollHeight = this.$scrollElement[0].scrollHeight || this.$body[0].scrollHeight
-    var maxScroll    = scrollHeight - this.$scrollElement.height()
-    var offsets      = this.offsets
-    var targets      = this.targets
-    var activeTarget = this.activeTarget
-    var i
-
-    if (scrollTop >= maxScroll) {
-      return activeTarget != (i = targets.last()[0]) && this.activate(i)
-    }
-
-    for (i = offsets.length; i--;) {
-      activeTarget != targets[i]
-        && scrollTop >= offsets[i]
-        && (!offsets[i + 1] || scrollTop <= offsets[i + 1])
-        && this.activate( targets[i] )
-    }
-  }
-
-  ScrollSpy.prototype.activate = function (target) {
-    this.activeTarget = target
-
-    $(this.selector)
-      .parents('.active')
-      .removeClass('active')
-
-    var selector = this.selector
-      + '[data-target="' + target + '"],'
-      + this.selector + '[href="' + target + '"]'
-
-    var active = $(selector)
-      .parents('li')
-      .addClass('active')
-
-    if (active.parent('.dropdown-menu').length)  {
-      active = active
-        .closest('li.dropdown')
-        .addClass('active')
-    }
-
-    active.trigger('activate.bs.scrollspy')
-  }
-
-
-  // SCROLLSPY PLUGIN DEFINITION
-  // ===========================
-
-  var old = $.fn.scrollspy
-
-  $.fn.scrollspy = function (option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.scrollspy')
-      var options = typeof option == 'object' && option
-
-      if (!data) $this.data('bs.scrollspy', (data = new ScrollSpy(this, options)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  $.fn.scrollspy.Constructor = ScrollSpy
-
-
-  // SCROLLSPY NO CONFLICT
-  // =====================
-
-  $.fn.scrollspy.noConflict = function () {
-    $.fn.scrollspy = old
-    return this
-  }
-
-
-  // SCROLLSPY DATA-API
-  // ==================
-
-  $(window).on('load', function () {
-    $('[data-spy="scroll"]').each(function () {
-      var $spy = $(this)
-      $spy.scrollspy($spy.data())
-    })
-  })
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: tab.js v3.0.3
- * http://getbootstrap.com/javascript/#tabs
- * ========================================================================
- * Copyright 2013 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ======================================================================== */
-
-
-+function ($) { "use strict";
-
-  // TAB CLASS DEFINITION
-  // ====================
-
-  var Tab = function (element) {
-    this.element = $(element)
-  }
-
-  Tab.prototype.show = function () {
-    var $this    = this.element
-    var $ul      = $this.closest('ul:not(.dropdown-menu)')
-    var selector = $this.data('target')
-
-    if (!selector) {
-      selector = $this.attr('href')
-      selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '') //strip for ie7
-    }
-
-    if ($this.parent('li').hasClass('active')) return
-
-    var previous = $ul.find('.active:last a')[0]
-    var e        = $.Event('show.bs.tab', {
-      relatedTarget: previous
-    })
-
-    $this.trigger(e)
-
-    if (e.isDefaultPrevented()) return
-
-    var $target = $(selector)
-
-    this.activate($this.parent('li'), $ul)
-    this.activate($target, $target.parent(), function () {
-      $this.trigger({
-        type: 'shown.bs.tab'
-      , relatedTarget: previous
-      })
-    })
-  }
-
-  Tab.prototype.activate = function (element, container, callback) {
-    var $active    = container.find('> .active')
-    var transition = callback
-      && $.support.transition
-      && $active.hasClass('fade')
-
-    function next() {
-      $active
-        .removeClass('active')
-        .find('> .dropdown-menu > .active')
-        .removeClass('active')
-
-      element.addClass('active')
-
-      if (transition) {
-        element[0].offsetWidth // reflow for transition
-        element.addClass('in')
+  } catch(error) {
+    if (error.code === 22 && store._storageSize() === 0)
+      errorMessage = "Private browsing is unsupported";
+    else
+      errorMessage = error.message;
+  }
+
+  if (resp) {
+    if (options && options.success) {
+      if (Backbone.VERSION === "0.9.10") {
+        options.success(model, resp, options);
       } else {
-        element.removeClass('fade')
+        options.success(resp);
       }
-
-      if (element.parent('.dropdown-menu')) {
-        element.closest('li.dropdown').addClass('active')
-      }
-
-      callback && callback()
+    }
+    if (syncDfd) {
+      syncDfd.resolve(resp);
     }
 
-    transition ?
-      $active
-        .one($.support.transition.end, next)
-        .emulateTransitionEnd(150) :
-      next()
+  } else {
+    errorMessage = errorMessage ? errorMessage
+                                : "Record Not Found";
 
-    $active.removeClass('in')
+    if (options && options.error)
+      if (Backbone.VERSION === "0.9.10") {
+        options.error(model, errorMessage, options);
+      } else {
+        options.error(errorMessage);
+      }
+
+    if (syncDfd)
+      syncDfd.reject(errorMessage);
   }
 
+  // add compatibility with $.ajax
+  // always execute callback for success and error
+  if (options && options.complete) options.complete(resp);
 
-  // TAB PLUGIN DEFINITION
-  // =====================
+  return syncDfd && syncDfd.promise();
+};
 
-  var old = $.fn.tab
+Backbone.ajaxSync = Backbone.sync;
 
-  $.fn.tab = function ( option ) {
-    return this.each(function () {
-      var $this = $(this)
-      var data  = $this.data('bs.tab')
-
-      if (!data) $this.data('bs.tab', (data = new Tab(this)))
-      if (typeof option == 'string') data[option]()
-    })
+Backbone.getSyncMethod = function(model) {
+  if(model.localStorage || (model.collection && model.collection.localStorage)) {
+    return Backbone.localSync;
   }
 
-  $.fn.tab.Constructor = Tab
+  return Backbone.ajaxSync;
+};
 
+// Override 'Backbone.sync' to default to localSync,
+// the original 'Backbone.sync' is still available in 'Backbone.ajaxSync'
+Backbone.sync = function(method, model, options) {
+  return Backbone.getSyncMethod(model).apply(this, [method, model, options]);
+};
 
-  // TAB NO CONFLICT
-  // ===============
+return Backbone.LocalStorage;
+}));
 
-  $.fn.tab.noConflict = function () {
-    $.fn.tab = old
-    return this
-  }
-
-
-  // TAB DATA-API
-  // ============
-
-  $(document).on('click.bs.tab.data-api', '[data-toggle="tab"], [data-toggle="pill"]', function (e) {
-    e.preventDefault()
-    $(this).tab('show')
-  })
-
-}(jQuery);
-
-/* ========================================================================
- * Bootstrap: affix.js v3.0.3
- * http://getbootstrap.com/javascript/#affix
- * ========================================================================
- * Copyright 2013 Twitter, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ======================================================================== */
-
-
-+function ($) { "use strict";
-
-  // AFFIX CLASS DEFINITION
-  // ======================
-
-  var Affix = function (element, options) {
-    this.options = $.extend({}, Affix.DEFAULTS, options)
-    this.$window = $(window)
-      .on('scroll.bs.affix.data-api', $.proxy(this.checkPosition, this))
-      .on('click.bs.affix.data-api',  $.proxy(this.checkPositionWithEventLoop, this))
-
-    this.$element = $(element)
-    this.affixed  =
-    this.unpin    = null
-
-    this.checkPosition()
-  }
-
-  Affix.RESET = 'affix affix-top affix-bottom'
-
-  Affix.DEFAULTS = {
-    offset: 0
-  }
-
-  Affix.prototype.checkPositionWithEventLoop = function () {
-    setTimeout($.proxy(this.checkPosition, this), 1)
-  }
-
-  Affix.prototype.checkPosition = function () {
-    if (!this.$element.is(':visible')) return
-
-    var scrollHeight = $(document).height()
-    var scrollTop    = this.$window.scrollTop()
-    var position     = this.$element.offset()
-    var offset       = this.options.offset
-    var offsetTop    = offset.top
-    var offsetBottom = offset.bottom
-
-    if (typeof offset != 'object')         offsetBottom = offsetTop = offset
-    if (typeof offsetTop == 'function')    offsetTop    = offset.top()
-    if (typeof offsetBottom == 'function') offsetBottom = offset.bottom()
-
-    var affix = this.unpin   != null && (scrollTop + this.unpin <= position.top) ? false :
-                offsetBottom != null && (position.top + this.$element.height() >= scrollHeight - offsetBottom) ? 'bottom' :
-                offsetTop    != null && (scrollTop <= offsetTop) ? 'top' : false
-
-    if (this.affixed === affix) return
-    if (this.unpin) this.$element.css('top', '')
-
-    this.affixed = affix
-    this.unpin   = affix == 'bottom' ? position.top - scrollTop : null
-
-    this.$element.removeClass(Affix.RESET).addClass('affix' + (affix ? '-' + affix : ''))
-
-    if (affix == 'bottom') {
-      this.$element.offset({ top: document.body.offsetHeight - offsetBottom - this.$element.height() })
-    }
-  }
-
-
-  // AFFIX PLUGIN DEFINITION
-  // =======================
-
-  var old = $.fn.affix
-
-  $.fn.affix = function (option) {
-    return this.each(function () {
-      var $this   = $(this)
-      var data    = $this.data('bs.affix')
-      var options = typeof option == 'object' && option
-
-      if (!data) $this.data('bs.affix', (data = new Affix(this, options)))
-      if (typeof option == 'string') data[option]()
-    })
-  }
-
-  $.fn.affix.Constructor = Affix
-
-
-  // AFFIX NO CONFLICT
-  // =================
-
-  $.fn.affix.noConflict = function () {
-    $.fn.affix = old
-    return this
-  }
-
-
-  // AFFIX DATA-API
-  // ==============
-
-  $(window).on('load', function () {
-    $('[data-spy="affix"]').each(function () {
-      var $spy = $(this)
-      var data = $spy.data()
-
-      data.offset = data.offset || {}
-
-      if (data.offsetBottom) data.offset.bottom = data.offsetBottom
-      if (data.offsetTop)    data.offset.top    = data.offsetTop
-
-      $spy.affix(data)
-    })
-  })
-
-}(jQuery);
-
-;/**
+/**
  * Backbone Forms v0.13.0
  *
  * Copyright (c) 2013 Charles Davison, Pow Media Ltd
@@ -17359,7 +15575,85 @@ Form.editors.DateTime = Form.editors.Base.extend({
 
 })(window || global || this);
 
-;// MarionetteJS (Backbone.Marionette)
+/** 
+ * Include this template file after backbone-forms.amd.js to override the default templates
+ * 
+ * 'data-*' attributes control where elements are placed
+ */
+;(function(Form) {
+
+  
+  /**
+   * Bootstrap 3 templates
+   */
+  Form.template = _.template('\
+    <form class="form-horizontal" role="form" data-fieldsets></form>\
+  ');
+
+
+  Form.Fieldset.template = _.template('\
+    <fieldset data-fields>\
+      <% if (legend) { %>\
+        <legend><%= legend %></legend>\
+      <% } %>\
+    </fieldset>\
+  ');
+
+
+  Form.Field.template = _.template('\
+    <div class="form-group field-<%= key %>">\
+      <label class="col-sm-2 control-label" for="<%= editorId %>"><%= title %></label>\
+      <div class="col-sm-10">\
+        <span data-editor></span>\
+        <p class="help-block" data-error></p>\
+        <p class="help-block"><%= help %></p>\
+      </div>\
+    </div>\
+  ');
+
+
+  Form.NestedField.template = _.template('\
+    <div class="field-<%= key %>">\
+      <div title="<%= title %>" class="input-xlarge">\
+        <span data-editor></span>\
+        <div class="help-inline" data-error></div>\
+      </div>\
+      <div class="help-block"><%= help %></div>\
+    </div>\
+  ');
+
+  Form.editors.Base.prototype.className = 'form-control';
+  Form.Field.errorClassName = 'has-error';
+
+
+  if (Form.editors.List) {
+
+    Form.editors.List.template = _.template('\
+      <div class="bbf-list">\
+        <ul class="unstyled clearfix" data-items></ul>\
+        <button type="button" class="btn bbf-add" data-action="add">Add</button>\
+      </div>\
+    ');
+
+
+    Form.editors.List.Item.template = _.template('\
+      <li class="clearfix">\
+        <div class="pull-left" data-editor></div>\
+        <button type="button" class="btn bbf-del" data-action="remove">&times;</button>\
+      </li>\
+    ');
+    
+
+    Form.editors.List.Object.template = Form.editors.List.NestedModel.template = _.template('\
+      <div class="bbf-list-modal"><%= summary %></div>\
+    ');
+
+  }
+
+
+})(Backbone.Form);
+
+// MarionetteJS (Backbone.Marionette)
 // ----------------------------------
 // v1.6.4
 //
@@ -19913,1989 +18207,2155 @@ _.extend(Marionette.Module, {
   return Marionette;
 })(this, Backbone, _);
 
-;/**
- * Copyright (c) 2011-2013 Felix Gnass
- * Licensed under the MIT license
+// MarionetteJS (Backbone.Marionette)
+// ----------------------------------
+// v1.6.4
+//
+// Copyright (c)2014 Derick Bailey, Muted Solutions, LLC.
+// Distributed under MIT license
+//
+// http://marionettejs.com
+
+
+
+/*!
+ * Includes BabySitter
+ * https://github.com/marionettejs/backbone.babysitter/
+ *
+ * Includes Wreqr
+ * https://github.com/marionettejs/backbone.wreqr/
  */
-(function(root, factory) {
 
-  /* CommonJS */
-  if (typeof exports == 'object')  module.exports = factory()
+(function (root, factory) {
+  if (typeof exports === 'object') {
 
-  /* AMD module */
-  else if (typeof define == 'function' && define.amd) define(factory)
+    var underscore = require('underscore');
+    var backbone = require('backbone');
+    var wreqr = require('backbone.wreqr');
+    var babysitter = require('backbone.babysitter');
 
-  /* Browser global */
-  else root.Spinner = factory()
-}
-(this, function() {
+    module.exports = factory(underscore, backbone, wreqr, babysitter);
+
+  } else if (typeof define === 'function' && define.amd) {
+
+    define(['underscore', 'backbone', 'backbone.wreqr', 'backbone.babysitter'], factory);
+
+  }
+}(this, function (_, Backbone) {
+
+  var Marionette = (function(global, Backbone, _){
   "use strict";
 
-  var prefixes = ['webkit', 'Moz', 'ms', 'O'] /* Vendor prefixes */
-    , animations = {} /* Animation rules keyed by their name */
-    , useCssAnimations /* Whether to use CSS animations or setTimeout */
+  // Define and export the Marionette namespace
+  var Marionette = {};
+  Backbone.Marionette = Marionette;
 
-  /**
-   * Utility function to create elements. If no tag name is given,
-   * a DIV is created. Optionally properties can be passed.
-   */
-  function createEl(tag, prop) {
-    var el = document.createElement(tag || 'div')
-      , n
+  // Get the DOM manipulator for later use
+  Marionette.$ = Backbone.$;
 
-    for(n in prop) el[n] = prop[n]
-    return el
-  }
+// Helpers
+// -------
 
-  /**
-   * Appends children and returns the parent.
-   */
-  function ins(parent /* child1, child2, ...*/) {
-    for (var i=1, n=arguments.length; i<n; i++)
-      parent.appendChild(arguments[i])
+// For slicing `arguments` in functions
+var slice = Array.prototype.slice;
 
-    return parent
-  }
+function throwError(message, name) {
+  var error = new Error(message);
+  error.name = name || 'Error';
+  throw error;
+}
 
-  /**
-   * Insert a new stylesheet to hold the @keyframe or VML rules.
-   */
-  var sheet = (function() {
-    var el = createEl('style', {type : 'text/css'})
-    ins(document.getElementsByTagName('head')[0], el)
-    return el.sheet || el.styleSheet
-  }())
+// Marionette.extend
+// -----------------
 
-  /**
-   * Creates an opacity keyframe animation rule and returns its name.
-   * Since most mobile Webkits have timing issues with animation-delay,
-   * we create separate rules for each line/segment.
-   */
-  function addAnimation(alpha, trail, i, lines) {
-    var name = ['opacity', trail, ~~(alpha*100), i, lines].join('-')
-      , start = 0.01 + i/lines * 100
-      , z = Math.max(1 - (1-alpha) / trail * (100-start), alpha)
-      , prefix = useCssAnimations.substring(0, useCssAnimations.indexOf('Animation')).toLowerCase()
-      , pre = prefix && '-' + prefix + '-' || ''
+// Borrow the Backbone `extend` method so we can use it as needed
+Marionette.extend = Backbone.Model.extend;
 
-    if (!animations[name]) {
-      sheet.insertRule(
-        '@' + pre + 'keyframes ' + name + '{' +
-        '0%{opacity:' + z + '}' +
-        start + '%{opacity:' + alpha + '}' +
-        (start+0.01) + '%{opacity:1}' +
-        (start+trail) % 100 + '%{opacity:' + alpha + '}' +
-        '100%{opacity:' + z + '}' +
-        '}', sheet.cssRules.length)
+// Marionette.getOption
+// --------------------
 
-      animations[name] = 1
-    }
+// Retrieve an object, function or other value from a target
+// object or its `options`, with `options` taking precedence.
+Marionette.getOption = function(target, optionName){
+  if (!target || !optionName){ return; }
+  var value;
 
-    return name
-  }
-
-  /**
-   * Tries various vendor prefixes and returns the first supported property.
-   */
-  function vendor(el, prop) {
-    var s = el.style
-      , pp
-      , i
-
-    prop = prop.charAt(0).toUpperCase() + prop.slice(1)
-    for(i=0; i<prefixes.length; i++) {
-      pp = prefixes[i]+prop
-      if(s[pp] !== undefined) return pp
-    }
-    if(s[prop] !== undefined) return prop
-  }
-
-  /**
-   * Sets multiple style properties at once.
-   */
-  function css(el, prop) {
-    for (var n in prop)
-      el.style[vendor(el, n)||n] = prop[n]
-
-    return el
-  }
-
-  /**
-   * Fills in default values.
-   */
-  function merge(obj) {
-    for (var i=1; i < arguments.length; i++) {
-      var def = arguments[i]
-      for (var n in def)
-        if (obj[n] === undefined) obj[n] = def[n]
-    }
-    return obj
-  }
-
-  /**
-   * Returns the absolute page-offset of the given element.
-   */
-  function pos(el) {
-    var o = { x:el.offsetLeft, y:el.offsetTop }
-    while((el = el.offsetParent))
-      o.x+=el.offsetLeft, o.y+=el.offsetTop
-
-    return o
-  }
-
-  /**
-   * Returns the line color from the given string or array.
-   */
-  function getColor(color, idx) {
-    return typeof color == 'string' ? color : color[idx % color.length]
-  }
-
-  // Built-in defaults
-
-  var defaults = {
-    lines: 12,            // The number of lines to draw
-    length: 7,            // The length of each line
-    width: 5,             // The line thickness
-    radius: 10,           // The radius of the inner circle
-    rotate: 0,            // Rotation offset
-    corners: 1,           // Roundness (0..1)
-    color: '#000',        // #rgb or #rrggbb
-    direction: 1,         // 1: clockwise, -1: counterclockwise
-    speed: 1,             // Rounds per second
-    trail: 100,           // Afterglow percentage
-    opacity: 1/4,         // Opacity of the lines
-    fps: 20,              // Frames per second when using setTimeout()
-    zIndex: 2e9,          // Use a high z-index by default
-    className: 'spinner', // CSS class to assign to the element
-    top: 'auto',          // center vertically
-    left: 'auto',         // center horizontally
-    position: 'relative'  // element position
-  }
-
-  /** The constructor */
-  function Spinner(o) {
-    if (typeof this == 'undefined') return new Spinner(o)
-    this.opts = merge(o || {}, Spinner.defaults, defaults)
-  }
-
-  // Global defaults that override the built-ins:
-  Spinner.defaults = {}
-
-  merge(Spinner.prototype, {
-
-    /**
-     * Adds the spinner to the given target element. If this instance is already
-     * spinning, it is automatically removed from its previous target b calling
-     * stop() internally.
-     */
-    spin: function(target) {
-      this.stop()
-
-      var self = this
-        , o = self.opts
-        , el = self.el = css(createEl(0, {className: o.className}), {position: o.position, width: 0, zIndex: o.zIndex})
-        , mid = o.radius+o.length+o.width
-        , ep // element position
-        , tp // target position
-
-      if (target) {
-        target.insertBefore(el, target.firstChild||null)
-        tp = pos(target)
-        ep = pos(el)
-        css(el, {
-          left: (o.left == 'auto' ? tp.x-ep.x + (target.offsetWidth >> 1) : parseInt(o.left, 10) + mid) + 'px',
-          top: (o.top == 'auto' ? tp.y-ep.y + (target.offsetHeight >> 1) : parseInt(o.top, 10) + mid)  + 'px'
-        })
-      }
-
-      el.setAttribute('role', 'progressbar')
-      self.lines(el, self.opts)
-
-      if (!useCssAnimations) {
-        // No CSS animation support, use setTimeout() instead
-        var i = 0
-          , start = (o.lines - 1) * (1 - o.direction) / 2
-          , alpha
-          , fps = o.fps
-          , f = fps/o.speed
-          , ostep = (1-o.opacity) / (f*o.trail / 100)
-          , astep = f/o.lines
-
-        ;(function anim() {
-          i++;
-          for (var j = 0; j < o.lines; j++) {
-            alpha = Math.max(1 - (i + (o.lines - j) * astep) % f * ostep, o.opacity)
-
-            self.opacity(el, j * o.direction + start, alpha, o)
-          }
-          self.timeout = self.el && setTimeout(anim, ~~(1000/fps))
-        })()
-      }
-      return self
-    },
-
-    /**
-     * Stops and removes the Spinner.
-     */
-    stop: function() {
-      var el = this.el
-      if (el) {
-        clearTimeout(this.timeout)
-        if (el.parentNode) el.parentNode.removeChild(el)
-        this.el = undefined
-      }
-      return this
-    },
-
-    /**
-     * Internal method that draws the individual lines. Will be overwritten
-     * in VML fallback mode below.
-     */
-    lines: function(el, o) {
-      var i = 0
-        , start = (o.lines - 1) * (1 - o.direction) / 2
-        , seg
-
-      function fill(color, shadow) {
-        return css(createEl(), {
-          position: 'absolute',
-          width: (o.length+o.width) + 'px',
-          height: o.width + 'px',
-          background: color,
-          boxShadow: shadow,
-          transformOrigin: 'left',
-          transform: 'rotate(' + ~~(360/o.lines*i+o.rotate) + 'deg) translate(' + o.radius+'px' +',0)',
-          borderRadius: (o.corners * o.width>>1) + 'px'
-        })
-      }
-
-      for (; i < o.lines; i++) {
-        seg = css(createEl(), {
-          position: 'absolute',
-          top: 1+~(o.width/2) + 'px',
-          transform: o.hwaccel ? 'translate3d(0,0,0)' : '',
-          opacity: o.opacity,
-          animation: useCssAnimations && addAnimation(o.opacity, o.trail, start + i * o.direction, o.lines) + ' ' + 1/o.speed + 's linear infinite'
-        })
-
-        if (o.shadow) ins(seg, css(fill('#000', '0 0 4px ' + '#000'), {top: 2+'px'}))
-        ins(el, ins(seg, fill(getColor(o.color, i), '0 0 1px rgba(0,0,0,.1)')))
-      }
-      return el
-    },
-
-    /**
-     * Internal method that adjusts the opacity of a single line.
-     * Will be overwritten in VML fallback mode below.
-     */
-    opacity: function(el, i, val) {
-      if (i < el.childNodes.length) el.childNodes[i].style.opacity = val
-    }
-
-  })
-
-
-  function initVML() {
-
-    /* Utility function to create a VML tag */
-    function vml(tag, attr) {
-      return createEl('<' + tag + ' xmlns="urn:schemas-microsoft.com:vml" class="spin-vml">', attr)
-    }
-
-    // No CSS transforms but VML support, add a CSS rule for VML elements:
-    sheet.addRule('.spin-vml', 'behavior:url(#default#VML)')
-
-    Spinner.prototype.lines = function(el, o) {
-      var r = o.length+o.width
-        , s = 2*r
-
-      function grp() {
-        return css(
-          vml('group', {
-            coordsize: s + ' ' + s,
-            coordorigin: -r + ' ' + -r
-          }),
-          { width: s, height: s }
-        )
-      }
-
-      var margin = -(o.width+o.length)*2 + 'px'
-        , g = css(grp(), {position: 'absolute', top: margin, left: margin})
-        , i
-
-      function seg(i, dx, filter) {
-        ins(g,
-          ins(css(grp(), {rotation: 360 / o.lines * i + 'deg', left: ~~dx}),
-            ins(css(vml('roundrect', {arcsize: o.corners}), {
-                width: r,
-                height: o.width,
-                left: o.radius,
-                top: -o.width>>1,
-                filter: filter
-              }),
-              vml('fill', {color: getColor(o.color, i), opacity: o.opacity}),
-              vml('stroke', {opacity: 0}) // transparent stroke to fix color bleeding upon opacity change
-            )
-          )
-        )
-      }
-
-      if (o.shadow)
-        for (i = 1; i <= o.lines; i++)
-          seg(i, -2, 'progid:DXImageTransform.Microsoft.Blur(pixelradius=2,makeshadow=1,shadowopacity=.3)')
-
-      for (i = 1; i <= o.lines; i++) seg(i)
-      return ins(el, g)
-    }
-
-    Spinner.prototype.opacity = function(el, i, val, o) {
-      var c = el.firstChild
-      o = o.shadow && o.lines || 0
-      if (c && i+o < c.childNodes.length) {
-        c = c.childNodes[i+o]; c = c && c.firstChild; c = c && c.firstChild
-        if (c) c.opacity = val
-      }
-    }
-  }
-
-  var probe = css(createEl('group'), {behavior: 'url(#default#VML)'})
-
-  if (!vendor(probe, 'transform') && probe.adj) initVML()
-  else useCssAnimations = vendor(probe, 'animation')
-
-  return Spinner
-
-}));
-
-;/* ========================================================================
- * bootstrap-switch - v2.0.1
- * http://www.bootstrap-switch.org
- * ========================================================================
- * Copyright 2012-2013 Mattia Larentis
- *
- * ========================================================================
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ========================================================================
- */
-
-(function() {
-  (function($) {
-    $.fn.bootstrapSwitch = function(method) {
-      var methods;
-      methods = {
-        init: function() {
-          return this.each(function() {
-            var $div, $element, $form, $label, $switchLeft, $switchRight, $wrapper, changeState;
-            $element = $(this);
-            $switchLeft = $("<span>", {
-              "class": "switch-left",
-              html: function() {
-                var html, label;
-                html = "ON";
-                label = $element.data("on-label");
-                if (label != null) {
-                  html = label;
-                }
-                return html;
-              }
-            });
-            $switchRight = $("<span>", {
-              "class": "switch-right",
-              html: function() {
-                var html, label;
-                html = "OFF";
-                label = $element.data("off-label");
-                if (label != null) {
-                  html = label;
-                }
-                return html;
-              }
-            });
-            $label = $("<label>", {
-              "for": $element.attr("id"),
-              html: function() {
-                var html, icon, label;
-                html = "&nbsp;";
-                icon = $element.data("label-icon");
-                label = $element.data("text-label");
-                if (icon != null) {
-                  html = "<i class=\"icon " + icon + "\"></i>";
-                }
-                if (label != null) {
-                  html = label;
-                }
-                return html;
-              }
-            });
-            $div = $("<div>");
-            $wrapper = $("<div>", {
-              "class": "has-switch",
-              tabindex: 0
-            });
-            $form = $element.closest("form");
-            changeState = function() {
-              if ($label.hasClass("label-change-switch")) {
-                return;
-              }
-              return $label.trigger("mousedown").trigger("mouseup").trigger("click");
-            };
-            $element.data("bootstrap-switch", true);
-            if ($element.data("on") != null) {
-              $switchLeft.addClass("switch-" + $element.data("on"));
-            }
-            if ($element.data("off") != null) {
-              $switchRight.addClass("switch-" + $element.data("off"));
-            }
-            $wrapper.data("animated", false);
-            if ($element.data("animated") !== false) {
-              $wrapper.addClass("switch-animate").data("animated", true);
-            }
-            $div = $element.wrap($div).parent();
-            $wrapper = $div.wrap($wrapper).parent();
-            if ($element.attr("class")) {
-              $.each(["switch-mini", "switch-small", "switch-large"], function(i, cls) {
-                if ($element.attr("class").indexOf(cls) >= 0) {
-                  return $wrapper.addClass(cls);
-                }
-              });
-            }
-            $element.before($switchLeft).before($label).before($switchRight);
-            $wrapper.addClass($element.is(":checked") ? "switch-on" : "switch-off");
-            if ($element.is(":disabled") || $element.is("[readonly]")) {
-              $wrapper.addClass("disabled");
-            }
-            $element.on("keydown", function(e) {
-              if (e.keyCode !== 32) {
-                return;
-              }
-              e.stopImmediatePropagation();
-              e.preventDefault();
-              return changeState();
-            }).on("change", function(e, skip) {
-              var isChecked, state;
-              isChecked = $element.is(":checked");
-              state = $wrapper.hasClass("switch-off");
-              e.preventDefault();
-              $div.css("left", "");
-              if (state !== isChecked) {
-                return;
-              }
-              if (isChecked) {
-                $wrapper.removeClass("switch-off").addClass("switch-on");
-              } else {
-                $wrapper.removeClass("switch-on").addClass("switch-off");
-              }
-              if ($wrapper.data("animated") !== false) {
-                $wrapper.addClass("switch-animate");
-              }
-              if (typeof skip === "boolean" && skip) {
-                return;
-              }
-              return $element.trigger("switch-change", {
-                el: $element,
-                value: isChecked
-              });
-            });
-            $wrapper.on("keydown", function(e) {
-              if (!e.which || $element.is(":disabled") || $element.is("[readonly]")) {
-                return;
-              }
-              switch (e.which) {
-                case 32:
-                  e.preventDefault();
-                  return changeState();
-                case 37:
-                  e.preventDefault();
-                  if ($element.is(":checked")) {
-                    return changeState();
-                  }
-                  break;
-                case 39:
-                  e.preventDefault();
-                  if (!$element.is(":checked")) {
-                    return changeState();
-                  }
-              }
-            });
-            $switchLeft.on("click", function() {
-              return changeState();
-            });
-            $switchRight.on("click", function() {
-              return changeState();
-            });
-            $label.on("mousedown touchstart", function(e) {
-              var moving;
-              moving = false;
-              e.preventDefault();
-              e.stopImmediatePropagation();
-              $wrapper.removeClass("switch-animate");
-              if ($element.is(":disabled") || $element.is("[readonly]") || $element.hasClass("radio-no-uncheck")) {
-                return $label.unbind("click");
-              }
-              return $label.on("mousemove touchmove", function(e) {
-                var left, percent, relativeX, right;
-                relativeX = (e.pageX || e.originalEvent.targetTouches[0].pageX) - $wrapper.offset().left;
-                percent = (relativeX / $wrapper.width()) * 100;
-                left = 25;
-                right = 75;
-                moving = true;
-                if (percent < left) {
-                  percent = left;
-                } else if (percent > right) {
-                  percent = right;
-                }
-                return $div.css("left", (percent - right) + "%");
-              }).on("click touchend", function(e) {
-                e.stopImmediatePropagation();
-                e.preventDefault();
-                $label.unbind("mouseleave");
-                if (moving) {
-                  $element.prop("checked", parseInt($label.parent().css("left"), 10) > -25);
-                } else {
-                  $element.prop("checked", !$element.is(":checked"));
-                }
-                moving = false;
-                return $element.trigger("change");
-              }).on("mouseleave", function(e) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                $label.unbind("mouseleave mousemove").trigger("mouseup");
-                return $element.prop("checked", parseInt($label.parent().css("left"), 10) > -25).trigger("change");
-              }).on("mouseup", function(e) {
-                e.stopImmediatePropagation();
-                e.preventDefault();
-                return $label.trigger("mouseleave");
-              });
-            });
-            if (!$form.data("bootstrap-switch")) {
-              return $form.bind("reset", function() {
-                return window.setTimeout(function() {
-                  return $form.find(".has-switch").each(function() {
-                    var $input;
-                    $input = $(this).find("input");
-                    return $input.prop("checked", $input.is(":checked")).trigger("change");
-                  });
-                }, 1);
-              }).data("bootstrap-switch", true);
-            }
-          });
-        },
-        setDisabled: function(disabled) {
-          var $element, $wrapper;
-          $element = $(this);
-          $wrapper = $element.parents(".has-switch");
-          if (disabled) {
-            $wrapper.addClass("disabled");
-            $element.prop("disabled", true);
-          } else {
-            $wrapper.removeClass("disabled");
-            $element.prop("disabled", false);
-          }
-          return $element;
-        },
-        toggleDisabled: function() {
-          var $element;
-          $element = $(this);
-          $element.prop("disabled", !$element.is(":disabled")).parents(".has-switch").toggleClass("disabled");
-          return $element;
-        },
-        isDisabled: function() {
-          return $(this).is(":disabled");
-        },
-        setReadOnly: function(readonly) {
-          var $element, $wrapper;
-          $element = $(this);
-          $wrapper = $element.parents(".has-switch");
-          if (readonly) {
-            $wrapper.addClass("disabled");
-            $element.prop("readonly", true);
-          } else {
-            $wrapper.removeClass("disabled");
-            $element.prop("readonly", false);
-          }
-          return $element;
-        },
-        toggleReadOnly: function() {
-          var $element;
-          $element = $(this);
-          $element.prop("readonly", !$element.is("[readonly]")).parents(".has-switch").toggleClass("disabled");
-          return $element;
-        },
-        isReadOnly: function() {
-          return $(this).is("[readonly]");
-        },
-        toggleState: function(skip) {
-          var $element;
-          $element = $(this);
-          $element.prop("checked", !$element.is(":checked")).trigger("change", skip);
-          return $element;
-        },
-        toggleRadioState: function(skip) {
-          var $element;
-          $element = $(this);
-          $element.not(":checked").prop("checked", !$element.is(":checked")).trigger("change", skip);
-          return $element;
-        },
-        toggleRadioStateAllowUncheck: function(uncheck, skip) {
-          var $element;
-          $element = $(this);
-          if (uncheck) {
-            $element.not(":checked").trigger("change", skip);
-          } else {
-            $element.not(":checked").prop("checked", !$element.is(":checked")).trigger("change", skip);
-          }
-          return $element;
-        },
-        setState: function(value, skip) {
-          var $element;
-          $element = $(this);
-          $element.prop("checked", value).trigger("change", skip);
-          return $element;
-        },
-        setOnLabel: function(value) {
-          var $element;
-          $element = $(this);
-          $element.siblings(".switch-left").html(value);
-          return $element;
-        },
-        setOffLabel: function(value) {
-          var $element;
-          $element = $(this);
-          $element.siblings(".switch-right").html(value);
-          return $element;
-        },
-        setOnClass: function(value) {
-          var $element, $switchLeft, cls;
-          $element = $(this);
-          $switchLeft = $element.siblings(".switch-left");
-          cls = $element.attr("data-on");
-          if (value == null) {
-            return;
-          }
-          if (cls != null) {
-            $switchLeft.removeClass("switch-" + cls);
-          }
-          $switchLeft.addClass("switch-" + value);
-          return $element;
-        },
-        setOffClass: function(value) {
-          var $element, $switchRight, cls;
-          $element = $(this);
-          $switchRight = $element.siblings(".switch-right");
-          cls = $element.attr("data-off");
-          if (value == null) {
-            return;
-          }
-          if (cls != null) {
-            $switchRight.removeClass("switch-" + cls);
-          }
-          $switchRight.addClass("switch-" + value);
-          return $element;
-        },
-        setAnimated: function(value) {
-          var $element, $wrapper;
-          $element = $(this);
-          $wrapper = $element.parents(".has-switch");
-          if (value == null) {
-            value = false;
-          }
-          $wrapper.data("animated", value).attr("data-animated", value)[$wrapper.data("animated") !== false ? "addClass" : "removeClass"]("switch-animate");
-          return $element;
-        },
-        setSizeClass: function(value) {
-          var $element, $wrapper;
-          $element = $(this);
-          $wrapper = $element.parents(".has-switch");
-          $.each(["switch-mini", "switch-small", "switch-large"], function(i, cls) {
-            return $wrapper[cls !== value ? "removeClass" : "addClass"](cls);
-          });
-          return $element;
-        },
-        setTextLabel: function(value) {
-          var $element;
-          $element = $(this);
-          $element.siblings("label").html(value || "&nbsp");
-          return $element;
-        },
-        setTextIcon: function(value) {
-          var $element;
-          $element = $(this);
-          $element.siblings("label").html(value ? "<i class=\"icon " + value + "\"></i>" : "&nbsp;");
-          return $element;
-        },
-        state: function() {
-          return $(this).is(":checked");
-        },
-        destroy: function() {
-          var $div, $element, $form;
-          $element = $(this);
-          $div = $element.parent();
-          $form = $div.closest("form");
-          $div.children().not($element).remove();
-          $element.unwrap().unwrap().off("change");
-          if ($form.length) {
-            $form.off("reset").removeData("bootstrap-switch");
-          }
-          return $element;
-        }
-      };
-      if (methods[method]) {
-        return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-      }
-      if (typeof method === "object" || !method) {
-        return methods.init.apply(this, arguments);
-      }
-      return $.error("Method " + method + " does not exist!");
-    };
-    return this;
-  })(jQuery);
-
-}).call(this);
-
-;(function() {
-  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Evented, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, ignoreStack, init, now, options, requestAnimationFrame, result, runAnimation, scalers, shouldIgnoreURL, shouldTrack, source, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _i, _intercept, _len, _pushState, _ref, _ref1, _replaceState,
-    __slice = [].slice,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-  defaultOptions = {
-    catchupTime: 500,
-    initialRate: .03,
-    minTime: 500,
-    ghostTime: 500,
-    maxProgressPerFrame: 10,
-    easeFactor: 1.25,
-    startOnPageLoad: true,
-    restartOnPushState: true,
-    restartOnRequestAfter: 500,
-    target: 'body',
-    elements: {
-      checkInterval: 100,
-      selectors: ['body']
-    },
-    eventLag: {
-      minSamples: 10,
-      sampleCount: 3,
-      lagThreshold: 3
-    },
-    ajax: {
-      trackMethods: ['GET'],
-      trackWebSockets: true,
-      ignoreURLs: []
-    }
-  };
-
-  now = function() {
-    var _ref;
-    return (_ref = typeof performance !== "undefined" && performance !== null ? typeof performance.now === "function" ? performance.now() : void 0 : void 0) != null ? _ref : +(new Date);
-  };
-
-  requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-
-  cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
-
-  if (requestAnimationFrame == null) {
-    requestAnimationFrame = function(fn) {
-      return setTimeout(fn, 50);
-    };
-    cancelAnimationFrame = function(id) {
-      return clearTimeout(id);
-    };
-  }
-
-  runAnimation = function(fn) {
-    var last, tick;
-    last = now();
-    tick = function() {
-      var diff;
-      diff = now() - last;
-      if (diff >= 33) {
-        last = now();
-        return fn(diff, function() {
-          return requestAnimationFrame(tick);
-        });
-      } else {
-        return setTimeout(tick, 33 - diff);
-      }
-    };
-    return tick();
-  };
-
-  result = function() {
-    var args, key, obj;
-    obj = arguments[0], key = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
-    if (typeof obj[key] === 'function') {
-      return obj[key].apply(obj, args);
-    } else {
-      return obj[key];
-    }
-  };
-
-  extend = function() {
-    var key, out, source, sources, val, _i, _len;
-    out = arguments[0], sources = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-    for (_i = 0, _len = sources.length; _i < _len; _i++) {
-      source = sources[_i];
-      if (source) {
-        for (key in source) {
-          if (!__hasProp.call(source, key)) continue;
-          val = source[key];
-          if ((out[key] != null) && typeof out[key] === 'object' && (val != null) && typeof val === 'object') {
-            extend(out[key], val);
-          } else {
-            out[key] = val;
-          }
-        }
-      }
-    }
-    return out;
-  };
-
-  avgAmplitude = function(arr) {
-    var count, sum, v, _i, _len;
-    sum = count = 0;
-    for (_i = 0, _len = arr.length; _i < _len; _i++) {
-      v = arr[_i];
-      sum += Math.abs(v);
-      count++;
-    }
-    return sum / count;
-  };
-
-  getFromDOM = function(key, json) {
-    var data, e, el;
-    if (key == null) {
-      key = 'options';
-    }
-    if (json == null) {
-      json = true;
-    }
-    el = document.querySelector("[data-pace-" + key + "]");
-    if (!el) {
-      return;
-    }
-    data = el.getAttribute("data-pace-" + key);
-    if (!json) {
-      return data;
-    }
-    try {
-      return JSON.parse(data);
-    } catch (_error) {
-      e = _error;
-      return typeof console !== "undefined" && console !== null ? console.error("Error parsing inline pace options", e) : void 0;
-    }
-  };
-
-  Evented = (function() {
-    function Evented() {}
-
-    Evented.prototype.on = function(event, handler, ctx, once) {
-      var _base;
-      if (once == null) {
-        once = false;
-      }
-      if (this.bindings == null) {
-        this.bindings = {};
-      }
-      if ((_base = this.bindings)[event] == null) {
-        _base[event] = [];
-      }
-      return this.bindings[event].push({
-        handler: handler,
-        ctx: ctx,
-        once: once
-      });
-    };
-
-    Evented.prototype.once = function(event, handler, ctx) {
-      return this.on(event, handler, ctx, true);
-    };
-
-    Evented.prototype.off = function(event, handler) {
-      var i, _ref, _results;
-      if (((_ref = this.bindings) != null ? _ref[event] : void 0) == null) {
-        return;
-      }
-      if (handler == null) {
-        return delete this.bindings[event];
-      } else {
-        i = 0;
-        _results = [];
-        while (i < this.bindings[event].length) {
-          if (this.bindings[event][i].handler === handler) {
-            _results.push(this.bindings[event].splice(i, 1));
-          } else {
-            _results.push(i++);
-          }
-        }
-        return _results;
-      }
-    };
-
-    Evented.prototype.trigger = function() {
-      var args, ctx, event, handler, i, once, _ref, _ref1, _results;
-      event = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      if ((_ref = this.bindings) != null ? _ref[event] : void 0) {
-        i = 0;
-        _results = [];
-        while (i < this.bindings[event].length) {
-          _ref1 = this.bindings[event][i], handler = _ref1.handler, ctx = _ref1.ctx, once = _ref1.once;
-          handler.apply(ctx != null ? ctx : this, args);
-          if (once) {
-            _results.push(this.bindings[event].splice(i, 1));
-          } else {
-            _results.push(i++);
-          }
-        }
-        return _results;
-      }
-    };
-
-    return Evented;
-
-  })();
-
-  if (window.Pace == null) {
-    window.Pace = {};
-  }
-
-  extend(Pace, Evented.prototype);
-
-  options = Pace.options = extend({}, defaultOptions, window.paceOptions, getFromDOM());
-
-  _ref = ['ajax', 'document', 'eventLag', 'elements'];
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    source = _ref[_i];
-    if (options[source] === true) {
-      options[source] = defaultOptions[source];
-    }
-  }
-
-  NoTargetError = (function(_super) {
-    __extends(NoTargetError, _super);
-
-    function NoTargetError() {
-      _ref1 = NoTargetError.__super__.constructor.apply(this, arguments);
-      return _ref1;
-    }
-
-    return NoTargetError;
-
-  })(Error);
-
-  Bar = (function() {
-    function Bar() {
-      this.progress = 0;
-    }
-
-    Bar.prototype.getElement = function() {
-      var targetElement;
-      if (this.el == null) {
-        targetElement = document.querySelector(options.target);
-        if (!targetElement) {
-          throw new NoTargetError;
-        }
-        this.el = document.createElement('div');
-        this.el.className = "pace pace-active";
-        document.body.className = document.body.className.replace(/pace-done/g, '');
-        document.body.className += ' pace-running';
-        this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
-        if (targetElement.firstChild != null) {
-          targetElement.insertBefore(this.el, targetElement.firstChild);
-        } else {
-          targetElement.appendChild(this.el);
-        }
-      }
-      return this.el;
-    };
-
-    Bar.prototype.finish = function() {
-      var el;
-      el = this.getElement();
-      el.className = el.className.replace('pace-active', '');
-      el.className += ' pace-inactive';
-      document.body.className = document.body.className.replace('pace-running', '');
-      return document.body.className += ' pace-done';
-    };
-
-    Bar.prototype.update = function(prog) {
-      this.progress = prog;
-      return this.render();
-    };
-
-    Bar.prototype.destroy = function() {
-      try {
-        this.getElement().parentNode.removeChild(this.getElement());
-      } catch (_error) {
-        NoTargetError = _error;
-      }
-      return this.el = void 0;
-    };
-
-    Bar.prototype.render = function() {
-      var el, progressStr;
-      if (document.querySelector(options.target) == null) {
-        return false;
-      }
-      el = this.getElement();
-      el.children[0].style.width = "" + this.progress + "%";
-      if (!this.lastRenderedProgress || this.lastRenderedProgress | 0 !== this.progress | 0) {
-        el.children[0].setAttribute('data-progress-text', "" + (this.progress | 0) + "%");
-        if (this.progress >= 100) {
-          progressStr = '99';
-        } else {
-          progressStr = this.progress < 10 ? "0" : "";
-          progressStr += this.progress | 0;
-        }
-        el.children[0].setAttribute('data-progress', "" + progressStr);
-      }
-      return this.lastRenderedProgress = this.progress;
-    };
-
-    Bar.prototype.done = function() {
-      return this.progress >= 100;
-    };
-
-    return Bar;
-
-  })();
-
-  Events = (function() {
-    function Events() {
-      this.bindings = {};
-    }
-
-    Events.prototype.trigger = function(name, val) {
-      var binding, _j, _len1, _ref2, _results;
-      if (this.bindings[name] != null) {
-        _ref2 = this.bindings[name];
-        _results = [];
-        for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-          binding = _ref2[_j];
-          _results.push(binding.call(this, val));
-        }
-        return _results;
-      }
-    };
-
-    Events.prototype.on = function(name, fn) {
-      var _base;
-      if ((_base = this.bindings)[name] == null) {
-        _base[name] = [];
-      }
-      return this.bindings[name].push(fn);
-    };
-
-    return Events;
-
-  })();
-
-  _XMLHttpRequest = window.XMLHttpRequest;
-
-  _XDomainRequest = window.XDomainRequest;
-
-  _WebSocket = window.WebSocket;
-
-  extendNative = function(to, from) {
-    var e, key, val, _results;
-    _results = [];
-    for (key in from.prototype) {
-      try {
-        val = from.prototype[key];
-        if ((to[key] == null) && typeof val !== 'function') {
-          _results.push(to[key] = val);
-        } else {
-          _results.push(void 0);
-        }
-      } catch (_error) {
-        e = _error;
-      }
-    }
-    return _results;
-  };
-
-  ignoreStack = [];
-
-  Pace.ignore = function() {
-    var args, fn, ret;
-    fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-    ignoreStack.unshift('ignore');
-    ret = fn.apply(null, args);
-    ignoreStack.shift();
-    return ret;
-  };
-
-  Pace.track = function() {
-    var args, fn, ret;
-    fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-    ignoreStack.unshift('track');
-    ret = fn.apply(null, args);
-    ignoreStack.shift();
-    return ret;
-  };
-
-  shouldTrack = function(method) {
-    var _ref2;
-    if (method == null) {
-      method = 'GET';
-    }
-    if (ignoreStack[0] === 'track') {
-      return 'force';
-    }
-    if (!ignoreStack.length && options.ajax) {
-      if (method === 'socket' && options.ajax.trackWebSockets) {
-        return true;
-      } else if (_ref2 = method.toUpperCase(), __indexOf.call(options.ajax.trackMethods, _ref2) >= 0) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  RequestIntercept = (function(_super) {
-    __extends(RequestIntercept, _super);
-
-    function RequestIntercept() {
-      var monitorXHR,
-        _this = this;
-      RequestIntercept.__super__.constructor.apply(this, arguments);
-      monitorXHR = function(req) {
-        var _open;
-        _open = req.open;
-        return req.open = function(type, url, async) {
-          if (shouldTrack(type)) {
-            _this.trigger('request', {
-              type: type,
-              url: url,
-              request: req
-            });
-          }
-          return _open.apply(req, arguments);
-        };
-      };
-      window.XMLHttpRequest = function(flags) {
-        var req;
-        req = new _XMLHttpRequest(flags);
-        monitorXHR(req);
-        return req;
-      };
-      extendNative(window.XMLHttpRequest, _XMLHttpRequest);
-      if (_XDomainRequest != null) {
-        window.XDomainRequest = function() {
-          var req;
-          req = new _XDomainRequest;
-          monitorXHR(req);
-          return req;
-        };
-        extendNative(window.XDomainRequest, _XDomainRequest);
-      }
-      if ((_WebSocket != null) && options.ajax.trackWebSockets) {
-        window.WebSocket = function(url, protocols) {
-          var req;
-          if (protocols != null) {
-            req = new _WebSocket(url, protocols);
-          } else {
-            req = new _WebSocket(url);
-          }
-          if (shouldTrack('socket')) {
-            _this.trigger('request', {
-              type: 'socket',
-              url: url,
-              protocols: protocols,
-              request: req
-            });
-          }
-          return req;
-        };
-        extendNative(window.WebSocket, _WebSocket);
-      }
-    }
-
-    return RequestIntercept;
-
-  })(Events);
-
-  _intercept = null;
-
-  getIntercept = function() {
-    if (_intercept == null) {
-      _intercept = new RequestIntercept;
-    }
-    return _intercept;
-  };
-
-  shouldIgnoreURL = function(url) {
-    var pattern, _j, _len1, _ref2;
-    _ref2 = options.ajax.ignoreURLs;
-    for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-      pattern = _ref2[_j];
-      if (typeof pattern === 'string') {
-        if (url.indexOf(pattern) !== -1) {
-          return true;
-        }
-      } else {
-        if (pattern.test(url)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  };
-
-  getIntercept().on('request', function(_arg) {
-    var after, args, request, type, url;
-    type = _arg.type, request = _arg.request, url = _arg.url;
-    if (shouldIgnoreURL(url)) {
-      return;
-    }
-    if (!Pace.running && (options.restartOnRequestAfter !== false || shouldTrack(type) === 'force')) {
-      args = arguments;
-      after = options.restartOnRequestAfter || 0;
-      if (typeof after === 'boolean') {
-        after = 0;
-      }
-      return setTimeout(function() {
-        var stillActive, _j, _len1, _ref2, _ref3, _results;
-        if (type === 'socket') {
-          stillActive = request.readyState < 2;
-        } else {
-          stillActive = (0 < (_ref2 = request.readyState) && _ref2 < 4);
-        }
-        if (stillActive) {
-          Pace.restart();
-          _ref3 = Pace.sources;
-          _results = [];
-          for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-            source = _ref3[_j];
-            if (source instanceof AjaxMonitor) {
-              source.watch.apply(source, args);
-              break;
-            } else {
-              _results.push(void 0);
-            }
-          }
-          return _results;
-        }
-      }, after);
-    }
-  });
-
-  AjaxMonitor = (function() {
-    function AjaxMonitor() {
-      var _this = this;
-      this.elements = [];
-      getIntercept().on('request', function() {
-        return _this.watch.apply(_this, arguments);
-      });
-    }
-
-    AjaxMonitor.prototype.watch = function(_arg) {
-      var request, tracker, type, url;
-      type = _arg.type, request = _arg.request, url = _arg.url;
-      if (shouldIgnoreURL(url)) {
-        return;
-      }
-      if (type === 'socket') {
-        tracker = new SocketRequestTracker(request);
-      } else {
-        tracker = new XHRRequestTracker(request);
-      }
-      return this.elements.push(tracker);
-    };
-
-    return AjaxMonitor;
-
-  })();
-
-  XHRRequestTracker = (function() {
-    function XHRRequestTracker(request) {
-      var event, size, _j, _len1, _onreadystatechange, _ref2,
-        _this = this;
-      this.progress = 0;
-      if (window.ProgressEvent != null) {
-        size = null;
-        request.addEventListener('progress', function(evt) {
-          if (evt.lengthComputable) {
-            return _this.progress = 100 * evt.loaded / evt.total;
-          } else {
-            return _this.progress = _this.progress + (100 - _this.progress) / 2;
-          }
-        });
-        _ref2 = ['load', 'abort', 'timeout', 'error'];
-        for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-          event = _ref2[_j];
-          request.addEventListener(event, function() {
-            return _this.progress = 100;
-          });
-        }
-      } else {
-        _onreadystatechange = request.onreadystatechange;
-        request.onreadystatechange = function() {
-          var _ref3;
-          if ((_ref3 = request.readyState) === 0 || _ref3 === 4) {
-            _this.progress = 100;
-          } else if (request.readyState === 3) {
-            _this.progress = 50;
-          }
-          return typeof _onreadystatechange === "function" ? _onreadystatechange.apply(null, arguments) : void 0;
-        };
-      }
-    }
-
-    return XHRRequestTracker;
-
-  })();
-
-  SocketRequestTracker = (function() {
-    function SocketRequestTracker(request) {
-      var event, _j, _len1, _ref2,
-        _this = this;
-      this.progress = 0;
-      _ref2 = ['error', 'open'];
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        event = _ref2[_j];
-        request.addEventListener(event, function() {
-          return _this.progress = 100;
-        });
-      }
-    }
-
-    return SocketRequestTracker;
-
-  })();
-
-  ElementMonitor = (function() {
-    function ElementMonitor(options) {
-      var selector, _j, _len1, _ref2;
-      if (options == null) {
-        options = {};
-      }
-      this.elements = [];
-      if (options.selectors == null) {
-        options.selectors = [];
-      }
-      _ref2 = options.selectors;
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        selector = _ref2[_j];
-        this.elements.push(new ElementTracker(selector));
-      }
-    }
-
-    return ElementMonitor;
-
-  })();
-
-  ElementTracker = (function() {
-    function ElementTracker(selector) {
-      this.selector = selector;
-      this.progress = 0;
-      this.check();
-    }
-
-    ElementTracker.prototype.check = function() {
-      var _this = this;
-      if (document.querySelector(this.selector)) {
-        return this.done();
-      } else {
-        return setTimeout((function() {
-          return _this.check();
-        }), options.elements.checkInterval);
-      }
-    };
-
-    ElementTracker.prototype.done = function() {
-      return this.progress = 100;
-    };
-
-    return ElementTracker;
-
-  })();
-
-  DocumentMonitor = (function() {
-    DocumentMonitor.prototype.states = {
-      loading: 0,
-      interactive: 50,
-      complete: 100
-    };
-
-    function DocumentMonitor() {
-      var _onreadystatechange, _ref2,
-        _this = this;
-      this.progress = (_ref2 = this.states[document.readyState]) != null ? _ref2 : 100;
-      _onreadystatechange = document.onreadystatechange;
-      document.onreadystatechange = function() {
-        if (_this.states[document.readyState] != null) {
-          _this.progress = _this.states[document.readyState];
-        }
-        return typeof _onreadystatechange === "function" ? _onreadystatechange.apply(null, arguments) : void 0;
-      };
-    }
-
-    return DocumentMonitor;
-
-  })();
-
-  EventLagMonitor = (function() {
-    function EventLagMonitor() {
-      var avg, interval, last, points, samples,
-        _this = this;
-      this.progress = 0;
-      avg = 0;
-      samples = [];
-      points = 0;
-      last = now();
-      interval = setInterval(function() {
-        var diff;
-        diff = now() - last - 50;
-        last = now();
-        samples.push(diff);
-        if (samples.length > options.eventLag.sampleCount) {
-          samples.shift();
-        }
-        avg = avgAmplitude(samples);
-        if (++points >= options.eventLag.minSamples && avg < options.eventLag.lagThreshold) {
-          _this.progress = 100;
-          return clearInterval(interval);
-        } else {
-          return _this.progress = 100 * (3 / (avg + 3));
-        }
-      }, 50);
-    }
-
-    return EventLagMonitor;
-
-  })();
-
-  Scaler = (function() {
-    function Scaler(source) {
-      this.source = source;
-      this.last = this.sinceLastUpdate = 0;
-      this.rate = options.initialRate;
-      this.catchup = 0;
-      this.progress = this.lastProgress = 0;
-      if (this.source != null) {
-        this.progress = result(this.source, 'progress');
-      }
-    }
-
-    Scaler.prototype.tick = function(frameTime, val) {
-      var scaling;
-      if (val == null) {
-        val = result(this.source, 'progress');
-      }
-      if (val >= 100) {
-        this.done = true;
-      }
-      if (val === this.last) {
-        this.sinceLastUpdate += frameTime;
-      } else {
-        if (this.sinceLastUpdate) {
-          this.rate = (val - this.last) / this.sinceLastUpdate;
-        }
-        this.catchup = (val - this.progress) / options.catchupTime;
-        this.sinceLastUpdate = 0;
-        this.last = val;
-      }
-      if (val > this.progress) {
-        this.progress += this.catchup * frameTime;
-      }
-      scaling = 1 - Math.pow(this.progress / 100, options.easeFactor);
-      this.progress += scaling * this.rate * frameTime;
-      this.progress = Math.min(this.lastProgress + options.maxProgressPerFrame, this.progress);
-      this.progress = Math.max(0, this.progress);
-      this.progress = Math.min(100, this.progress);
-      this.lastProgress = this.progress;
-      return this.progress;
-    };
-
-    return Scaler;
-
-  })();
-
-  sources = null;
-
-  scalers = null;
-
-  bar = null;
-
-  uniScaler = null;
-
-  animation = null;
-
-  cancelAnimation = null;
-
-  Pace.running = false;
-
-  handlePushState = function() {
-    if (options.restartOnPushState) {
-      return Pace.restart();
-    }
-  };
-
-  if (window.history.pushState != null) {
-    _pushState = window.history.pushState;
-    window.history.pushState = function() {
-      handlePushState();
-      return _pushState.apply(window.history, arguments);
-    };
-  }
-
-  if (window.history.replaceState != null) {
-    _replaceState = window.history.replaceState;
-    window.history.replaceState = function() {
-      handlePushState();
-      return _replaceState.apply(window.history, arguments);
-    };
-  }
-
-  SOURCE_KEYS = {
-    ajax: AjaxMonitor,
-    elements: ElementMonitor,
-    document: DocumentMonitor,
-    eventLag: EventLagMonitor
-  };
-
-  (init = function() {
-    var type, _j, _k, _len1, _len2, _ref2, _ref3, _ref4;
-    Pace.sources = sources = [];
-    _ref2 = ['ajax', 'elements', 'document', 'eventLag'];
-    for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-      type = _ref2[_j];
-      if (options[type] !== false) {
-        sources.push(new SOURCE_KEYS[type](options[type]));
-      }
-    }
-    _ref4 = (_ref3 = options.extraSources) != null ? _ref3 : [];
-    for (_k = 0, _len2 = _ref4.length; _k < _len2; _k++) {
-      source = _ref4[_k];
-      sources.push(new source(options));
-    }
-    Pace.bar = bar = new Bar;
-    scalers = [];
-    return uniScaler = new Scaler;
-  })();
-
-  Pace.stop = function() {
-    Pace.trigger('stop');
-    Pace.running = false;
-    bar.destroy();
-    cancelAnimation = true;
-    if (animation != null) {
-      if (typeof cancelAnimationFrame === "function") {
-        cancelAnimationFrame(animation);
-      }
-      animation = null;
-    }
-    return init();
-  };
-
-  Pace.restart = function() {
-    Pace.trigger('restart');
-    Pace.stop();
-    return Pace.start();
-  };
-
-  Pace.go = function() {
-    var start;
-    Pace.running = true;
-    bar.render();
-    start = now();
-    cancelAnimation = false;
-    return animation = runAnimation(function(frameTime, enqueueNextFrame) {
-      var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, sum, _j, _k, _len1, _len2, _ref2;
-      remaining = 100 - bar.progress;
-      count = sum = 0;
-      done = true;
-      for (i = _j = 0, _len1 = sources.length; _j < _len1; i = ++_j) {
-        source = sources[i];
-        scalerList = scalers[i] != null ? scalers[i] : scalers[i] = [];
-        elements = (_ref2 = source.elements) != null ? _ref2 : [source];
-        for (j = _k = 0, _len2 = elements.length; _k < _len2; j = ++_k) {
-          element = elements[j];
-          scaler = scalerList[j] != null ? scalerList[j] : scalerList[j] = new Scaler(element);
-          done &= scaler.done;
-          if (scaler.done) {
-            continue;
-          }
-          count++;
-          sum += scaler.tick(frameTime);
-        }
-      }
-      avg = sum / count;
-      bar.update(uniScaler.tick(frameTime, avg));
-      if (bar.done() || done || cancelAnimation) {
-        bar.update(100);
-        Pace.trigger('done');
-        return setTimeout(function() {
-          bar.finish();
-          Pace.running = false;
-          return Pace.trigger('hide');
-        }, Math.max(options.ghostTime, Math.max(options.minTime - (now() - start), 0)));
-      } else {
-        return enqueueNextFrame();
-      }
-    });
-  };
-
-  Pace.start = function(_options) {
-    extend(options, _options);
-    Pace.running = true;
-    try {
-      bar.render();
-    } catch (_error) {
-      NoTargetError = _error;
-    }
-    if (!document.querySelector('.pace')) {
-      return setTimeout(Pace.start, 50);
-    } else {
-      Pace.trigger('start');
-      return Pace.go();
-    }
-  };
-
-  if (typeof define === 'function' && define.amd) {
-    define(function() {
-      return Pace;
-    });
-  } else if (typeof exports === 'object') {
-    module.exports = Pace;
+  if (target.options && (optionName in target.options) && (target.options[optionName] !== undefined)){
+    value = target.options[optionName];
   } else {
-    if (options.startOnPageLoad) {
-      Pace.start();
+    value = target[optionName];
+  }
+
+  return value;
+};
+
+// Marionette.normalizeMethods
+// ----------------------
+
+// Pass in a mapping of events => functions or function names
+// and return a mapping of events => functions
+Marionette.normalizeMethods = function(hash) {
+  var normalizedHash = {}, method;
+  _.each(hash, function(fn, name) {
+    method = fn;
+    if (!_.isFunction(method)) {
+      method = this[method];
+    }
+    if (!method) {
+      return;
+    }
+    normalizedHash[name] = method;
+  }, this);
+  return normalizedHash;
+};
+
+// Trigger an event and/or a corresponding method name. Examples:
+//
+// `this.triggerMethod("foo")` will trigger the "foo" event and
+// call the "onFoo" method.
+//
+// `this.triggerMethod("foo:bar")` will trigger the "foo:bar" event and
+// call the "onFooBar" method.
+Marionette.triggerMethod = (function(){
+
+  // split the event name on the ":"
+  var splitter = /(^|:)(\w)/gi;
+
+  // take the event section ("section1:section2:section3")
+  // and turn it in to uppercase name
+  function getEventName(match, prefix, eventName) {
+    return eventName.toUpperCase();
+  }
+
+  // actual triggerMethod implementation
+  var triggerMethod = function(event) {
+    // get the method name from the event name
+    var methodName = 'on' + event.replace(splitter, getEventName);
+    var method = this[methodName];
+
+    // trigger the event, if a trigger method exists
+    if(_.isFunction(this.trigger)) {
+      this.trigger.apply(this, arguments);
+    }
+
+    // call the onMethodName if it exists
+    if (_.isFunction(method)) {
+      // pass all arguments, except the event name
+      return method.apply(this, _.tail(arguments));
+    }
+  };
+
+  return triggerMethod;
+})();
+
+// DOMRefresh
+// ----------
+//
+// Monitor a view's state, and after it has been rendered and shown
+// in the DOM, trigger a "dom:refresh" event every time it is
+// re-rendered.
+
+Marionette.MonitorDOMRefresh = (function(documentElement){
+  // track when the view has been shown in the DOM,
+  // using a Marionette.Region (or by other means of triggering "show")
+  function handleShow(view){
+    view._isShown = true;
+    triggerDOMRefresh(view);
+  }
+
+  // track when the view has been rendered
+  function handleRender(view){
+    view._isRendered = true;
+    triggerDOMRefresh(view);
+  }
+
+  // Trigger the "dom:refresh" event and corresponding "onDomRefresh" method
+  function triggerDOMRefresh(view){
+    if (view._isShown && view._isRendered && isInDOM(view)){
+      if (_.isFunction(view.triggerMethod)){
+        view.triggerMethod("dom:refresh");
+      }
     }
   }
 
-}).call(this);
-
-;/** 
- * Include this template file after backbone-forms.amd.js to override the default templates
- * 
- * 'data-*' attributes control where elements are placed
- */
-;(function(Form) {
-
-  
-  /**
-   * Bootstrap 3 templates
-   */
-  Form.template = _.template('\
-    <form class="form-horizontal" role="form" data-fieldsets></form>\
-  ');
-
-
-  Form.Fieldset.template = _.template('\
-    <fieldset data-fields>\
-      <% if (legend) { %>\
-        <legend><%= legend %></legend>\
-      <% } %>\
-    </fieldset>\
-  ');
-
-
-  Form.Field.template = _.template('\
-    <div class="form-group field-<%= key %>">\
-      <label class="col-sm-2 control-label" for="<%= editorId %>"><%= title %></label>\
-      <div class="col-sm-10">\
-        <span data-editor></span>\
-        <p class="help-block" data-error></p>\
-        <p class="help-block"><%= help %></p>\
-      </div>\
-    </div>\
-  ');
-
-
-  Form.NestedField.template = _.template('\
-    <div class="field-<%= key %>">\
-      <div title="<%= title %>" class="input-xlarge">\
-        <span data-editor></span>\
-        <div class="help-inline" data-error></div>\
-      </div>\
-      <div class="help-block"><%= help %></div>\
-    </div>\
-  ');
-
-  Form.editors.Base.prototype.className = 'form-control';
-  Form.Field.errorClassName = 'has-error';
-
-
-  if (Form.editors.List) {
-
-    Form.editors.List.template = _.template('\
-      <div class="bbf-list">\
-        <ul class="unstyled clearfix" data-items></ul>\
-        <button type="button" class="btn bbf-add" data-action="add">Add</button>\
-      </div>\
-    ');
-
-
-    Form.editors.List.Item.template = _.template('\
-      <li class="clearfix">\
-        <div class="pull-left" data-editor></div>\
-        <button type="button" class="btn bbf-del" data-action="remove">&times;</button>\
-      </li>\
-    ');
-    
-
-    Form.editors.List.Object.template = Form.editors.List.NestedModel.template = _.template('\
-      <div class="bbf-list-modal"><%= summary %></div>\
-    ');
-
+  function isInDOM(view) {
+    return documentElement.contains(view.el);
   }
 
-
-})(Backbone.Form);
-
-;/**
- * Backbone localStorage Adapter
- * Version 1.1.7
- *
- * https://github.com/jeromegn/Backbone.localStorage
- */
-(function (root, factory) {
-   if (typeof exports === 'object' && typeof require === 'function') {
-     module.exports = factory(require("underscore"), require("backbone"));
-   } else if (typeof define === "function" && define.amd) {
-      // AMD. Register as an anonymous module.
-      define(["underscore","backbone"], function(_, Backbone) {
-        // Use global variables if the locals are undefined.
-        return factory(_ || root._, Backbone || root.Backbone);
-      });
-   } else {
-      // RequireJS isn't being used. Assume underscore and backbone are loaded in <script> tags
-      factory(_, Backbone);
-   }
-}(this, function(_, Backbone) {
-// A simple module to replace `Backbone.sync` with *localStorage*-based
-// persistence. Models are given GUIDS, and saved into a JSON object. Simple
-// as that.
-
-// Hold reference to Underscore.js and Backbone.js in the closure in order
-// to make things work even if they are removed from the global namespace
-
-// Generate four random hex digits.
-function S4() {
-   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-};
-
-// Generate a pseudo-GUID by concatenating random hexadecimal.
-function guid() {
-   return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
-};
-
-// Our Store is represented by a single JS object in *localStorage*. Create it
-// with a meaningful name, like the name you'd give a table.
-// window.Store is deprectated, use Backbone.LocalStorage instead
-Backbone.LocalStorage = window.Store = function(name) {
-  if( !this.localStorage ) {
-    throw "Backbone.localStorage: Environment does not support localStorage."
-  }
-  this.name = name;
-  var store = this.localStorage().getItem(this.name);
-  this.records = (store && store.split(",")) || [];
-};
-
-_.extend(Backbone.LocalStorage.prototype, {
-
-  // Save the current state of the **Store** to *localStorage*.
-  save: function() {
-    this.localStorage().setItem(this.name, this.records.join(","));
-  },
-
-  // Add a model, giving it a (hopefully)-unique GUID, if it doesn't already
-  // have an id of it's own.
-  create: function(model) {
-    if (!model.id) {
-      model.id = guid();
-      model.set(model.idAttribute, model.id);
-    }
-    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
-    this.records.push(model.id.toString());
-    this.save();
-    return this.find(model);
-  },
-
-  // Update a model by replacing its copy in `this.data`.
-  update: function(model) {
-    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
-    if (!_.include(this.records, model.id.toString()))
-      this.records.push(model.id.toString()); this.save();
-    return this.find(model);
-  },
-
-  // Retrieve a model from `this.data` by id.
-  find: function(model) {
-    return this.jsonData(this.localStorage().getItem(this.name+"-"+model.id));
-  },
-
-  // Return the array of all models currently in storage.
-  findAll: function() {
-    // Lodash removed _#chain in v1.0.0-rc.1
-    return (_.chain || _)(this.records)
-      .map(function(id){
-        return this.jsonData(this.localStorage().getItem(this.name+"-"+id));
-      }, this)
-      .compact()
-      .value();
-  },
-
-  // Delete a model from `this.data`, returning it.
-  destroy: function(model) {
-    if (model.isNew())
-      return false
-    this.localStorage().removeItem(this.name+"-"+model.id);
-    this.records = _.reject(this.records, function(id){
-      return id === model.id.toString();
+  // Export public API
+  return function(view){
+    view.listenTo(view, "show", function(){
+      handleShow(view);
     });
-    this.save();
-    return model;
+
+    view.listenTo(view, "render", function(){
+      handleRender(view);
+    });
+  };
+})(document.documentElement);
+
+
+// Marionette.bindEntityEvents & unbindEntityEvents
+// ---------------------------
+//
+// These methods are used to bind/unbind a backbone "entity" (collection/model)
+// to methods on a target object.
+//
+// The first parameter, `target`, must have a `listenTo` method from the
+// EventBinder object.
+//
+// The second parameter is the entity (Backbone.Model or Backbone.Collection)
+// to bind the events from.
+//
+// The third parameter is a hash of { "event:name": "eventHandler" }
+// configuration. Multiple handlers can be separated by a space. A
+// function can be supplied instead of a string handler name.
+
+(function(Marionette){
+  "use strict";
+
+  // Bind the event to handlers specified as a string of
+  // handler names on the target object
+  function bindFromStrings(target, entity, evt, methods){
+    var methodNames = methods.split(/\s+/);
+
+    _.each(methodNames,function(methodName) {
+
+      var method = target[methodName];
+      if(!method) {
+        throwError("Method '"+ methodName +"' was configured as an event handler, but does not exist.");
+      }
+
+      target.listenTo(entity, evt, method);
+    });
+  }
+
+  // Bind the event to a supplied callback function
+  function bindToFunction(target, entity, evt, method){
+      target.listenTo(entity, evt, method);
+  }
+
+  // Bind the event to handlers specified as a string of
+  // handler names on the target object
+  function unbindFromStrings(target, entity, evt, methods){
+    var methodNames = methods.split(/\s+/);
+
+    _.each(methodNames,function(methodName) {
+      var method = target[methodName];
+      target.stopListening(entity, evt, method);
+    });
+  }
+
+  // Bind the event to a supplied callback function
+  function unbindToFunction(target, entity, evt, method){
+      target.stopListening(entity, evt, method);
+  }
+
+
+  // generic looping function
+  function iterateEvents(target, entity, bindings, functionCallback, stringCallback){
+    if (!entity || !bindings) { return; }
+
+    // allow the bindings to be a function
+    if (_.isFunction(bindings)){
+      bindings = bindings.call(target);
+    }
+
+    // iterate the bindings and bind them
+    _.each(bindings, function(methods, evt){
+
+      // allow for a function as the handler,
+      // or a list of event names as a string
+      if (_.isFunction(methods)){
+        functionCallback(target, entity, evt, methods);
+      } else {
+        stringCallback(target, entity, evt, methods);
+      }
+
+    });
+  }
+
+  // Export Public API
+  Marionette.bindEntityEvents = function(target, entity, bindings){
+    iterateEvents(target, entity, bindings, bindToFunction, bindFromStrings);
+  };
+
+  Marionette.unbindEntityEvents = function(target, entity, bindings){
+    iterateEvents(target, entity, bindings, unbindToFunction, unbindFromStrings);
+  };
+
+})(Marionette);
+
+
+// Callbacks
+// ---------
+
+// A simple way of managing a collection of callbacks
+// and executing them at a later point in time, using jQuery's
+// `Deferred` object.
+Marionette.Callbacks = function(){
+  this._deferred = Marionette.$.Deferred();
+  this._callbacks = [];
+};
+
+_.extend(Marionette.Callbacks.prototype, {
+
+  // Add a callback to be executed. Callbacks added here are
+  // guaranteed to execute, even if they are added after the
+  // `run` method is called.
+  add: function(callback, contextOverride){
+    this._callbacks.push({cb: callback, ctx: contextOverride});
+
+    this._deferred.done(function(context, options){
+      if (contextOverride){ context = contextOverride; }
+      callback.call(context, options);
+    });
   },
 
-  localStorage: function() {
-    return localStorage;
+  // Run all registered callbacks with the context specified.
+  // Additional callbacks can be added after this has been run
+  // and they will still be executed.
+  run: function(options, context){
+    this._deferred.resolve(context, options);
   },
 
-  // fix for "illegal access" error on Android when JSON.parse is passed null
-  jsonData: function (data) {
-      return data && JSON.parse(data);
-  },
+  // Resets the list of callbacks to be run, allowing the same list
+  // to be run multiple times - whenever the `run` method is called.
+  reset: function(){
+    var callbacks = this._callbacks;
+    this._deferred = Marionette.$.Deferred();
+    this._callbacks = [];
 
-  // Clear localStorage for specific collection.
-  _clear: function() {
-    var local = this.localStorage(),
-      itemRe = new RegExp("^" + this.name + "-");
+    _.each(callbacks, function(cb){
+      this.add(cb.cb, cb.ctx);
+    }, this);
+  }
+});
 
-    // Remove id-tracking item (e.g., "foo").
-    local.removeItem(this.name);
 
-    // Lodash removed _#chain in v1.0.0-rc.1
-    // Match all data items (e.g., "foo-ID") and remove.
-    (_.chain || _)(local).keys()
-      .filter(function (k) { return itemRe.test(k); })
-      .each(function (k) { local.removeItem(k); });
+// Marionette Controller
+// ---------------------
+//
+// A multi-purpose object to use as a controller for
+// modules and routers, and as a mediator for workflow
+// and coordination of other objects, views, and more.
+Marionette.Controller = function(options){
+  this.triggerMethod = Marionette.triggerMethod;
+  this.options = options || {};
 
-    this.records.length = 0;
-  },
+  if (_.isFunction(this.initialize)){
+    this.initialize(this.options);
+  }
+};
 
-  // Size of localStorage.
-  _storageSize: function() {
-    return this.localStorage().length;
+Marionette.Controller.extend = Marionette.extend;
+
+// Controller Methods
+// --------------
+
+// Ensure it can trigger events with Backbone.Events
+_.extend(Marionette.Controller.prototype, Backbone.Events, {
+  close: function(){
+    this.stopListening();
+    this.triggerMethod("close");
+    this.unbind();
+  }
+});
+
+// Region
+// ------
+//
+// Manage the visual regions of your composite application. See
+// http://lostechies.com/derickbailey/2011/12/12/composite-js-apps-regions-and-region-managers/
+
+Marionette.Region = function(options){
+  this.options = options || {};
+  this.el = Marionette.getOption(this, "el");
+
+  if (!this.el){
+    throwError("An 'el' must be specified for a region.", "NoElError");
+  }
+
+  if (this.initialize){
+    var args = Array.prototype.slice.apply(arguments);
+    this.initialize.apply(this, args);
+  }
+};
+
+
+// Region Type methods
+// -------------------
+
+_.extend(Marionette.Region, {
+
+  // Build an instance of a region by passing in a configuration object
+  // and a default region type to use if none is specified in the config.
+  //
+  // The config object should either be a string as a jQuery DOM selector,
+  // a Region type directly, or an object literal that specifies both
+  // a selector and regionType:
+  //
+  // ```js
+  // {
+  //   selector: "#foo",
+  //   regionType: MyCustomRegion
+  // }
+  // ```
+  //
+  buildRegion: function(regionConfig, defaultRegionType){
+    var regionIsString = _.isString(regionConfig);
+    var regionSelectorIsString = _.isString(regionConfig.selector);
+    var regionTypeIsUndefined = _.isUndefined(regionConfig.regionType);
+    var regionIsType = _.isFunction(regionConfig);
+
+    if (!regionIsType && !regionIsString && !regionSelectorIsString) {
+      throwError("Region must be specified as a Region type, a selector string or an object with selector property");
+    }
+
+    var selector, RegionType;
+
+    // get the selector for the region
+
+    if (regionIsString) {
+      selector = regionConfig;
+    }
+
+    if (regionConfig.selector) {
+      selector = regionConfig.selector;
+      delete regionConfig.selector;
+    }
+
+    // get the type for the region
+
+    if (regionIsType){
+      RegionType = regionConfig;
+    }
+
+    if (!regionIsType && regionTypeIsUndefined) {
+      RegionType = defaultRegionType;
+    }
+
+    if (regionConfig.regionType) {
+      RegionType = regionConfig.regionType;
+      delete regionConfig.regionType;
+    }
+
+    if (regionIsString || regionIsType) {
+      regionConfig = {};
+    }
+
+    regionConfig.el = selector;
+
+    // build the region instance
+    var region = new RegionType(regionConfig);
+
+    // override the `getEl` function if we have a parentEl
+    // this must be overridden to ensure the selector is found
+    // on the first use of the region. if we try to assign the
+    // region's `el` to `parentEl.find(selector)` in the object
+    // literal to build the region, the element will not be
+    // guaranteed to be in the DOM already, and will cause problems
+    if (regionConfig.parentEl){
+      region.getEl = function(selector) {
+        var parentEl = regionConfig.parentEl;
+        if (_.isFunction(parentEl)){
+          parentEl = parentEl();
+        }
+        return parentEl.find(selector);
+      };
+    }
+
+    return region;
   }
 
 });
 
-// localSync delegate to the model or collection's
-// *localStorage* property, which should be an instance of `Store`.
-// window.Store.sync and Backbone.localSync is deprecated, use Backbone.LocalStorage.sync instead
-Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function(method, model, options) {
-  var store = model.localStorage || model.collection.localStorage;
+// Region Instance Methods
+// -----------------------
 
-  var resp, errorMessage, syncDfd = Backbone.$.Deferred && Backbone.$.Deferred(); //If $ is having Deferred - use it.
+_.extend(Marionette.Region.prototype, Backbone.Events, {
 
-  try {
+  // Displays a backbone view instance inside of the region.
+  // Handles calling the `render` method for you. Reads content
+  // directly from the `el` attribute. Also calls an optional
+  // `onShow` and `close` method on your view, just after showing
+  // or just before closing the view, respectively.
+  show: function(view){
+    this.ensureEl();
 
-    switch (method) {
-      case "read":
-        resp = model.id != undefined ? store.find(model) : store.findAll();
-        break;
-      case "create":
-        resp = store.create(model);
-        break;
-      case "update":
-        resp = store.update(model);
-        break;
-      case "delete":
-        resp = store.destroy(model);
-        break;
+    var isViewClosed = view.isClosed || _.isUndefined(view.$el);
+    var isDifferentView = view !== this.currentView;
+
+    if (isDifferentView) {
+      this.close();
     }
 
-  } catch(error) {
-    if (error.code === 22 && store._storageSize() === 0)
-      errorMessage = "Private browsing is unsupported";
-    else
-      errorMessage = error.message;
-  }
+    view.render();
 
-  if (resp) {
-    if (options && options.success) {
-      if (Backbone.VERSION === "0.9.10") {
-        options.success(model, resp, options);
+    if (isDifferentView || isViewClosed) {
+      this.open(view);
+    }
+
+    this.currentView = view;
+
+    Marionette.triggerMethod.call(this, "show", view);
+    Marionette.triggerMethod.call(view, "show");
+  },
+
+  ensureEl: function(){
+    if (!this.$el || this.$el.length === 0){
+      this.$el = this.getEl(this.el);
+    }
+  },
+
+  // Override this method to change how the region finds the
+  // DOM element that it manages. Return a jQuery selector object.
+  getEl: function(selector){
+    return Marionette.$(selector);
+  },
+
+  // Override this method to change how the new view is
+  // appended to the `$el` that the region is managing
+  open: function(view){
+    this.$el.empty().append(view.el);
+  },
+
+  // Close the current view, if there is one. If there is no
+  // current view, it does nothing and returns immediately.
+  close: function(){
+    var view = this.currentView;
+    if (!view || view.isClosed){ return; }
+
+    // call 'close' or 'remove', depending on which is found
+    if (view.close) { view.close(); }
+    else if (view.remove) { view.remove(); }
+
+    Marionette.triggerMethod.call(this, "close", view);
+
+    delete this.currentView;
+  },
+
+  // Attach an existing view to the region. This
+  // will not call `render` or `onShow` for the new view,
+  // and will not replace the current HTML for the `el`
+  // of the region.
+  attachView: function(view){
+    this.currentView = view;
+  },
+
+  // Reset the region by closing any existing view and
+  // clearing out the cached `$el`. The next time a view
+  // is shown via this region, the region will re-query the
+  // DOM for the region's `el`.
+  reset: function(){
+    this.close();
+    delete this.$el;
+  }
+});
+
+// Copy the `extend` function used by Backbone's classes
+Marionette.Region.extend = Marionette.extend;
+
+// Marionette.RegionManager
+// ------------------------
+//
+// Manage one or more related `Marionette.Region` objects.
+Marionette.RegionManager = (function(Marionette){
+
+  var RegionManager = Marionette.Controller.extend({
+    constructor: function(options){
+      this._regions = {};
+      Marionette.Controller.prototype.constructor.call(this, options);
+    },
+
+    // Add multiple regions using an object literal, where
+    // each key becomes the region name, and each value is
+    // the region definition.
+    addRegions: function(regionDefinitions, defaults){
+      var regions = {};
+
+      _.each(regionDefinitions, function(definition, name){
+        if (_.isString(definition)){
+          definition = { selector: definition };
+        }
+
+        if (definition.selector){
+          definition = _.defaults({}, definition, defaults);
+        }
+
+        var region = this.addRegion(name, definition);
+        regions[name] = region;
+      }, this);
+
+      return regions;
+    },
+
+    // Add an individual region to the region manager,
+    // and return the region instance
+    addRegion: function(name, definition){
+      var region;
+
+      var isObject = _.isObject(definition);
+      var isString = _.isString(definition);
+      var hasSelector = !!definition.selector;
+
+      if (isString || (isObject && hasSelector)){
+        region = Marionette.Region.buildRegion(definition, Marionette.Region);
+      } else if (_.isFunction(definition)){
+        region = Marionette.Region.buildRegion(definition, Marionette.Region);
       } else {
-        options.success(resp);
-      }
-    }
-    if (syncDfd) {
-      syncDfd.resolve(resp);
-    }
-
-  } else {
-    errorMessage = errorMessage ? errorMessage
-                                : "Record Not Found";
-
-    if (options && options.error)
-      if (Backbone.VERSION === "0.9.10") {
-        options.error(model, errorMessage, options);
-      } else {
-        options.error(errorMessage);
+        region = definition;
       }
 
-    if (syncDfd)
-      syncDfd.reject(errorMessage);
+      this._store(name, region);
+      this.triggerMethod("region:add", name, region);
+      return region;
+    },
+
+    // Get a region by name
+    get: function(name){
+      return this._regions[name];
+    },
+
+    // Remove a region by name
+    removeRegion: function(name){
+      var region = this._regions[name];
+      this._remove(name, region);
+    },
+
+    // Close all regions in the region manager, and
+    // remove them
+    removeRegions: function(){
+      _.each(this._regions, function(region, name){
+        this._remove(name, region);
+      }, this);
+    },
+
+    // Close all regions in the region manager, but
+    // leave them attached
+    closeRegions: function(){
+      _.each(this._regions, function(region, name){
+        region.close();
+      }, this);
+    },
+
+    // Close all regions and shut down the region
+    // manager entirely
+    close: function(){
+      this.removeRegions();
+      Marionette.Controller.prototype.close.apply(this, arguments);
+    },
+
+    // internal method to store regions
+    _store: function(name, region){
+      this._regions[name] = region;
+      this._setLength();
+    },
+
+    // internal method to remove a region
+    _remove: function(name, region){
+      region.close();
+      delete this._regions[name];
+      this._setLength();
+      this.triggerMethod("region:remove", name, region);
+    },
+
+    // set the number of regions current held
+    _setLength: function(){
+      this.length = _.size(this._regions);
+    }
+
+  });
+
+  // Borrowing this code from Backbone.Collection:
+  // http://backbonejs.org/docs/backbone.html#section-106
+  //
+  // Mix in methods from Underscore, for iteration, and other
+  // collection related features.
+  var methods = ['forEach', 'each', 'map', 'find', 'detect', 'filter',
+    'select', 'reject', 'every', 'all', 'some', 'any', 'include',
+    'contains', 'invoke', 'toArray', 'first', 'initial', 'rest',
+    'last', 'without', 'isEmpty', 'pluck'];
+
+  _.each(methods, function(method) {
+    RegionManager.prototype[method] = function() {
+      var regions = _.values(this._regions);
+      var args = [regions].concat(_.toArray(arguments));
+      return _[method].apply(_, args);
+    };
+  });
+
+  return RegionManager;
+})(Marionette);
+
+
+// Template Cache
+// --------------
+
+// Manage templates stored in `<script>` blocks,
+// caching them for faster access.
+Marionette.TemplateCache = function(templateId){
+  this.templateId = templateId;
+};
+
+// TemplateCache object-level methods. Manage the template
+// caches from these method calls instead of creating
+// your own TemplateCache instances
+_.extend(Marionette.TemplateCache, {
+  templateCaches: {},
+
+  // Get the specified template by id. Either
+  // retrieves the cached version, or loads it
+  // from the DOM.
+  get: function(templateId){
+    var cachedTemplate = this.templateCaches[templateId];
+
+    if (!cachedTemplate){
+      cachedTemplate = new Marionette.TemplateCache(templateId);
+      this.templateCaches[templateId] = cachedTemplate;
+    }
+
+    return cachedTemplate.load();
+  },
+
+  // Clear templates from the cache. If no arguments
+  // are specified, clears all templates:
+  // `clear()`
+  //
+  // If arguments are specified, clears each of the
+  // specified templates from the cache:
+  // `clear("#t1", "#t2", "...")`
+  clear: function(){
+    var i;
+    var args = slice.call(arguments);
+    var length = args.length;
+
+    if (length > 0){
+      for(i=0; i<length; i++){
+        delete this.templateCaches[args[i]];
+      }
+    } else {
+      this.templateCaches = {};
+    }
   }
+});
 
-  // add compatibility with $.ajax
-  // always execute callback for success and error
-  if (options && options.complete) options.complete(resp);
+// TemplateCache instance methods, allowing each
+// template cache object to manage its own state
+// and know whether or not it has been loaded
+_.extend(Marionette.TemplateCache.prototype, {
 
-  return syncDfd && syncDfd.promise();
-};
+  // Internal method to load the template
+  load: function(){
+    // Guard clause to prevent loading this template more than once
+    if (this.compiledTemplate){
+      return this.compiledTemplate;
+    }
 
-Backbone.ajaxSync = Backbone.sync;
+    // Load the template and compile it
+    var template = this.loadTemplate(this.templateId);
+    this.compiledTemplate = this.compileTemplate(template);
 
-Backbone.getSyncMethod = function(model) {
-  if(model.localStorage || (model.collection && model.collection.localStorage)) {
-    return Backbone.localSync;
+    return this.compiledTemplate;
+  },
+
+  // Load a template from the DOM, by default. Override
+  // this method to provide your own template retrieval
+  // For asynchronous loading with AMD/RequireJS, consider
+  // using a template-loader plugin as described here:
+  // https://github.com/marionettejs/backbone.marionette/wiki/Using-marionette-with-requirejs
+  loadTemplate: function(templateId){
+    var template = Marionette.$(templateId).html();
+
+    if (!template || template.length === 0){
+      throwError("Could not find template: '" + templateId + "'", "NoTemplateError");
+    }
+
+    return template;
+  },
+
+  // Pre-compile the template before caching it. Override
+  // this method if you do not need to pre-compile a template
+  // (JST / RequireJS for example) or if you want to change
+  // the template engine used (Handebars, etc).
+  compileTemplate: function(rawTemplate){
+    return _.template(rawTemplate);
   }
+});
 
-  return Backbone.ajaxSync;
+
+// Renderer
+// --------
+
+// Render a template with data by passing in the template
+// selector and the data to render.
+Marionette.Renderer = {
+
+  // Render a template with data. The `template` parameter is
+  // passed to the `TemplateCache` object to retrieve the
+  // template function. Override this method to provide your own
+  // custom rendering and template handling for all of Marionette.
+  render: function(template, data){
+
+    if (!template) {
+      throwError("Cannot render the template since it's false, null or undefined.", "TemplateNotFoundError");
+    }
+
+    var templateFunc;
+    if (typeof template === "function"){
+      templateFunc = template;
+    } else {
+      templateFunc = Marionette.TemplateCache.get(template);
+    }
+
+    return templateFunc(data);
+  }
 };
 
-// Override 'Backbone.sync' to default to localSync,
-// the original 'Backbone.sync' is still available in 'Backbone.ajaxSync'
-Backbone.sync = function(method, model, options) {
-  return Backbone.getSyncMethod(model).apply(this, [method, model, options]);
+
+
+// Marionette.View
+// ---------------
+
+// The core view type that other Marionette views extend from.
+Marionette.View = Backbone.View.extend({
+
+  constructor: function(options){
+    _.bindAll(this, "render");
+
+    // this exposes view options to the view initializer
+    // this is a backfill since backbone removed the assignment
+    // of this.options
+    // at some point however this may be removed
+    this.options = _.extend({}, _.result(this, 'options'), _.isFunction(options) ? options.call(this) : options);
+
+    // parses out the @ui DSL for events
+    this.events = this.normalizeUIKeys(_.result(this, 'events'));
+    Backbone.View.prototype.constructor.apply(this, arguments);
+
+    Marionette.MonitorDOMRefresh(this);
+    this.listenTo(this, "show", this.onShowCalled);
+  },
+
+  // import the "triggerMethod" to trigger events with corresponding
+  // methods if the method exists
+  triggerMethod: Marionette.triggerMethod,
+
+  // Imports the "normalizeMethods" to transform hashes of
+  // events=>function references/names to a hash of events=>function references
+  normalizeMethods: Marionette.normalizeMethods,
+
+  // Get the template for this view
+  // instance. You can set a `template` attribute in the view
+  // definition or pass a `template: "whatever"` parameter in
+  // to the constructor options.
+  getTemplate: function(){
+    return Marionette.getOption(this, "template");
+  },
+
+  // Mix in template helper methods. Looks for a
+  // `templateHelpers` attribute, which can either be an
+  // object literal, or a function that returns an object
+  // literal. All methods and attributes from this object
+  // are copies to the object passed in.
+  mixinTemplateHelpers: function(target){
+    target = target || {};
+    var templateHelpers = Marionette.getOption(this, "templateHelpers");
+    if (_.isFunction(templateHelpers)){
+      templateHelpers = templateHelpers.call(this);
+    }
+    return _.extend(target, templateHelpers);
+  },
+
+  // allows for the use of the @ui. syntax within
+  // a given key for triggers and events
+  // swaps the @ui with the associated selector
+  normalizeUIKeys: function(hash) {
+    var _this = this;
+    if (typeof(hash) === "undefined") {
+      return;
+    }
+
+    _.each(_.keys(hash), function(v) {
+      var pattern = /@ui.[a-zA-Z_$0-9]*/g;
+      if (v.match(pattern)) {
+        hash[v.replace(pattern, function(r) {
+          return _.result(_this, "ui")[r.slice(4)];
+        })] = hash[v];
+        delete hash[v];
+      }
+    });
+
+    return hash;
+  },
+
+  // Configure `triggers` to forward DOM events to view
+  // events. `triggers: {"click .foo": "do:foo"}`
+  configureTriggers: function(){
+    if (!this.triggers) { return; }
+
+    var triggerEvents = {};
+
+    // Allow `triggers` to be configured as a function
+    var triggers = this.normalizeUIKeys(_.result(this, "triggers"));
+
+    // Configure the triggers, prevent default
+    // action and stop propagation of DOM events
+    _.each(triggers, function(value, key){
+
+      var hasOptions = _.isObject(value);
+      var eventName = hasOptions ? value.event : value;
+
+      // build the event handler function for the DOM event
+      triggerEvents[key] = function(e){
+
+        // stop the event in its tracks
+        if (e) {
+          var prevent = e.preventDefault;
+          var stop = e.stopPropagation;
+
+          var shouldPrevent = hasOptions ? value.preventDefault : prevent;
+          var shouldStop = hasOptions ? value.stopPropagation : stop;
+
+          if (shouldPrevent && prevent) { prevent.apply(e); }
+          if (shouldStop && stop) { stop.apply(e); }
+        }
+
+        // build the args for the event
+        var args = {
+          view: this,
+          model: this.model,
+          collection: this.collection
+        };
+
+        // trigger the event
+        this.triggerMethod(eventName, args);
+      };
+
+    }, this);
+
+    return triggerEvents;
+  },
+
+  // Overriding Backbone.View's delegateEvents to handle
+  // the `triggers`, `modelEvents`, and `collectionEvents` configuration
+  delegateEvents: function(events){
+    this._delegateDOMEvents(events);
+    Marionette.bindEntityEvents(this, this.model, Marionette.getOption(this, "modelEvents"));
+    Marionette.bindEntityEvents(this, this.collection, Marionette.getOption(this, "collectionEvents"));
+  },
+
+  // internal method to delegate DOM events and triggers
+  _delegateDOMEvents: function(events){
+    events = events || this.events;
+    if (_.isFunction(events)){ events = events.call(this); }
+
+    var combinedEvents = {};
+    var triggers = this.configureTriggers();
+    _.extend(combinedEvents, events, triggers);
+
+    Backbone.View.prototype.delegateEvents.call(this, combinedEvents);
+  },
+
+  // Overriding Backbone.View's undelegateEvents to handle unbinding
+  // the `triggers`, `modelEvents`, and `collectionEvents` config
+  undelegateEvents: function(){
+    var args = Array.prototype.slice.call(arguments);
+    Backbone.View.prototype.undelegateEvents.apply(this, args);
+
+    Marionette.unbindEntityEvents(this, this.model, Marionette.getOption(this, "modelEvents"));
+    Marionette.unbindEntityEvents(this, this.collection, Marionette.getOption(this, "collectionEvents"));
+  },
+
+  // Internal method, handles the `show` event.
+  onShowCalled: function(){},
+
+  // Default `close` implementation, for removing a view from the
+  // DOM and unbinding it. Regions will call this method
+  // for you. You can specify an `onClose` method in your view to
+  // add custom code that is called after the view is closed.
+  close: function(){
+    if (this.isClosed) { return; }
+
+    // allow the close to be stopped by returning `false`
+    // from the `onBeforeClose` method
+    var shouldClose = this.triggerMethod("before:close");
+    if (shouldClose === false){
+      return;
+    }
+
+    // mark as closed before doing the actual close, to
+    // prevent infinite loops within "close" event handlers
+    // that are trying to close other views
+    this.isClosed = true;
+    this.triggerMethod("close");
+
+    // unbind UI elements
+    this.unbindUIElements();
+
+    // remove the view from the DOM
+    this.remove();
+  },
+
+  // This method binds the elements specified in the "ui" hash inside the view's code with
+  // the associated jQuery selectors.
+  bindUIElements: function(){
+    if (!this.ui) { return; }
+
+    // store the ui hash in _uiBindings so they can be reset later
+    // and so re-rendering the view will be able to find the bindings
+    if (!this._uiBindings){
+      this._uiBindings = this.ui;
+    }
+
+    // get the bindings result, as a function or otherwise
+    var bindings = _.result(this, "_uiBindings");
+
+    // empty the ui so we don't have anything to start with
+    this.ui = {};
+
+    // bind each of the selectors
+    _.each(_.keys(bindings), function(key) {
+      var selector = bindings[key];
+      this.ui[key] = this.$(selector);
+    }, this);
+  },
+
+  // This method unbinds the elements specified in the "ui" hash
+  unbindUIElements: function(){
+    if (!this.ui || !this._uiBindings){ return; }
+
+    // delete all of the existing ui bindings
+    _.each(this.ui, function($el, name){
+      delete this.ui[name];
+    }, this);
+
+    // reset the ui element to the original bindings configuration
+    this.ui = this._uiBindings;
+    delete this._uiBindings;
+  }
+});
+
+// Item View
+// ---------
+
+// A single item view implementation that contains code for rendering
+// with underscore.js templates, serializing the view's model or collection,
+// and calling several methods on extended views, such as `onRender`.
+Marionette.ItemView = Marionette.View.extend({
+
+  // Setting up the inheritance chain which allows changes to
+  // Marionette.View.prototype.constructor which allows overriding
+  constructor: function(){
+    Marionette.View.prototype.constructor.apply(this, arguments);
+  },
+
+  // Serialize the model or collection for the view. If a model is
+  // found, `.toJSON()` is called. If a collection is found, `.toJSON()`
+  // is also called, but is used to populate an `items` array in the
+  // resulting data. If both are found, defaults to the model.
+  // You can override the `serializeData` method in your own view
+  // definition, to provide custom serialization for your view's data.
+  serializeData: function(){
+    var data = {};
+
+    if (this.model) {
+      data = this.model.toJSON();
+    }
+    else if (this.collection) {
+      data = { items: this.collection.toJSON() };
+    }
+
+    return data;
+  },
+
+  // Render the view, defaulting to underscore.js templates.
+  // You can override this in your view definition to provide
+  // a very specific rendering for your view. In general, though,
+  // you should override the `Marionette.Renderer` object to
+  // change how Marionette renders views.
+  render: function(){
+    this.isClosed = false;
+
+    this.triggerMethod("before:render", this);
+    this.triggerMethod("item:before:render", this);
+
+    var data = this.serializeData();
+    data = this.mixinTemplateHelpers(data);
+
+    var template = this.getTemplate();
+    var html = Marionette.Renderer.render(template, data);
+
+    this.$el.html(html);
+    this.bindUIElements();
+
+    this.triggerMethod("render", this);
+    this.triggerMethod("item:rendered", this);
+
+    return this;
+  },
+
+  // Override the default close event to add a few
+  // more events that are triggered.
+  close: function(){
+    if (this.isClosed){ return; }
+
+    this.triggerMethod('item:before:close');
+
+    Marionette.View.prototype.close.apply(this, arguments);
+
+    this.triggerMethod('item:closed');
+  }
+});
+
+// Collection View
+// ---------------
+
+// A view that iterates over a Backbone.Collection
+// and renders an individual ItemView for each model.
+Marionette.CollectionView = Marionette.View.extend({
+  // used as the prefix for item view events
+  // that are forwarded through the collectionview
+  itemViewEventPrefix: "itemview",
+
+  // constructor
+  constructor: function(options){
+    this._initChildViewStorage();
+
+    Marionette.View.prototype.constructor.apply(this, arguments);
+
+    this._initialEvents();
+    this.initRenderBuffer();
+  },
+
+  // Instead of inserting elements one by one into the page,
+  // it's much more performant to insert elements into a document
+  // fragment and then insert that document fragment into the page
+  initRenderBuffer: function() {
+    this.elBuffer = document.createDocumentFragment();
+    this._bufferedChildren = [];
+  },
+
+  startBuffering: function() {
+    this.initRenderBuffer();
+    this.isBuffering = true;
+  },
+
+  endBuffering: function() {
+    this.isBuffering = false;
+    this.appendBuffer(this, this.elBuffer);
+    this._triggerShowBufferedChildren();
+    this.initRenderBuffer();
+  },
+
+  _triggerShowBufferedChildren: function () {
+    if (this._isShown) {
+      _.each(this._bufferedChildren, function (child) {
+        Marionette.triggerMethod.call(child, "show");
+      });
+      this._bufferedChildren = [];
+    }
+  },
+
+  // Configured the initial events that the collection view
+  // binds to.
+  _initialEvents: function(){
+    if (this.collection){
+      this.listenTo(this.collection, "add", this.addChildView);
+      this.listenTo(this.collection, "remove", this.removeItemView);
+      this.listenTo(this.collection, "reset", this.render);
+    }
+  },
+
+  // Handle a child item added to the collection
+  addChildView: function(item, collection, options){
+    this.closeEmptyView();
+    var ItemView = this.getItemView(item);
+    var index = this.collection.indexOf(item);
+    this.addItemView(item, ItemView, index);
+  },
+
+  // Override from `Marionette.View` to guarantee the `onShow` method
+  // of child views is called.
+  onShowCalled: function(){
+    this.children.each(function(child){
+      Marionette.triggerMethod.call(child, "show");
+    });
+  },
+
+  // Internal method to trigger the before render callbacks
+  // and events
+  triggerBeforeRender: function(){
+    this.triggerMethod("before:render", this);
+    this.triggerMethod("collection:before:render", this);
+  },
+
+  // Internal method to trigger the rendered callbacks and
+  // events
+  triggerRendered: function(){
+    this.triggerMethod("render", this);
+    this.triggerMethod("collection:rendered", this);
+  },
+
+  // Render the collection of items. Override this method to
+  // provide your own implementation of a render function for
+  // the collection view.
+  render: function(){
+    this.isClosed = false;
+    this.triggerBeforeRender();
+    this._renderChildren();
+    this.triggerRendered();
+    return this;
+  },
+
+  // Internal method. Separated so that CompositeView can have
+  // more control over events being triggered, around the rendering
+  // process
+  _renderChildren: function(){
+    this.startBuffering();
+
+    this.closeEmptyView();
+    this.closeChildren();
+
+    if (!this.isEmpty(this.collection)) {
+      this.showCollection();
+    } else {
+      this.showEmptyView();
+    }
+
+    this.endBuffering();
+  },
+
+  // Internal method to loop through each item in the
+  // collection view and show it
+  showCollection: function(){
+    var ItemView;
+    this.collection.each(function(item, index){
+      ItemView = this.getItemView(item);
+      this.addItemView(item, ItemView, index);
+    }, this);
+  },
+
+  // Internal method to show an empty view in place of
+  // a collection of item views, when the collection is
+  // empty
+  showEmptyView: function(){
+    var EmptyView = this.getEmptyView();
+
+    if (EmptyView && !this._showingEmptyView){
+      this._showingEmptyView = true;
+      var model = new Backbone.Model();
+      this.addItemView(model, EmptyView, 0);
+    }
+  },
+
+  // Internal method to close an existing emptyView instance
+  // if one exists. Called when a collection view has been
+  // rendered empty, and then an item is added to the collection.
+  closeEmptyView: function(){
+    if (this._showingEmptyView){
+      this.closeChildren();
+      delete this._showingEmptyView;
+    }
+  },
+
+  // Retrieve the empty view type
+  getEmptyView: function(){
+    return Marionette.getOption(this, "emptyView");
+  },
+
+  // Retrieve the itemView type, either from `this.options.itemView`
+  // or from the `itemView` in the object definition. The "options"
+  // takes precedence.
+  getItemView: function(item){
+    var itemView = Marionette.getOption(this, "itemView");
+
+    if (!itemView){
+      throwError("An `itemView` must be specified", "NoItemViewError");
+    }
+
+    return itemView;
+  },
+
+  // Render the child item's view and add it to the
+  // HTML for the collection view.
+  addItemView: function(item, ItemView, index){
+    // get the itemViewOptions if any were specified
+    var itemViewOptions = Marionette.getOption(this, "itemViewOptions");
+    if (_.isFunction(itemViewOptions)){
+      itemViewOptions = itemViewOptions.call(this, item, index);
+    }
+
+    // build the view
+    var view = this.buildItemView(item, ItemView, itemViewOptions);
+
+    // set up the child view event forwarding
+    this.addChildViewEventForwarding(view);
+
+    // this view is about to be added
+    this.triggerMethod("before:item:added", view);
+
+    // Store the child view itself so we can properly
+    // remove and/or close it later
+    this.children.add(view);
+
+    // Render it and show it
+    this.renderItemView(view, index);
+
+    // call the "show" method if the collection view
+    // has already been shown
+    if (this._isShown && !this.isBuffering){
+      Marionette.triggerMethod.call(view, "show");
+    }
+
+    // this view was added
+    this.triggerMethod("after:item:added", view);
+
+    return view;
+  },
+
+  // Set up the child view event forwarding. Uses an "itemview:"
+  // prefix in front of all forwarded events.
+  addChildViewEventForwarding: function(view){
+    var prefix = Marionette.getOption(this, "itemViewEventPrefix");
+
+    // Forward all child item view events through the parent,
+    // prepending "itemview:" to the event name
+    this.listenTo(view, "all", function(){
+      var args = slice.call(arguments);
+      var rootEvent = args[0];
+      var itemEvents = this.normalizeMethods(this.getItemEvents());
+
+      args[0] = prefix + ":" + rootEvent;
+      args.splice(1, 0, view);
+
+      // call collectionView itemEvent if defined
+      if (typeof itemEvents !== "undefined" && _.isFunction(itemEvents[rootEvent])) {
+        itemEvents[rootEvent].apply(this, args);
+      }
+
+      Marionette.triggerMethod.apply(this, args);
+    }, this);
+  },
+
+  // returns the value of itemEvents depending on if a function
+  getItemEvents: function() {
+    if (_.isFunction(this.itemEvents)) {
+      return this.itemEvents.call(this);
+    }
+
+    return this.itemEvents;
+  },
+
+  // render the item view
+  renderItemView: function(view, index) {
+    view.render();
+    this.appendHtml(this, view, index);
+  },
+
+  // Build an `itemView` for every model in the collection.
+  buildItemView: function(item, ItemViewType, itemViewOptions){
+    var options = _.extend({model: item}, itemViewOptions);
+    return new ItemViewType(options);
+  },
+
+  // get the child view by item it holds, and remove it
+  removeItemView: function(item){
+    var view = this.children.findByModel(item);
+    this.removeChildView(view);
+    this.checkEmpty();
+  },
+
+  // Remove the child view and close it
+  removeChildView: function(view){
+
+    // shut down the child view properly,
+    // including events that the collection has from it
+    if (view){
+      this.stopListening(view);
+
+      // call 'close' or 'remove', depending on which is found
+      if (view.close) { view.close(); }
+      else if (view.remove) { view.remove(); }
+
+      this.children.remove(view);
+    }
+
+    this.triggerMethod("item:removed", view);
+  },
+
+  // helper to check if the collection is empty
+  isEmpty: function(collection){
+    // check if we're empty now
+    return !this.collection || this.collection.length === 0;
+  },
+
+  // If empty, show the empty view
+  checkEmpty: function (){
+    if (this.isEmpty(this.collection)){
+      this.showEmptyView();
+    }
+  },
+
+  // You might need to override this if you've overridden appendHtml
+  appendBuffer: function(collectionView, buffer) {
+    collectionView.$el.append(buffer);
+  },
+
+  // Append the HTML to the collection's `el`.
+  // Override this method to do something other
+  // than `.append`.
+  appendHtml: function(collectionView, itemView, index){
+    if (collectionView.isBuffering) {
+      // buffering happens on reset events and initial renders
+      // in order to reduce the number of inserts into the
+      // document, which are expensive.
+      collectionView.elBuffer.appendChild(itemView.el);
+      collectionView._bufferedChildren.push(itemView);
+    }
+    else {
+      // If we've already rendered the main collection, just
+      // append the new items directly into the element.
+      collectionView.$el.append(itemView.el);
+    }
+  },
+
+  // Internal method to set up the `children` object for
+  // storing all of the child views
+  _initChildViewStorage: function(){
+    this.children = new Backbone.ChildViewContainer();
+  },
+
+  // Handle cleanup and other closing needs for
+  // the collection of views.
+  close: function(){
+    if (this.isClosed){ return; }
+
+    this.triggerMethod("collection:before:close");
+    this.closeChildren();
+    this.triggerMethod("collection:closed");
+
+    Marionette.View.prototype.close.apply(this, arguments);
+  },
+
+  // Close the child views that this collection view
+  // is holding on to, if any
+  closeChildren: function(){
+    this.children.each(function(child){
+      this.removeChildView(child);
+    }, this);
+    this.checkEmpty();
+  }
+});
+
+
+// Composite View
+// --------------
+
+// Used for rendering a branch-leaf, hierarchical structure.
+// Extends directly from CollectionView and also renders an
+// an item view as `modelView`, for the top leaf
+Marionette.CompositeView = Marionette.CollectionView.extend({
+
+  // Setting up the inheritance chain which allows changes to
+  // Marionette.CollectionView.prototype.constructor which allows overriding
+  constructor: function(){
+    Marionette.CollectionView.prototype.constructor.apply(this, arguments);
+  },
+
+  // Configured the initial events that the composite view
+  // binds to. Override this method to prevent the initial
+  // events, or to add your own initial events.
+  _initialEvents: function(){
+
+    // Bind only after composite view is rendered to avoid adding child views
+    // to nonexistent itemViewContainer
+    this.once('render', function () {
+      if (this.collection){
+        this.listenTo(this.collection, "add", this.addChildView);
+        this.listenTo(this.collection, "remove", this.removeItemView);
+        this.listenTo(this.collection, "reset", this._renderChildren);
+      }
+    });
+
+  },
+
+  // Retrieve the `itemView` to be used when rendering each of
+  // the items in the collection. The default is to return
+  // `this.itemView` or Marionette.CompositeView if no `itemView`
+  // has been defined
+  getItemView: function(item){
+    var itemView = Marionette.getOption(this, "itemView") || this.constructor;
+
+    if (!itemView){
+      throwError("An `itemView` must be specified", "NoItemViewError");
+    }
+
+    return itemView;
+  },
+
+  // Serialize the collection for the view.
+  // You can override the `serializeData` method in your own view
+  // definition, to provide custom serialization for your view's data.
+  serializeData: function(){
+    var data = {};
+
+    if (this.model){
+      data = this.model.toJSON();
+    }
+
+    return data;
+  },
+
+  // Renders the model once, and the collection once. Calling
+  // this again will tell the model's view to re-render itself
+  // but the collection will not re-render.
+  render: function(){
+    this.isRendered = true;
+    this.isClosed = false;
+    this.resetItemViewContainer();
+
+    this.triggerBeforeRender();
+    var html = this.renderModel();
+    this.$el.html(html);
+    // the ui bindings is done here and not at the end of render since they
+    // will not be available until after the model is rendered, but should be
+    // available before the collection is rendered.
+    this.bindUIElements();
+    this.triggerMethod("composite:model:rendered");
+
+    this._renderChildren();
+
+    this.triggerMethod("composite:rendered");
+    this.triggerRendered();
+    return this;
+  },
+
+  _renderChildren: function(){
+    if (this.isRendered){
+      this.triggerMethod("composite:collection:before:render");
+      Marionette.CollectionView.prototype._renderChildren.call(this);
+      this.triggerMethod("composite:collection:rendered");
+    }
+  },
+
+  // Render an individual model, if we have one, as
+  // part of a composite view (branch / leaf). For example:
+  // a treeview.
+  renderModel: function(){
+    var data = {};
+    data = this.serializeData();
+    data = this.mixinTemplateHelpers(data);
+
+    var template = this.getTemplate();
+    return Marionette.Renderer.render(template, data);
+  },
+
+
+  // You might need to override this if you've overridden appendHtml
+  appendBuffer: function(compositeView, buffer) {
+    var $container = this.getItemViewContainer(compositeView);
+    $container.append(buffer);
+  },
+
+  // Appends the `el` of itemView instances to the specified
+  // `itemViewContainer` (a jQuery selector). Override this method to
+  // provide custom logic of how the child item view instances have their
+  // HTML appended to the composite view instance.
+  appendHtml: function(compositeView, itemView, index){
+    if (compositeView.isBuffering) {
+      compositeView.elBuffer.appendChild(itemView.el);
+      compositeView._bufferedChildren.push(itemView);
+    }
+    else {
+      // If we've already rendered the main collection, just
+      // append the new items directly into the element.
+      var $container = this.getItemViewContainer(compositeView);
+      $container.append(itemView.el);
+    }
+  },
+
+
+  // Internal method to ensure an `$itemViewContainer` exists, for the
+  // `appendHtml` method to use.
+  getItemViewContainer: function(containerView){
+    if ("$itemViewContainer" in containerView){
+      return containerView.$itemViewContainer;
+    }
+
+    var container;
+    var itemViewContainer = Marionette.getOption(containerView, "itemViewContainer");
+    if (itemViewContainer){
+
+      var selector = _.isFunction(itemViewContainer) ? itemViewContainer.call(this) : itemViewContainer;
+      container = containerView.$(selector);
+      if (container.length <= 0) {
+        throwError("The specified `itemViewContainer` was not found: " + containerView.itemViewContainer, "ItemViewContainerMissingError");
+      }
+
+    } else {
+      container = containerView.$el;
+    }
+
+    containerView.$itemViewContainer = container;
+    return container;
+  },
+
+  // Internal method to reset the `$itemViewContainer` on render
+  resetItemViewContainer: function(){
+    if (this.$itemViewContainer){
+      delete this.$itemViewContainer;
+    }
+  }
+});
+
+
+// Layout
+// ------
+
+// Used for managing application layouts, nested layouts and
+// multiple regions within an application or sub-application.
+//
+// A specialized view type that renders an area of HTML and then
+// attaches `Region` instances to the specified `regions`.
+// Used for composite view management and sub-application areas.
+Marionette.Layout = Marionette.ItemView.extend({
+  regionType: Marionette.Region,
+
+  // Ensure the regions are available when the `initialize` method
+  // is called.
+  constructor: function (options) {
+    options = options || {};
+
+    this._firstRender = true;
+    this._initializeRegions(options);
+
+    Marionette.ItemView.prototype.constructor.call(this, options);
+  },
+
+  // Layout's render will use the existing region objects the
+  // first time it is called. Subsequent calls will close the
+  // views that the regions are showing and then reset the `el`
+  // for the regions to the newly rendered DOM elements.
+  render: function(){
+
+    if (this.isClosed){
+      // a previously closed layout means we need to
+      // completely re-initialize the regions
+      this._initializeRegions();
+    }
+    if (this._firstRender) {
+      // if this is the first render, don't do anything to
+      // reset the regions
+      this._firstRender = false;
+    } else if (!this.isClosed){
+      // If this is not the first render call, then we need to
+      // re-initializing the `el` for each region
+      this._reInitializeRegions();
+    }
+
+    return Marionette.ItemView.prototype.render.apply(this, arguments);
+  },
+
+  // Handle closing regions, and then close the view itself.
+  close: function () {
+    if (this.isClosed){ return; }
+    this.regionManager.close();
+    Marionette.ItemView.prototype.close.apply(this, arguments);
+  },
+
+  // Add a single region, by name, to the layout
+  addRegion: function(name, definition){
+    var regions = {};
+    regions[name] = definition;
+    return this._buildRegions(regions)[name];
+  },
+
+  // Add multiple regions as a {name: definition, name2: def2} object literal
+  addRegions: function(regions){
+    this.regions = _.extend({}, this.regions, regions);
+    return this._buildRegions(regions);
+  },
+
+  // Remove a single region from the Layout, by name
+  removeRegion: function(name){
+    delete this.regions[name];
+    return this.regionManager.removeRegion(name);
+  },
+
+  // internal method to build regions
+  _buildRegions: function(regions){
+    var that = this;
+
+    var defaults = {
+      regionType: Marionette.getOption(this, "regionType"),
+      parentEl: function(){ return that.$el; }
+    };
+
+    return this.regionManager.addRegions(regions, defaults);
+  },
+
+  // Internal method to initialize the regions that have been defined in a
+  // `regions` attribute on this layout.
+  _initializeRegions: function (options) {
+    var regions;
+    this._initRegionManager();
+
+    if (_.isFunction(this.regions)) {
+      regions = this.regions(options);
+    } else {
+      regions = this.regions || {};
+    }
+
+    this.addRegions(regions);
+  },
+
+  // Internal method to re-initialize all of the regions by updating the `el` that
+  // they point to
+  _reInitializeRegions: function(){
+    this.regionManager.closeRegions();
+    this.regionManager.each(function(region){
+      region.reset();
+    });
+  },
+
+  // Internal method to initialize the region manager
+  // and all regions in it
+  _initRegionManager: function(){
+    this.regionManager = new Marionette.RegionManager();
+
+    this.listenTo(this.regionManager, "region:add", function(name, region){
+      this[name] = region;
+      this.trigger("region:add", name, region);
+    });
+
+    this.listenTo(this.regionManager, "region:remove", function(name, region){
+      delete this[name];
+      this.trigger("region:remove", name, region);
+    });
+  }
+});
+
+
+// AppRouter
+// ---------
+
+// Reduce the boilerplate code of handling route events
+// and then calling a single method on another object.
+// Have your routers configured to call the method on
+// your object, directly.
+//
+// Configure an AppRouter with `appRoutes`.
+//
+// App routers can only take one `controller` object.
+// It is recommended that you divide your controller
+// objects in to smaller pieces of related functionality
+// and have multiple routers / controllers, instead of
+// just one giant router and controller.
+//
+// You can also add standard routes to an AppRouter.
+
+Marionette.AppRouter = Backbone.Router.extend({
+
+  constructor: function(options){
+    Backbone.Router.prototype.constructor.apply(this, arguments);
+	
+    this.options = options || {};
+
+    var appRoutes = Marionette.getOption(this, "appRoutes");
+    var controller = this._getController();
+    this.processAppRoutes(controller, appRoutes);
+  },
+
+  // Similar to route method on a Backbone Router but
+  // method is called on the controller
+  appRoute: function(route, methodName) {
+    var controller = this._getController();
+    this._addAppRoute(controller, route, methodName);
+  },
+
+  // Internal method to process the `appRoutes` for the
+  // router, and turn them in to routes that trigger the
+  // specified method on the specified `controller`.
+  processAppRoutes: function(controller, appRoutes) {
+    if (!appRoutes){ return; }
+
+    var routeNames = _.keys(appRoutes).reverse(); // Backbone requires reverted order of routes
+
+    _.each(routeNames, function(route) {
+      this._addAppRoute(controller, route, appRoutes[route]);
+    }, this);
+  },
+
+  _getController: function(){
+    return Marionette.getOption(this, "controller");
+  },
+
+  _addAppRoute: function(controller, route, methodName){
+    var method = controller[methodName];
+
+    if (!method) {
+      throwError("Method '" + methodName + "' was not found on the controller");
+    }
+
+    this.route(route, methodName, _.bind(method, controller));
+  }
+});
+
+
+// Application
+// -----------
+
+// Contain and manage the composite application as a whole.
+// Stores and starts up `Region` objects, includes an
+// event aggregator as `app.vent`
+Marionette.Application = function(options){
+  this._initRegionManager();
+  this._initCallbacks = new Marionette.Callbacks();
+  this.vent = new Backbone.Wreqr.EventAggregator();
+  this.commands = new Backbone.Wreqr.Commands();
+  this.reqres = new Backbone.Wreqr.RequestResponse();
+  this.submodules = {};
+
+  _.extend(this, options);
+
+  this.triggerMethod = Marionette.triggerMethod;
 };
 
-return Backbone.LocalStorage;
+_.extend(Marionette.Application.prototype, Backbone.Events, {
+  // Command execution, facilitated by Backbone.Wreqr.Commands
+  execute: function(){
+    this.commands.execute.apply(this.commands, arguments);
+  },
+
+  // Request/response, facilitated by Backbone.Wreqr.RequestResponse
+  request: function(){
+    return this.reqres.request.apply(this.reqres, arguments);
+  },
+
+  // Add an initializer that is either run at when the `start`
+  // method is called, or run immediately if added after `start`
+  // has already been called.
+  addInitializer: function(initializer){
+    this._initCallbacks.add(initializer);
+  },
+
+  // kick off all of the application's processes.
+  // initializes all of the regions that have been added
+  // to the app, and runs all of the initializer functions
+  start: function(options){
+    this.triggerMethod("initialize:before", options);
+    this._initCallbacks.run(options, this);
+    this.triggerMethod("initialize:after", options);
+
+    this.triggerMethod("start", options);
+  },
+
+  // Add regions to your app.
+  // Accepts a hash of named strings or Region objects
+  // addRegions({something: "#someRegion"})
+  // addRegions({something: Region.extend({el: "#someRegion"}) });
+  addRegions: function(regions){
+    return this._regionManager.addRegions(regions);
+  },
+
+  // Close all regions in the app, without removing them
+  closeRegions: function(){
+    this._regionManager.closeRegions();
+  },
+
+  // Removes a region from your app, by name
+  // Accepts the regions name
+  // removeRegion('myRegion')
+  removeRegion: function(region) {
+    this._regionManager.removeRegion(region);
+  },
+
+  // Provides alternative access to regions
+  // Accepts the region name
+  // getRegion('main')
+  getRegion: function(region) {
+    return this._regionManager.get(region);
+  },
+
+  // Create a module, attached to the application
+  module: function(moduleNames, moduleDefinition){
+
+    // Overwrite the module class if the user specifies one
+    var ModuleClass = Marionette.Module.getClass(moduleDefinition);
+
+    // slice the args, and add this application object as the
+    // first argument of the array
+    var args = slice.call(arguments);
+    args.unshift(this);
+
+    // see the Marionette.Module object for more information
+    return ModuleClass.create.apply(ModuleClass, args);
+  },
+
+  // Internal method to set up the region manager
+  _initRegionManager: function(){
+    this._regionManager = new Marionette.RegionManager();
+
+    this.listenTo(this._regionManager, "region:add", function(name, region){
+      this[name] = region;
+    });
+
+    this.listenTo(this._regionManager, "region:remove", function(name, region){
+      delete this[name];
+    });
+  }
+});
+
+// Copy the `extend` function used by Backbone's classes
+Marionette.Application.extend = Marionette.extend;
+
+// Module
+// ------
+
+// A simple module system, used to create privacy and encapsulation in
+// Marionette applications
+Marionette.Module = function(moduleName, app, options){
+  this.moduleName = moduleName;
+  this.options = _.extend({}, this.options, options);
+  this.initialize = options.initialize || this.initialize;
+
+  // store sub-modules
+  this.submodules = {};
+
+  this._setupInitializersAndFinalizers();
+
+  // store the configuration for this module
+  this.app = app;
+  this.startWithParent = true;
+
+  this.triggerMethod = Marionette.triggerMethod;
+
+  if (_.isFunction(this.initialize)){
+    this.initialize(this.options, moduleName, app);
+  }
+};
+
+Marionette.Module.extend = Marionette.extend;
+
+// Extend the Module prototype with events / listenTo, so that the module
+// can be used as an event aggregator or pub/sub.
+_.extend(Marionette.Module.prototype, Backbone.Events, {
+
+  // Initialize is an empty function by default. Override it with your own
+  // initialization logic when extending Marionette.Module.
+  initialize: function(){},
+
+  // Initializer for a specific module. Initializers are run when the
+  // module's `start` method is called.
+  addInitializer: function(callback){
+    this._initializerCallbacks.add(callback);
+  },
+
+  // Finalizers are run when a module is stopped. They are used to teardown
+  // and finalize any variables, references, events and other code that the
+  // module had set up.
+  addFinalizer: function(callback){
+    this._finalizerCallbacks.add(callback);
+  },
+
+  // Start the module, and run all of its initializers
+  start: function(options){
+    // Prevent re-starting a module that is already started
+    if (this._isInitialized){ return; }
+
+    // start the sub-modules (depth-first hierarchy)
+    _.each(this.submodules, function(mod){
+      // check to see if we should start the sub-module with this parent
+      if (mod.startWithParent){
+        mod.start(options);
+      }
+    });
+
+    // run the callbacks to "start" the current module
+    this.triggerMethod("before:start", options);
+
+    this._initializerCallbacks.run(options, this);
+    this._isInitialized = true;
+
+    this.triggerMethod("start", options);
+  },
+
+  // Stop this module by running its finalizers and then stop all of
+  // the sub-modules for this module
+  stop: function(){
+    // if we are not initialized, don't bother finalizing
+    if (!this._isInitialized){ return; }
+    this._isInitialized = false;
+
+    Marionette.triggerMethod.call(this, "before:stop");
+
+    // stop the sub-modules; depth-first, to make sure the
+    // sub-modules are stopped / finalized before parents
+    _.each(this.submodules, function(mod){ mod.stop(); });
+
+    // run the finalizers
+    this._finalizerCallbacks.run(undefined,this);
+
+    // reset the initializers and finalizers
+    this._initializerCallbacks.reset();
+    this._finalizerCallbacks.reset();
+
+    Marionette.triggerMethod.call(this, "stop");
+  },
+
+  // Configure the module with a definition function and any custom args
+  // that are to be passed in to the definition function
+  addDefinition: function(moduleDefinition, customArgs){
+    this._runModuleDefinition(moduleDefinition, customArgs);
+  },
+
+  // Internal method: run the module definition function with the correct
+  // arguments
+  _runModuleDefinition: function(definition, customArgs){
+    if (!definition){ return; }
+
+    // build the correct list of arguments for the module definition
+    var args = _.flatten([
+      this,
+      this.app,
+      Backbone,
+      Marionette,
+      Marionette.$, _,
+      customArgs
+    ]);
+
+    definition.apply(this, args);
+  },
+
+  // Internal method: set up new copies of initializers and finalizers.
+  // Calling this method will wipe out all existing initializers and
+  // finalizers.
+  _setupInitializersAndFinalizers: function(){
+    this._initializerCallbacks = new Marionette.Callbacks();
+    this._finalizerCallbacks = new Marionette.Callbacks();
+  }
+});
+
+// Type methods to create modules
+_.extend(Marionette.Module, {
+
+  // Create a module, hanging off the app parameter as the parent object.
+  create: function(app, moduleNames, moduleDefinition){
+    var module = app;
+
+    // get the custom args passed in after the module definition and
+    // get rid of the module name and definition function
+    var customArgs = slice.call(arguments);
+    customArgs.splice(0, 3);
+
+    // split the module names and get the length
+    moduleNames = moduleNames.split(".");
+    var length = moduleNames.length;
+
+    // store the module definition for the last module in the chain
+    var moduleDefinitions = [];
+    moduleDefinitions[length-1] = moduleDefinition;
+
+    // Loop through all the parts of the module definition
+    _.each(moduleNames, function(moduleName, i){
+      var parentModule = module;
+      module = this._getModule(parentModule, moduleName, app, moduleDefinition);
+      this._addModuleDefinition(parentModule, module, moduleDefinitions[i], customArgs);
+    }, this);
+
+    // Return the last module in the definition chain
+    return module;
+  },
+
+  _getModule: function(parentModule, moduleName, app, def, args){
+    var options = _.extend({}, def);
+    var ModuleClass = this.getClass(def);
+
+    // Get an existing module of this name if we have one
+    var module = parentModule[moduleName];
+
+    if (!module){
+      // Create a new module if we don't have one
+      module = new ModuleClass(moduleName, app, options);
+      parentModule[moduleName] = module;
+      // store the module on the parent
+      parentModule.submodules[moduleName] = module;
+    }
+
+    return module;
+  },
+
+  getClass: function(moduleDefinition) {
+    var ModuleClass = Marionette.Module;
+
+    if (!moduleDefinition) {
+      return ModuleClass;
+    }
+
+    if (moduleDefinition.prototype instanceof ModuleClass) {
+      return moduleDefinition;
+    }
+
+    return moduleDefinition.moduleClass || ModuleClass;
+  },
+
+  _addModuleDefinition: function(parentModule, module, def, args){
+    var fn;
+    var startWithParent;
+
+    if (_.isFunction(def) && !(def.prototype instanceof Marionette.Module)){
+      // if a function is supplied for the module definition
+      fn = def;
+      startWithParent = true;
+
+    } else if (_.isObject(def)){
+      // if an object is supplied
+      fn = def.define;
+      startWithParent = !_.isUndefined(def.startWithParent) ? def.startWithParent : true;
+
+    } else {
+      // if nothing is supplied
+      startWithParent = true;
+    }
+
+    // add module definition if needed
+    if (fn){
+      module.addDefinition(fn, args);
+    }
+
+    // `and` the two together, ensuring a single `false` will prevent it
+    // from starting with the parent
+    module.startWithParent = module.startWithParent && startWithParent;
+
+    // setup auto-start if needed
+    if (module.startWithParent && !module.startWithParentIsConfigured){
+
+      // only configure this once
+      module.startWithParentIsConfigured = true;
+
+      // add the module initializer config
+      parentModule.addInitializer(function(options){
+        if (module.startWithParent){
+          module.start(options);
+        }
+      });
+
+    }
+
+  }
+});
+
+
+
+  return Marionette;
+})(this, Backbone, _);
+
+  return Backbone.Marionette;
+
 }));
 
-;// Console-polyfill. MIT license.
-// https://github.com/paulmillr/console-polyfill
-// Make it safe to do console.log() always.
-(function(con) {
-  'use strict';
-  var prop, method;
-  var empty = {};
-  var dummy = function() {};
-  var properties = 'memory'.split(',');
-  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
-     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
-     'time,timeEnd,trace,warn').split(',');
-  while (prop = properties.pop()) con[prop] = con[prop] || empty;
-  while (method = methods.pop()) con[method] = con[method] || dummy;
-})(this.console = this.console || {});
-
-;/*!
+/*!
  * jQuery blockUI plugin
  * Version 2.66.0-2013.10.09
  * Requires jQuery v1.7 or later
@@ -22515,88 +20975,2425 @@ return Backbone.LocalStorage;
 
 })();
 
-;/**
- * Copyright (c) 2011-2013 Felix Gnass
- * Licensed under the MIT license
+/* ========================================================================
+ * bootstrap-switch - v2.0.1
+ * http://www.bootstrap-switch.org
+ * ========================================================================
+ * Copyright 2012-2013 Mattia Larentis
+ *
+ * ========================================================================
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ========================================================================
  */
 
-/*
-
-Basic Usage:
-============
-
-$('#el').spin(); // Creates a default Spinner using the text color of #el.
-$('#el').spin({ ... }); // Creates a Spinner using the provided options.
-
-$('#el').spin(false); // Stops and removes the spinner.
-
-Using Presets:
-==============
-
-$('#el').spin('small'); // Creates a 'small' Spinner using the text color of #el.
-$('#el').spin('large', '#fff'); // Creates a 'large' white Spinner.
-
-Adding a custom preset:
-=======================
-
-$.fn.spin.presets.flower = {
-  lines: 9
-  length: 10
-  width: 20
-  radius: 0
-}
-
-$('#el').spin('flower', 'red');
-
-*/
-
-(function(factory) {
-
-  if (typeof exports == 'object') {
-    // CommonJS
-    factory(require('jquery'), require('spin'))
-  }
-  else if (typeof define == 'function' && define.amd) {
-    // AMD, register as anonymous module
-    define(['jquery', 'spin'], factory)
-  }
-  else {
-    // Browser globals
-    if (!window.Spinner) throw new Error('Spin.js not present')
-    factory(window.jQuery, window.Spinner)
-  }
-
-}(function($, Spinner) {
-
-  $.fn.spin = function(opts, color) {
-
-    return this.each(function() {
-      var $this = $(this),
-        data = $this.data();
-
-      if (data.spinner) {
-        data.spinner.stop();
-        delete data.spinner;
+(function() {
+  (function($) {
+    $.fn.bootstrapSwitch = function(method) {
+      var methods;
+      methods = {
+        init: function() {
+          return this.each(function() {
+            var $div, $element, $form, $label, $switchLeft, $switchRight, $wrapper, changeState;
+            $element = $(this);
+            $switchLeft = $("<span>", {
+              "class": "switch-left",
+              html: function() {
+                var html, label;
+                html = "ON";
+                label = $element.data("on-label");
+                if (label != null) {
+                  html = label;
+                }
+                return html;
+              }
+            });
+            $switchRight = $("<span>", {
+              "class": "switch-right",
+              html: function() {
+                var html, label;
+                html = "OFF";
+                label = $element.data("off-label");
+                if (label != null) {
+                  html = label;
+                }
+                return html;
+              }
+            });
+            $label = $("<label>", {
+              "for": $element.attr("id"),
+              html: function() {
+                var html, icon, label;
+                html = "&nbsp;";
+                icon = $element.data("label-icon");
+                label = $element.data("text-label");
+                if (icon != null) {
+                  html = "<i class=\"icon " + icon + "\"></i>";
+                }
+                if (label != null) {
+                  html = label;
+                }
+                return html;
+              }
+            });
+            $div = $("<div>");
+            $wrapper = $("<div>", {
+              "class": "has-switch",
+              tabindex: 0
+            });
+            $form = $element.closest("form");
+            changeState = function() {
+              if ($label.hasClass("label-change-switch")) {
+                return;
+              }
+              return $label.trigger("mousedown").trigger("mouseup").trigger("click");
+            };
+            $element.data("bootstrap-switch", true);
+            if ($element.data("on") != null) {
+              $switchLeft.addClass("switch-" + $element.data("on"));
+            }
+            if ($element.data("off") != null) {
+              $switchRight.addClass("switch-" + $element.data("off"));
+            }
+            $wrapper.data("animated", false);
+            if ($element.data("animated") !== false) {
+              $wrapper.addClass("switch-animate").data("animated", true);
+            }
+            $div = $element.wrap($div).parent();
+            $wrapper = $div.wrap($wrapper).parent();
+            if ($element.attr("class")) {
+              $.each(["switch-mini", "switch-small", "switch-large"], function(i, cls) {
+                if ($element.attr("class").indexOf(cls) >= 0) {
+                  return $wrapper.addClass(cls);
+                }
+              });
+            }
+            $element.before($switchLeft).before($label).before($switchRight);
+            $wrapper.addClass($element.is(":checked") ? "switch-on" : "switch-off");
+            if ($element.is(":disabled") || $element.is("[readonly]")) {
+              $wrapper.addClass("disabled");
+            }
+            $element.on("keydown", function(e) {
+              if (e.keyCode !== 32) {
+                return;
+              }
+              e.stopImmediatePropagation();
+              e.preventDefault();
+              return changeState();
+            }).on("change", function(e, skip) {
+              var isChecked, state;
+              isChecked = $element.is(":checked");
+              state = $wrapper.hasClass("switch-off");
+              e.preventDefault();
+              $div.css("left", "");
+              if (state !== isChecked) {
+                return;
+              }
+              if (isChecked) {
+                $wrapper.removeClass("switch-off").addClass("switch-on");
+              } else {
+                $wrapper.removeClass("switch-on").addClass("switch-off");
+              }
+              if ($wrapper.data("animated") !== false) {
+                $wrapper.addClass("switch-animate");
+              }
+              if (typeof skip === "boolean" && skip) {
+                return;
+              }
+              return $element.trigger("switch-change", {
+                el: $element,
+                value: isChecked
+              });
+            });
+            $wrapper.on("keydown", function(e) {
+              if (!e.which || $element.is(":disabled") || $element.is("[readonly]")) {
+                return;
+              }
+              switch (e.which) {
+                case 32:
+                  e.preventDefault();
+                  return changeState();
+                case 37:
+                  e.preventDefault();
+                  if ($element.is(":checked")) {
+                    return changeState();
+                  }
+                  break;
+                case 39:
+                  e.preventDefault();
+                  if (!$element.is(":checked")) {
+                    return changeState();
+                  }
+              }
+            });
+            $switchLeft.on("click", function() {
+              return changeState();
+            });
+            $switchRight.on("click", function() {
+              return changeState();
+            });
+            $label.on("mousedown touchstart", function(e) {
+              var moving;
+              moving = false;
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              $wrapper.removeClass("switch-animate");
+              if ($element.is(":disabled") || $element.is("[readonly]") || $element.hasClass("radio-no-uncheck")) {
+                return $label.unbind("click");
+              }
+              return $label.on("mousemove touchmove", function(e) {
+                var left, percent, relativeX, right;
+                relativeX = (e.pageX || e.originalEvent.targetTouches[0].pageX) - $wrapper.offset().left;
+                percent = (relativeX / $wrapper.width()) * 100;
+                left = 25;
+                right = 75;
+                moving = true;
+                if (percent < left) {
+                  percent = left;
+                } else if (percent > right) {
+                  percent = right;
+                }
+                return $div.css("left", (percent - right) + "%");
+              }).on("click touchend", function(e) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                $label.unbind("mouseleave");
+                if (moving) {
+                  $element.prop("checked", parseInt($label.parent().css("left"), 10) > -25);
+                } else {
+                  $element.prop("checked", !$element.is(":checked"));
+                }
+                moving = false;
+                return $element.trigger("change");
+              }).on("mouseleave", function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                $label.unbind("mouseleave mousemove").trigger("mouseup");
+                return $element.prop("checked", parseInt($label.parent().css("left"), 10) > -25).trigger("change");
+              }).on("mouseup", function(e) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                return $label.trigger("mouseleave");
+              });
+            });
+            if (!$form.data("bootstrap-switch")) {
+              return $form.bind("reset", function() {
+                return window.setTimeout(function() {
+                  return $form.find(".has-switch").each(function() {
+                    var $input;
+                    $input = $(this).find("input");
+                    return $input.prop("checked", $input.is(":checked")).trigger("change");
+                  });
+                }, 1);
+              }).data("bootstrap-switch", true);
+            }
+          });
+        },
+        setDisabled: function(disabled) {
+          var $element, $wrapper;
+          $element = $(this);
+          $wrapper = $element.parents(".has-switch");
+          if (disabled) {
+            $wrapper.addClass("disabled");
+            $element.prop("disabled", true);
+          } else {
+            $wrapper.removeClass("disabled");
+            $element.prop("disabled", false);
+          }
+          return $element;
+        },
+        toggleDisabled: function() {
+          var $element;
+          $element = $(this);
+          $element.prop("disabled", !$element.is(":disabled")).parents(".has-switch").toggleClass("disabled");
+          return $element;
+        },
+        isDisabled: function() {
+          return $(this).is(":disabled");
+        },
+        setReadOnly: function(readonly) {
+          var $element, $wrapper;
+          $element = $(this);
+          $wrapper = $element.parents(".has-switch");
+          if (readonly) {
+            $wrapper.addClass("disabled");
+            $element.prop("readonly", true);
+          } else {
+            $wrapper.removeClass("disabled");
+            $element.prop("readonly", false);
+          }
+          return $element;
+        },
+        toggleReadOnly: function() {
+          var $element;
+          $element = $(this);
+          $element.prop("readonly", !$element.is("[readonly]")).parents(".has-switch").toggleClass("disabled");
+          return $element;
+        },
+        isReadOnly: function() {
+          return $(this).is("[readonly]");
+        },
+        toggleState: function(skip) {
+          var $element;
+          $element = $(this);
+          $element.prop("checked", !$element.is(":checked")).trigger("change", skip);
+          return $element;
+        },
+        toggleRadioState: function(skip) {
+          var $element;
+          $element = $(this);
+          $element.not(":checked").prop("checked", !$element.is(":checked")).trigger("change", skip);
+          return $element;
+        },
+        toggleRadioStateAllowUncheck: function(uncheck, skip) {
+          var $element;
+          $element = $(this);
+          if (uncheck) {
+            $element.not(":checked").trigger("change", skip);
+          } else {
+            $element.not(":checked").prop("checked", !$element.is(":checked")).trigger("change", skip);
+          }
+          return $element;
+        },
+        setState: function(value, skip) {
+          var $element;
+          $element = $(this);
+          $element.prop("checked", value).trigger("change", skip);
+          return $element;
+        },
+        setOnLabel: function(value) {
+          var $element;
+          $element = $(this);
+          $element.siblings(".switch-left").html(value);
+          return $element;
+        },
+        setOffLabel: function(value) {
+          var $element;
+          $element = $(this);
+          $element.siblings(".switch-right").html(value);
+          return $element;
+        },
+        setOnClass: function(value) {
+          var $element, $switchLeft, cls;
+          $element = $(this);
+          $switchLeft = $element.siblings(".switch-left");
+          cls = $element.attr("data-on");
+          if (value == null) {
+            return;
+          }
+          if (cls != null) {
+            $switchLeft.removeClass("switch-" + cls);
+          }
+          $switchLeft.addClass("switch-" + value);
+          return $element;
+        },
+        setOffClass: function(value) {
+          var $element, $switchRight, cls;
+          $element = $(this);
+          $switchRight = $element.siblings(".switch-right");
+          cls = $element.attr("data-off");
+          if (value == null) {
+            return;
+          }
+          if (cls != null) {
+            $switchRight.removeClass("switch-" + cls);
+          }
+          $switchRight.addClass("switch-" + value);
+          return $element;
+        },
+        setAnimated: function(value) {
+          var $element, $wrapper;
+          $element = $(this);
+          $wrapper = $element.parents(".has-switch");
+          if (value == null) {
+            value = false;
+          }
+          $wrapper.data("animated", value).attr("data-animated", value)[$wrapper.data("animated") !== false ? "addClass" : "removeClass"]("switch-animate");
+          return $element;
+        },
+        setSizeClass: function(value) {
+          var $element, $wrapper;
+          $element = $(this);
+          $wrapper = $element.parents(".has-switch");
+          $.each(["switch-mini", "switch-small", "switch-large"], function(i, cls) {
+            return $wrapper[cls !== value ? "removeClass" : "addClass"](cls);
+          });
+          return $element;
+        },
+        setTextLabel: function(value) {
+          var $element;
+          $element = $(this);
+          $element.siblings("label").html(value || "&nbsp");
+          return $element;
+        },
+        setTextIcon: function(value) {
+          var $element;
+          $element = $(this);
+          $element.siblings("label").html(value ? "<i class=\"icon " + value + "\"></i>" : "&nbsp;");
+          return $element;
+        },
+        state: function() {
+          return $(this).is(":checked");
+        },
+        destroy: function() {
+          var $div, $element, $form;
+          $element = $(this);
+          $div = $element.parent();
+          $form = $div.closest("form");
+          $div.children().not($element).remove();
+          $element.unwrap().unwrap().off("change");
+          if ($form.length) {
+            $form.off("reset").removeData("bootstrap-switch");
+          }
+          return $element;
+        }
+      };
+      if (methods[method]) {
+        return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
       }
-      if (opts !== false) {
-        opts = $.extend(
-          { color: color || $this.css('color') },
-          $.fn.spin.presets[opts] || opts
-        )
-        data.spinner = new Spinner(opts).spin(this)
+      if (typeof method === "object" || !method) {
+        return methods.init.apply(this, arguments);
       }
+      return $.error("Method " + method + " does not exist!");
+    };
+    return this;
+  })(jQuery);
+
+}).call(this);
+
+/*!
+ * Bootstrap v3.0.3 (http://getbootstrap.com)
+ * Copyright 2013 Twitter, Inc.
+ * Licensed under http://www.apache.org/licenses/LICENSE-2.0
+ */
+
+if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery") }
+
+/* ========================================================================
+ * Bootstrap: transition.js v3.0.3
+ * http://getbootstrap.com/javascript/#transitions
+ * ========================================================================
+ * Copyright 2013 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ======================================================================== */
+
+
++function ($) { "use strict";
+
+  // CSS TRANSITION SUPPORT (Shoutout: http://www.modernizr.com/)
+  // ============================================================
+
+  function transitionEnd() {
+    var el = document.createElement('bootstrap')
+
+    var transEndEventNames = {
+      'WebkitTransition' : 'webkitTransitionEnd'
+    , 'MozTransition'    : 'transitionend'
+    , 'OTransition'      : 'oTransitionEnd otransitionend'
+    , 'transition'       : 'transitionend'
+    }
+
+    for (var name in transEndEventNames) {
+      if (el.style[name] !== undefined) {
+        return { end: transEndEventNames[name] }
+      }
+    }
+  }
+
+  // http://blog.alexmaccaw.com/css-transitions
+  $.fn.emulateTransitionEnd = function (duration) {
+    var called = false, $el = this
+    $(this).one($.support.transition.end, function () { called = true })
+    var callback = function () { if (!called) $($el).trigger($.support.transition.end) }
+    setTimeout(callback, duration)
+    return this
+  }
+
+  $(function () {
+    $.support.transition = transitionEnd()
+  })
+
+}(jQuery);
+
+/* ========================================================================
+ * Bootstrap: alert.js v3.0.3
+ * http://getbootstrap.com/javascript/#alerts
+ * ========================================================================
+ * Copyright 2013 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ======================================================================== */
+
+
++function ($) { "use strict";
+
+  // ALERT CLASS DEFINITION
+  // ======================
+
+  var dismiss = '[data-dismiss="alert"]'
+  var Alert   = function (el) {
+    $(el).on('click', dismiss, this.close)
+  }
+
+  Alert.prototype.close = function (e) {
+    var $this    = $(this)
+    var selector = $this.attr('data-target')
+
+    if (!selector) {
+      selector = $this.attr('href')
+      selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
+    }
+
+    var $parent = $(selector)
+
+    if (e) e.preventDefault()
+
+    if (!$parent.length) {
+      $parent = $this.hasClass('alert') ? $this : $this.parent()
+    }
+
+    $parent.trigger(e = $.Event('close.bs.alert'))
+
+    if (e.isDefaultPrevented()) return
+
+    $parent.removeClass('in')
+
+    function removeElement() {
+      $parent.trigger('closed.bs.alert').remove()
+    }
+
+    $.support.transition && $parent.hasClass('fade') ?
+      $parent
+        .one($.support.transition.end, removeElement)
+        .emulateTransitionEnd(150) :
+      removeElement()
+  }
+
+
+  // ALERT PLUGIN DEFINITION
+  // =======================
+
+  var old = $.fn.alert
+
+  $.fn.alert = function (option) {
+    return this.each(function () {
+      var $this = $(this)
+      var data  = $this.data('bs.alert')
+
+      if (!data) $this.data('bs.alert', (data = new Alert(this)))
+      if (typeof option == 'string') data[option].call($this)
     })
   }
 
-  $.fn.spin.presets = {
-    tiny: { lines: 8, length: 2, width: 2, radius: 3 },
-    small: { lines: 8, length: 4, width: 3, radius: 5 },
-    large: { lines: 10, length: 8, width: 4, radius: 8 }
+  $.fn.alert.Constructor = Alert
+
+
+  // ALERT NO CONFLICT
+  // =================
+
+  $.fn.alert.noConflict = function () {
+    $.fn.alert = old
+    return this
   }
 
-}));
 
-;/**
+  // ALERT DATA-API
+  // ==============
+
+  $(document).on('click.bs.alert.data-api', dismiss, Alert.prototype.close)
+
+}(jQuery);
+
+/* ========================================================================
+ * Bootstrap: button.js v3.0.3
+ * http://getbootstrap.com/javascript/#buttons
+ * ========================================================================
+ * Copyright 2013 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ======================================================================== */
+
+
++function ($) { "use strict";
+
+  // BUTTON PUBLIC CLASS DEFINITION
+  // ==============================
+
+  var Button = function (element, options) {
+    this.$element = $(element)
+    this.options  = $.extend({}, Button.DEFAULTS, options)
+  }
+
+  Button.DEFAULTS = {
+    loadingText: 'loading...'
+  }
+
+  Button.prototype.setState = function (state) {
+    var d    = 'disabled'
+    var $el  = this.$element
+    var val  = $el.is('input') ? 'val' : 'html'
+    var data = $el.data()
+
+    state = state + 'Text'
+
+    if (!data.resetText) $el.data('resetText', $el[val]())
+
+    $el[val](data[state] || this.options[state])
+
+    // push to event loop to allow forms to submit
+    setTimeout(function () {
+      state == 'loadingText' ?
+        $el.addClass(d).attr(d, d) :
+        $el.removeClass(d).removeAttr(d);
+    }, 0)
+  }
+
+  Button.prototype.toggle = function () {
+    var $parent = this.$element.closest('[data-toggle="buttons"]')
+    var changed = true
+
+    if ($parent.length) {
+      var $input = this.$element.find('input')
+      if ($input.prop('type') === 'radio') {
+        // see if clicking on current one
+        if ($input.prop('checked') && this.$element.hasClass('active'))
+          changed = false
+        else
+          $parent.find('.active').removeClass('active')
+      }
+      if (changed) $input.prop('checked', !this.$element.hasClass('active')).trigger('change')
+    }
+
+    if (changed) this.$element.toggleClass('active')
+  }
+
+
+  // BUTTON PLUGIN DEFINITION
+  // ========================
+
+  var old = $.fn.button
+
+  $.fn.button = function (option) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.button')
+      var options = typeof option == 'object' && option
+
+      if (!data) $this.data('bs.button', (data = new Button(this, options)))
+
+      if (option == 'toggle') data.toggle()
+      else if (option) data.setState(option)
+    })
+  }
+
+  $.fn.button.Constructor = Button
+
+
+  // BUTTON NO CONFLICT
+  // ==================
+
+  $.fn.button.noConflict = function () {
+    $.fn.button = old
+    return this
+  }
+
+
+  // BUTTON DATA-API
+  // ===============
+
+  $(document).on('click.bs.button.data-api', '[data-toggle^=button]', function (e) {
+    var $btn = $(e.target)
+    if (!$btn.hasClass('btn')) $btn = $btn.closest('.btn')
+    $btn.button('toggle')
+    e.preventDefault()
+  })
+
+}(jQuery);
+
+/* ========================================================================
+ * Bootstrap: carousel.js v3.0.3
+ * http://getbootstrap.com/javascript/#carousel
+ * ========================================================================
+ * Copyright 2013 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ======================================================================== */
+
+
++function ($) { "use strict";
+
+  // CAROUSEL CLASS DEFINITION
+  // =========================
+
+  var Carousel = function (element, options) {
+    this.$element    = $(element)
+    this.$indicators = this.$element.find('.carousel-indicators')
+    this.options     = options
+    this.paused      =
+    this.sliding     =
+    this.interval    =
+    this.$active     =
+    this.$items      = null
+
+    this.options.pause == 'hover' && this.$element
+      .on('mouseenter', $.proxy(this.pause, this))
+      .on('mouseleave', $.proxy(this.cycle, this))
+  }
+
+  Carousel.DEFAULTS = {
+    interval: 5000
+  , pause: 'hover'
+  , wrap: true
+  }
+
+  Carousel.prototype.cycle =  function (e) {
+    e || (this.paused = false)
+
+    this.interval && clearInterval(this.interval)
+
+    this.options.interval
+      && !this.paused
+      && (this.interval = setInterval($.proxy(this.next, this), this.options.interval))
+
+    return this
+  }
+
+  Carousel.prototype.getActiveIndex = function () {
+    this.$active = this.$element.find('.item.active')
+    this.$items  = this.$active.parent().children()
+
+    return this.$items.index(this.$active)
+  }
+
+  Carousel.prototype.to = function (pos) {
+    var that        = this
+    var activeIndex = this.getActiveIndex()
+
+    if (pos > (this.$items.length - 1) || pos < 0) return
+
+    if (this.sliding)       return this.$element.one('slid.bs.carousel', function () { that.to(pos) })
+    if (activeIndex == pos) return this.pause().cycle()
+
+    return this.slide(pos > activeIndex ? 'next' : 'prev', $(this.$items[pos]))
+  }
+
+  Carousel.prototype.pause = function (e) {
+    e || (this.paused = true)
+
+    if (this.$element.find('.next, .prev').length && $.support.transition.end) {
+      this.$element.trigger($.support.transition.end)
+      this.cycle(true)
+    }
+
+    this.interval = clearInterval(this.interval)
+
+    return this
+  }
+
+  Carousel.prototype.next = function () {
+    if (this.sliding) return
+    return this.slide('next')
+  }
+
+  Carousel.prototype.prev = function () {
+    if (this.sliding) return
+    return this.slide('prev')
+  }
+
+  Carousel.prototype.slide = function (type, next) {
+    var $active   = this.$element.find('.item.active')
+    var $next     = next || $active[type]()
+    var isCycling = this.interval
+    var direction = type == 'next' ? 'left' : 'right'
+    var fallback  = type == 'next' ? 'first' : 'last'
+    var that      = this
+
+    if (!$next.length) {
+      if (!this.options.wrap) return
+      $next = this.$element.find('.item')[fallback]()
+    }
+
+    this.sliding = true
+
+    isCycling && this.pause()
+
+    var e = $.Event('slide.bs.carousel', { relatedTarget: $next[0], direction: direction })
+
+    if ($next.hasClass('active')) return
+
+    if (this.$indicators.length) {
+      this.$indicators.find('.active').removeClass('active')
+      this.$element.one('slid.bs.carousel', function () {
+        var $nextIndicator = $(that.$indicators.children()[that.getActiveIndex()])
+        $nextIndicator && $nextIndicator.addClass('active')
+      })
+    }
+
+    if ($.support.transition && this.$element.hasClass('slide')) {
+      this.$element.trigger(e)
+      if (e.isDefaultPrevented()) return
+      $next.addClass(type)
+      $next[0].offsetWidth // force reflow
+      $active.addClass(direction)
+      $next.addClass(direction)
+      $active
+        .one($.support.transition.end, function () {
+          $next.removeClass([type, direction].join(' ')).addClass('active')
+          $active.removeClass(['active', direction].join(' '))
+          that.sliding = false
+          setTimeout(function () { that.$element.trigger('slid.bs.carousel') }, 0)
+        })
+        .emulateTransitionEnd(600)
+    } else {
+      this.$element.trigger(e)
+      if (e.isDefaultPrevented()) return
+      $active.removeClass('active')
+      $next.addClass('active')
+      this.sliding = false
+      this.$element.trigger('slid.bs.carousel')
+    }
+
+    isCycling && this.cycle()
+
+    return this
+  }
+
+
+  // CAROUSEL PLUGIN DEFINITION
+  // ==========================
+
+  var old = $.fn.carousel
+
+  $.fn.carousel = function (option) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.carousel')
+      var options = $.extend({}, Carousel.DEFAULTS, $this.data(), typeof option == 'object' && option)
+      var action  = typeof option == 'string' ? option : options.slide
+
+      if (!data) $this.data('bs.carousel', (data = new Carousel(this, options)))
+      if (typeof option == 'number') data.to(option)
+      else if (action) data[action]()
+      else if (options.interval) data.pause().cycle()
+    })
+  }
+
+  $.fn.carousel.Constructor = Carousel
+
+
+  // CAROUSEL NO CONFLICT
+  // ====================
+
+  $.fn.carousel.noConflict = function () {
+    $.fn.carousel = old
+    return this
+  }
+
+
+  // CAROUSEL DATA-API
+  // =================
+
+  $(document).on('click.bs.carousel.data-api', '[data-slide], [data-slide-to]', function (e) {
+    var $this   = $(this), href
+    var $target = $($this.attr('data-target') || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '')) //strip for ie7
+    var options = $.extend({}, $target.data(), $this.data())
+    var slideIndex = $this.attr('data-slide-to')
+    if (slideIndex) options.interval = false
+
+    $target.carousel(options)
+
+    if (slideIndex = $this.attr('data-slide-to')) {
+      $target.data('bs.carousel').to(slideIndex)
+    }
+
+    e.preventDefault()
+  })
+
+  $(window).on('load', function () {
+    $('[data-ride="carousel"]').each(function () {
+      var $carousel = $(this)
+      $carousel.carousel($carousel.data())
+    })
+  })
+
+}(jQuery);
+
+/* ========================================================================
+ * Bootstrap: collapse.js v3.0.3
+ * http://getbootstrap.com/javascript/#collapse
+ * ========================================================================
+ * Copyright 2013 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ======================================================================== */
+
+
++function ($) { "use strict";
+
+  // COLLAPSE PUBLIC CLASS DEFINITION
+  // ================================
+
+  var Collapse = function (element, options) {
+    this.$element      = $(element)
+    this.options       = $.extend({}, Collapse.DEFAULTS, options)
+    this.transitioning = null
+
+    if (this.options.parent) this.$parent = $(this.options.parent)
+    if (this.options.toggle) this.toggle()
+  }
+
+  Collapse.DEFAULTS = {
+    toggle: true
+  }
+
+  Collapse.prototype.dimension = function () {
+    var hasWidth = this.$element.hasClass('width')
+    return hasWidth ? 'width' : 'height'
+  }
+
+  Collapse.prototype.show = function () {
+    if (this.transitioning || this.$element.hasClass('in')) return
+
+    var startEvent = $.Event('show.bs.collapse')
+    this.$element.trigger(startEvent)
+    if (startEvent.isDefaultPrevented()) return
+
+    var actives = this.$parent && this.$parent.find('> .panel > .in')
+
+    if (actives && actives.length) {
+      var hasData = actives.data('bs.collapse')
+      if (hasData && hasData.transitioning) return
+      actives.collapse('hide')
+      hasData || actives.data('bs.collapse', null)
+    }
+
+    var dimension = this.dimension()
+
+    this.$element
+      .removeClass('collapse')
+      .addClass('collapsing')
+      [dimension](0)
+
+    this.transitioning = 1
+
+    var complete = function () {
+      this.$element
+        .removeClass('collapsing')
+        .addClass('in')
+        [dimension]('auto')
+      this.transitioning = 0
+      this.$element.trigger('shown.bs.collapse')
+    }
+
+    if (!$.support.transition) return complete.call(this)
+
+    var scrollSize = $.camelCase(['scroll', dimension].join('-'))
+
+    this.$element
+      .one($.support.transition.end, $.proxy(complete, this))
+      .emulateTransitionEnd(350)
+      [dimension](this.$element[0][scrollSize])
+  }
+
+  Collapse.prototype.hide = function () {
+    if (this.transitioning || !this.$element.hasClass('in')) return
+
+    var startEvent = $.Event('hide.bs.collapse')
+    this.$element.trigger(startEvent)
+    if (startEvent.isDefaultPrevented()) return
+
+    var dimension = this.dimension()
+
+    this.$element
+      [dimension](this.$element[dimension]())
+      [0].offsetHeight
+
+    this.$element
+      .addClass('collapsing')
+      .removeClass('collapse')
+      .removeClass('in')
+
+    this.transitioning = 1
+
+    var complete = function () {
+      this.transitioning = 0
+      this.$element
+        .trigger('hidden.bs.collapse')
+        .removeClass('collapsing')
+        .addClass('collapse')
+    }
+
+    if (!$.support.transition) return complete.call(this)
+
+    this.$element
+      [dimension](0)
+      .one($.support.transition.end, $.proxy(complete, this))
+      .emulateTransitionEnd(350)
+  }
+
+  Collapse.prototype.toggle = function () {
+    this[this.$element.hasClass('in') ? 'hide' : 'show']()
+  }
+
+
+  // COLLAPSE PLUGIN DEFINITION
+  // ==========================
+
+  var old = $.fn.collapse
+
+  $.fn.collapse = function (option) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.collapse')
+      var options = $.extend({}, Collapse.DEFAULTS, $this.data(), typeof option == 'object' && option)
+
+      if (!data) $this.data('bs.collapse', (data = new Collapse(this, options)))
+      if (typeof option == 'string') data[option]()
+    })
+  }
+
+  $.fn.collapse.Constructor = Collapse
+
+
+  // COLLAPSE NO CONFLICT
+  // ====================
+
+  $.fn.collapse.noConflict = function () {
+    $.fn.collapse = old
+    return this
+  }
+
+
+  // COLLAPSE DATA-API
+  // =================
+
+  $(document).on('click.bs.collapse.data-api', '[data-toggle=collapse]', function (e) {
+    var $this   = $(this), href
+    var target  = $this.attr('data-target')
+        || e.preventDefault()
+        || (href = $this.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '') //strip for ie7
+    var $target = $(target)
+    var data    = $target.data('bs.collapse')
+    var option  = data ? 'toggle' : $this.data()
+    var parent  = $this.attr('data-parent')
+    var $parent = parent && $(parent)
+
+    if (!data || !data.transitioning) {
+      if ($parent) $parent.find('[data-toggle=collapse][data-parent="' + parent + '"]').not($this).addClass('collapsed')
+      $this[$target.hasClass('in') ? 'addClass' : 'removeClass']('collapsed')
+    }
+
+    $target.collapse(option)
+  })
+
+}(jQuery);
+
+/* ========================================================================
+ * Bootstrap: dropdown.js v3.0.3
+ * http://getbootstrap.com/javascript/#dropdowns
+ * ========================================================================
+ * Copyright 2013 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ======================================================================== */
+
+
++function ($) { "use strict";
+
+  // DROPDOWN CLASS DEFINITION
+  // =========================
+
+  var backdrop = '.dropdown-backdrop'
+  var toggle   = '[data-toggle=dropdown]'
+  var Dropdown = function (element) {
+    $(element).on('click.bs.dropdown', this.toggle)
+  }
+
+  Dropdown.prototype.toggle = function (e) {
+    var $this = $(this)
+
+    if ($this.is('.disabled, :disabled')) return
+
+    var $parent  = getParent($this)
+    var isActive = $parent.hasClass('open')
+
+    clearMenus()
+
+    if (!isActive) {
+      if ('ontouchstart' in document.documentElement && !$parent.closest('.navbar-nav').length) {
+        // if mobile we use a backdrop because click events don't delegate
+        $('<div class="dropdown-backdrop"/>').insertAfter($(this)).on('click', clearMenus)
+      }
+
+      $parent.trigger(e = $.Event('show.bs.dropdown'))
+
+      if (e.isDefaultPrevented()) return
+
+      $parent
+        .toggleClass('open')
+        .trigger('shown.bs.dropdown')
+
+      $this.focus()
+    }
+
+    return false
+  }
+
+  Dropdown.prototype.keydown = function (e) {
+    if (!/(38|40|27)/.test(e.keyCode)) return
+
+    var $this = $(this)
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    if ($this.is('.disabled, :disabled')) return
+
+    var $parent  = getParent($this)
+    var isActive = $parent.hasClass('open')
+
+    if (!isActive || (isActive && e.keyCode == 27)) {
+      if (e.which == 27) $parent.find(toggle).focus()
+      return $this.click()
+    }
+
+    var $items = $('[role=menu] li:not(.divider):visible a', $parent)
+
+    if (!$items.length) return
+
+    var index = $items.index($items.filter(':focus'))
+
+    if (e.keyCode == 38 && index > 0)                 index--                        // up
+    if (e.keyCode == 40 && index < $items.length - 1) index++                        // down
+    if (!~index)                                      index=0
+
+    $items.eq(index).focus()
+  }
+
+  function clearMenus() {
+    $(backdrop).remove()
+    $(toggle).each(function (e) {
+      var $parent = getParent($(this))
+      if (!$parent.hasClass('open')) return
+      $parent.trigger(e = $.Event('hide.bs.dropdown'))
+      if (e.isDefaultPrevented()) return
+      $parent.removeClass('open').trigger('hidden.bs.dropdown')
+    })
+  }
+
+  function getParent($this) {
+    var selector = $this.attr('data-target')
+
+    if (!selector) {
+      selector = $this.attr('href')
+      selector = selector && /#/.test(selector) && selector.replace(/.*(?=#[^\s]*$)/, '') //strip for ie7
+    }
+
+    var $parent = selector && $(selector)
+
+    return $parent && $parent.length ? $parent : $this.parent()
+  }
+
+
+  // DROPDOWN PLUGIN DEFINITION
+  // ==========================
+
+  var old = $.fn.dropdown
+
+  $.fn.dropdown = function (option) {
+    return this.each(function () {
+      var $this = $(this)
+      var data  = $this.data('bs.dropdown')
+
+      if (!data) $this.data('bs.dropdown', (data = new Dropdown(this)))
+      if (typeof option == 'string') data[option].call($this)
+    })
+  }
+
+  $.fn.dropdown.Constructor = Dropdown
+
+
+  // DROPDOWN NO CONFLICT
+  // ====================
+
+  $.fn.dropdown.noConflict = function () {
+    $.fn.dropdown = old
+    return this
+  }
+
+
+  // APPLY TO STANDARD DROPDOWN ELEMENTS
+  // ===================================
+
+  $(document)
+    .on('click.bs.dropdown.data-api', clearMenus)
+    .on('click.bs.dropdown.data-api', '.dropdown form', function (e) { e.stopPropagation() })
+    .on('click.bs.dropdown.data-api'  , toggle, Dropdown.prototype.toggle)
+    .on('keydown.bs.dropdown.data-api', toggle + ', [role=menu]' , Dropdown.prototype.keydown)
+
+}(jQuery);
+
+/* ========================================================================
+ * Bootstrap: modal.js v3.0.3
+ * http://getbootstrap.com/javascript/#modals
+ * ========================================================================
+ * Copyright 2013 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ======================================================================== */
+
+
++function ($) { "use strict";
+
+  // MODAL CLASS DEFINITION
+  // ======================
+
+  var Modal = function (element, options) {
+    this.options   = options
+    this.$element  = $(element)
+    this.$backdrop =
+    this.isShown   = null
+
+    if (this.options.remote) this.$element.load(this.options.remote)
+  }
+
+  Modal.DEFAULTS = {
+      backdrop: true
+    , keyboard: true
+    , show: true
+  }
+
+  Modal.prototype.toggle = function (_relatedTarget) {
+    return this[!this.isShown ? 'show' : 'hide'](_relatedTarget)
+  }
+
+  Modal.prototype.show = function (_relatedTarget) {
+    var that = this
+    var e    = $.Event('show.bs.modal', { relatedTarget: _relatedTarget })
+
+    this.$element.trigger(e)
+
+    if (this.isShown || e.isDefaultPrevented()) return
+
+    this.isShown = true
+
+    this.escape()
+
+    this.$element.on('click.dismiss.modal', '[data-dismiss="modal"]', $.proxy(this.hide, this))
+
+    this.backdrop(function () {
+      var transition = $.support.transition && that.$element.hasClass('fade')
+
+      if (!that.$element.parent().length) {
+        that.$element.appendTo(document.body) // don't move modals dom position
+      }
+
+      that.$element.show()
+
+      if (transition) {
+        that.$element[0].offsetWidth // force reflow
+      }
+
+      that.$element
+        .addClass('in')
+        .attr('aria-hidden', false)
+
+      that.enforceFocus()
+
+      var e = $.Event('shown.bs.modal', { relatedTarget: _relatedTarget })
+
+      transition ?
+        that.$element.find('.modal-dialog') // wait for modal to slide in
+          .one($.support.transition.end, function () {
+            that.$element.focus().trigger(e)
+          })
+          .emulateTransitionEnd(300) :
+        that.$element.focus().trigger(e)
+    })
+  }
+
+  Modal.prototype.hide = function (e) {
+    if (e) e.preventDefault()
+
+    e = $.Event('hide.bs.modal')
+
+    this.$element.trigger(e)
+
+    if (!this.isShown || e.isDefaultPrevented()) return
+
+    this.isShown = false
+
+    this.escape()
+
+    $(document).off('focusin.bs.modal')
+
+    this.$element
+      .removeClass('in')
+      .attr('aria-hidden', true)
+      .off('click.dismiss.modal')
+
+    $.support.transition && this.$element.hasClass('fade') ?
+      this.$element
+        .one($.support.transition.end, $.proxy(this.hideModal, this))
+        .emulateTransitionEnd(300) :
+      this.hideModal()
+  }
+
+  Modal.prototype.enforceFocus = function () {
+    $(document)
+      .off('focusin.bs.modal') // guard against infinite focus loop
+      .on('focusin.bs.modal', $.proxy(function (e) {
+        if (this.$element[0] !== e.target && !this.$element.has(e.target).length) {
+          this.$element.focus()
+        }
+      }, this))
+  }
+
+  Modal.prototype.escape = function () {
+    if (this.isShown && this.options.keyboard) {
+      this.$element.on('keyup.dismiss.bs.modal', $.proxy(function (e) {
+        e.which == 27 && this.hide()
+      }, this))
+    } else if (!this.isShown) {
+      this.$element.off('keyup.dismiss.bs.modal')
+    }
+  }
+
+  Modal.prototype.hideModal = function () {
+    var that = this
+    this.$element.hide()
+    this.backdrop(function () {
+      that.removeBackdrop()
+      that.$element.trigger('hidden.bs.modal')
+    })
+  }
+
+  Modal.prototype.removeBackdrop = function () {
+    this.$backdrop && this.$backdrop.remove()
+    this.$backdrop = null
+  }
+
+  Modal.prototype.backdrop = function (callback) {
+    var that    = this
+    var animate = this.$element.hasClass('fade') ? 'fade' : ''
+
+    if (this.isShown && this.options.backdrop) {
+      var doAnimate = $.support.transition && animate
+
+      this.$backdrop = $('<div class="modal-backdrop ' + animate + '" />')
+        .appendTo(document.body)
+
+      this.$element.on('click.dismiss.modal', $.proxy(function (e) {
+        if (e.target !== e.currentTarget) return
+        this.options.backdrop == 'static'
+          ? this.$element[0].focus.call(this.$element[0])
+          : this.hide.call(this)
+      }, this))
+
+      if (doAnimate) this.$backdrop[0].offsetWidth // force reflow
+
+      this.$backdrop.addClass('in')
+
+      if (!callback) return
+
+      doAnimate ?
+        this.$backdrop
+          .one($.support.transition.end, callback)
+          .emulateTransitionEnd(150) :
+        callback()
+
+    } else if (!this.isShown && this.$backdrop) {
+      this.$backdrop.removeClass('in')
+
+      $.support.transition && this.$element.hasClass('fade')?
+        this.$backdrop
+          .one($.support.transition.end, callback)
+          .emulateTransitionEnd(150) :
+        callback()
+
+    } else if (callback) {
+      callback()
+    }
+  }
+
+
+  // MODAL PLUGIN DEFINITION
+  // =======================
+
+  var old = $.fn.modal
+
+  $.fn.modal = function (option, _relatedTarget) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.modal')
+      var options = $.extend({}, Modal.DEFAULTS, $this.data(), typeof option == 'object' && option)
+
+      if (!data) $this.data('bs.modal', (data = new Modal(this, options)))
+      if (typeof option == 'string') data[option](_relatedTarget)
+      else if (options.show) data.show(_relatedTarget)
+    })
+  }
+
+  $.fn.modal.Constructor = Modal
+
+
+  // MODAL NO CONFLICT
+  // =================
+
+  $.fn.modal.noConflict = function () {
+    $.fn.modal = old
+    return this
+  }
+
+
+  // MODAL DATA-API
+  // ==============
+
+  $(document).on('click.bs.modal.data-api', '[data-toggle="modal"]', function (e) {
+    var $this   = $(this)
+    var href    = $this.attr('href')
+    var $target = $($this.attr('data-target') || (href && href.replace(/.*(?=#[^\s]+$)/, ''))) //strip for ie7
+    var option  = $target.data('modal') ? 'toggle' : $.extend({ remote: !/#/.test(href) && href }, $target.data(), $this.data())
+
+    e.preventDefault()
+
+    $target
+      .modal(option, this)
+      .one('hide', function () {
+        $this.is(':visible') && $this.focus()
+      })
+  })
+
+  $(document)
+    .on('show.bs.modal',  '.modal', function () { $(document.body).addClass('modal-open') })
+    .on('hidden.bs.modal', '.modal', function () { $(document.body).removeClass('modal-open') })
+
+}(jQuery);
+
+/* ========================================================================
+ * Bootstrap: tooltip.js v3.0.3
+ * http://getbootstrap.com/javascript/#tooltip
+ * Inspired by the original jQuery.tipsy by Jason Frame
+ * ========================================================================
+ * Copyright 2013 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ======================================================================== */
+
+
++function ($) { "use strict";
+
+  // TOOLTIP PUBLIC CLASS DEFINITION
+  // ===============================
+
+  var Tooltip = function (element, options) {
+    this.type       =
+    this.options    =
+    this.enabled    =
+    this.timeout    =
+    this.hoverState =
+    this.$element   = null
+
+    this.init('tooltip', element, options)
+  }
+
+  Tooltip.DEFAULTS = {
+    animation: true
+  , placement: 'top'
+  , selector: false
+  , template: '<div class="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+  , trigger: 'hover focus'
+  , title: ''
+  , delay: 0
+  , html: false
+  , container: false
+  }
+
+  Tooltip.prototype.init = function (type, element, options) {
+    this.enabled  = true
+    this.type     = type
+    this.$element = $(element)
+    this.options  = this.getOptions(options)
+
+    var triggers = this.options.trigger.split(' ')
+
+    for (var i = triggers.length; i--;) {
+      var trigger = triggers[i]
+
+      if (trigger == 'click') {
+        this.$element.on('click.' + this.type, this.options.selector, $.proxy(this.toggle, this))
+      } else if (trigger != 'manual') {
+        var eventIn  = trigger == 'hover' ? 'mouseenter' : 'focus'
+        var eventOut = trigger == 'hover' ? 'mouseleave' : 'blur'
+
+        this.$element.on(eventIn  + '.' + this.type, this.options.selector, $.proxy(this.enter, this))
+        this.$element.on(eventOut + '.' + this.type, this.options.selector, $.proxy(this.leave, this))
+      }
+    }
+
+    this.options.selector ?
+      (this._options = $.extend({}, this.options, { trigger: 'manual', selector: '' })) :
+      this.fixTitle()
+  }
+
+  Tooltip.prototype.getDefaults = function () {
+    return Tooltip.DEFAULTS
+  }
+
+  Tooltip.prototype.getOptions = function (options) {
+    options = $.extend({}, this.getDefaults(), this.$element.data(), options)
+
+    if (options.delay && typeof options.delay == 'number') {
+      options.delay = {
+        show: options.delay
+      , hide: options.delay
+      }
+    }
+
+    return options
+  }
+
+  Tooltip.prototype.getDelegateOptions = function () {
+    var options  = {}
+    var defaults = this.getDefaults()
+
+    this._options && $.each(this._options, function (key, value) {
+      if (defaults[key] != value) options[key] = value
+    })
+
+    return options
+  }
+
+  Tooltip.prototype.enter = function (obj) {
+    var self = obj instanceof this.constructor ?
+      obj : $(obj.currentTarget)[this.type](this.getDelegateOptions()).data('bs.' + this.type)
+
+    clearTimeout(self.timeout)
+
+    self.hoverState = 'in'
+
+    if (!self.options.delay || !self.options.delay.show) return self.show()
+
+    self.timeout = setTimeout(function () {
+      if (self.hoverState == 'in') self.show()
+    }, self.options.delay.show)
+  }
+
+  Tooltip.prototype.leave = function (obj) {
+    var self = obj instanceof this.constructor ?
+      obj : $(obj.currentTarget)[this.type](this.getDelegateOptions()).data('bs.' + this.type)
+
+    clearTimeout(self.timeout)
+
+    self.hoverState = 'out'
+
+    if (!self.options.delay || !self.options.delay.hide) return self.hide()
+
+    self.timeout = setTimeout(function () {
+      if (self.hoverState == 'out') self.hide()
+    }, self.options.delay.hide)
+  }
+
+  Tooltip.prototype.show = function () {
+    var e = $.Event('show.bs.'+ this.type)
+
+    if (this.hasContent() && this.enabled) {
+      this.$element.trigger(e)
+
+      if (e.isDefaultPrevented()) return
+
+      var $tip = this.tip()
+
+      this.setContent()
+
+      if (this.options.animation) $tip.addClass('fade')
+
+      var placement = typeof this.options.placement == 'function' ?
+        this.options.placement.call(this, $tip[0], this.$element[0]) :
+        this.options.placement
+
+      var autoToken = /\s?auto?\s?/i
+      var autoPlace = autoToken.test(placement)
+      if (autoPlace) placement = placement.replace(autoToken, '') || 'top'
+
+      $tip
+        .detach()
+        .css({ top: 0, left: 0, display: 'block' })
+        .addClass(placement)
+
+      this.options.container ? $tip.appendTo(this.options.container) : $tip.insertAfter(this.$element)
+
+      var pos          = this.getPosition()
+      var actualWidth  = $tip[0].offsetWidth
+      var actualHeight = $tip[0].offsetHeight
+
+      if (autoPlace) {
+        var $parent = this.$element.parent()
+
+        var orgPlacement = placement
+        var docScroll    = document.documentElement.scrollTop || document.body.scrollTop
+        var parentWidth  = this.options.container == 'body' ? window.innerWidth  : $parent.outerWidth()
+        var parentHeight = this.options.container == 'body' ? window.innerHeight : $parent.outerHeight()
+        var parentLeft   = this.options.container == 'body' ? 0 : $parent.offset().left
+
+        placement = placement == 'bottom' && pos.top   + pos.height  + actualHeight - docScroll > parentHeight  ? 'top'    :
+                    placement == 'top'    && pos.top   - docScroll   - actualHeight < 0                         ? 'bottom' :
+                    placement == 'right'  && pos.right + actualWidth > parentWidth                              ? 'left'   :
+                    placement == 'left'   && pos.left  - actualWidth < parentLeft                               ? 'right'  :
+                    placement
+
+        $tip
+          .removeClass(orgPlacement)
+          .addClass(placement)
+      }
+
+      var calculatedOffset = this.getCalculatedOffset(placement, pos, actualWidth, actualHeight)
+
+      this.applyPlacement(calculatedOffset, placement)
+      this.$element.trigger('shown.bs.' + this.type)
+    }
+  }
+
+  Tooltip.prototype.applyPlacement = function(offset, placement) {
+    var replace
+    var $tip   = this.tip()
+    var width  = $tip[0].offsetWidth
+    var height = $tip[0].offsetHeight
+
+    // manually read margins because getBoundingClientRect includes difference
+    var marginTop = parseInt($tip.css('margin-top'), 10)
+    var marginLeft = parseInt($tip.css('margin-left'), 10)
+
+    // we must check for NaN for ie 8/9
+    if (isNaN(marginTop))  marginTop  = 0
+    if (isNaN(marginLeft)) marginLeft = 0
+
+    offset.top  = offset.top  + marginTop
+    offset.left = offset.left + marginLeft
+
+    $tip
+      .offset(offset)
+      .addClass('in')
+
+    // check to see if placing tip in new offset caused the tip to resize itself
+    var actualWidth  = $tip[0].offsetWidth
+    var actualHeight = $tip[0].offsetHeight
+
+    if (placement == 'top' && actualHeight != height) {
+      replace = true
+      offset.top = offset.top + height - actualHeight
+    }
+
+    if (/bottom|top/.test(placement)) {
+      var delta = 0
+
+      if (offset.left < 0) {
+        delta       = offset.left * -2
+        offset.left = 0
+
+        $tip.offset(offset)
+
+        actualWidth  = $tip[0].offsetWidth
+        actualHeight = $tip[0].offsetHeight
+      }
+
+      this.replaceArrow(delta - width + actualWidth, actualWidth, 'left')
+    } else {
+      this.replaceArrow(actualHeight - height, actualHeight, 'top')
+    }
+
+    if (replace) $tip.offset(offset)
+  }
+
+  Tooltip.prototype.replaceArrow = function(delta, dimension, position) {
+    this.arrow().css(position, delta ? (50 * (1 - delta / dimension) + "%") : '')
+  }
+
+  Tooltip.prototype.setContent = function () {
+    var $tip  = this.tip()
+    var title = this.getTitle()
+
+    $tip.find('.tooltip-inner')[this.options.html ? 'html' : 'text'](title)
+    $tip.removeClass('fade in top bottom left right')
+  }
+
+  Tooltip.prototype.hide = function () {
+    var that = this
+    var $tip = this.tip()
+    var e    = $.Event('hide.bs.' + this.type)
+
+    function complete() {
+      if (that.hoverState != 'in') $tip.detach()
+    }
+
+    this.$element.trigger(e)
+
+    if (e.isDefaultPrevented()) return
+
+    $tip.removeClass('in')
+
+    $.support.transition && this.$tip.hasClass('fade') ?
+      $tip
+        .one($.support.transition.end, complete)
+        .emulateTransitionEnd(150) :
+      complete()
+
+    this.$element.trigger('hidden.bs.' + this.type)
+
+    return this
+  }
+
+  Tooltip.prototype.fixTitle = function () {
+    var $e = this.$element
+    if ($e.attr('title') || typeof($e.attr('data-original-title')) != 'string') {
+      $e.attr('data-original-title', $e.attr('title') || '').attr('title', '')
+    }
+  }
+
+  Tooltip.prototype.hasContent = function () {
+    return this.getTitle()
+  }
+
+  Tooltip.prototype.getPosition = function () {
+    var el = this.$element[0]
+    return $.extend({}, (typeof el.getBoundingClientRect == 'function') ? el.getBoundingClientRect() : {
+      width: el.offsetWidth
+    , height: el.offsetHeight
+    }, this.$element.offset())
+  }
+
+  Tooltip.prototype.getCalculatedOffset = function (placement, pos, actualWidth, actualHeight) {
+    return placement == 'bottom' ? { top: pos.top + pos.height,   left: pos.left + pos.width / 2 - actualWidth / 2  } :
+           placement == 'top'    ? { top: pos.top - actualHeight, left: pos.left + pos.width / 2 - actualWidth / 2  } :
+           placement == 'left'   ? { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth } :
+        /* placement == 'right' */ { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width   }
+  }
+
+  Tooltip.prototype.getTitle = function () {
+    var title
+    var $e = this.$element
+    var o  = this.options
+
+    title = $e.attr('data-original-title')
+      || (typeof o.title == 'function' ? o.title.call($e[0]) :  o.title)
+
+    return title
+  }
+
+  Tooltip.prototype.tip = function () {
+    return this.$tip = this.$tip || $(this.options.template)
+  }
+
+  Tooltip.prototype.arrow = function () {
+    return this.$arrow = this.$arrow || this.tip().find('.tooltip-arrow')
+  }
+
+  Tooltip.prototype.validate = function () {
+    if (!this.$element[0].parentNode) {
+      this.hide()
+      this.$element = null
+      this.options  = null
+    }
+  }
+
+  Tooltip.prototype.enable = function () {
+    this.enabled = true
+  }
+
+  Tooltip.prototype.disable = function () {
+    this.enabled = false
+  }
+
+  Tooltip.prototype.toggleEnabled = function () {
+    this.enabled = !this.enabled
+  }
+
+  Tooltip.prototype.toggle = function (e) {
+    var self = e ? $(e.currentTarget)[this.type](this.getDelegateOptions()).data('bs.' + this.type) : this
+    self.tip().hasClass('in') ? self.leave(self) : self.enter(self)
+  }
+
+  Tooltip.prototype.destroy = function () {
+    this.hide().$element.off('.' + this.type).removeData('bs.' + this.type)
+  }
+
+
+  // TOOLTIP PLUGIN DEFINITION
+  // =========================
+
+  var old = $.fn.tooltip
+
+  $.fn.tooltip = function (option) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.tooltip')
+      var options = typeof option == 'object' && option
+
+      if (!data) $this.data('bs.tooltip', (data = new Tooltip(this, options)))
+      if (typeof option == 'string') data[option]()
+    })
+  }
+
+  $.fn.tooltip.Constructor = Tooltip
+
+
+  // TOOLTIP NO CONFLICT
+  // ===================
+
+  $.fn.tooltip.noConflict = function () {
+    $.fn.tooltip = old
+    return this
+  }
+
+}(jQuery);
+
+/* ========================================================================
+ * Bootstrap: popover.js v3.0.3
+ * http://getbootstrap.com/javascript/#popovers
+ * ========================================================================
+ * Copyright 2013 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ======================================================================== */
+
+
++function ($) { "use strict";
+
+  // POPOVER PUBLIC CLASS DEFINITION
+  // ===============================
+
+  var Popover = function (element, options) {
+    this.init('popover', element, options)
+  }
+
+  if (!$.fn.tooltip) throw new Error('Popover requires tooltip.js')
+
+  Popover.DEFAULTS = $.extend({} , $.fn.tooltip.Constructor.DEFAULTS, {
+    placement: 'right'
+  , trigger: 'click'
+  , content: ''
+  , template: '<div class="popover"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
+  })
+
+
+  // NOTE: POPOVER EXTENDS tooltip.js
+  // ================================
+
+  Popover.prototype = $.extend({}, $.fn.tooltip.Constructor.prototype)
+
+  Popover.prototype.constructor = Popover
+
+  Popover.prototype.getDefaults = function () {
+    return Popover.DEFAULTS
+  }
+
+  Popover.prototype.setContent = function () {
+    var $tip    = this.tip()
+    var title   = this.getTitle()
+    var content = this.getContent()
+
+    $tip.find('.popover-title')[this.options.html ? 'html' : 'text'](title)
+    $tip.find('.popover-content')[this.options.html ? 'html' : 'text'](content)
+
+    $tip.removeClass('fade top bottom left right in')
+
+    // IE8 doesn't accept hiding via the `:empty` pseudo selector, we have to do
+    // this manually by checking the contents.
+    if (!$tip.find('.popover-title').html()) $tip.find('.popover-title').hide()
+  }
+
+  Popover.prototype.hasContent = function () {
+    return this.getTitle() || this.getContent()
+  }
+
+  Popover.prototype.getContent = function () {
+    var $e = this.$element
+    var o  = this.options
+
+    return $e.attr('data-content')
+      || (typeof o.content == 'function' ?
+            o.content.call($e[0]) :
+            o.content)
+  }
+
+  Popover.prototype.arrow = function () {
+    return this.$arrow = this.$arrow || this.tip().find('.arrow')
+  }
+
+  Popover.prototype.tip = function () {
+    if (!this.$tip) this.$tip = $(this.options.template)
+    return this.$tip
+  }
+
+
+  // POPOVER PLUGIN DEFINITION
+  // =========================
+
+  var old = $.fn.popover
+
+  $.fn.popover = function (option) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.popover')
+      var options = typeof option == 'object' && option
+
+      if (!data) $this.data('bs.popover', (data = new Popover(this, options)))
+      if (typeof option == 'string') data[option]()
+    })
+  }
+
+  $.fn.popover.Constructor = Popover
+
+
+  // POPOVER NO CONFLICT
+  // ===================
+
+  $.fn.popover.noConflict = function () {
+    $.fn.popover = old
+    return this
+  }
+
+}(jQuery);
+
+/* ========================================================================
+ * Bootstrap: scrollspy.js v3.0.3
+ * http://getbootstrap.com/javascript/#scrollspy
+ * ========================================================================
+ * Copyright 2013 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ======================================================================== */
+
+
++function ($) { "use strict";
+
+  // SCROLLSPY CLASS DEFINITION
+  // ==========================
+
+  function ScrollSpy(element, options) {
+    var href
+    var process  = $.proxy(this.process, this)
+
+    this.$element       = $(element).is('body') ? $(window) : $(element)
+    this.$body          = $('body')
+    this.$scrollElement = this.$element.on('scroll.bs.scroll-spy.data-api', process)
+    this.options        = $.extend({}, ScrollSpy.DEFAULTS, options)
+    this.selector       = (this.options.target
+      || ((href = $(element).attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '')) //strip for ie7
+      || '') + ' .nav li > a'
+    this.offsets        = $([])
+    this.targets        = $([])
+    this.activeTarget   = null
+
+    this.refresh()
+    this.process()
+  }
+
+  ScrollSpy.DEFAULTS = {
+    offset: 10
+  }
+
+  ScrollSpy.prototype.refresh = function () {
+    var offsetMethod = this.$element[0] == window ? 'offset' : 'position'
+
+    this.offsets = $([])
+    this.targets = $([])
+
+    var self     = this
+    var $targets = this.$body
+      .find(this.selector)
+      .map(function () {
+        var $el   = $(this)
+        var href  = $el.data('target') || $el.attr('href')
+        var $href = /^#\w/.test(href) && $(href)
+
+        return ($href
+          && $href.length
+          && [[ $href[offsetMethod]().top + (!$.isWindow(self.$scrollElement.get(0)) && self.$scrollElement.scrollTop()), href ]]) || null
+      })
+      .sort(function (a, b) { return a[0] - b[0] })
+      .each(function () {
+        self.offsets.push(this[0])
+        self.targets.push(this[1])
+      })
+  }
+
+  ScrollSpy.prototype.process = function () {
+    var scrollTop    = this.$scrollElement.scrollTop() + this.options.offset
+    var scrollHeight = this.$scrollElement[0].scrollHeight || this.$body[0].scrollHeight
+    var maxScroll    = scrollHeight - this.$scrollElement.height()
+    var offsets      = this.offsets
+    var targets      = this.targets
+    var activeTarget = this.activeTarget
+    var i
+
+    if (scrollTop >= maxScroll) {
+      return activeTarget != (i = targets.last()[0]) && this.activate(i)
+    }
+
+    for (i = offsets.length; i--;) {
+      activeTarget != targets[i]
+        && scrollTop >= offsets[i]
+        && (!offsets[i + 1] || scrollTop <= offsets[i + 1])
+        && this.activate( targets[i] )
+    }
+  }
+
+  ScrollSpy.prototype.activate = function (target) {
+    this.activeTarget = target
+
+    $(this.selector)
+      .parents('.active')
+      .removeClass('active')
+
+    var selector = this.selector
+      + '[data-target="' + target + '"],'
+      + this.selector + '[href="' + target + '"]'
+
+    var active = $(selector)
+      .parents('li')
+      .addClass('active')
+
+    if (active.parent('.dropdown-menu').length)  {
+      active = active
+        .closest('li.dropdown')
+        .addClass('active')
+    }
+
+    active.trigger('activate.bs.scrollspy')
+  }
+
+
+  // SCROLLSPY PLUGIN DEFINITION
+  // ===========================
+
+  var old = $.fn.scrollspy
+
+  $.fn.scrollspy = function (option) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.scrollspy')
+      var options = typeof option == 'object' && option
+
+      if (!data) $this.data('bs.scrollspy', (data = new ScrollSpy(this, options)))
+      if (typeof option == 'string') data[option]()
+    })
+  }
+
+  $.fn.scrollspy.Constructor = ScrollSpy
+
+
+  // SCROLLSPY NO CONFLICT
+  // =====================
+
+  $.fn.scrollspy.noConflict = function () {
+    $.fn.scrollspy = old
+    return this
+  }
+
+
+  // SCROLLSPY DATA-API
+  // ==================
+
+  $(window).on('load', function () {
+    $('[data-spy="scroll"]').each(function () {
+      var $spy = $(this)
+      $spy.scrollspy($spy.data())
+    })
+  })
+
+}(jQuery);
+
+/* ========================================================================
+ * Bootstrap: tab.js v3.0.3
+ * http://getbootstrap.com/javascript/#tabs
+ * ========================================================================
+ * Copyright 2013 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ======================================================================== */
+
+
++function ($) { "use strict";
+
+  // TAB CLASS DEFINITION
+  // ====================
+
+  var Tab = function (element) {
+    this.element = $(element)
+  }
+
+  Tab.prototype.show = function () {
+    var $this    = this.element
+    var $ul      = $this.closest('ul:not(.dropdown-menu)')
+    var selector = $this.data('target')
+
+    if (!selector) {
+      selector = $this.attr('href')
+      selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '') //strip for ie7
+    }
+
+    if ($this.parent('li').hasClass('active')) return
+
+    var previous = $ul.find('.active:last a')[0]
+    var e        = $.Event('show.bs.tab', {
+      relatedTarget: previous
+    })
+
+    $this.trigger(e)
+
+    if (e.isDefaultPrevented()) return
+
+    var $target = $(selector)
+
+    this.activate($this.parent('li'), $ul)
+    this.activate($target, $target.parent(), function () {
+      $this.trigger({
+        type: 'shown.bs.tab'
+      , relatedTarget: previous
+      })
+    })
+  }
+
+  Tab.prototype.activate = function (element, container, callback) {
+    var $active    = container.find('> .active')
+    var transition = callback
+      && $.support.transition
+      && $active.hasClass('fade')
+
+    function next() {
+      $active
+        .removeClass('active')
+        .find('> .dropdown-menu > .active')
+        .removeClass('active')
+
+      element.addClass('active')
+
+      if (transition) {
+        element[0].offsetWidth // reflow for transition
+        element.addClass('in')
+      } else {
+        element.removeClass('fade')
+      }
+
+      if (element.parent('.dropdown-menu')) {
+        element.closest('li.dropdown').addClass('active')
+      }
+
+      callback && callback()
+    }
+
+    transition ?
+      $active
+        .one($.support.transition.end, next)
+        .emulateTransitionEnd(150) :
+      next()
+
+    $active.removeClass('in')
+  }
+
+
+  // TAB PLUGIN DEFINITION
+  // =====================
+
+  var old = $.fn.tab
+
+  $.fn.tab = function ( option ) {
+    return this.each(function () {
+      var $this = $(this)
+      var data  = $this.data('bs.tab')
+
+      if (!data) $this.data('bs.tab', (data = new Tab(this)))
+      if (typeof option == 'string') data[option]()
+    })
+  }
+
+  $.fn.tab.Constructor = Tab
+
+
+  // TAB NO CONFLICT
+  // ===============
+
+  $.fn.tab.noConflict = function () {
+    $.fn.tab = old
+    return this
+  }
+
+
+  // TAB DATA-API
+  // ============
+
+  $(document).on('click.bs.tab.data-api', '[data-toggle="tab"], [data-toggle="pill"]', function (e) {
+    e.preventDefault()
+    $(this).tab('show')
+  })
+
+}(jQuery);
+
+/* ========================================================================
+ * Bootstrap: affix.js v3.0.3
+ * http://getbootstrap.com/javascript/#affix
+ * ========================================================================
+ * Copyright 2013 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ======================================================================== */
+
+
++function ($) { "use strict";
+
+  // AFFIX CLASS DEFINITION
+  // ======================
+
+  var Affix = function (element, options) {
+    this.options = $.extend({}, Affix.DEFAULTS, options)
+    this.$window = $(window)
+      .on('scroll.bs.affix.data-api', $.proxy(this.checkPosition, this))
+      .on('click.bs.affix.data-api',  $.proxy(this.checkPositionWithEventLoop, this))
+
+    this.$element = $(element)
+    this.affixed  =
+    this.unpin    = null
+
+    this.checkPosition()
+  }
+
+  Affix.RESET = 'affix affix-top affix-bottom'
+
+  Affix.DEFAULTS = {
+    offset: 0
+  }
+
+  Affix.prototype.checkPositionWithEventLoop = function () {
+    setTimeout($.proxy(this.checkPosition, this), 1)
+  }
+
+  Affix.prototype.checkPosition = function () {
+    if (!this.$element.is(':visible')) return
+
+    var scrollHeight = $(document).height()
+    var scrollTop    = this.$window.scrollTop()
+    var position     = this.$element.offset()
+    var offset       = this.options.offset
+    var offsetTop    = offset.top
+    var offsetBottom = offset.bottom
+
+    if (typeof offset != 'object')         offsetBottom = offsetTop = offset
+    if (typeof offsetTop == 'function')    offsetTop    = offset.top()
+    if (typeof offsetBottom == 'function') offsetBottom = offset.bottom()
+
+    var affix = this.unpin   != null && (scrollTop + this.unpin <= position.top) ? false :
+                offsetBottom != null && (position.top + this.$element.height() >= scrollHeight - offsetBottom) ? 'bottom' :
+                offsetTop    != null && (scrollTop <= offsetTop) ? 'top' : false
+
+    if (this.affixed === affix) return
+    if (this.unpin) this.$element.css('top', '')
+
+    this.affixed = affix
+    this.unpin   = affix == 'bottom' ? position.top - scrollTop : null
+
+    this.$element.removeClass(Affix.RESET).addClass('affix' + (affix ? '-' + affix : ''))
+
+    if (affix == 'bottom') {
+      this.$element.offset({ top: document.body.offsetHeight - offsetBottom - this.$element.height() })
+    }
+  }
+
+
+  // AFFIX PLUGIN DEFINITION
+  // =======================
+
+  var old = $.fn.affix
+
+  $.fn.affix = function (option) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.affix')
+      var options = typeof option == 'object' && option
+
+      if (!data) $this.data('bs.affix', (data = new Affix(this, options)))
+      if (typeof option == 'string') data[option]()
+    })
+  }
+
+  $.fn.affix.Constructor = Affix
+
+
+  // AFFIX NO CONFLICT
+  // =================
+
+  $.fn.affix.noConflict = function () {
+    $.fn.affix = old
+    return this
+  }
+
+
+  // AFFIX DATA-API
+  // ==============
+
+  $(window).on('load', function () {
+    $('[data-spy="affix"]').each(function () {
+      var $spy = $(this)
+      var data = $spy.data()
+
+      data.offset = data.offset || {}
+
+      if (data.offsetBottom) data.offset.bottom = data.offsetBottom
+      if (data.offsetTop)    data.offset.top    = data.offsetTop
+
+      $spy.affix(data)
+    })
+  })
+
+}(jQuery);
+
+// Console-polyfill. MIT license.
+// https://github.com/paulmillr/console-polyfill
+// Make it safe to do console.log() always.
+(function(con) {
+  'use strict';
+  var prop, method;
+  var empty = {};
+  var dummy = function() {};
+  var properties = 'memory'.split(',');
+  var methods = ('assert,count,debug,dir,dirxml,error,exception,group,' +
+     'groupCollapsed,groupEnd,info,log,markTimeline,profile,profileEnd,' +
+     'time,timeEnd,trace,warn').split(',');
+  while (prop = properties.pop()) con[prop] = con[prop] || empty;
+  while (method = methods.pop()) con[method] = con[method] || dummy;
+})(this.console = this.console || {});
+
+/**
  * @preserve FastClick: polyfill to remove click delays on browsers with touch UIs.
  *
  * @version 0.6.12
@@ -23645,7 +24442,7 @@ if (typeof define !== 'undefined' && define.amd) {
 	};
 }));
 
-;//! moment.js
+//! moment.js
 //! version : 2.5.1
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
 //! license : MIT
@@ -26046,7 +26843,1358 @@ if (typeof define !== 'undefined' && define.amd) {
     }
 }).call(this);
 
-;//  Underscore.string
+(function() {
+  var AjaxMonitor, Bar, DocumentMonitor, ElementMonitor, ElementTracker, EventLagMonitor, Evented, Events, NoTargetError, RequestIntercept, SOURCE_KEYS, Scaler, SocketRequestTracker, XHRRequestTracker, animation, avgAmplitude, bar, cancelAnimation, cancelAnimationFrame, defaultOptions, extend, extendNative, getFromDOM, getIntercept, handlePushState, ignoreStack, init, now, options, requestAnimationFrame, result, runAnimation, scalers, shouldIgnoreURL, shouldTrack, source, sources, uniScaler, _WebSocket, _XDomainRequest, _XMLHttpRequest, _i, _intercept, _len, _pushState, _ref, _ref1, _replaceState,
+    __slice = [].slice,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  defaultOptions = {
+    catchupTime: 500,
+    initialRate: .03,
+    minTime: 500,
+    ghostTime: 500,
+    maxProgressPerFrame: 10,
+    easeFactor: 1.25,
+    startOnPageLoad: true,
+    restartOnPushState: true,
+    restartOnRequestAfter: 500,
+    target: 'body',
+    elements: {
+      checkInterval: 100,
+      selectors: ['body']
+    },
+    eventLag: {
+      minSamples: 10,
+      sampleCount: 3,
+      lagThreshold: 3
+    },
+    ajax: {
+      trackMethods: ['GET'],
+      trackWebSockets: true,
+      ignoreURLs: []
+    }
+  };
+
+  now = function() {
+    var _ref;
+    return (_ref = typeof performance !== "undefined" && performance !== null ? typeof performance.now === "function" ? performance.now() : void 0 : void 0) != null ? _ref : +(new Date);
+  };
+
+  requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
+  cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+
+  if (requestAnimationFrame == null) {
+    requestAnimationFrame = function(fn) {
+      return setTimeout(fn, 50);
+    };
+    cancelAnimationFrame = function(id) {
+      return clearTimeout(id);
+    };
+  }
+
+  runAnimation = function(fn) {
+    var last, tick;
+    last = now();
+    tick = function() {
+      var diff;
+      diff = now() - last;
+      if (diff >= 33) {
+        last = now();
+        return fn(diff, function() {
+          return requestAnimationFrame(tick);
+        });
+      } else {
+        return setTimeout(tick, 33 - diff);
+      }
+    };
+    return tick();
+  };
+
+  result = function() {
+    var args, key, obj;
+    obj = arguments[0], key = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
+    if (typeof obj[key] === 'function') {
+      return obj[key].apply(obj, args);
+    } else {
+      return obj[key];
+    }
+  };
+
+  extend = function() {
+    var key, out, source, sources, val, _i, _len;
+    out = arguments[0], sources = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    for (_i = 0, _len = sources.length; _i < _len; _i++) {
+      source = sources[_i];
+      if (source) {
+        for (key in source) {
+          if (!__hasProp.call(source, key)) continue;
+          val = source[key];
+          if ((out[key] != null) && typeof out[key] === 'object' && (val != null) && typeof val === 'object') {
+            extend(out[key], val);
+          } else {
+            out[key] = val;
+          }
+        }
+      }
+    }
+    return out;
+  };
+
+  avgAmplitude = function(arr) {
+    var count, sum, v, _i, _len;
+    sum = count = 0;
+    for (_i = 0, _len = arr.length; _i < _len; _i++) {
+      v = arr[_i];
+      sum += Math.abs(v);
+      count++;
+    }
+    return sum / count;
+  };
+
+  getFromDOM = function(key, json) {
+    var data, e, el;
+    if (key == null) {
+      key = 'options';
+    }
+    if (json == null) {
+      json = true;
+    }
+    el = document.querySelector("[data-pace-" + key + "]");
+    if (!el) {
+      return;
+    }
+    data = el.getAttribute("data-pace-" + key);
+    if (!json) {
+      return data;
+    }
+    try {
+      return JSON.parse(data);
+    } catch (_error) {
+      e = _error;
+      return typeof console !== "undefined" && console !== null ? console.error("Error parsing inline pace options", e) : void 0;
+    }
+  };
+
+  Evented = (function() {
+    function Evented() {}
+
+    Evented.prototype.on = function(event, handler, ctx, once) {
+      var _base;
+      if (once == null) {
+        once = false;
+      }
+      if (this.bindings == null) {
+        this.bindings = {};
+      }
+      if ((_base = this.bindings)[event] == null) {
+        _base[event] = [];
+      }
+      return this.bindings[event].push({
+        handler: handler,
+        ctx: ctx,
+        once: once
+      });
+    };
+
+    Evented.prototype.once = function(event, handler, ctx) {
+      return this.on(event, handler, ctx, true);
+    };
+
+    Evented.prototype.off = function(event, handler) {
+      var i, _ref, _results;
+      if (((_ref = this.bindings) != null ? _ref[event] : void 0) == null) {
+        return;
+      }
+      if (handler == null) {
+        return delete this.bindings[event];
+      } else {
+        i = 0;
+        _results = [];
+        while (i < this.bindings[event].length) {
+          if (this.bindings[event][i].handler === handler) {
+            _results.push(this.bindings[event].splice(i, 1));
+          } else {
+            _results.push(i++);
+          }
+        }
+        return _results;
+      }
+    };
+
+    Evented.prototype.trigger = function() {
+      var args, ctx, event, handler, i, once, _ref, _ref1, _results;
+      event = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      if ((_ref = this.bindings) != null ? _ref[event] : void 0) {
+        i = 0;
+        _results = [];
+        while (i < this.bindings[event].length) {
+          _ref1 = this.bindings[event][i], handler = _ref1.handler, ctx = _ref1.ctx, once = _ref1.once;
+          handler.apply(ctx != null ? ctx : this, args);
+          if (once) {
+            _results.push(this.bindings[event].splice(i, 1));
+          } else {
+            _results.push(i++);
+          }
+        }
+        return _results;
+      }
+    };
+
+    return Evented;
+
+  })();
+
+  if (window.Pace == null) {
+    window.Pace = {};
+  }
+
+  extend(Pace, Evented.prototype);
+
+  options = Pace.options = extend({}, defaultOptions, window.paceOptions, getFromDOM());
+
+  _ref = ['ajax', 'document', 'eventLag', 'elements'];
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    source = _ref[_i];
+    if (options[source] === true) {
+      options[source] = defaultOptions[source];
+    }
+  }
+
+  NoTargetError = (function(_super) {
+    __extends(NoTargetError, _super);
+
+    function NoTargetError() {
+      _ref1 = NoTargetError.__super__.constructor.apply(this, arguments);
+      return _ref1;
+    }
+
+    return NoTargetError;
+
+  })(Error);
+
+  Bar = (function() {
+    function Bar() {
+      this.progress = 0;
+    }
+
+    Bar.prototype.getElement = function() {
+      var targetElement;
+      if (this.el == null) {
+        targetElement = document.querySelector(options.target);
+        if (!targetElement) {
+          throw new NoTargetError;
+        }
+        this.el = document.createElement('div');
+        this.el.className = "pace pace-active";
+        document.body.className = document.body.className.replace(/pace-done/g, '');
+        document.body.className += ' pace-running';
+        this.el.innerHTML = '<div class="pace-progress">\n  <div class="pace-progress-inner"></div>\n</div>\n<div class="pace-activity"></div>';
+        if (targetElement.firstChild != null) {
+          targetElement.insertBefore(this.el, targetElement.firstChild);
+        } else {
+          targetElement.appendChild(this.el);
+        }
+      }
+      return this.el;
+    };
+
+    Bar.prototype.finish = function() {
+      var el;
+      el = this.getElement();
+      el.className = el.className.replace('pace-active', '');
+      el.className += ' pace-inactive';
+      document.body.className = document.body.className.replace('pace-running', '');
+      return document.body.className += ' pace-done';
+    };
+
+    Bar.prototype.update = function(prog) {
+      this.progress = prog;
+      return this.render();
+    };
+
+    Bar.prototype.destroy = function() {
+      try {
+        this.getElement().parentNode.removeChild(this.getElement());
+      } catch (_error) {
+        NoTargetError = _error;
+      }
+      return this.el = void 0;
+    };
+
+    Bar.prototype.render = function() {
+      var el, progressStr;
+      if (document.querySelector(options.target) == null) {
+        return false;
+      }
+      el = this.getElement();
+      el.children[0].style.width = "" + this.progress + "%";
+      if (!this.lastRenderedProgress || this.lastRenderedProgress | 0 !== this.progress | 0) {
+        el.children[0].setAttribute('data-progress-text', "" + (this.progress | 0) + "%");
+        if (this.progress >= 100) {
+          progressStr = '99';
+        } else {
+          progressStr = this.progress < 10 ? "0" : "";
+          progressStr += this.progress | 0;
+        }
+        el.children[0].setAttribute('data-progress', "" + progressStr);
+      }
+      return this.lastRenderedProgress = this.progress;
+    };
+
+    Bar.prototype.done = function() {
+      return this.progress >= 100;
+    };
+
+    return Bar;
+
+  })();
+
+  Events = (function() {
+    function Events() {
+      this.bindings = {};
+    }
+
+    Events.prototype.trigger = function(name, val) {
+      var binding, _j, _len1, _ref2, _results;
+      if (this.bindings[name] != null) {
+        _ref2 = this.bindings[name];
+        _results = [];
+        for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+          binding = _ref2[_j];
+          _results.push(binding.call(this, val));
+        }
+        return _results;
+      }
+    };
+
+    Events.prototype.on = function(name, fn) {
+      var _base;
+      if ((_base = this.bindings)[name] == null) {
+        _base[name] = [];
+      }
+      return this.bindings[name].push(fn);
+    };
+
+    return Events;
+
+  })();
+
+  _XMLHttpRequest = window.XMLHttpRequest;
+
+  _XDomainRequest = window.XDomainRequest;
+
+  _WebSocket = window.WebSocket;
+
+  extendNative = function(to, from) {
+    var e, key, val, _results;
+    _results = [];
+    for (key in from.prototype) {
+      try {
+        val = from.prototype[key];
+        if ((to[key] == null) && typeof val !== 'function') {
+          _results.push(to[key] = val);
+        } else {
+          _results.push(void 0);
+        }
+      } catch (_error) {
+        e = _error;
+      }
+    }
+    return _results;
+  };
+
+  ignoreStack = [];
+
+  Pace.ignore = function() {
+    var args, fn, ret;
+    fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    ignoreStack.unshift('ignore');
+    ret = fn.apply(null, args);
+    ignoreStack.shift();
+    return ret;
+  };
+
+  Pace.track = function() {
+    var args, fn, ret;
+    fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    ignoreStack.unshift('track');
+    ret = fn.apply(null, args);
+    ignoreStack.shift();
+    return ret;
+  };
+
+  shouldTrack = function(method) {
+    var _ref2;
+    if (method == null) {
+      method = 'GET';
+    }
+    if (ignoreStack[0] === 'track') {
+      return 'force';
+    }
+    if (!ignoreStack.length && options.ajax) {
+      if (method === 'socket' && options.ajax.trackWebSockets) {
+        return true;
+      } else if (_ref2 = method.toUpperCase(), __indexOf.call(options.ajax.trackMethods, _ref2) >= 0) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  RequestIntercept = (function(_super) {
+    __extends(RequestIntercept, _super);
+
+    function RequestIntercept() {
+      var monitorXHR,
+        _this = this;
+      RequestIntercept.__super__.constructor.apply(this, arguments);
+      monitorXHR = function(req) {
+        var _open;
+        _open = req.open;
+        return req.open = function(type, url, async) {
+          if (shouldTrack(type)) {
+            _this.trigger('request', {
+              type: type,
+              url: url,
+              request: req
+            });
+          }
+          return _open.apply(req, arguments);
+        };
+      };
+      window.XMLHttpRequest = function(flags) {
+        var req;
+        req = new _XMLHttpRequest(flags);
+        monitorXHR(req);
+        return req;
+      };
+      extendNative(window.XMLHttpRequest, _XMLHttpRequest);
+      if (_XDomainRequest != null) {
+        window.XDomainRequest = function() {
+          var req;
+          req = new _XDomainRequest;
+          monitorXHR(req);
+          return req;
+        };
+        extendNative(window.XDomainRequest, _XDomainRequest);
+      }
+      if ((_WebSocket != null) && options.ajax.trackWebSockets) {
+        window.WebSocket = function(url, protocols) {
+          var req;
+          if (protocols != null) {
+            req = new _WebSocket(url, protocols);
+          } else {
+            req = new _WebSocket(url);
+          }
+          if (shouldTrack('socket')) {
+            _this.trigger('request', {
+              type: 'socket',
+              url: url,
+              protocols: protocols,
+              request: req
+            });
+          }
+          return req;
+        };
+        extendNative(window.WebSocket, _WebSocket);
+      }
+    }
+
+    return RequestIntercept;
+
+  })(Events);
+
+  _intercept = null;
+
+  getIntercept = function() {
+    if (_intercept == null) {
+      _intercept = new RequestIntercept;
+    }
+    return _intercept;
+  };
+
+  shouldIgnoreURL = function(url) {
+    var pattern, _j, _len1, _ref2;
+    _ref2 = options.ajax.ignoreURLs;
+    for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+      pattern = _ref2[_j];
+      if (typeof pattern === 'string') {
+        if (url.indexOf(pattern) !== -1) {
+          return true;
+        }
+      } else {
+        if (pattern.test(url)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  getIntercept().on('request', function(_arg) {
+    var after, args, request, type, url;
+    type = _arg.type, request = _arg.request, url = _arg.url;
+    if (shouldIgnoreURL(url)) {
+      return;
+    }
+    if (!Pace.running && (options.restartOnRequestAfter !== false || shouldTrack(type) === 'force')) {
+      args = arguments;
+      after = options.restartOnRequestAfter || 0;
+      if (typeof after === 'boolean') {
+        after = 0;
+      }
+      return setTimeout(function() {
+        var stillActive, _j, _len1, _ref2, _ref3, _results;
+        if (type === 'socket') {
+          stillActive = request.readyState < 2;
+        } else {
+          stillActive = (0 < (_ref2 = request.readyState) && _ref2 < 4);
+        }
+        if (stillActive) {
+          Pace.restart();
+          _ref3 = Pace.sources;
+          _results = [];
+          for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+            source = _ref3[_j];
+            if (source instanceof AjaxMonitor) {
+              source.watch.apply(source, args);
+              break;
+            } else {
+              _results.push(void 0);
+            }
+          }
+          return _results;
+        }
+      }, after);
+    }
+  });
+
+  AjaxMonitor = (function() {
+    function AjaxMonitor() {
+      var _this = this;
+      this.elements = [];
+      getIntercept().on('request', function() {
+        return _this.watch.apply(_this, arguments);
+      });
+    }
+
+    AjaxMonitor.prototype.watch = function(_arg) {
+      var request, tracker, type, url;
+      type = _arg.type, request = _arg.request, url = _arg.url;
+      if (shouldIgnoreURL(url)) {
+        return;
+      }
+      if (type === 'socket') {
+        tracker = new SocketRequestTracker(request);
+      } else {
+        tracker = new XHRRequestTracker(request);
+      }
+      return this.elements.push(tracker);
+    };
+
+    return AjaxMonitor;
+
+  })();
+
+  XHRRequestTracker = (function() {
+    function XHRRequestTracker(request) {
+      var event, size, _j, _len1, _onreadystatechange, _ref2,
+        _this = this;
+      this.progress = 0;
+      if (window.ProgressEvent != null) {
+        size = null;
+        request.addEventListener('progress', function(evt) {
+          if (evt.lengthComputable) {
+            return _this.progress = 100 * evt.loaded / evt.total;
+          } else {
+            return _this.progress = _this.progress + (100 - _this.progress) / 2;
+          }
+        });
+        _ref2 = ['load', 'abort', 'timeout', 'error'];
+        for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+          event = _ref2[_j];
+          request.addEventListener(event, function() {
+            return _this.progress = 100;
+          });
+        }
+      } else {
+        _onreadystatechange = request.onreadystatechange;
+        request.onreadystatechange = function() {
+          var _ref3;
+          if ((_ref3 = request.readyState) === 0 || _ref3 === 4) {
+            _this.progress = 100;
+          } else if (request.readyState === 3) {
+            _this.progress = 50;
+          }
+          return typeof _onreadystatechange === "function" ? _onreadystatechange.apply(null, arguments) : void 0;
+        };
+      }
+    }
+
+    return XHRRequestTracker;
+
+  })();
+
+  SocketRequestTracker = (function() {
+    function SocketRequestTracker(request) {
+      var event, _j, _len1, _ref2,
+        _this = this;
+      this.progress = 0;
+      _ref2 = ['error', 'open'];
+      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+        event = _ref2[_j];
+        request.addEventListener(event, function() {
+          return _this.progress = 100;
+        });
+      }
+    }
+
+    return SocketRequestTracker;
+
+  })();
+
+  ElementMonitor = (function() {
+    function ElementMonitor(options) {
+      var selector, _j, _len1, _ref2;
+      if (options == null) {
+        options = {};
+      }
+      this.elements = [];
+      if (options.selectors == null) {
+        options.selectors = [];
+      }
+      _ref2 = options.selectors;
+      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+        selector = _ref2[_j];
+        this.elements.push(new ElementTracker(selector));
+      }
+    }
+
+    return ElementMonitor;
+
+  })();
+
+  ElementTracker = (function() {
+    function ElementTracker(selector) {
+      this.selector = selector;
+      this.progress = 0;
+      this.check();
+    }
+
+    ElementTracker.prototype.check = function() {
+      var _this = this;
+      if (document.querySelector(this.selector)) {
+        return this.done();
+      } else {
+        return setTimeout((function() {
+          return _this.check();
+        }), options.elements.checkInterval);
+      }
+    };
+
+    ElementTracker.prototype.done = function() {
+      return this.progress = 100;
+    };
+
+    return ElementTracker;
+
+  })();
+
+  DocumentMonitor = (function() {
+    DocumentMonitor.prototype.states = {
+      loading: 0,
+      interactive: 50,
+      complete: 100
+    };
+
+    function DocumentMonitor() {
+      var _onreadystatechange, _ref2,
+        _this = this;
+      this.progress = (_ref2 = this.states[document.readyState]) != null ? _ref2 : 100;
+      _onreadystatechange = document.onreadystatechange;
+      document.onreadystatechange = function() {
+        if (_this.states[document.readyState] != null) {
+          _this.progress = _this.states[document.readyState];
+        }
+        return typeof _onreadystatechange === "function" ? _onreadystatechange.apply(null, arguments) : void 0;
+      };
+    }
+
+    return DocumentMonitor;
+
+  })();
+
+  EventLagMonitor = (function() {
+    function EventLagMonitor() {
+      var avg, interval, last, points, samples,
+        _this = this;
+      this.progress = 0;
+      avg = 0;
+      samples = [];
+      points = 0;
+      last = now();
+      interval = setInterval(function() {
+        var diff;
+        diff = now() - last - 50;
+        last = now();
+        samples.push(diff);
+        if (samples.length > options.eventLag.sampleCount) {
+          samples.shift();
+        }
+        avg = avgAmplitude(samples);
+        if (++points >= options.eventLag.minSamples && avg < options.eventLag.lagThreshold) {
+          _this.progress = 100;
+          return clearInterval(interval);
+        } else {
+          return _this.progress = 100 * (3 / (avg + 3));
+        }
+      }, 50);
+    }
+
+    return EventLagMonitor;
+
+  })();
+
+  Scaler = (function() {
+    function Scaler(source) {
+      this.source = source;
+      this.last = this.sinceLastUpdate = 0;
+      this.rate = options.initialRate;
+      this.catchup = 0;
+      this.progress = this.lastProgress = 0;
+      if (this.source != null) {
+        this.progress = result(this.source, 'progress');
+      }
+    }
+
+    Scaler.prototype.tick = function(frameTime, val) {
+      var scaling;
+      if (val == null) {
+        val = result(this.source, 'progress');
+      }
+      if (val >= 100) {
+        this.done = true;
+      }
+      if (val === this.last) {
+        this.sinceLastUpdate += frameTime;
+      } else {
+        if (this.sinceLastUpdate) {
+          this.rate = (val - this.last) / this.sinceLastUpdate;
+        }
+        this.catchup = (val - this.progress) / options.catchupTime;
+        this.sinceLastUpdate = 0;
+        this.last = val;
+      }
+      if (val > this.progress) {
+        this.progress += this.catchup * frameTime;
+      }
+      scaling = 1 - Math.pow(this.progress / 100, options.easeFactor);
+      this.progress += scaling * this.rate * frameTime;
+      this.progress = Math.min(this.lastProgress + options.maxProgressPerFrame, this.progress);
+      this.progress = Math.max(0, this.progress);
+      this.progress = Math.min(100, this.progress);
+      this.lastProgress = this.progress;
+      return this.progress;
+    };
+
+    return Scaler;
+
+  })();
+
+  sources = null;
+
+  scalers = null;
+
+  bar = null;
+
+  uniScaler = null;
+
+  animation = null;
+
+  cancelAnimation = null;
+
+  Pace.running = false;
+
+  handlePushState = function() {
+    if (options.restartOnPushState) {
+      return Pace.restart();
+    }
+  };
+
+  if (window.history.pushState != null) {
+    _pushState = window.history.pushState;
+    window.history.pushState = function() {
+      handlePushState();
+      return _pushState.apply(window.history, arguments);
+    };
+  }
+
+  if (window.history.replaceState != null) {
+    _replaceState = window.history.replaceState;
+    window.history.replaceState = function() {
+      handlePushState();
+      return _replaceState.apply(window.history, arguments);
+    };
+  }
+
+  SOURCE_KEYS = {
+    ajax: AjaxMonitor,
+    elements: ElementMonitor,
+    document: DocumentMonitor,
+    eventLag: EventLagMonitor
+  };
+
+  (init = function() {
+    var type, _j, _k, _len1, _len2, _ref2, _ref3, _ref4;
+    Pace.sources = sources = [];
+    _ref2 = ['ajax', 'elements', 'document', 'eventLag'];
+    for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+      type = _ref2[_j];
+      if (options[type] !== false) {
+        sources.push(new SOURCE_KEYS[type](options[type]));
+      }
+    }
+    _ref4 = (_ref3 = options.extraSources) != null ? _ref3 : [];
+    for (_k = 0, _len2 = _ref4.length; _k < _len2; _k++) {
+      source = _ref4[_k];
+      sources.push(new source(options));
+    }
+    Pace.bar = bar = new Bar;
+    scalers = [];
+    return uniScaler = new Scaler;
+  })();
+
+  Pace.stop = function() {
+    Pace.trigger('stop');
+    Pace.running = false;
+    bar.destroy();
+    cancelAnimation = true;
+    if (animation != null) {
+      if (typeof cancelAnimationFrame === "function") {
+        cancelAnimationFrame(animation);
+      }
+      animation = null;
+    }
+    return init();
+  };
+
+  Pace.restart = function() {
+    Pace.trigger('restart');
+    Pace.stop();
+    return Pace.start();
+  };
+
+  Pace.go = function() {
+    var start;
+    Pace.running = true;
+    bar.render();
+    start = now();
+    cancelAnimation = false;
+    return animation = runAnimation(function(frameTime, enqueueNextFrame) {
+      var avg, count, done, element, elements, i, j, remaining, scaler, scalerList, sum, _j, _k, _len1, _len2, _ref2;
+      remaining = 100 - bar.progress;
+      count = sum = 0;
+      done = true;
+      for (i = _j = 0, _len1 = sources.length; _j < _len1; i = ++_j) {
+        source = sources[i];
+        scalerList = scalers[i] != null ? scalers[i] : scalers[i] = [];
+        elements = (_ref2 = source.elements) != null ? _ref2 : [source];
+        for (j = _k = 0, _len2 = elements.length; _k < _len2; j = ++_k) {
+          element = elements[j];
+          scaler = scalerList[j] != null ? scalerList[j] : scalerList[j] = new Scaler(element);
+          done &= scaler.done;
+          if (scaler.done) {
+            continue;
+          }
+          count++;
+          sum += scaler.tick(frameTime);
+        }
+      }
+      avg = sum / count;
+      bar.update(uniScaler.tick(frameTime, avg));
+      if (bar.done() || done || cancelAnimation) {
+        bar.update(100);
+        Pace.trigger('done');
+        return setTimeout(function() {
+          bar.finish();
+          Pace.running = false;
+          return Pace.trigger('hide');
+        }, Math.max(options.ghostTime, Math.max(options.minTime - (now() - start), 0)));
+      } else {
+        return enqueueNextFrame();
+      }
+    });
+  };
+
+  Pace.start = function(_options) {
+    extend(options, _options);
+    Pace.running = true;
+    try {
+      bar.render();
+    } catch (_error) {
+      NoTargetError = _error;
+    }
+    if (!document.querySelector('.pace')) {
+      return setTimeout(Pace.start, 50);
+    } else {
+      Pace.trigger('start');
+      return Pace.go();
+    }
+  };
+
+  if (typeof define === 'function' && define.amd) {
+    define(function() {
+      return Pace;
+    });
+  } else if (typeof exports === 'object') {
+    module.exports = Pace;
+  } else {
+    if (options.startOnPageLoad) {
+      Pace.start();
+    }
+  }
+
+}).call(this);
+
+/**
+ * Copyright (c) 2011-2013 Felix Gnass
+ * Licensed under the MIT license
+ */
+(function(root, factory) {
+
+  /* CommonJS */
+  if (typeof exports == 'object')  module.exports = factory()
+
+  /* AMD module */
+  else if (typeof define == 'function' && define.amd) define(factory)
+
+  /* Browser global */
+  else root.Spinner = factory()
+}
+(this, function() {
+  "use strict";
+
+  var prefixes = ['webkit', 'Moz', 'ms', 'O'] /* Vendor prefixes */
+    , animations = {} /* Animation rules keyed by their name */
+    , useCssAnimations /* Whether to use CSS animations or setTimeout */
+
+  /**
+   * Utility function to create elements. If no tag name is given,
+   * a DIV is created. Optionally properties can be passed.
+   */
+  function createEl(tag, prop) {
+    var el = document.createElement(tag || 'div')
+      , n
+
+    for(n in prop) el[n] = prop[n]
+    return el
+  }
+
+  /**
+   * Appends children and returns the parent.
+   */
+  function ins(parent /* child1, child2, ...*/) {
+    for (var i=1, n=arguments.length; i<n; i++)
+      parent.appendChild(arguments[i])
+
+    return parent
+  }
+
+  /**
+   * Insert a new stylesheet to hold the @keyframe or VML rules.
+   */
+  var sheet = (function() {
+    var el = createEl('style', {type : 'text/css'})
+    ins(document.getElementsByTagName('head')[0], el)
+    return el.sheet || el.styleSheet
+  }())
+
+  /**
+   * Creates an opacity keyframe animation rule and returns its name.
+   * Since most mobile Webkits have timing issues with animation-delay,
+   * we create separate rules for each line/segment.
+   */
+  function addAnimation(alpha, trail, i, lines) {
+    var name = ['opacity', trail, ~~(alpha*100), i, lines].join('-')
+      , start = 0.01 + i/lines * 100
+      , z = Math.max(1 - (1-alpha) / trail * (100-start), alpha)
+      , prefix = useCssAnimations.substring(0, useCssAnimations.indexOf('Animation')).toLowerCase()
+      , pre = prefix && '-' + prefix + '-' || ''
+
+    if (!animations[name]) {
+      sheet.insertRule(
+        '@' + pre + 'keyframes ' + name + '{' +
+        '0%{opacity:' + z + '}' +
+        start + '%{opacity:' + alpha + '}' +
+        (start+0.01) + '%{opacity:1}' +
+        (start+trail) % 100 + '%{opacity:' + alpha + '}' +
+        '100%{opacity:' + z + '}' +
+        '}', sheet.cssRules.length)
+
+      animations[name] = 1
+    }
+
+    return name
+  }
+
+  /**
+   * Tries various vendor prefixes and returns the first supported property.
+   */
+  function vendor(el, prop) {
+    var s = el.style
+      , pp
+      , i
+
+    prop = prop.charAt(0).toUpperCase() + prop.slice(1)
+    for(i=0; i<prefixes.length; i++) {
+      pp = prefixes[i]+prop
+      if(s[pp] !== undefined) return pp
+    }
+    if(s[prop] !== undefined) return prop
+  }
+
+  /**
+   * Sets multiple style properties at once.
+   */
+  function css(el, prop) {
+    for (var n in prop)
+      el.style[vendor(el, n)||n] = prop[n]
+
+    return el
+  }
+
+  /**
+   * Fills in default values.
+   */
+  function merge(obj) {
+    for (var i=1; i < arguments.length; i++) {
+      var def = arguments[i]
+      for (var n in def)
+        if (obj[n] === undefined) obj[n] = def[n]
+    }
+    return obj
+  }
+
+  /**
+   * Returns the absolute page-offset of the given element.
+   */
+  function pos(el) {
+    var o = { x:el.offsetLeft, y:el.offsetTop }
+    while((el = el.offsetParent))
+      o.x+=el.offsetLeft, o.y+=el.offsetTop
+
+    return o
+  }
+
+  /**
+   * Returns the line color from the given string or array.
+   */
+  function getColor(color, idx) {
+    return typeof color == 'string' ? color : color[idx % color.length]
+  }
+
+  // Built-in defaults
+
+  var defaults = {
+    lines: 12,            // The number of lines to draw
+    length: 7,            // The length of each line
+    width: 5,             // The line thickness
+    radius: 10,           // The radius of the inner circle
+    rotate: 0,            // Rotation offset
+    corners: 1,           // Roundness (0..1)
+    color: '#000',        // #rgb or #rrggbb
+    direction: 1,         // 1: clockwise, -1: counterclockwise
+    speed: 1,             // Rounds per second
+    trail: 100,           // Afterglow percentage
+    opacity: 1/4,         // Opacity of the lines
+    fps: 20,              // Frames per second when using setTimeout()
+    zIndex: 2e9,          // Use a high z-index by default
+    className: 'spinner', // CSS class to assign to the element
+    top: 'auto',          // center vertically
+    left: 'auto',         // center horizontally
+    position: 'relative'  // element position
+  }
+
+  /** The constructor */
+  function Spinner(o) {
+    if (typeof this == 'undefined') return new Spinner(o)
+    this.opts = merge(o || {}, Spinner.defaults, defaults)
+  }
+
+  // Global defaults that override the built-ins:
+  Spinner.defaults = {}
+
+  merge(Spinner.prototype, {
+
+    /**
+     * Adds the spinner to the given target element. If this instance is already
+     * spinning, it is automatically removed from its previous target b calling
+     * stop() internally.
+     */
+    spin: function(target) {
+      this.stop()
+
+      var self = this
+        , o = self.opts
+        , el = self.el = css(createEl(0, {className: o.className}), {position: o.position, width: 0, zIndex: o.zIndex})
+        , mid = o.radius+o.length+o.width
+        , ep // element position
+        , tp // target position
+
+      if (target) {
+        target.insertBefore(el, target.firstChild||null)
+        tp = pos(target)
+        ep = pos(el)
+        css(el, {
+          left: (o.left == 'auto' ? tp.x-ep.x + (target.offsetWidth >> 1) : parseInt(o.left, 10) + mid) + 'px',
+          top: (o.top == 'auto' ? tp.y-ep.y + (target.offsetHeight >> 1) : parseInt(o.top, 10) + mid)  + 'px'
+        })
+      }
+
+      el.setAttribute('role', 'progressbar')
+      self.lines(el, self.opts)
+
+      if (!useCssAnimations) {
+        // No CSS animation support, use setTimeout() instead
+        var i = 0
+          , start = (o.lines - 1) * (1 - o.direction) / 2
+          , alpha
+          , fps = o.fps
+          , f = fps/o.speed
+          , ostep = (1-o.opacity) / (f*o.trail / 100)
+          , astep = f/o.lines
+
+        ;(function anim() {
+          i++;
+          for (var j = 0; j < o.lines; j++) {
+            alpha = Math.max(1 - (i + (o.lines - j) * astep) % f * ostep, o.opacity)
+
+            self.opacity(el, j * o.direction + start, alpha, o)
+          }
+          self.timeout = self.el && setTimeout(anim, ~~(1000/fps))
+        })()
+      }
+      return self
+    },
+
+    /**
+     * Stops and removes the Spinner.
+     */
+    stop: function() {
+      var el = this.el
+      if (el) {
+        clearTimeout(this.timeout)
+        if (el.parentNode) el.parentNode.removeChild(el)
+        this.el = undefined
+      }
+      return this
+    },
+
+    /**
+     * Internal method that draws the individual lines. Will be overwritten
+     * in VML fallback mode below.
+     */
+    lines: function(el, o) {
+      var i = 0
+        , start = (o.lines - 1) * (1 - o.direction) / 2
+        , seg
+
+      function fill(color, shadow) {
+        return css(createEl(), {
+          position: 'absolute',
+          width: (o.length+o.width) + 'px',
+          height: o.width + 'px',
+          background: color,
+          boxShadow: shadow,
+          transformOrigin: 'left',
+          transform: 'rotate(' + ~~(360/o.lines*i+o.rotate) + 'deg) translate(' + o.radius+'px' +',0)',
+          borderRadius: (o.corners * o.width>>1) + 'px'
+        })
+      }
+
+      for (; i < o.lines; i++) {
+        seg = css(createEl(), {
+          position: 'absolute',
+          top: 1+~(o.width/2) + 'px',
+          transform: o.hwaccel ? 'translate3d(0,0,0)' : '',
+          opacity: o.opacity,
+          animation: useCssAnimations && addAnimation(o.opacity, o.trail, start + i * o.direction, o.lines) + ' ' + 1/o.speed + 's linear infinite'
+        })
+
+        if (o.shadow) ins(seg, css(fill('#000', '0 0 4px ' + '#000'), {top: 2+'px'}))
+        ins(el, ins(seg, fill(getColor(o.color, i), '0 0 1px rgba(0,0,0,.1)')))
+      }
+      return el
+    },
+
+    /**
+     * Internal method that adjusts the opacity of a single line.
+     * Will be overwritten in VML fallback mode below.
+     */
+    opacity: function(el, i, val) {
+      if (i < el.childNodes.length) el.childNodes[i].style.opacity = val
+    }
+
+  })
+
+
+  function initVML() {
+
+    /* Utility function to create a VML tag */
+    function vml(tag, attr) {
+      return createEl('<' + tag + ' xmlns="urn:schemas-microsoft.com:vml" class="spin-vml">', attr)
+    }
+
+    // No CSS transforms but VML support, add a CSS rule for VML elements:
+    sheet.addRule('.spin-vml', 'behavior:url(#default#VML)')
+
+    Spinner.prototype.lines = function(el, o) {
+      var r = o.length+o.width
+        , s = 2*r
+
+      function grp() {
+        return css(
+          vml('group', {
+            coordsize: s + ' ' + s,
+            coordorigin: -r + ' ' + -r
+          }),
+          { width: s, height: s }
+        )
+      }
+
+      var margin = -(o.width+o.length)*2 + 'px'
+        , g = css(grp(), {position: 'absolute', top: margin, left: margin})
+        , i
+
+      function seg(i, dx, filter) {
+        ins(g,
+          ins(css(grp(), {rotation: 360 / o.lines * i + 'deg', left: ~~dx}),
+            ins(css(vml('roundrect', {arcsize: o.corners}), {
+                width: r,
+                height: o.width,
+                left: o.radius,
+                top: -o.width>>1,
+                filter: filter
+              }),
+              vml('fill', {color: getColor(o.color, i), opacity: o.opacity}),
+              vml('stroke', {opacity: 0}) // transparent stroke to fix color bleeding upon opacity change
+            )
+          )
+        )
+      }
+
+      if (o.shadow)
+        for (i = 1; i <= o.lines; i++)
+          seg(i, -2, 'progid:DXImageTransform.Microsoft.Blur(pixelradius=2,makeshadow=1,shadowopacity=.3)')
+
+      for (i = 1; i <= o.lines; i++) seg(i)
+      return ins(el, g)
+    }
+
+    Spinner.prototype.opacity = function(el, i, val, o) {
+      var c = el.firstChild
+      o = o.shadow && o.lines || 0
+      if (c && i+o < c.childNodes.length) {
+        c = c.childNodes[i+o]; c = c && c.firstChild; c = c && c.firstChild
+        if (c) c.opacity = val
+      }
+    }
+  }
+
+  var probe = css(createEl('group'), {behavior: 'url(#default#VML)'})
+
+  if (!vendor(probe, 'transform') && probe.adj) initVML()
+  else useCssAnimations = vendor(probe, 'animation')
+
+  return Spinner
+
+}));
+
+/**
+ * Copyright (c) 2011-2013 Felix Gnass
+ * Licensed under the MIT license
+ */
+
+/*
+
+Basic Usage:
+============
+
+$('#el').spin(); // Creates a default Spinner using the text color of #el.
+$('#el').spin({ ... }); // Creates a Spinner using the provided options.
+
+$('#el').spin(false); // Stops and removes the spinner.
+
+Using Presets:
+==============
+
+$('#el').spin('small'); // Creates a 'small' Spinner using the text color of #el.
+$('#el').spin('large', '#fff'); // Creates a 'large' white Spinner.
+
+Adding a custom preset:
+=======================
+
+$.fn.spin.presets.flower = {
+  lines: 9
+  length: 10
+  width: 20
+  radius: 0
+}
+
+$('#el').spin('flower', 'red');
+
+*/
+
+(function(factory) {
+
+  if (typeof exports == 'object') {
+    // CommonJS
+    factory(require('jquery'), require('spin'))
+  }
+  else if (typeof define == 'function' && define.amd) {
+    // AMD, register as anonymous module
+    define(['jquery', 'spin'], factory)
+  }
+  else {
+    // Browser globals
+    if (!window.Spinner) throw new Error('Spin.js not present')
+    factory(window.jQuery, window.Spinner)
+  }
+
+}(function($, Spinner) {
+
+  $.fn.spin = function(opts, color) {
+
+    return this.each(function() {
+      var $this = $(this),
+        data = $this.data();
+
+      if (data.spinner) {
+        data.spinner.stop();
+        delete data.spinner;
+      }
+      if (opts !== false) {
+        opts = $.extend(
+          { color: color || $this.css('color') },
+          $.fn.spin.presets[opts] || opts
+        )
+        data.spinner = new Spinner(opts).spin(this)
+      }
+    })
+  }
+
+  $.fn.spin.presets = {
+    tiny: { lines: 8, length: 2, width: 2, radius: 3 },
+    small: { lines: 8, length: 4, width: 3, radius: 5 },
+    large: { lines: 10, length: 8, width: 4, radius: 8 }
+  }
+
+}));
+
+//  Underscore.string
 //  (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
 //  Underscore.string is freely distributable under the terms of the MIT license.
 //  Documentation: https://github.com/epeli/underscore.string
@@ -26720,2155 +28868,7 @@ if (typeof define !== 'undefined' && define.amd) {
   root._.string = root._.str = _s;
 }(this, String);
 
-;// MarionetteJS (Backbone.Marionette)
-// ----------------------------------
-// v1.6.4
-//
-// Copyright (c)2014 Derick Bailey, Muted Solutions, LLC.
-// Distributed under MIT license
-//
-// http://marionettejs.com
-
-
-
 /*!
- * Includes BabySitter
- * https://github.com/marionettejs/backbone.babysitter/
- *
- * Includes Wreqr
- * https://github.com/marionettejs/backbone.wreqr/
- */
-
-(function (root, factory) {
-  if (typeof exports === 'object') {
-
-    var underscore = require('underscore');
-    var backbone = require('backbone');
-    var wreqr = require('backbone.wreqr');
-    var babysitter = require('backbone.babysitter');
-
-    module.exports = factory(underscore, backbone, wreqr, babysitter);
-
-  } else if (typeof define === 'function' && define.amd) {
-
-    define(['underscore', 'backbone', 'backbone.wreqr', 'backbone.babysitter'], factory);
-
-  }
-}(this, function (_, Backbone) {
-
-  var Marionette = (function(global, Backbone, _){
-  "use strict";
-
-  // Define and export the Marionette namespace
-  var Marionette = {};
-  Backbone.Marionette = Marionette;
-
-  // Get the DOM manipulator for later use
-  Marionette.$ = Backbone.$;
-
-// Helpers
-// -------
-
-// For slicing `arguments` in functions
-var slice = Array.prototype.slice;
-
-function throwError(message, name) {
-  var error = new Error(message);
-  error.name = name || 'Error';
-  throw error;
-}
-
-// Marionette.extend
-// -----------------
-
-// Borrow the Backbone `extend` method so we can use it as needed
-Marionette.extend = Backbone.Model.extend;
-
-// Marionette.getOption
-// --------------------
-
-// Retrieve an object, function or other value from a target
-// object or its `options`, with `options` taking precedence.
-Marionette.getOption = function(target, optionName){
-  if (!target || !optionName){ return; }
-  var value;
-
-  if (target.options && (optionName in target.options) && (target.options[optionName] !== undefined)){
-    value = target.options[optionName];
-  } else {
-    value = target[optionName];
-  }
-
-  return value;
-};
-
-// Marionette.normalizeMethods
-// ----------------------
-
-// Pass in a mapping of events => functions or function names
-// and return a mapping of events => functions
-Marionette.normalizeMethods = function(hash) {
-  var normalizedHash = {}, method;
-  _.each(hash, function(fn, name) {
-    method = fn;
-    if (!_.isFunction(method)) {
-      method = this[method];
-    }
-    if (!method) {
-      return;
-    }
-    normalizedHash[name] = method;
-  }, this);
-  return normalizedHash;
-};
-
-// Trigger an event and/or a corresponding method name. Examples:
-//
-// `this.triggerMethod("foo")` will trigger the "foo" event and
-// call the "onFoo" method.
-//
-// `this.triggerMethod("foo:bar")` will trigger the "foo:bar" event and
-// call the "onFooBar" method.
-Marionette.triggerMethod = (function(){
-
-  // split the event name on the ":"
-  var splitter = /(^|:)(\w)/gi;
-
-  // take the event section ("section1:section2:section3")
-  // and turn it in to uppercase name
-  function getEventName(match, prefix, eventName) {
-    return eventName.toUpperCase();
-  }
-
-  // actual triggerMethod implementation
-  var triggerMethod = function(event) {
-    // get the method name from the event name
-    var methodName = 'on' + event.replace(splitter, getEventName);
-    var method = this[methodName];
-
-    // trigger the event, if a trigger method exists
-    if(_.isFunction(this.trigger)) {
-      this.trigger.apply(this, arguments);
-    }
-
-    // call the onMethodName if it exists
-    if (_.isFunction(method)) {
-      // pass all arguments, except the event name
-      return method.apply(this, _.tail(arguments));
-    }
-  };
-
-  return triggerMethod;
-})();
-
-// DOMRefresh
-// ----------
-//
-// Monitor a view's state, and after it has been rendered and shown
-// in the DOM, trigger a "dom:refresh" event every time it is
-// re-rendered.
-
-Marionette.MonitorDOMRefresh = (function(documentElement){
-  // track when the view has been shown in the DOM,
-  // using a Marionette.Region (or by other means of triggering "show")
-  function handleShow(view){
-    view._isShown = true;
-    triggerDOMRefresh(view);
-  }
-
-  // track when the view has been rendered
-  function handleRender(view){
-    view._isRendered = true;
-    triggerDOMRefresh(view);
-  }
-
-  // Trigger the "dom:refresh" event and corresponding "onDomRefresh" method
-  function triggerDOMRefresh(view){
-    if (view._isShown && view._isRendered && isInDOM(view)){
-      if (_.isFunction(view.triggerMethod)){
-        view.triggerMethod("dom:refresh");
-      }
-    }
-  }
-
-  function isInDOM(view) {
-    return documentElement.contains(view.el);
-  }
-
-  // Export public API
-  return function(view){
-    view.listenTo(view, "show", function(){
-      handleShow(view);
-    });
-
-    view.listenTo(view, "render", function(){
-      handleRender(view);
-    });
-  };
-})(document.documentElement);
-
-
-// Marionette.bindEntityEvents & unbindEntityEvents
-// ---------------------------
-//
-// These methods are used to bind/unbind a backbone "entity" (collection/model)
-// to methods on a target object.
-//
-// The first parameter, `target`, must have a `listenTo` method from the
-// EventBinder object.
-//
-// The second parameter is the entity (Backbone.Model or Backbone.Collection)
-// to bind the events from.
-//
-// The third parameter is a hash of { "event:name": "eventHandler" }
-// configuration. Multiple handlers can be separated by a space. A
-// function can be supplied instead of a string handler name.
-
-(function(Marionette){
-  "use strict";
-
-  // Bind the event to handlers specified as a string of
-  // handler names on the target object
-  function bindFromStrings(target, entity, evt, methods){
-    var methodNames = methods.split(/\s+/);
-
-    _.each(methodNames,function(methodName) {
-
-      var method = target[methodName];
-      if(!method) {
-        throwError("Method '"+ methodName +"' was configured as an event handler, but does not exist.");
-      }
-
-      target.listenTo(entity, evt, method);
-    });
-  }
-
-  // Bind the event to a supplied callback function
-  function bindToFunction(target, entity, evt, method){
-      target.listenTo(entity, evt, method);
-  }
-
-  // Bind the event to handlers specified as a string of
-  // handler names on the target object
-  function unbindFromStrings(target, entity, evt, methods){
-    var methodNames = methods.split(/\s+/);
-
-    _.each(methodNames,function(methodName) {
-      var method = target[methodName];
-      target.stopListening(entity, evt, method);
-    });
-  }
-
-  // Bind the event to a supplied callback function
-  function unbindToFunction(target, entity, evt, method){
-      target.stopListening(entity, evt, method);
-  }
-
-
-  // generic looping function
-  function iterateEvents(target, entity, bindings, functionCallback, stringCallback){
-    if (!entity || !bindings) { return; }
-
-    // allow the bindings to be a function
-    if (_.isFunction(bindings)){
-      bindings = bindings.call(target);
-    }
-
-    // iterate the bindings and bind them
-    _.each(bindings, function(methods, evt){
-
-      // allow for a function as the handler,
-      // or a list of event names as a string
-      if (_.isFunction(methods)){
-        functionCallback(target, entity, evt, methods);
-      } else {
-        stringCallback(target, entity, evt, methods);
-      }
-
-    });
-  }
-
-  // Export Public API
-  Marionette.bindEntityEvents = function(target, entity, bindings){
-    iterateEvents(target, entity, bindings, bindToFunction, bindFromStrings);
-  };
-
-  Marionette.unbindEntityEvents = function(target, entity, bindings){
-    iterateEvents(target, entity, bindings, unbindToFunction, unbindFromStrings);
-  };
-
-})(Marionette);
-
-
-// Callbacks
-// ---------
-
-// A simple way of managing a collection of callbacks
-// and executing them at a later point in time, using jQuery's
-// `Deferred` object.
-Marionette.Callbacks = function(){
-  this._deferred = Marionette.$.Deferred();
-  this._callbacks = [];
-};
-
-_.extend(Marionette.Callbacks.prototype, {
-
-  // Add a callback to be executed. Callbacks added here are
-  // guaranteed to execute, even if they are added after the
-  // `run` method is called.
-  add: function(callback, contextOverride){
-    this._callbacks.push({cb: callback, ctx: contextOverride});
-
-    this._deferred.done(function(context, options){
-      if (contextOverride){ context = contextOverride; }
-      callback.call(context, options);
-    });
-  },
-
-  // Run all registered callbacks with the context specified.
-  // Additional callbacks can be added after this has been run
-  // and they will still be executed.
-  run: function(options, context){
-    this._deferred.resolve(context, options);
-  },
-
-  // Resets the list of callbacks to be run, allowing the same list
-  // to be run multiple times - whenever the `run` method is called.
-  reset: function(){
-    var callbacks = this._callbacks;
-    this._deferred = Marionette.$.Deferred();
-    this._callbacks = [];
-
-    _.each(callbacks, function(cb){
-      this.add(cb.cb, cb.ctx);
-    }, this);
-  }
-});
-
-
-// Marionette Controller
-// ---------------------
-//
-// A multi-purpose object to use as a controller for
-// modules and routers, and as a mediator for workflow
-// and coordination of other objects, views, and more.
-Marionette.Controller = function(options){
-  this.triggerMethod = Marionette.triggerMethod;
-  this.options = options || {};
-
-  if (_.isFunction(this.initialize)){
-    this.initialize(this.options);
-  }
-};
-
-Marionette.Controller.extend = Marionette.extend;
-
-// Controller Methods
-// --------------
-
-// Ensure it can trigger events with Backbone.Events
-_.extend(Marionette.Controller.prototype, Backbone.Events, {
-  close: function(){
-    this.stopListening();
-    this.triggerMethod("close");
-    this.unbind();
-  }
-});
-
-// Region
-// ------
-//
-// Manage the visual regions of your composite application. See
-// http://lostechies.com/derickbailey/2011/12/12/composite-js-apps-regions-and-region-managers/
-
-Marionette.Region = function(options){
-  this.options = options || {};
-  this.el = Marionette.getOption(this, "el");
-
-  if (!this.el){
-    throwError("An 'el' must be specified for a region.", "NoElError");
-  }
-
-  if (this.initialize){
-    var args = Array.prototype.slice.apply(arguments);
-    this.initialize.apply(this, args);
-  }
-};
-
-
-// Region Type methods
-// -------------------
-
-_.extend(Marionette.Region, {
-
-  // Build an instance of a region by passing in a configuration object
-  // and a default region type to use if none is specified in the config.
-  //
-  // The config object should either be a string as a jQuery DOM selector,
-  // a Region type directly, or an object literal that specifies both
-  // a selector and regionType:
-  //
-  // ```js
-  // {
-  //   selector: "#foo",
-  //   regionType: MyCustomRegion
-  // }
-  // ```
-  //
-  buildRegion: function(regionConfig, defaultRegionType){
-    var regionIsString = _.isString(regionConfig);
-    var regionSelectorIsString = _.isString(regionConfig.selector);
-    var regionTypeIsUndefined = _.isUndefined(regionConfig.regionType);
-    var regionIsType = _.isFunction(regionConfig);
-
-    if (!regionIsType && !regionIsString && !regionSelectorIsString) {
-      throwError("Region must be specified as a Region type, a selector string or an object with selector property");
-    }
-
-    var selector, RegionType;
-
-    // get the selector for the region
-
-    if (regionIsString) {
-      selector = regionConfig;
-    }
-
-    if (regionConfig.selector) {
-      selector = regionConfig.selector;
-      delete regionConfig.selector;
-    }
-
-    // get the type for the region
-
-    if (regionIsType){
-      RegionType = regionConfig;
-    }
-
-    if (!regionIsType && regionTypeIsUndefined) {
-      RegionType = defaultRegionType;
-    }
-
-    if (regionConfig.regionType) {
-      RegionType = regionConfig.regionType;
-      delete regionConfig.regionType;
-    }
-
-    if (regionIsString || regionIsType) {
-      regionConfig = {};
-    }
-
-    regionConfig.el = selector;
-
-    // build the region instance
-    var region = new RegionType(regionConfig);
-
-    // override the `getEl` function if we have a parentEl
-    // this must be overridden to ensure the selector is found
-    // on the first use of the region. if we try to assign the
-    // region's `el` to `parentEl.find(selector)` in the object
-    // literal to build the region, the element will not be
-    // guaranteed to be in the DOM already, and will cause problems
-    if (regionConfig.parentEl){
-      region.getEl = function(selector) {
-        var parentEl = regionConfig.parentEl;
-        if (_.isFunction(parentEl)){
-          parentEl = parentEl();
-        }
-        return parentEl.find(selector);
-      };
-    }
-
-    return region;
-  }
-
-});
-
-// Region Instance Methods
-// -----------------------
-
-_.extend(Marionette.Region.prototype, Backbone.Events, {
-
-  // Displays a backbone view instance inside of the region.
-  // Handles calling the `render` method for you. Reads content
-  // directly from the `el` attribute. Also calls an optional
-  // `onShow` and `close` method on your view, just after showing
-  // or just before closing the view, respectively.
-  show: function(view){
-    this.ensureEl();
-
-    var isViewClosed = view.isClosed || _.isUndefined(view.$el);
-    var isDifferentView = view !== this.currentView;
-
-    if (isDifferentView) {
-      this.close();
-    }
-
-    view.render();
-
-    if (isDifferentView || isViewClosed) {
-      this.open(view);
-    }
-
-    this.currentView = view;
-
-    Marionette.triggerMethod.call(this, "show", view);
-    Marionette.triggerMethod.call(view, "show");
-  },
-
-  ensureEl: function(){
-    if (!this.$el || this.$el.length === 0){
-      this.$el = this.getEl(this.el);
-    }
-  },
-
-  // Override this method to change how the region finds the
-  // DOM element that it manages. Return a jQuery selector object.
-  getEl: function(selector){
-    return Marionette.$(selector);
-  },
-
-  // Override this method to change how the new view is
-  // appended to the `$el` that the region is managing
-  open: function(view){
-    this.$el.empty().append(view.el);
-  },
-
-  // Close the current view, if there is one. If there is no
-  // current view, it does nothing and returns immediately.
-  close: function(){
-    var view = this.currentView;
-    if (!view || view.isClosed){ return; }
-
-    // call 'close' or 'remove', depending on which is found
-    if (view.close) { view.close(); }
-    else if (view.remove) { view.remove(); }
-
-    Marionette.triggerMethod.call(this, "close", view);
-
-    delete this.currentView;
-  },
-
-  // Attach an existing view to the region. This
-  // will not call `render` or `onShow` for the new view,
-  // and will not replace the current HTML for the `el`
-  // of the region.
-  attachView: function(view){
-    this.currentView = view;
-  },
-
-  // Reset the region by closing any existing view and
-  // clearing out the cached `$el`. The next time a view
-  // is shown via this region, the region will re-query the
-  // DOM for the region's `el`.
-  reset: function(){
-    this.close();
-    delete this.$el;
-  }
-});
-
-// Copy the `extend` function used by Backbone's classes
-Marionette.Region.extend = Marionette.extend;
-
-// Marionette.RegionManager
-// ------------------------
-//
-// Manage one or more related `Marionette.Region` objects.
-Marionette.RegionManager = (function(Marionette){
-
-  var RegionManager = Marionette.Controller.extend({
-    constructor: function(options){
-      this._regions = {};
-      Marionette.Controller.prototype.constructor.call(this, options);
-    },
-
-    // Add multiple regions using an object literal, where
-    // each key becomes the region name, and each value is
-    // the region definition.
-    addRegions: function(regionDefinitions, defaults){
-      var regions = {};
-
-      _.each(regionDefinitions, function(definition, name){
-        if (_.isString(definition)){
-          definition = { selector: definition };
-        }
-
-        if (definition.selector){
-          definition = _.defaults({}, definition, defaults);
-        }
-
-        var region = this.addRegion(name, definition);
-        regions[name] = region;
-      }, this);
-
-      return regions;
-    },
-
-    // Add an individual region to the region manager,
-    // and return the region instance
-    addRegion: function(name, definition){
-      var region;
-
-      var isObject = _.isObject(definition);
-      var isString = _.isString(definition);
-      var hasSelector = !!definition.selector;
-
-      if (isString || (isObject && hasSelector)){
-        region = Marionette.Region.buildRegion(definition, Marionette.Region);
-      } else if (_.isFunction(definition)){
-        region = Marionette.Region.buildRegion(definition, Marionette.Region);
-      } else {
-        region = definition;
-      }
-
-      this._store(name, region);
-      this.triggerMethod("region:add", name, region);
-      return region;
-    },
-
-    // Get a region by name
-    get: function(name){
-      return this._regions[name];
-    },
-
-    // Remove a region by name
-    removeRegion: function(name){
-      var region = this._regions[name];
-      this._remove(name, region);
-    },
-
-    // Close all regions in the region manager, and
-    // remove them
-    removeRegions: function(){
-      _.each(this._regions, function(region, name){
-        this._remove(name, region);
-      }, this);
-    },
-
-    // Close all regions in the region manager, but
-    // leave them attached
-    closeRegions: function(){
-      _.each(this._regions, function(region, name){
-        region.close();
-      }, this);
-    },
-
-    // Close all regions and shut down the region
-    // manager entirely
-    close: function(){
-      this.removeRegions();
-      Marionette.Controller.prototype.close.apply(this, arguments);
-    },
-
-    // internal method to store regions
-    _store: function(name, region){
-      this._regions[name] = region;
-      this._setLength();
-    },
-
-    // internal method to remove a region
-    _remove: function(name, region){
-      region.close();
-      delete this._regions[name];
-      this._setLength();
-      this.triggerMethod("region:remove", name, region);
-    },
-
-    // set the number of regions current held
-    _setLength: function(){
-      this.length = _.size(this._regions);
-    }
-
-  });
-
-  // Borrowing this code from Backbone.Collection:
-  // http://backbonejs.org/docs/backbone.html#section-106
-  //
-  // Mix in methods from Underscore, for iteration, and other
-  // collection related features.
-  var methods = ['forEach', 'each', 'map', 'find', 'detect', 'filter',
-    'select', 'reject', 'every', 'all', 'some', 'any', 'include',
-    'contains', 'invoke', 'toArray', 'first', 'initial', 'rest',
-    'last', 'without', 'isEmpty', 'pluck'];
-
-  _.each(methods, function(method) {
-    RegionManager.prototype[method] = function() {
-      var regions = _.values(this._regions);
-      var args = [regions].concat(_.toArray(arguments));
-      return _[method].apply(_, args);
-    };
-  });
-
-  return RegionManager;
-})(Marionette);
-
-
-// Template Cache
-// --------------
-
-// Manage templates stored in `<script>` blocks,
-// caching them for faster access.
-Marionette.TemplateCache = function(templateId){
-  this.templateId = templateId;
-};
-
-// TemplateCache object-level methods. Manage the template
-// caches from these method calls instead of creating
-// your own TemplateCache instances
-_.extend(Marionette.TemplateCache, {
-  templateCaches: {},
-
-  // Get the specified template by id. Either
-  // retrieves the cached version, or loads it
-  // from the DOM.
-  get: function(templateId){
-    var cachedTemplate = this.templateCaches[templateId];
-
-    if (!cachedTemplate){
-      cachedTemplate = new Marionette.TemplateCache(templateId);
-      this.templateCaches[templateId] = cachedTemplate;
-    }
-
-    return cachedTemplate.load();
-  },
-
-  // Clear templates from the cache. If no arguments
-  // are specified, clears all templates:
-  // `clear()`
-  //
-  // If arguments are specified, clears each of the
-  // specified templates from the cache:
-  // `clear("#t1", "#t2", "...")`
-  clear: function(){
-    var i;
-    var args = slice.call(arguments);
-    var length = args.length;
-
-    if (length > 0){
-      for(i=0; i<length; i++){
-        delete this.templateCaches[args[i]];
-      }
-    } else {
-      this.templateCaches = {};
-    }
-  }
-});
-
-// TemplateCache instance methods, allowing each
-// template cache object to manage its own state
-// and know whether or not it has been loaded
-_.extend(Marionette.TemplateCache.prototype, {
-
-  // Internal method to load the template
-  load: function(){
-    // Guard clause to prevent loading this template more than once
-    if (this.compiledTemplate){
-      return this.compiledTemplate;
-    }
-
-    // Load the template and compile it
-    var template = this.loadTemplate(this.templateId);
-    this.compiledTemplate = this.compileTemplate(template);
-
-    return this.compiledTemplate;
-  },
-
-  // Load a template from the DOM, by default. Override
-  // this method to provide your own template retrieval
-  // For asynchronous loading with AMD/RequireJS, consider
-  // using a template-loader plugin as described here:
-  // https://github.com/marionettejs/backbone.marionette/wiki/Using-marionette-with-requirejs
-  loadTemplate: function(templateId){
-    var template = Marionette.$(templateId).html();
-
-    if (!template || template.length === 0){
-      throwError("Could not find template: '" + templateId + "'", "NoTemplateError");
-    }
-
-    return template;
-  },
-
-  // Pre-compile the template before caching it. Override
-  // this method if you do not need to pre-compile a template
-  // (JST / RequireJS for example) or if you want to change
-  // the template engine used (Handebars, etc).
-  compileTemplate: function(rawTemplate){
-    return _.template(rawTemplate);
-  }
-});
-
-
-// Renderer
-// --------
-
-// Render a template with data by passing in the template
-// selector and the data to render.
-Marionette.Renderer = {
-
-  // Render a template with data. The `template` parameter is
-  // passed to the `TemplateCache` object to retrieve the
-  // template function. Override this method to provide your own
-  // custom rendering and template handling for all of Marionette.
-  render: function(template, data){
-
-    if (!template) {
-      throwError("Cannot render the template since it's false, null or undefined.", "TemplateNotFoundError");
-    }
-
-    var templateFunc;
-    if (typeof template === "function"){
-      templateFunc = template;
-    } else {
-      templateFunc = Marionette.TemplateCache.get(template);
-    }
-
-    return templateFunc(data);
-  }
-};
-
-
-
-// Marionette.View
-// ---------------
-
-// The core view type that other Marionette views extend from.
-Marionette.View = Backbone.View.extend({
-
-  constructor: function(options){
-    _.bindAll(this, "render");
-
-    // this exposes view options to the view initializer
-    // this is a backfill since backbone removed the assignment
-    // of this.options
-    // at some point however this may be removed
-    this.options = _.extend({}, _.result(this, 'options'), _.isFunction(options) ? options.call(this) : options);
-
-    // parses out the @ui DSL for events
-    this.events = this.normalizeUIKeys(_.result(this, 'events'));
-    Backbone.View.prototype.constructor.apply(this, arguments);
-
-    Marionette.MonitorDOMRefresh(this);
-    this.listenTo(this, "show", this.onShowCalled);
-  },
-
-  // import the "triggerMethod" to trigger events with corresponding
-  // methods if the method exists
-  triggerMethod: Marionette.triggerMethod,
-
-  // Imports the "normalizeMethods" to transform hashes of
-  // events=>function references/names to a hash of events=>function references
-  normalizeMethods: Marionette.normalizeMethods,
-
-  // Get the template for this view
-  // instance. You can set a `template` attribute in the view
-  // definition or pass a `template: "whatever"` parameter in
-  // to the constructor options.
-  getTemplate: function(){
-    return Marionette.getOption(this, "template");
-  },
-
-  // Mix in template helper methods. Looks for a
-  // `templateHelpers` attribute, which can either be an
-  // object literal, or a function that returns an object
-  // literal. All methods and attributes from this object
-  // are copies to the object passed in.
-  mixinTemplateHelpers: function(target){
-    target = target || {};
-    var templateHelpers = Marionette.getOption(this, "templateHelpers");
-    if (_.isFunction(templateHelpers)){
-      templateHelpers = templateHelpers.call(this);
-    }
-    return _.extend(target, templateHelpers);
-  },
-
-  // allows for the use of the @ui. syntax within
-  // a given key for triggers and events
-  // swaps the @ui with the associated selector
-  normalizeUIKeys: function(hash) {
-    var _this = this;
-    if (typeof(hash) === "undefined") {
-      return;
-    }
-
-    _.each(_.keys(hash), function(v) {
-      var pattern = /@ui.[a-zA-Z_$0-9]*/g;
-      if (v.match(pattern)) {
-        hash[v.replace(pattern, function(r) {
-          return _.result(_this, "ui")[r.slice(4)];
-        })] = hash[v];
-        delete hash[v];
-      }
-    });
-
-    return hash;
-  },
-
-  // Configure `triggers` to forward DOM events to view
-  // events. `triggers: {"click .foo": "do:foo"}`
-  configureTriggers: function(){
-    if (!this.triggers) { return; }
-
-    var triggerEvents = {};
-
-    // Allow `triggers` to be configured as a function
-    var triggers = this.normalizeUIKeys(_.result(this, "triggers"));
-
-    // Configure the triggers, prevent default
-    // action and stop propagation of DOM events
-    _.each(triggers, function(value, key){
-
-      var hasOptions = _.isObject(value);
-      var eventName = hasOptions ? value.event : value;
-
-      // build the event handler function for the DOM event
-      triggerEvents[key] = function(e){
-
-        // stop the event in its tracks
-        if (e) {
-          var prevent = e.preventDefault;
-          var stop = e.stopPropagation;
-
-          var shouldPrevent = hasOptions ? value.preventDefault : prevent;
-          var shouldStop = hasOptions ? value.stopPropagation : stop;
-
-          if (shouldPrevent && prevent) { prevent.apply(e); }
-          if (shouldStop && stop) { stop.apply(e); }
-        }
-
-        // build the args for the event
-        var args = {
-          view: this,
-          model: this.model,
-          collection: this.collection
-        };
-
-        // trigger the event
-        this.triggerMethod(eventName, args);
-      };
-
-    }, this);
-
-    return triggerEvents;
-  },
-
-  // Overriding Backbone.View's delegateEvents to handle
-  // the `triggers`, `modelEvents`, and `collectionEvents` configuration
-  delegateEvents: function(events){
-    this._delegateDOMEvents(events);
-    Marionette.bindEntityEvents(this, this.model, Marionette.getOption(this, "modelEvents"));
-    Marionette.bindEntityEvents(this, this.collection, Marionette.getOption(this, "collectionEvents"));
-  },
-
-  // internal method to delegate DOM events and triggers
-  _delegateDOMEvents: function(events){
-    events = events || this.events;
-    if (_.isFunction(events)){ events = events.call(this); }
-
-    var combinedEvents = {};
-    var triggers = this.configureTriggers();
-    _.extend(combinedEvents, events, triggers);
-
-    Backbone.View.prototype.delegateEvents.call(this, combinedEvents);
-  },
-
-  // Overriding Backbone.View's undelegateEvents to handle unbinding
-  // the `triggers`, `modelEvents`, and `collectionEvents` config
-  undelegateEvents: function(){
-    var args = Array.prototype.slice.call(arguments);
-    Backbone.View.prototype.undelegateEvents.apply(this, args);
-
-    Marionette.unbindEntityEvents(this, this.model, Marionette.getOption(this, "modelEvents"));
-    Marionette.unbindEntityEvents(this, this.collection, Marionette.getOption(this, "collectionEvents"));
-  },
-
-  // Internal method, handles the `show` event.
-  onShowCalled: function(){},
-
-  // Default `close` implementation, for removing a view from the
-  // DOM and unbinding it. Regions will call this method
-  // for you. You can specify an `onClose` method in your view to
-  // add custom code that is called after the view is closed.
-  close: function(){
-    if (this.isClosed) { return; }
-
-    // allow the close to be stopped by returning `false`
-    // from the `onBeforeClose` method
-    var shouldClose = this.triggerMethod("before:close");
-    if (shouldClose === false){
-      return;
-    }
-
-    // mark as closed before doing the actual close, to
-    // prevent infinite loops within "close" event handlers
-    // that are trying to close other views
-    this.isClosed = true;
-    this.triggerMethod("close");
-
-    // unbind UI elements
-    this.unbindUIElements();
-
-    // remove the view from the DOM
-    this.remove();
-  },
-
-  // This method binds the elements specified in the "ui" hash inside the view's code with
-  // the associated jQuery selectors.
-  bindUIElements: function(){
-    if (!this.ui) { return; }
-
-    // store the ui hash in _uiBindings so they can be reset later
-    // and so re-rendering the view will be able to find the bindings
-    if (!this._uiBindings){
-      this._uiBindings = this.ui;
-    }
-
-    // get the bindings result, as a function or otherwise
-    var bindings = _.result(this, "_uiBindings");
-
-    // empty the ui so we don't have anything to start with
-    this.ui = {};
-
-    // bind each of the selectors
-    _.each(_.keys(bindings), function(key) {
-      var selector = bindings[key];
-      this.ui[key] = this.$(selector);
-    }, this);
-  },
-
-  // This method unbinds the elements specified in the "ui" hash
-  unbindUIElements: function(){
-    if (!this.ui || !this._uiBindings){ return; }
-
-    // delete all of the existing ui bindings
-    _.each(this.ui, function($el, name){
-      delete this.ui[name];
-    }, this);
-
-    // reset the ui element to the original bindings configuration
-    this.ui = this._uiBindings;
-    delete this._uiBindings;
-  }
-});
-
-// Item View
-// ---------
-
-// A single item view implementation that contains code for rendering
-// with underscore.js templates, serializing the view's model or collection,
-// and calling several methods on extended views, such as `onRender`.
-Marionette.ItemView = Marionette.View.extend({
-
-  // Setting up the inheritance chain which allows changes to
-  // Marionette.View.prototype.constructor which allows overriding
-  constructor: function(){
-    Marionette.View.prototype.constructor.apply(this, arguments);
-  },
-
-  // Serialize the model or collection for the view. If a model is
-  // found, `.toJSON()` is called. If a collection is found, `.toJSON()`
-  // is also called, but is used to populate an `items` array in the
-  // resulting data. If both are found, defaults to the model.
-  // You can override the `serializeData` method in your own view
-  // definition, to provide custom serialization for your view's data.
-  serializeData: function(){
-    var data = {};
-
-    if (this.model) {
-      data = this.model.toJSON();
-    }
-    else if (this.collection) {
-      data = { items: this.collection.toJSON() };
-    }
-
-    return data;
-  },
-
-  // Render the view, defaulting to underscore.js templates.
-  // You can override this in your view definition to provide
-  // a very specific rendering for your view. In general, though,
-  // you should override the `Marionette.Renderer` object to
-  // change how Marionette renders views.
-  render: function(){
-    this.isClosed = false;
-
-    this.triggerMethod("before:render", this);
-    this.triggerMethod("item:before:render", this);
-
-    var data = this.serializeData();
-    data = this.mixinTemplateHelpers(data);
-
-    var template = this.getTemplate();
-    var html = Marionette.Renderer.render(template, data);
-
-    this.$el.html(html);
-    this.bindUIElements();
-
-    this.triggerMethod("render", this);
-    this.triggerMethod("item:rendered", this);
-
-    return this;
-  },
-
-  // Override the default close event to add a few
-  // more events that are triggered.
-  close: function(){
-    if (this.isClosed){ return; }
-
-    this.triggerMethod('item:before:close');
-
-    Marionette.View.prototype.close.apply(this, arguments);
-
-    this.triggerMethod('item:closed');
-  }
-});
-
-// Collection View
-// ---------------
-
-// A view that iterates over a Backbone.Collection
-// and renders an individual ItemView for each model.
-Marionette.CollectionView = Marionette.View.extend({
-  // used as the prefix for item view events
-  // that are forwarded through the collectionview
-  itemViewEventPrefix: "itemview",
-
-  // constructor
-  constructor: function(options){
-    this._initChildViewStorage();
-
-    Marionette.View.prototype.constructor.apply(this, arguments);
-
-    this._initialEvents();
-    this.initRenderBuffer();
-  },
-
-  // Instead of inserting elements one by one into the page,
-  // it's much more performant to insert elements into a document
-  // fragment and then insert that document fragment into the page
-  initRenderBuffer: function() {
-    this.elBuffer = document.createDocumentFragment();
-    this._bufferedChildren = [];
-  },
-
-  startBuffering: function() {
-    this.initRenderBuffer();
-    this.isBuffering = true;
-  },
-
-  endBuffering: function() {
-    this.isBuffering = false;
-    this.appendBuffer(this, this.elBuffer);
-    this._triggerShowBufferedChildren();
-    this.initRenderBuffer();
-  },
-
-  _triggerShowBufferedChildren: function () {
-    if (this._isShown) {
-      _.each(this._bufferedChildren, function (child) {
-        Marionette.triggerMethod.call(child, "show");
-      });
-      this._bufferedChildren = [];
-    }
-  },
-
-  // Configured the initial events that the collection view
-  // binds to.
-  _initialEvents: function(){
-    if (this.collection){
-      this.listenTo(this.collection, "add", this.addChildView);
-      this.listenTo(this.collection, "remove", this.removeItemView);
-      this.listenTo(this.collection, "reset", this.render);
-    }
-  },
-
-  // Handle a child item added to the collection
-  addChildView: function(item, collection, options){
-    this.closeEmptyView();
-    var ItemView = this.getItemView(item);
-    var index = this.collection.indexOf(item);
-    this.addItemView(item, ItemView, index);
-  },
-
-  // Override from `Marionette.View` to guarantee the `onShow` method
-  // of child views is called.
-  onShowCalled: function(){
-    this.children.each(function(child){
-      Marionette.triggerMethod.call(child, "show");
-    });
-  },
-
-  // Internal method to trigger the before render callbacks
-  // and events
-  triggerBeforeRender: function(){
-    this.triggerMethod("before:render", this);
-    this.triggerMethod("collection:before:render", this);
-  },
-
-  // Internal method to trigger the rendered callbacks and
-  // events
-  triggerRendered: function(){
-    this.triggerMethod("render", this);
-    this.triggerMethod("collection:rendered", this);
-  },
-
-  // Render the collection of items. Override this method to
-  // provide your own implementation of a render function for
-  // the collection view.
-  render: function(){
-    this.isClosed = false;
-    this.triggerBeforeRender();
-    this._renderChildren();
-    this.triggerRendered();
-    return this;
-  },
-
-  // Internal method. Separated so that CompositeView can have
-  // more control over events being triggered, around the rendering
-  // process
-  _renderChildren: function(){
-    this.startBuffering();
-
-    this.closeEmptyView();
-    this.closeChildren();
-
-    if (!this.isEmpty(this.collection)) {
-      this.showCollection();
-    } else {
-      this.showEmptyView();
-    }
-
-    this.endBuffering();
-  },
-
-  // Internal method to loop through each item in the
-  // collection view and show it
-  showCollection: function(){
-    var ItemView;
-    this.collection.each(function(item, index){
-      ItemView = this.getItemView(item);
-      this.addItemView(item, ItemView, index);
-    }, this);
-  },
-
-  // Internal method to show an empty view in place of
-  // a collection of item views, when the collection is
-  // empty
-  showEmptyView: function(){
-    var EmptyView = this.getEmptyView();
-
-    if (EmptyView && !this._showingEmptyView){
-      this._showingEmptyView = true;
-      var model = new Backbone.Model();
-      this.addItemView(model, EmptyView, 0);
-    }
-  },
-
-  // Internal method to close an existing emptyView instance
-  // if one exists. Called when a collection view has been
-  // rendered empty, and then an item is added to the collection.
-  closeEmptyView: function(){
-    if (this._showingEmptyView){
-      this.closeChildren();
-      delete this._showingEmptyView;
-    }
-  },
-
-  // Retrieve the empty view type
-  getEmptyView: function(){
-    return Marionette.getOption(this, "emptyView");
-  },
-
-  // Retrieve the itemView type, either from `this.options.itemView`
-  // or from the `itemView` in the object definition. The "options"
-  // takes precedence.
-  getItemView: function(item){
-    var itemView = Marionette.getOption(this, "itemView");
-
-    if (!itemView){
-      throwError("An `itemView` must be specified", "NoItemViewError");
-    }
-
-    return itemView;
-  },
-
-  // Render the child item's view and add it to the
-  // HTML for the collection view.
-  addItemView: function(item, ItemView, index){
-    // get the itemViewOptions if any were specified
-    var itemViewOptions = Marionette.getOption(this, "itemViewOptions");
-    if (_.isFunction(itemViewOptions)){
-      itemViewOptions = itemViewOptions.call(this, item, index);
-    }
-
-    // build the view
-    var view = this.buildItemView(item, ItemView, itemViewOptions);
-
-    // set up the child view event forwarding
-    this.addChildViewEventForwarding(view);
-
-    // this view is about to be added
-    this.triggerMethod("before:item:added", view);
-
-    // Store the child view itself so we can properly
-    // remove and/or close it later
-    this.children.add(view);
-
-    // Render it and show it
-    this.renderItemView(view, index);
-
-    // call the "show" method if the collection view
-    // has already been shown
-    if (this._isShown && !this.isBuffering){
-      Marionette.triggerMethod.call(view, "show");
-    }
-
-    // this view was added
-    this.triggerMethod("after:item:added", view);
-
-    return view;
-  },
-
-  // Set up the child view event forwarding. Uses an "itemview:"
-  // prefix in front of all forwarded events.
-  addChildViewEventForwarding: function(view){
-    var prefix = Marionette.getOption(this, "itemViewEventPrefix");
-
-    // Forward all child item view events through the parent,
-    // prepending "itemview:" to the event name
-    this.listenTo(view, "all", function(){
-      var args = slice.call(arguments);
-      var rootEvent = args[0];
-      var itemEvents = this.normalizeMethods(this.getItemEvents());
-
-      args[0] = prefix + ":" + rootEvent;
-      args.splice(1, 0, view);
-
-      // call collectionView itemEvent if defined
-      if (typeof itemEvents !== "undefined" && _.isFunction(itemEvents[rootEvent])) {
-        itemEvents[rootEvent].apply(this, args);
-      }
-
-      Marionette.triggerMethod.apply(this, args);
-    }, this);
-  },
-
-  // returns the value of itemEvents depending on if a function
-  getItemEvents: function() {
-    if (_.isFunction(this.itemEvents)) {
-      return this.itemEvents.call(this);
-    }
-
-    return this.itemEvents;
-  },
-
-  // render the item view
-  renderItemView: function(view, index) {
-    view.render();
-    this.appendHtml(this, view, index);
-  },
-
-  // Build an `itemView` for every model in the collection.
-  buildItemView: function(item, ItemViewType, itemViewOptions){
-    var options = _.extend({model: item}, itemViewOptions);
-    return new ItemViewType(options);
-  },
-
-  // get the child view by item it holds, and remove it
-  removeItemView: function(item){
-    var view = this.children.findByModel(item);
-    this.removeChildView(view);
-    this.checkEmpty();
-  },
-
-  // Remove the child view and close it
-  removeChildView: function(view){
-
-    // shut down the child view properly,
-    // including events that the collection has from it
-    if (view){
-      this.stopListening(view);
-
-      // call 'close' or 'remove', depending on which is found
-      if (view.close) { view.close(); }
-      else if (view.remove) { view.remove(); }
-
-      this.children.remove(view);
-    }
-
-    this.triggerMethod("item:removed", view);
-  },
-
-  // helper to check if the collection is empty
-  isEmpty: function(collection){
-    // check if we're empty now
-    return !this.collection || this.collection.length === 0;
-  },
-
-  // If empty, show the empty view
-  checkEmpty: function (){
-    if (this.isEmpty(this.collection)){
-      this.showEmptyView();
-    }
-  },
-
-  // You might need to override this if you've overridden appendHtml
-  appendBuffer: function(collectionView, buffer) {
-    collectionView.$el.append(buffer);
-  },
-
-  // Append the HTML to the collection's `el`.
-  // Override this method to do something other
-  // than `.append`.
-  appendHtml: function(collectionView, itemView, index){
-    if (collectionView.isBuffering) {
-      // buffering happens on reset events and initial renders
-      // in order to reduce the number of inserts into the
-      // document, which are expensive.
-      collectionView.elBuffer.appendChild(itemView.el);
-      collectionView._bufferedChildren.push(itemView);
-    }
-    else {
-      // If we've already rendered the main collection, just
-      // append the new items directly into the element.
-      collectionView.$el.append(itemView.el);
-    }
-  },
-
-  // Internal method to set up the `children` object for
-  // storing all of the child views
-  _initChildViewStorage: function(){
-    this.children = new Backbone.ChildViewContainer();
-  },
-
-  // Handle cleanup and other closing needs for
-  // the collection of views.
-  close: function(){
-    if (this.isClosed){ return; }
-
-    this.triggerMethod("collection:before:close");
-    this.closeChildren();
-    this.triggerMethod("collection:closed");
-
-    Marionette.View.prototype.close.apply(this, arguments);
-  },
-
-  // Close the child views that this collection view
-  // is holding on to, if any
-  closeChildren: function(){
-    this.children.each(function(child){
-      this.removeChildView(child);
-    }, this);
-    this.checkEmpty();
-  }
-});
-
-
-// Composite View
-// --------------
-
-// Used for rendering a branch-leaf, hierarchical structure.
-// Extends directly from CollectionView and also renders an
-// an item view as `modelView`, for the top leaf
-Marionette.CompositeView = Marionette.CollectionView.extend({
-
-  // Setting up the inheritance chain which allows changes to
-  // Marionette.CollectionView.prototype.constructor which allows overriding
-  constructor: function(){
-    Marionette.CollectionView.prototype.constructor.apply(this, arguments);
-  },
-
-  // Configured the initial events that the composite view
-  // binds to. Override this method to prevent the initial
-  // events, or to add your own initial events.
-  _initialEvents: function(){
-
-    // Bind only after composite view is rendered to avoid adding child views
-    // to nonexistent itemViewContainer
-    this.once('render', function () {
-      if (this.collection){
-        this.listenTo(this.collection, "add", this.addChildView);
-        this.listenTo(this.collection, "remove", this.removeItemView);
-        this.listenTo(this.collection, "reset", this._renderChildren);
-      }
-    });
-
-  },
-
-  // Retrieve the `itemView` to be used when rendering each of
-  // the items in the collection. The default is to return
-  // `this.itemView` or Marionette.CompositeView if no `itemView`
-  // has been defined
-  getItemView: function(item){
-    var itemView = Marionette.getOption(this, "itemView") || this.constructor;
-
-    if (!itemView){
-      throwError("An `itemView` must be specified", "NoItemViewError");
-    }
-
-    return itemView;
-  },
-
-  // Serialize the collection for the view.
-  // You can override the `serializeData` method in your own view
-  // definition, to provide custom serialization for your view's data.
-  serializeData: function(){
-    var data = {};
-
-    if (this.model){
-      data = this.model.toJSON();
-    }
-
-    return data;
-  },
-
-  // Renders the model once, and the collection once. Calling
-  // this again will tell the model's view to re-render itself
-  // but the collection will not re-render.
-  render: function(){
-    this.isRendered = true;
-    this.isClosed = false;
-    this.resetItemViewContainer();
-
-    this.triggerBeforeRender();
-    var html = this.renderModel();
-    this.$el.html(html);
-    // the ui bindings is done here and not at the end of render since they
-    // will not be available until after the model is rendered, but should be
-    // available before the collection is rendered.
-    this.bindUIElements();
-    this.triggerMethod("composite:model:rendered");
-
-    this._renderChildren();
-
-    this.triggerMethod("composite:rendered");
-    this.triggerRendered();
-    return this;
-  },
-
-  _renderChildren: function(){
-    if (this.isRendered){
-      this.triggerMethod("composite:collection:before:render");
-      Marionette.CollectionView.prototype._renderChildren.call(this);
-      this.triggerMethod("composite:collection:rendered");
-    }
-  },
-
-  // Render an individual model, if we have one, as
-  // part of a composite view (branch / leaf). For example:
-  // a treeview.
-  renderModel: function(){
-    var data = {};
-    data = this.serializeData();
-    data = this.mixinTemplateHelpers(data);
-
-    var template = this.getTemplate();
-    return Marionette.Renderer.render(template, data);
-  },
-
-
-  // You might need to override this if you've overridden appendHtml
-  appendBuffer: function(compositeView, buffer) {
-    var $container = this.getItemViewContainer(compositeView);
-    $container.append(buffer);
-  },
-
-  // Appends the `el` of itemView instances to the specified
-  // `itemViewContainer` (a jQuery selector). Override this method to
-  // provide custom logic of how the child item view instances have their
-  // HTML appended to the composite view instance.
-  appendHtml: function(compositeView, itemView, index){
-    if (compositeView.isBuffering) {
-      compositeView.elBuffer.appendChild(itemView.el);
-      compositeView._bufferedChildren.push(itemView);
-    }
-    else {
-      // If we've already rendered the main collection, just
-      // append the new items directly into the element.
-      var $container = this.getItemViewContainer(compositeView);
-      $container.append(itemView.el);
-    }
-  },
-
-
-  // Internal method to ensure an `$itemViewContainer` exists, for the
-  // `appendHtml` method to use.
-  getItemViewContainer: function(containerView){
-    if ("$itemViewContainer" in containerView){
-      return containerView.$itemViewContainer;
-    }
-
-    var container;
-    var itemViewContainer = Marionette.getOption(containerView, "itemViewContainer");
-    if (itemViewContainer){
-
-      var selector = _.isFunction(itemViewContainer) ? itemViewContainer.call(this) : itemViewContainer;
-      container = containerView.$(selector);
-      if (container.length <= 0) {
-        throwError("The specified `itemViewContainer` was not found: " + containerView.itemViewContainer, "ItemViewContainerMissingError");
-      }
-
-    } else {
-      container = containerView.$el;
-    }
-
-    containerView.$itemViewContainer = container;
-    return container;
-  },
-
-  // Internal method to reset the `$itemViewContainer` on render
-  resetItemViewContainer: function(){
-    if (this.$itemViewContainer){
-      delete this.$itemViewContainer;
-    }
-  }
-});
-
-
-// Layout
-// ------
-
-// Used for managing application layouts, nested layouts and
-// multiple regions within an application or sub-application.
-//
-// A specialized view type that renders an area of HTML and then
-// attaches `Region` instances to the specified `regions`.
-// Used for composite view management and sub-application areas.
-Marionette.Layout = Marionette.ItemView.extend({
-  regionType: Marionette.Region,
-
-  // Ensure the regions are available when the `initialize` method
-  // is called.
-  constructor: function (options) {
-    options = options || {};
-
-    this._firstRender = true;
-    this._initializeRegions(options);
-
-    Marionette.ItemView.prototype.constructor.call(this, options);
-  },
-
-  // Layout's render will use the existing region objects the
-  // first time it is called. Subsequent calls will close the
-  // views that the regions are showing and then reset the `el`
-  // for the regions to the newly rendered DOM elements.
-  render: function(){
-
-    if (this.isClosed){
-      // a previously closed layout means we need to
-      // completely re-initialize the regions
-      this._initializeRegions();
-    }
-    if (this._firstRender) {
-      // if this is the first render, don't do anything to
-      // reset the regions
-      this._firstRender = false;
-    } else if (!this.isClosed){
-      // If this is not the first render call, then we need to
-      // re-initializing the `el` for each region
-      this._reInitializeRegions();
-    }
-
-    return Marionette.ItemView.prototype.render.apply(this, arguments);
-  },
-
-  // Handle closing regions, and then close the view itself.
-  close: function () {
-    if (this.isClosed){ return; }
-    this.regionManager.close();
-    Marionette.ItemView.prototype.close.apply(this, arguments);
-  },
-
-  // Add a single region, by name, to the layout
-  addRegion: function(name, definition){
-    var regions = {};
-    regions[name] = definition;
-    return this._buildRegions(regions)[name];
-  },
-
-  // Add multiple regions as a {name: definition, name2: def2} object literal
-  addRegions: function(regions){
-    this.regions = _.extend({}, this.regions, regions);
-    return this._buildRegions(regions);
-  },
-
-  // Remove a single region from the Layout, by name
-  removeRegion: function(name){
-    delete this.regions[name];
-    return this.regionManager.removeRegion(name);
-  },
-
-  // internal method to build regions
-  _buildRegions: function(regions){
-    var that = this;
-
-    var defaults = {
-      regionType: Marionette.getOption(this, "regionType"),
-      parentEl: function(){ return that.$el; }
-    };
-
-    return this.regionManager.addRegions(regions, defaults);
-  },
-
-  // Internal method to initialize the regions that have been defined in a
-  // `regions` attribute on this layout.
-  _initializeRegions: function (options) {
-    var regions;
-    this._initRegionManager();
-
-    if (_.isFunction(this.regions)) {
-      regions = this.regions(options);
-    } else {
-      regions = this.regions || {};
-    }
-
-    this.addRegions(regions);
-  },
-
-  // Internal method to re-initialize all of the regions by updating the `el` that
-  // they point to
-  _reInitializeRegions: function(){
-    this.regionManager.closeRegions();
-    this.regionManager.each(function(region){
-      region.reset();
-    });
-  },
-
-  // Internal method to initialize the region manager
-  // and all regions in it
-  _initRegionManager: function(){
-    this.regionManager = new Marionette.RegionManager();
-
-    this.listenTo(this.regionManager, "region:add", function(name, region){
-      this[name] = region;
-      this.trigger("region:add", name, region);
-    });
-
-    this.listenTo(this.regionManager, "region:remove", function(name, region){
-      delete this[name];
-      this.trigger("region:remove", name, region);
-    });
-  }
-});
-
-
-// AppRouter
-// ---------
-
-// Reduce the boilerplate code of handling route events
-// and then calling a single method on another object.
-// Have your routers configured to call the method on
-// your object, directly.
-//
-// Configure an AppRouter with `appRoutes`.
-//
-// App routers can only take one `controller` object.
-// It is recommended that you divide your controller
-// objects in to smaller pieces of related functionality
-// and have multiple routers / controllers, instead of
-// just one giant router and controller.
-//
-// You can also add standard routes to an AppRouter.
-
-Marionette.AppRouter = Backbone.Router.extend({
-
-  constructor: function(options){
-    Backbone.Router.prototype.constructor.apply(this, arguments);
-	
-    this.options = options || {};
-
-    var appRoutes = Marionette.getOption(this, "appRoutes");
-    var controller = this._getController();
-    this.processAppRoutes(controller, appRoutes);
-  },
-
-  // Similar to route method on a Backbone Router but
-  // method is called on the controller
-  appRoute: function(route, methodName) {
-    var controller = this._getController();
-    this._addAppRoute(controller, route, methodName);
-  },
-
-  // Internal method to process the `appRoutes` for the
-  // router, and turn them in to routes that trigger the
-  // specified method on the specified `controller`.
-  processAppRoutes: function(controller, appRoutes) {
-    if (!appRoutes){ return; }
-
-    var routeNames = _.keys(appRoutes).reverse(); // Backbone requires reverted order of routes
-
-    _.each(routeNames, function(route) {
-      this._addAppRoute(controller, route, appRoutes[route]);
-    }, this);
-  },
-
-  _getController: function(){
-    return Marionette.getOption(this, "controller");
-  },
-
-  _addAppRoute: function(controller, route, methodName){
-    var method = controller[methodName];
-
-    if (!method) {
-      throwError("Method '" + methodName + "' was not found on the controller");
-    }
-
-    this.route(route, methodName, _.bind(method, controller));
-  }
-});
-
-
-// Application
-// -----------
-
-// Contain and manage the composite application as a whole.
-// Stores and starts up `Region` objects, includes an
-// event aggregator as `app.vent`
-Marionette.Application = function(options){
-  this._initRegionManager();
-  this._initCallbacks = new Marionette.Callbacks();
-  this.vent = new Backbone.Wreqr.EventAggregator();
-  this.commands = new Backbone.Wreqr.Commands();
-  this.reqres = new Backbone.Wreqr.RequestResponse();
-  this.submodules = {};
-
-  _.extend(this, options);
-
-  this.triggerMethod = Marionette.triggerMethod;
-};
-
-_.extend(Marionette.Application.prototype, Backbone.Events, {
-  // Command execution, facilitated by Backbone.Wreqr.Commands
-  execute: function(){
-    this.commands.execute.apply(this.commands, arguments);
-  },
-
-  // Request/response, facilitated by Backbone.Wreqr.RequestResponse
-  request: function(){
-    return this.reqres.request.apply(this.reqres, arguments);
-  },
-
-  // Add an initializer that is either run at when the `start`
-  // method is called, or run immediately if added after `start`
-  // has already been called.
-  addInitializer: function(initializer){
-    this._initCallbacks.add(initializer);
-  },
-
-  // kick off all of the application's processes.
-  // initializes all of the regions that have been added
-  // to the app, and runs all of the initializer functions
-  start: function(options){
-    this.triggerMethod("initialize:before", options);
-    this._initCallbacks.run(options, this);
-    this.triggerMethod("initialize:after", options);
-
-    this.triggerMethod("start", options);
-  },
-
-  // Add regions to your app.
-  // Accepts a hash of named strings or Region objects
-  // addRegions({something: "#someRegion"})
-  // addRegions({something: Region.extend({el: "#someRegion"}) });
-  addRegions: function(regions){
-    return this._regionManager.addRegions(regions);
-  },
-
-  // Close all regions in the app, without removing them
-  closeRegions: function(){
-    this._regionManager.closeRegions();
-  },
-
-  // Removes a region from your app, by name
-  // Accepts the regions name
-  // removeRegion('myRegion')
-  removeRegion: function(region) {
-    this._regionManager.removeRegion(region);
-  },
-
-  // Provides alternative access to regions
-  // Accepts the region name
-  // getRegion('main')
-  getRegion: function(region) {
-    return this._regionManager.get(region);
-  },
-
-  // Create a module, attached to the application
-  module: function(moduleNames, moduleDefinition){
-
-    // Overwrite the module class if the user specifies one
-    var ModuleClass = Marionette.Module.getClass(moduleDefinition);
-
-    // slice the args, and add this application object as the
-    // first argument of the array
-    var args = slice.call(arguments);
-    args.unshift(this);
-
-    // see the Marionette.Module object for more information
-    return ModuleClass.create.apply(ModuleClass, args);
-  },
-
-  // Internal method to set up the region manager
-  _initRegionManager: function(){
-    this._regionManager = new Marionette.RegionManager();
-
-    this.listenTo(this._regionManager, "region:add", function(name, region){
-      this[name] = region;
-    });
-
-    this.listenTo(this._regionManager, "region:remove", function(name, region){
-      delete this[name];
-    });
-  }
-});
-
-// Copy the `extend` function used by Backbone's classes
-Marionette.Application.extend = Marionette.extend;
-
-// Module
-// ------
-
-// A simple module system, used to create privacy and encapsulation in
-// Marionette applications
-Marionette.Module = function(moduleName, app, options){
-  this.moduleName = moduleName;
-  this.options = _.extend({}, this.options, options);
-  this.initialize = options.initialize || this.initialize;
-
-  // store sub-modules
-  this.submodules = {};
-
-  this._setupInitializersAndFinalizers();
-
-  // store the configuration for this module
-  this.app = app;
-  this.startWithParent = true;
-
-  this.triggerMethod = Marionette.triggerMethod;
-
-  if (_.isFunction(this.initialize)){
-    this.initialize(this.options, moduleName, app);
-  }
-};
-
-Marionette.Module.extend = Marionette.extend;
-
-// Extend the Module prototype with events / listenTo, so that the module
-// can be used as an event aggregator or pub/sub.
-_.extend(Marionette.Module.prototype, Backbone.Events, {
-
-  // Initialize is an empty function by default. Override it with your own
-  // initialization logic when extending Marionette.Module.
-  initialize: function(){},
-
-  // Initializer for a specific module. Initializers are run when the
-  // module's `start` method is called.
-  addInitializer: function(callback){
-    this._initializerCallbacks.add(callback);
-  },
-
-  // Finalizers are run when a module is stopped. They are used to teardown
-  // and finalize any variables, references, events and other code that the
-  // module had set up.
-  addFinalizer: function(callback){
-    this._finalizerCallbacks.add(callback);
-  },
-
-  // Start the module, and run all of its initializers
-  start: function(options){
-    // Prevent re-starting a module that is already started
-    if (this._isInitialized){ return; }
-
-    // start the sub-modules (depth-first hierarchy)
-    _.each(this.submodules, function(mod){
-      // check to see if we should start the sub-module with this parent
-      if (mod.startWithParent){
-        mod.start(options);
-      }
-    });
-
-    // run the callbacks to "start" the current module
-    this.triggerMethod("before:start", options);
-
-    this._initializerCallbacks.run(options, this);
-    this._isInitialized = true;
-
-    this.triggerMethod("start", options);
-  },
-
-  // Stop this module by running its finalizers and then stop all of
-  // the sub-modules for this module
-  stop: function(){
-    // if we are not initialized, don't bother finalizing
-    if (!this._isInitialized){ return; }
-    this._isInitialized = false;
-
-    Marionette.triggerMethod.call(this, "before:stop");
-
-    // stop the sub-modules; depth-first, to make sure the
-    // sub-modules are stopped / finalized before parents
-    _.each(this.submodules, function(mod){ mod.stop(); });
-
-    // run the finalizers
-    this._finalizerCallbacks.run(undefined,this);
-
-    // reset the initializers and finalizers
-    this._initializerCallbacks.reset();
-    this._finalizerCallbacks.reset();
-
-    Marionette.triggerMethod.call(this, "stop");
-  },
-
-  // Configure the module with a definition function and any custom args
-  // that are to be passed in to the definition function
-  addDefinition: function(moduleDefinition, customArgs){
-    this._runModuleDefinition(moduleDefinition, customArgs);
-  },
-
-  // Internal method: run the module definition function with the correct
-  // arguments
-  _runModuleDefinition: function(definition, customArgs){
-    if (!definition){ return; }
-
-    // build the correct list of arguments for the module definition
-    var args = _.flatten([
-      this,
-      this.app,
-      Backbone,
-      Marionette,
-      Marionette.$, _,
-      customArgs
-    ]);
-
-    definition.apply(this, args);
-  },
-
-  // Internal method: set up new copies of initializers and finalizers.
-  // Calling this method will wipe out all existing initializers and
-  // finalizers.
-  _setupInitializersAndFinalizers: function(){
-    this._initializerCallbacks = new Marionette.Callbacks();
-    this._finalizerCallbacks = new Marionette.Callbacks();
-  }
-});
-
-// Type methods to create modules
-_.extend(Marionette.Module, {
-
-  // Create a module, hanging off the app parameter as the parent object.
-  create: function(app, moduleNames, moduleDefinition){
-    var module = app;
-
-    // get the custom args passed in after the module definition and
-    // get rid of the module name and definition function
-    var customArgs = slice.call(arguments);
-    customArgs.splice(0, 3);
-
-    // split the module names and get the length
-    moduleNames = moduleNames.split(".");
-    var length = moduleNames.length;
-
-    // store the module definition for the last module in the chain
-    var moduleDefinitions = [];
-    moduleDefinitions[length-1] = moduleDefinition;
-
-    // Loop through all the parts of the module definition
-    _.each(moduleNames, function(moduleName, i){
-      var parentModule = module;
-      module = this._getModule(parentModule, moduleName, app, moduleDefinition);
-      this._addModuleDefinition(parentModule, module, moduleDefinitions[i], customArgs);
-    }, this);
-
-    // Return the last module in the definition chain
-    return module;
-  },
-
-  _getModule: function(parentModule, moduleName, app, def, args){
-    var options = _.extend({}, def);
-    var ModuleClass = this.getClass(def);
-
-    // Get an existing module of this name if we have one
-    var module = parentModule[moduleName];
-
-    if (!module){
-      // Create a new module if we don't have one
-      module = new ModuleClass(moduleName, app, options);
-      parentModule[moduleName] = module;
-      // store the module on the parent
-      parentModule.submodules[moduleName] = module;
-    }
-
-    return module;
-  },
-
-  getClass: function(moduleDefinition) {
-    var ModuleClass = Marionette.Module;
-
-    if (!moduleDefinition) {
-      return ModuleClass;
-    }
-
-    if (moduleDefinition.prototype instanceof ModuleClass) {
-      return moduleDefinition;
-    }
-
-    return moduleDefinition.moduleClass || ModuleClass;
-  },
-
-  _addModuleDefinition: function(parentModule, module, def, args){
-    var fn;
-    var startWithParent;
-
-    if (_.isFunction(def) && !(def.prototype instanceof Marionette.Module)){
-      // if a function is supplied for the module definition
-      fn = def;
-      startWithParent = true;
-
-    } else if (_.isObject(def)){
-      // if an object is supplied
-      fn = def.define;
-      startWithParent = !_.isUndefined(def.startWithParent) ? def.startWithParent : true;
-
-    } else {
-      // if nothing is supplied
-      startWithParent = true;
-    }
-
-    // add module definition if needed
-    if (fn){
-      module.addDefinition(fn, args);
-    }
-
-    // `and` the two together, ensuring a single `false` will prevent it
-    // from starting with the parent
-    module.startWithParent = module.startWithParent && startWithParent;
-
-    // setup auto-start if needed
-    if (module.startWithParent && !module.startWithParentIsConfigured){
-
-      // only configure this once
-      module.startWithParentIsConfigured = true;
-
-      // add the module initializer config
-      parentModule.addInitializer(function(options){
-        if (module.startWithParent){
-          module.start(options);
-        }
-      });
-
-    }
-
-  }
-});
-
-
-
-  return Marionette;
-})(this, Backbone, _);
-
-  return Backbone.Marionette;
-
-}));
-
-;/*!
  * backbone.cacheit.js v0.1.0-pre
  * Copyright 2013, Tim Branyen (@tbranyen)
  * backbone.cacheit.js may be freely distributed under the MIT license.
@@ -28941,7 +28941,7 @@ _.each(["Model", "Collection"], function(ctor) {
 
 })(typeof global === "object" ? global : this);
 
-;// Backbone.Syphon, v0.4.1
+// Backbone.Syphon, v0.4.1
 // Copyright (c)2012 Derick Bailey, Muted Solutions, LLC.
 // Distributed under MIT license
 // http://github.com/derickbailey/backbone.syphon
@@ -29475,7 +29475,7 @@ Backbone.Syphon.KeyJoiner = function(parentKey, childKey){
 
 }));
 
-;//https://github.com/javiertoledo/bootstrap-rating-input
+//https://github.com/javiertoledo/bootstrap-rating-input
 
 //https://github.com/wbotelhos/raty
 //http://www.radioactivethinking.com/rateit/example/example.htm
@@ -29613,7 +29613,7 @@ Backbone.Syphon.KeyJoiner = function(parentKey, childKey){
 //  });
 
 //}(jQuery));
-;﻿/*! RateIt | v1.0.19 / 01/26/2014 | https://rateit.codeplex.com/license
+﻿/*! RateIt | v1.0.19 / 01/26/2014 | https://rateit.codeplex.com/license
     http://rateit.codeplex.com | Twitter: @gjunge
 */
 (function ($) {
@@ -29938,7 +29938,7 @@ Backbone.Syphon.KeyJoiner = function(parentKey, childKey){
   $(function () { $('div.rateit, span.rateit').rateit(); });
 
 })(jQuery);
-;﻿// Full version of `log` that:
+﻿// Full version of `log` that:
 //  * Prevents errors on console methods when no console present.
 //  * Exposes a global 'log' function that preserves line numbering and formatting.
 // http://www.briangrinstead.com/blog/console-log-helper-function
@@ -29972,7 +29972,7 @@ Backbone.Syphon.KeyJoiner = function(parentKey, childKey){
     };
   }
 })();
-;﻿/**
+﻿/**
  * @fileoverview
  * - Using the 'QRCode for Javascript library'
  * - Fixed dataset of 'QRCode for Javascript library' for support full-spec.
@@ -30666,7 +30666,7 @@ var QRCode;
 	 */
   QRCode.CorrectLevel = QRErrorCorrectLevel;
 })();
-;/*!
+/*!
 
  handlebars v1.3.0
 
@@ -31197,5 +31197,5 @@ var __module0__ = (function(__dependency1__, __dependency2__, __dependency3__, _
   return __module0__;
 })();
 
-;
+
 //# sourceMappingURL=vendor.js.map
