@@ -138,9 +138,12 @@
     <Content Include="www\images\icon-192x192.png" />
     <Content Include="www\images\icon-196x196.png" />
     <Content Include="www\images\icon-32x32.png" />
+    <Content Include="www\images\icon-36x36.png" />
+    <Content Include="www\images\icon-48x48.png" />
     <Content Include="www\images\icon-57x57.png" />
     <Content Include="www\images\icon-72x72.png" />
     <Content Include="www\images\icon-76x76.png" />
+    <Content Include="www\images\icon-96x96.png" />
     <Content Include="www\images\icon-original.png" />
     <Content Include="www\images\qr.png" />
     <Content Include="www\images\star.gif" />
