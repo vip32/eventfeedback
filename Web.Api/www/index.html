@@ -10,7 +10,7 @@
         <script type="text/javascript">
             if (window.location.protocol != "https:")
                 window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
-        </script>
+        </script>  
         <meta name="theme-color" content="#B1D43F">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
@@ -35,6 +35,7 @@
         <!-- retina iPad iOS 7 -->
         <link rel="apple-touch-icon" href="/www/images/icon-152x152.png" sizes="152x152">
 
+        <link rel="manifest" href="manifest.json">
         <link rel="stylesheet" href="/www/stylesheets/app.css">
 
         <script src="/www/javascripts/vendor.js"></script>
@@ -51,6 +52,7 @@
             window.appInsights = appInsights;
             appInsights.trackPageView();
         </script>
+
         <!--<script type="text/javascript">
     var appInsights = window.appInsights || function (config) {
         function s(config) { t[config] = function () { var i = arguments; t.queue.push(function () { t[config].apply(t, i) }) } } var t = { config: config }, r = document, f = window, e = "script", o = r.createElement(e), i, u; for (o.src = config.url || "//az416426.vo.msecnd.net/scripts/a/ai.0.js", r.getElementsByTagName(e)[0].parentNode.appendChild(o), t.cookie = r.cookie, t.queue = [], i = ["Event", "Exception", "Metric", "PageView", "Trace"]; i.length;) s("track" + i.pop()); return config.disableExceptionTracking || (i = "onerror", s("_" + i), u = f[i], f[i] = function (config, r, f, e, o) { var s = u && u(config, r, f, e, o); return s !== !0 && t["_" + i](config, r, f, e, o), s }), t
