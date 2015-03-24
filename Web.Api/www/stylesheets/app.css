@@ -7609,8 +7609,11 @@ label.btn.btn-primary.badge.active {
 .success {
   background-color: #64b92a;
 }
-.qr {
+.qrimage {
   background: url("../images/qr.png");
+}
+.logoimage {
+  background: url("../images/icon-96x96.png");
 }
 .nofeedback {
   background-color: #e2e2e2;
