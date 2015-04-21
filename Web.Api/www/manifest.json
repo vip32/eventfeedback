@@ -1,5 +1,6 @@
 ﻿{
-  "name": "Eventfeedback2",
+  "name": "Eventfeedback",
+  "short_name": "Eventfeedback",
   "icons": [
     {
       "src": "/www/images/icon-36x36.png",
