@@ -158,6 +158,7 @@
     <Content Include="www\index.local.html" />
     <Content Include="www\javascripts\app.js" />
     <Content Include="www\javascripts\vendor.js" />
+    <Content Include="www\service-worker.js" />
     <Content Include="www\stylesheets\app.css" />
   </ItemGroup>
   <ItemGroup>
