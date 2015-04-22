@@ -113,7 +113,7 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="index.html" />
-    <Content Include="service-worker.js" />
+    <None Include="service-worker.js.old" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
