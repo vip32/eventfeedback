@@ -43,14 +43,14 @@
         <script>require('initialize');</script>
         
         <script>
-            window.addEventListener('load', function () {
-                navigator.serviceWorker.register('service-worker.js', { scope: './' })
-                  .then(function (r) {
-                      console.log('registered service worker');
-                  })
-                  .catch(function (err) {
-                      console.error(err);
-                  });
+            window.addEventListener('load', function() {
+              navigator.serviceWorker.register('service-worker.js', { scope: './' })
+                .then(function(r) {
+                  console.log('registered service worker');
+                })
+                .catch(function(err) {
+                  console.error(err);
+                });
             });
         </script>
         
