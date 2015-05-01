@@ -115,7 +115,6 @@
     <Content Include="index.html" />
     <Content Include="apiapp.json" />
     <None Include="Properties\PublishProfiles\corp.contoso.com.pubxml" />
-    <None Include="service-worker.js.old" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
