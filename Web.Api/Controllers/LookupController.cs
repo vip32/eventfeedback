@@ -65,7 +65,7 @@ namespace EventFeedback.Web.Api.Controllers
 
         [HttpGet]
         [Route("levels/{eventId}")]
-        public IHttpActionResult Levels(int eventId)
+        public IHttpActionResult LevelsForEvent(int eventId)
         {
             Guard.Against<ArgumentException>(eventId == 0, "eventid cannot be empty or zero");
 
@@ -75,7 +75,7 @@ namespace EventFeedback.Web.Api.Controllers
 
         [HttpGet]
         [Route("tags/{eventId}")]
-        public IHttpActionResult Tags(int eventId)
+        public IHttpActionResult TagsForEvent(int eventId)
         {
             Guard.Against<ArgumentException>(eventId == 0, "eventid cannot be empty or zero");
 
@@ -88,7 +88,7 @@ namespace EventFeedback.Web.Api.Controllers
 
         [HttpGet]
         [Route("speakers/{eventId}")]
-        public IHttpActionResult Speakers(int eventId)
+        public IHttpActionResult SpeakersForEvent(int eventId)
         {
             Guard.Against<ArgumentException>(eventId == 0, "eventid cannot be empty or zero");
 
@@ -101,7 +101,7 @@ namespace EventFeedback.Web.Api.Controllers
 
         [HttpGet]
         [Route("tracks/{eventId}")]
-        public IHttpActionResult Tracks(int eventId)
+        public IHttpActionResult TracksForEvent(int eventId)
         {
             Guard.Against<ArgumentException>(eventId == 0, "eventid cannot be empty or zero");
 

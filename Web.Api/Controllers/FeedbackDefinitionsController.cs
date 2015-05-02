@@ -45,7 +45,7 @@ namespace EventFeedback.Web.Api.Controllers
         [HttpGet]
         [Route("{id:int}")]
         [ResponseType(typeof(FeedbackDefinition))]
-        public IHttpActionResult Get(int id, [FromUri] string filter = "")
+        public IHttpActionResult GetById(int id, [FromUri] string filter = "")
         {
             //Thread.Sleep(1500);
             Guard.Against<ArgumentException>(id == 0, "id cannot be empty or zero");

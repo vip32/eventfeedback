@@ -49,7 +49,7 @@ namespace EventFeedback.Web.Api.Controllers
         [HttpGet]
         [Route("{id:int}")]
         [ResponseType(typeof(Feedback))]
-        public IHttpActionResult Get(int id)
+        public IHttpActionResult GetById(int id)
         {
             using (new TraceLogicalScope(_traceSource, "FeedbacksController:Get"))
             {

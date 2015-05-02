@@ -64,7 +64,7 @@ namespace EventFeedback.Web.Api.Controllers
         [HttpGet]
         [Route("{id:int}")]
         [ResponseType(typeof(Session))]
-        public IHttpActionResult Get(int eventId, int id, [FromUri] string filter = "")
+        public IHttpActionResult GetById(int eventId, int id, [FromUri] string filter = "")
         {
             using (new TraceLogicalScope(_traceSource, "SessionsController:Get"))
             {

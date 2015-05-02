@@ -57,7 +57,7 @@ namespace EventFeedback.Web.Api.Controllers
         [HttpGet]
         [Route("{id:int}")]
         [ResponseType(typeof(Event))]
-        public IHttpActionResult Get(int id, [FromUri] string filter = "")
+        public IHttpActionResult GetById(int id, [FromUri] string filter = "")
         {
             using (new TraceLogicalScope(_traceSource, "EventsController:Get"))
             {
