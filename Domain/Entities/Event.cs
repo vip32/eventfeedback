@@ -7,7 +7,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EventFeedback.Domain
 {
-    // test
     public class Event
     {
         public int Id { get; set; }
