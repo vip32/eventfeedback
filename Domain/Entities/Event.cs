@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EventFeedback.Domain
 {
+    // test
     public class Event
     {
         public int Id { get; set; }
@@ -88,8 +89,8 @@ namespace EventFeedback.Domain
         /// <returns></returns>
         public bool IsActive()
         {
-            return !(Active != null && 
-                !(bool)Active) && 
+            return !(Active != null &&
+                !(bool)Active) &&
                 !IsDeleted() &&
                 SystemTime.Now().IsInRange(ActiveFromDate, ActiveTillDate);
         }
@@ -117,6 +118,3 @@ namespace EventFeedback.Domain
         }
     }
 }
-
-
-
