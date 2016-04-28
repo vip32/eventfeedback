@@ -98,6 +98,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Web2.App", "Web2.App\", "{0
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "26348"
+		SlnRelativePath = "Web2.App\"
 		DefaultWebSiteLanguage = "Visual C#"
 	EndProjectSection
 EndProject
