@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{35B7497D-EF2C-4329-8FE8-440CF8833FD3}"
 EndProject
@@ -79,6 +79,27 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.Api.IntegrationTests", "Web.Api.IntegrationTests\Web.Api.IntegrationTests.csproj", "{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.App.IntegrationTests", "Web.App.IntegrationTests\Web.App.IntegrationTests.csproj", "{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Web2.App", "Web2.App\", "{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_26348"
+		Debug.AspNetCompiler.PhysicalPath = "Web2.App\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_26348\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_26348"
+		Release.AspNetCompiler.PhysicalPath = "Web2.App\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_26348\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "26348"
+		DefaultWebSiteLanguage = "Visual C#"
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -169,6 +190,16 @@ Global
 		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.Azure|Any CPU.ActiveCfg = Debug|Any CPU
+		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.Azure|Any CPU.Build.0 = Debug|Any CPU
+		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.AzureDev|Any CPU.ActiveCfg = Debug|Any CPU
+		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.AzureDev|Any CPU.Build.0 = Debug|Any CPU
+		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.AzureProd|Any CPU.ActiveCfg = Debug|Any CPU
+		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.AzureProd|Any CPU.Build.0 = Debug|Any CPU
+		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -182,5 +213,6 @@ Global
 		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E} = {F9C3AE0D-8322-4C55-BF84-DF03480251F3}
 		{DD9E342F-D7CC-4704-91B4-59D1B4C92F92} = {B4547435-1D77-4A4A-978D-F1A8E04609CE}
 		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10} = {B4547435-1D77-4A4A-978D-F1A8E04609CE}
+		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9} = {F9C3AE0D-8322-4C55-BF84-DF03480251F3}
 	EndGlobalSection
 EndGlobal
