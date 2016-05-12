@@ -1,7 +1,7 @@
 [md-fab] { /* rate */
   position: relative;
   left:85%;
-  bottom: 16px;
+  /*bottom: 16px;*/
   z-index: 1;
 }
 
