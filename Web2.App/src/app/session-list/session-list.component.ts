@@ -9,6 +9,7 @@ import {MdInput} from '@angular2-material/input';
 import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
+import {SessionComponent} from '../session/session.component';
 
 @Component({
   moduleId: module.id,
@@ -25,12 +26,13 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
     MdCheckbox,
     MdRadioGroup,
     MdRadioButton,
-    MdIcon
+    MdIcon,
+    SessionComponent
   ],
   providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher]
 })
 export class SessionListComponent {
-  selectedSession = null;
+  ///selectedSession = null;
   sessions: Object[] = [
     { id: 1, name: 'Session 1' },
     { id: 2, name: 'Session 2' },
@@ -40,13 +42,13 @@ export class SessionListComponent {
     { id: 6, name: 'Session 6' }
   ];
 
-  select(session) {
-    /// this.isVisible = !this.isVisible;
-    if (this.selectedSession && session && this.selectedSession.id == session.id) {
-      this.selectedSession = null;
-    } else {
-      this.selectedSession = session;
-    }
-    console.log(session);
-  }
+  // select(session) {
+  //   /// this.isVisible = !this.isVisible;
+  //   if (this.selectedSession && session && this.selectedSession.id == session.id) {
+  //     this.selectedSession = null;
+  //   } else {
+  //     this.selectedSession = session;
+  //   }
+  //   console.log(session);
+  // }
 }

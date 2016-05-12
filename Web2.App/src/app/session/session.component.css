@@ -1,0 +1,26 @@
+[md-fab] { /* rate */
+  position: relative;
+  left:85%;
+  bottom: 16px;
+  z-index: 1;
+}
+
+.form md-card {
+  flex-grow: 1;
+}
+
+md-input {
+  margin: 8px 0;
+  width: 100%;
+}
+
+md-radio-button, md-checkbox {
+  margin: 16px 8px;
+}
+
+.card-done-button { /* done */
+  position: relative;
+  left: 88%;
+  /*bottom: 16px;*/
+  z-index: 1;
+}
