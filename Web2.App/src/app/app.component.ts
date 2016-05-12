@@ -38,16 +38,16 @@ export class AppComponent {
     {name: 'Event 3', description: 'Event 3', icon: 'event'}
   ];
   /// private isVisible = false;
-  private activeRateForm = 0;
+  private selectedSession;
 
-  showRateForm(id) {
+  select(session) {
     /// this.isVisible = !this.isVisible;
-    if (this.activeRateForm == id) {
-      this.activeRateForm = 0;
+    if (this.selectedSession && session && this.selectedSession.id == session.id) {
+      this.selectedSession = null;
     } else {
-      this.activeRateForm = id;
+      this.selectedSession = session;
     }
-    console.log(id);
+    console.log(session);
   }
   sessions: Object[] = [
     {id: 1, name: 'Session 1'},

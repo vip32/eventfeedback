@@ -62,10 +62,10 @@
       <!--<md-card-actions align="end">
         <button md-raised-button color="primary">Rate</button>
       </md-card-actions>-->
-      <button md-mini-fab color="accent" (click)="showRateForm(session.id)">
+      <button md-mini-fab color="accent" (click)="select(session)">
         <md-icon class="md-24">comment</md-icon>
       </button>
-      <div class="form" *ngIf="activeRateForm==session.id">
+      <div class="form" *ngIf="selectedSession && session && selectedSession.id == session.id">
           <form>
             <h3>Q1</h3>
             <md-input placeholder="Q_1"></md-input>
