@@ -7,23 +7,13 @@ const map: any = {
 };
 
 /** User packages configuration. */
-const materialPackages: string[] = [
-  'core',
-  'toolbar',
-  'icon',
-  'button',
-  'sidenav',
-  'list',
-  'card',
-  'input',
-  'radio',
-  'checkbox'
-];
+const materialPackages: string[] =
+    ['core', 'toolbar', 'icon', 'button', 'sidenav', 'list', 'card', 'input', 'radio', 'checkbox'];
 
 const packages: any = createCustomConfig(materialPackages);
 
-function createCustomConfig(packages: string[]): any {
-  return packages.reduce((packageConfig: any, packageName: string) => {
+function createCustomConfig(packages2: string[]): any {
+  return packages2.reduce((packageConfig: any, packageName: string) => {
     packageConfig[`@angular2-material/${packageName}`] = {
       format: 'cjs',
       defaultExtension: 'js',
@@ -57,22 +47,16 @@ const barrels: string[] = [
 ];
 
 const cliSystemConfigPackages: any = {};
-barrels.forEach((barrelName: string) => {
-  cliSystemConfigPackages[barrelName] = { main: 'index' };
-});
+barrels.forEach((barrelName: string) => { cliSystemConfigPackages[barrelName] = {main: 'index'}; });
 
 /** Type declaration for ambient System. */
 declare var System: any;
 
 // Apply the CLI SystemJS configuration.
 System.config({
-  map: {
-    '@angular': 'vendor/@angular',
-    'rxjs': 'vendor/rxjs',
-    'main': 'main.js'
-  },
+  map: {'@angular': 'vendor/@angular', 'rxjs': 'vendor/rxjs', 'main': 'main.js'},
   packages: cliSystemConfigPackages
 });
 
 // Apply the user's configuration.
-System.config({ map, packages });
+System.config({map, packages});

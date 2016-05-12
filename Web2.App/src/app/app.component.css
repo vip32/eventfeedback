@@ -17,7 +17,7 @@
 
 [md-mini-fab] { /* rate */
   position: relative;
-  left: 93%;
+  left:85%;
   bottom: 16px;
   z-index: 1;
 }
@@ -45,7 +45,7 @@ md-radio-button, md-checkbox {
 
 md-card {
   /*width: 400px;*/
-  width: 75%;
+  width: 90%;
   box-sizing: border-box;
   margin: 16px;
 }

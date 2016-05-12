@@ -1,2 +1,2 @@
 export {environment} from './environment';
-export {Angular2EventfeedbackAppComponent} from './angular2-eventfeedback.component';
+export {AppComponent} from './app.component';
