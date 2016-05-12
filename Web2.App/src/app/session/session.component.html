@@ -14,49 +14,47 @@
   </button>
   <div class="form" *ngIf="formShowing">
     <form>
-      <h3>Q1</h3>
-      <md-input placeholder="Q_1"></md-input>
-      <h3>Q2</h3>
-      <md-input placeholder="Q_2"></md-input>
-      <h3>Q3</h3>
-      <md-input placeholder="Q_3"></md-input>
+      <md-input placeholder="Q_1" [(ngModel)]="feedback.q1"></md-input>
+      <md-input placeholder="Q_2" [(ngModel)]="feedback.q2"></md-input>
+      <md-input placeholder="Q_3" [(ngModel)]="feedback.q3"></md-input>
       <h3>Q4</h3>
-      <md-radio-group>
-        <md-radio-button value="Q_41">
+      <md-radio-group [(ngModel)]="feedback.q4" #q1>
+        <md-radio-button value="1">
           <md-icon>mood_bad</md-icon>
         </md-radio-button>
-        <md-radio-button value="Q_42"></md-radio-button>
-        <md-radio-button value="Q_43"></md-radio-button>
-        <md-radio-button value="Q_44"></md-radio-button>
-        <md-radio-button value="Q_45">
+        <md-radio-button value="2"></md-radio-button>
+        <md-radio-button value="3"></md-radio-button>
+        <md-radio-button value="4"></md-radio-button>
+        <md-radio-button value="5">
           <md-icon>mood</md-icon>
         </md-radio-button>
       </md-radio-group>
       <h3>Q5</h3>
-      <md-radio-group>
-        <md-radio-button value="Q_51">
+      <md-radio-group [(ngModel)]="feedback.q5">
+        <md-radio-button value="1">
           <md-icon>mood_bad</md-icon>
         </md-radio-button>
-        <md-radio-button value="Q_52"></md-radio-button>
-        <md-radio-button value="Q_53"></md-radio-button>
-        <md-radio-button value="Q_54"></md-radio-button>
-        <md-radio-button value="Q_55">
+        <md-radio-button value="2"></md-radio-button>
+        <md-radio-button value="3"></md-radio-button>
+        <md-radio-button value="4"></md-radio-button>
+        <md-radio-button value="5">
           <md-icon>mood</md-icon>
         </md-radio-button>
       </md-radio-group>
       <h3>Q6</h3>
-      <md-radio-group>
-        <md-radio-button value="Q_61">
-          <md-icon>mood_bad</md-icon>1</md-radio-button>
-        <md-radio-button value="Q_62"></md-radio-button>
-        <md-radio-button value="Q_63"></md-radio-button>
-        <md-radio-button value="Q_64"></md-radio-button>
-        <md-radio-button value="Q_65">
+      <md-radio-group [(ngModel)]="feedback.q6">
+        <md-radio-button value="1">
+          <md-icon>mood_bad</md-icon>
+        </md-radio-button>
+        <md-radio-button value="2"></md-radio-button>
+        <md-radio-button value="3"></md-radio-button>
+        <md-radio-button value="4"></md-radio-button>
+        <md-radio-button value="5">
           <md-icon>mood</md-icon>
         </md-radio-button>
       </md-radio-group>
       <button md-raised-button color="accent" class="card-done-button">
-            <md-icon>done</md-icon>
-        </button>
+        <md-icon>done</md-icon>
+      </button>
     </form>
   </div>

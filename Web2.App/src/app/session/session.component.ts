@@ -31,4 +31,5 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 })
 export class SessionComponent  {
   @Input() session: any;
+  feedback = { id: 1, q1: 'new', q2: '', q3: '', q4: '3' };
 }
