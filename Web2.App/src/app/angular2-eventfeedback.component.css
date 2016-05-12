@@ -8,10 +8,17 @@
   color: rgba(0,0,0,0.54);
 }
 
-[md-fab] {
+[md-fab] { /* add */
   position: absolute;
   right: 3%;
   top: 34px;
+  z-index: 1;
+}
+
+[md-mini-fab] { /* rate */
+  position: relative;
+  left: 93%;
+  bottom: 16px;
   z-index: 1;
 }
 
@@ -37,12 +44,21 @@ md-radio-button, md-checkbox {
 }
 
 md-card {
-  width: 400px;
+  /*width: 400px;*/
+  width: 75%;
   box-sizing: border-box;
   margin: 16px;
 }
 
 .card-container {
+  /*align-content: center;*/
   display: flex;
   flex-flow: row wrap;
+}
+
+.card-done-button { /* done */
+  position: relative;
+  left: 88%;
+  /*bottom: 16px;*/
+  z-index: 1;
 }

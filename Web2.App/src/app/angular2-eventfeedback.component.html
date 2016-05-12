@@ -2,7 +2,7 @@
   <md-sidenav #sidenav>
     <md-nav-list>
       <a md-list-item *ngFor="let view of views">
-        <!--<md-icon md-list-icon>{{view.icon}}</md-icon>-->
+        <md-icon md-list-icon>{{view.icon}}</md-icon>
         <span md-line>{{view.name}}</span>
         <span md-line class="secondary">{{view.description}}</span>
       </a>
@@ -10,11 +10,11 @@
   </md-sidenav>
   <md-toolbar color="primary">
     <button md-icon-button (click)="sidenav.open()">
-      <!--<md-icon>menu</md-icon>-->=
+      <md-icon>menu</md-icon>
     </button>
     {{title}}
     <button md-fab (click)="formShowing=!formShowing">
-      <!--<md-icon>add</md-icon>-->+
+      <md-icon>add</md-icon>
     </button>
   </md-toolbar>
 
@@ -41,7 +41,9 @@
         </form>
       </md-card-content>
       <md-card-actions align="end">
-        <button md-raised-button color="accent">POST</button>
+        <button md-raised-button color="accent">
+          <md-icon>done</md-icon>
+        </button>
       </md-card-actions>
     </md-card>
   </div>
@@ -50,15 +52,56 @@
     <md-card *ngFor="let session of sessions">
       <!--<img md-card-image [alt]="session.name" src="https://material.angularjs.org/material2_assets/ngconf/{{session.name}}.png">-->
       <img md-card-image [alt]="session.name" src="http://www.dummymag.com//media/img/dummy-logo.png">
-      
-      <md-card-title>{{session.name}}</md-card-title>
+      <md-card-title>{{session.name}} #{{session.id}}</md-card-title>
       <md-card-content class="secondary">
+        Very ipsum such dolor amet wow very divs very content concern, very much develop much spans
+        much layer so so scare such spans such padding many beta very layer much excuse. 
         Very ipsum such dolor amet wow very divs very content concern, very much develop much spans
         much layer so so scare such spans such padding many beta very layer much excuse.
       </md-card-content>
-      <md-card-actions align="end">
-        <button md-button color="primary">Rate</button>
-      </md-card-actions>
+      <!--<md-card-actions align="end">
+        <button md-raised-button color="primary">Rate</button>
+      </md-card-actions>-->
+      <button md-mini-fab color="accent" (click)="showRateForm(session.id)">
+        <md-icon class="md-24">star</md-icon>
+      </button>
+      <div class="form" *ngIf="activeRateForm==session.id">
+          <form>
+            <h3>Q1</h3>
+            <md-input placeholder="Q_1"></md-input>
+            <h3>Q2</h3>
+            <md-input placeholder="Q_2"></md-input>
+            <h3>Q3</h3>
+            <md-input placeholder="Q_3"></md-input>
+            <h3>Q4</h3>
+            <md-radio-group>
+              <md-radio-button value="Q_41"><md-icon>mood_bad</md-icon></md-radio-button>
+              <md-radio-button value="Q_42"></md-radio-button>
+              <md-radio-button value="Q_43"></md-radio-button>
+              <md-radio-button value="Q_44"></md-radio-button>
+              <md-radio-button value="Q_45"><md-icon>mood</md-icon></md-radio-button>
+            </md-radio-group>
+            <h3>Q5</h3>
+            <md-radio-group>
+              <md-radio-button value="Q_51"><md-icon>mood_bad</md-icon></md-radio-button>
+              <md-radio-button value="Q_52"></md-radio-button>
+              <md-radio-button value="Q_53"></md-radio-button>
+              <md-radio-button value="Q_54"></md-radio-button>
+              <md-radio-button value="Q_55"><md-icon>mood</md-icon></md-radio-button>
+            </md-radio-group>
+            <h3>Q6</h3>
+            <md-radio-group>
+              <md-radio-button value="Q_61"><md-icon>mood_bad</md-icon>1</md-radio-button>
+              <md-radio-button value="Q_62"></md-radio-button>
+              <md-radio-button value="Q_63"></md-radio-button>
+              <md-radio-button value="Q_64"></md-radio-button>
+              <md-radio-button value="Q_65"><md-icon>mood</md-icon></md-radio-button>
+            </md-radio-group>
+            <button md-raised-button color="accent" class="card-done-button">
+                <md-icon>done</md-icon>
+            </button>
+          </form>
+        </div>
     </md-card>
   </div>
 </md-sidenav-layout>
