@@ -1,0 +1,32 @@
+.form md-card {
+  flex-grow: 1;
+}
+
+md-input {
+  margin: 8px 0;
+  width: 100%;
+}
+
+md-radio-button, md-checkbox {
+  margin: 16px 8px;
+}
+
+md-card {
+  /*width: 400px;*/
+  width: 90%;
+  box-sizing: border-box;
+  margin: 16px;
+}
+
+.card-container {
+  /*align-content: center;*/
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.card-done-button { /* done */
+  position: relative;
+  left: 88%;
+  /*bottom: 16px;*/
+  z-index: 1;
+}

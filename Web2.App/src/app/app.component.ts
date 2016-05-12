@@ -9,6 +9,7 @@ import {MdInput} from '@angular2-material/input';
 import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
+import {SessionListComponent} from './session-list/session-list.component';
 
 @Component({
   ///moduleId: module.id,
@@ -25,36 +26,18 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
     MdCheckbox,
     MdRadioGroup,
     MdRadioButton,
-    MdIcon
+    MdIcon,
+    SessionListComponent
   ],
   providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher]
 })
 export class AppComponent {
   title = 'EventFeedback';
+  selectedView = null;
   views: Object[] = [
-    {name: 'Profile', description: 'Profile', icon: 'account_circle'},
-    {name: 'Event 1', description: 'Event 1', icon: 'event'},
-    {name: 'Event 2', description: 'Event 2', icon: 'event'},
-    {name: 'Event 3', description: 'Event 3', icon: 'event'}
-  ];
-  /// private isVisible = false;
-  private selectedSession;
-
-  select(session) {
-    /// this.isVisible = !this.isVisible;
-    if (this.selectedSession && session && this.selectedSession.id == session.id) {
-      this.selectedSession = null;
-    } else {
-      this.selectedSession = session;
-    }
-    console.log(session);
-  }
-  sessions: Object[] = [
-    {id: 1, name: 'Session 1'},
-    {id: 2, name: 'Session 2'},
-    {id: 3, name: 'Session 3'},
-    {id: 4, name: 'Session 4'},
-    {id: 5, name: 'Session 5'},
-    {id: 6, name: 'Session 6'}
+    { name: 'Profile', description: 'Profile', icon: 'account_circle' },
+    { name: 'Event 1', description: 'Event 1', icon: 'event' },
+    { name: 'Event 2', description: 'Event 2', icon: 'event' },
+    { name: 'Event 3', description: 'Event 3', icon: 'event' }
   ];
 }

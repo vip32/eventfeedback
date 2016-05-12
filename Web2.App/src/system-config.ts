@@ -48,6 +48,7 @@ const barrels: string[] = [
   'app/login',
   'app/session',
   'app/session-list',
+  'app/sidenav',
   /** @cli-barrel */
 ];
 
