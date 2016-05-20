@@ -14,7 +14,6 @@ import {Event} from './+sessions/shared/event.model';
 import {EventComponent} from './+sessions/event/event.component';
 import {Session} from './+sessions/shared/session.model';
 import {SessionListComponent} from './+sessions/session-list/session-list.component';
-import {Feedback} from './+sessions/shared/feedback.model';
 import {BackendService} from './+sessions/shared/backend.service';
 
 @Component({
@@ -43,7 +42,7 @@ export class AppComponent {
   selectedEvent: Event = null;
   events: Event[] = this._backendService.getEvents();
   sessions: Session[];
-  
+
   constructor(private _backendService: BackendService) { }
 
   onEventSelected(event: Event) {

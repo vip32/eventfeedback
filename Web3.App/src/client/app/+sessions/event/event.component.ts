@@ -33,7 +33,9 @@ import {Event} from '../shared/event.model';
 export class EventComponent  {
   @Input() event: Event;
   @Output() onSelected = new EventEmitter<Event>();
+
   isSelected = false;
+
   select(event: Event) {
     console.log('event selected ', event.id);
     this.isSelected = !this.isSelected;
