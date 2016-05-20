@@ -3,6 +3,8 @@
            [style.background]="color" 
            (mouseenter)="color = '#EEE'" 
            (mouseleave)="color = '#FFFFFF'">
-    <app-session [session]=session></app-session>
+    <app-session (onSelected)="onSessionSelected($event)"
+                 [session]=session>
+    </app-session>
   </md-card>
 </div>

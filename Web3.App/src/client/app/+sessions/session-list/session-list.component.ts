@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {HTTP_PROVIDERS} from '@angular/http';
 import {MdToolbar} from '@angular2-material/toolbar';
 import {MdButton} from '@angular2-material/button';
@@ -11,6 +11,7 @@ import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 import {SessionComponent} from '../session/session.component';
 import {Session} from '../shared/session.model';
+import {Event} from '../../+events/shared/event.model';
 
 @Component({
   moduleId: module.id,
@@ -33,23 +34,10 @@ import {Session} from '../shared/session.model';
   providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher]
 })
 export class SessionListComponent {
-  ///selectedSession = null;
-  sessions: Session[] = [
-    new Session(1, 'Session 1'),
-    new Session(2, 'Session 2'),
-    new Session(3, 'Session 3'),
-    new Session(4, 'Session 4'),
-    new Session(5, 'Session 5'),
-    new Session(6, 'Session 6')
-  ];
-
-  // select(session) {
-  //   /// this.isVisible = !this.isVisible;
-  //   if (this.selectedSession && session && this.selectedSession.id == session.id) {
-  //     this.selectedSession = null;
-  //   } else {
-  //     this.selectedSession = session;
-  //   }
-  //   console.log(session);
-  // }
+  @Input() sessions: Session[];
+  selectedSession: Session = null;
+  onSessionSelected(session: Session) {
+    console.log('session selected ', session);
+    this.selectedSession = session;
+  }
 }

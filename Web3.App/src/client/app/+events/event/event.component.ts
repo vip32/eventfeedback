@@ -9,13 +9,13 @@ import {MdInput} from '@angular2-material/input';
 import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
-import {Session} from '../shared/session.model';
+import {Event} from '../shared/event.model';
 
 @Component({
   moduleId: module.id,
-  selector: 'app-session',
-  templateUrl: 'session.component.html',
-  styleUrls: ['session.component.css'],
+  selector: 'app-event',
+  templateUrl: 'event.component.html',
+  styleUrls: ['event.component.css'],
   directives: [
     MD_SIDENAV_DIRECTIVES,
     MD_LIST_DIRECTIVES,
@@ -30,15 +30,14 @@ import {Session} from '../shared/session.model';
   ],
   providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher]
 })
-export class SessionComponent  {
-  @Input() session: Session;
-  @Output() onSelected = new EventEmitter<Session>();
+export class EventComponent  {
+  @Input() event: Event;
+  @Output() onSelected = new EventEmitter<Event>();
   isSelected = false;
-  feedback = { id: 1, q1: 'new', q2: '', q3: '', q4: '3' };
-  select(session: Session) {
-    let msg = 'you selected';
-    console.log(msg, session);
+  select(event: Event) {
+    let msg = 'event selected ';
+    console.log(msg, event);
     this.isSelected = !this.isSelected;
-    this.onSelected.emit(session); // notify parent list
+    this.onSelected.emit(event);  // notify parent list
   };
 }
