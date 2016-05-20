@@ -1,0 +1,60 @@
+  <!--<img md-card-image [alt]="session.name" src="https://material.angularjs.org/material2_assets/ngconf/{{session.name}}.png">-->
+  <img md-card-image [alt]="session.name" src="http://www.dummymag.com//media/img/dummy-logo.png">
+  <md-card-title>{{session.name}} #{{session.id}}</md-card-title>
+  <md-card-content class="secondary">
+    Very ipsum such dolor amet wow very divs very content concern, very much develop much spans much layer so so scare such spans
+    such padding many beta very layer much excuse. Very ipsum such dolor amet wow very divs very content concern, very
+    much develop much spans much layer so so scare such spans such padding many beta very layer much excuse.
+  </md-card-content>
+  <!--<md-card-actions align="end">
+    <button md-raised-button color="primary">Rate</button>
+  </md-card-actions>-->
+  <button md-fab color="accent" (click)="formShowing=!formShowing">
+    <md-icon class="md-24">comment</md-icon>
+  </button>
+  <div class="form" *ngIf="formShowing">
+    <form>
+      <md-input placeholder="Q_1" [(ngModel)]="feedback.q1"></md-input>
+      <md-input placeholder="Q_2" [(ngModel)]="feedback.q2"></md-input>
+      <md-input placeholder="Q_3" [(ngModel)]="feedback.q3"></md-input>
+      <h3>Q4</h3>
+      <md-radio-group [(ngModel)]="feedback.q4" #q1>
+        <md-radio-button value="1">
+          <md-icon>mood_bad</md-icon>
+        </md-radio-button>
+        <md-radio-button value="2"></md-radio-button>
+        <md-radio-button value="3"></md-radio-button>
+        <md-radio-button value="4"></md-radio-button>
+        <md-radio-button value="5">
+          <md-icon>mood</md-icon>
+        </md-radio-button>
+      </md-radio-group>
+      <h3>Q5</h3>
+      <md-radio-group [(ngModel)]="feedback.q5">
+        <md-radio-button value="1">
+          <md-icon>mood_bad</md-icon>
+        </md-radio-button>
+        <md-radio-button value="2"></md-radio-button>
+        <md-radio-button value="3"></md-radio-button>
+        <md-radio-button value="4"></md-radio-button>
+        <md-radio-button value="5">
+          <md-icon>mood</md-icon>
+        </md-radio-button>
+      </md-radio-group>
+      <h3>Q6</h3>
+      <md-radio-group [(ngModel)]="feedback.q6">
+        <md-radio-button value="1">
+          <md-icon>mood_bad</md-icon>
+        </md-radio-button>
+        <md-radio-button value="2"></md-radio-button>
+        <md-radio-button value="3"></md-radio-button>
+        <md-radio-button value="4"></md-radio-button>
+        <md-radio-button value="5">
+          <md-icon>mood</md-icon>
+        </md-radio-button>
+      </md-radio-group>
+      <button md-raised-button color="accent" class="card-done-button">
+        <md-icon>done</md-icon>
+      </button>
+    </form>
+  </div>

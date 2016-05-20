@@ -15,3 +15,6 @@ a .NET Webapi with a coffeescript based SPA.
 - entity framework
 
 
+Web2 - ng2 cli + material
+Web3 - seed2
+Web4 - seed2 + material
