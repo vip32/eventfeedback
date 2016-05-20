@@ -9,10 +9,13 @@ import {MdInput} from '@angular2-material/input';
 import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
-import {EventComponent} from './+events/event/event.component';
-import {Event} from './+events/shared/event.model';
+
+import {Event} from './+sessions/shared/event.model';
+import {EventComponent} from './+sessions/event/event.component';
 import {Session} from './+sessions/shared/session.model';
 import {SessionListComponent} from './+sessions/session-list/session-list.component';
+import {Feedback} from './+sessions/shared/feedback.model';
+import {BackendService} from './+sessions/shared/backend.service';
 
 @Component({
   ///moduleId: module.id,
@@ -33,27 +36,19 @@ import {SessionListComponent} from './+sessions/session-list/session-list.compon
     EventComponent,
     SessionListComponent
   ],
-  providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher]
+  providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher, BackendService]
 })
 export class AppComponent {
   title = 'EventFeedback';
   selectedEvent: Event = null;
-  events: Event[] = [
-    new Event(1, 'Event 1', 'Event 1a'),
-    new Event(2, 'Event 2', 'Event 2b'),
-    new Event(3, 'Event 3', 'Event 3c'),
-  ];
-  sessions: Session[] = null;
+  events: Event[] = this._backendService.getEvents();
+  sessions: Session[];
+  
+  constructor(private _backendService: BackendService) { }
+
   onEventSelected(event: Event) {
-    console.log('load sessions for event ', event);
+    console.log('event selected (list) ', event.id);
     this.selectedEvent = event;
-    this.sessions = [
-      new Session(1, 'Session 1 ' + event.name),
-      new Session(2, 'Session 2 ' + event.name),
-      new Session(3, 'Session 3 ' + event.name),
-      new Session(4, 'Session 4 ' + event.name),
-      new Session(5, 'Session 5 ' + event.name),
-      new Session(6, 'Session 6 ' + event.name)
-    ];
+    this.sessions = this._backendService.getSessions(event);
   }
 }

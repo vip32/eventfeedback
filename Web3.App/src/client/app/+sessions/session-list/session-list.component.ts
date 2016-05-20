@@ -11,7 +11,6 @@ import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 import {SessionComponent} from '../session/session.component';
 import {Session} from '../shared/session.model';
-import {Event} from '../../+events/shared/event.model';
 
 @Component({
   moduleId: module.id,
@@ -35,9 +34,11 @@ import {Event} from '../../+events/shared/event.model';
 })
 export class SessionListComponent {
   @Input() sessions: Session[];
+
   selectedSession: Session = null;
+
   onSessionSelected(session: Session) {
-    console.log('session selected ', session);
+    console.log('session selected (list) ', session.id);
     this.selectedSession = session;
   }
 }

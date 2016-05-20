@@ -35,8 +35,7 @@ export class EventComponent  {
   @Output() onSelected = new EventEmitter<Event>();
   isSelected = false;
   select(event: Event) {
-    let msg = 'event selected ';
-    console.log(msg, event);
+    console.log('event selected ', event.id);
     this.isSelected = !this.isSelected;
     this.onSelected.emit(event);  // notify parent list
   };

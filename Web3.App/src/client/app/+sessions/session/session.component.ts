@@ -10,6 +10,8 @@ import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 import {Session} from '../shared/session.model';
+import {Feedback} from '../shared/feedback.model';
+import {BackendService} from '../shared/backend.service';
 
 @Component({
   moduleId: module.id,
@@ -28,17 +30,27 @@ import {Session} from '../shared/session.model';
     MdRadioButton,
     MdIcon
   ],
-  providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher]
+  providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher, BackendService]
 })
 export class SessionComponent  {
   @Input() session: Session;
   @Output() onSelected = new EventEmitter<Session>();
+
   isSelected = false;
-  feedback = { id: 1, q1: 'new', q2: '', q3: '', q4: '3' };
+  feedback: Feedback;
+
+  constructor(private _backendService: BackendService) { }
+
   select(session: Session) {
-    let msg = 'you selected';
-    console.log(msg, session);
+    console.log('session selected ', session.id);
+    if(!this.feedback) {
+      this.feedback = this._backendService.getFeedback(session);
+    }
     this.isSelected = !this.isSelected;
     this.onSelected.emit(session); // notify parent list
   };
+
+  save() {
+    console.log('save', this.feedback);
+  }
 }

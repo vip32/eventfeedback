@@ -1,8 +1,8 @@
 <div class="card-container">
   <md-card *ngFor="let session of sessions" 
-           [style.background]="color" 
-           (mouseenter)="color = '#EEE'" 
-           (mouseleave)="color = '#FFFFFF'">
+           [style.background]="color">
+           <!--(mouseenter)="color = '#EEE'" 
+               (mouseleave)="color = '#FFFFFF'"-->
     <app-session (onSelected)="onSessionSelected($event)"
                  [session]=session>
     </app-session>

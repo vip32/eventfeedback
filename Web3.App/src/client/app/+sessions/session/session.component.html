@@ -13,7 +13,7 @@
   <button md-fab color="accent" (click)="formShowing=!formShowing">
     <md-icon class="md-24">comment</md-icon>
   </button>
-  <div class="form" *ngIf="formShowing">
+  <div class="form" *ngIf="formShowing && feedback">
     <form>
       <md-input placeholder="Q_1" [(ngModel)]="feedback.q1"></md-input>
       <md-input placeholder="Q_2" [(ngModel)]="feedback.q2"></md-input>
@@ -54,9 +54,10 @@
           <md-icon>mood</md-icon>
         </md-radio-button>
       </md-radio-group>
-      <button md-raised-button color="accent" class="card-done-button">
-        <md-icon>done</md-icon>
-      </button>
     </form>
+    <button md-raised-button color="accent" class="card-done-button" (click)="save()">
+      <md-icon>done</md-icon>
+    </button>
+
   </div>
 </span>

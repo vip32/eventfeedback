@@ -18,9 +18,8 @@ md-radio-button, md-checkbox {
   margin: 16px 8px;
 }
 
-.card-done-button { /* done */
+/*.card-done-button { 
   position: relative;
   left: 88%;
-  /*bottom: 16px;*/
   z-index: 1;
-}
+}*/
