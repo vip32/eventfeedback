@@ -1,1 +1,1990 @@
-{"swagger":"2.0","info":{"version":"v1","title":"EventFeedback.Web.Api"},"host":"localhost:44300","schemes":["https"],"paths":{"/api/v1/events/{eventId}/report":{"get":{"tags":["EventReports"],"operationId":"EventReports_Get","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"eventId","in":"path","required":true,"type":"integer","format":"int32"},{"name":"filter","in":"query","required":false,"type":"string"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/EventReportModel"}}},"deprecated":false}},"/api/v1/events":{"get":{"tags":["Events"],"operationId":"Events_Get","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"filter","in":"query","required":false,"type":"string"}],"responses":{"200":{"description":"OK","schema":{"type":"array","items":{"$ref":"#/definitions/Event"}}}},"deprecated":false},"post":{"tags":["Events"],"operationId":"Events_Post","consumes":["application/json","text/json","application/x-www-form-urlencoded"],"produces":["application/json","text/json"],"parameters":[{"name":"entity","in":"body","required":true,"schema":{"$ref":"#/definitions/Event"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Event"}}},"deprecated":false}},"/api/v1/events/{id}":{"get":{"tags":["Events"],"operationId":"Events_GetById","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"},{"name":"filter","in":"query","required":false,"type":"string"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Event"}}},"deprecated":false},"put":{"tags":["Events"],"operationId":"Events_Put","consumes":["application/json","text/json","application/x-www-form-urlencoded"],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"},{"name":"entity","in":"body","required":true,"schema":{"$ref":"#/definitions/Event"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Event"}}},"deprecated":false},"delete":{"tags":["Events"],"operationId":"Events_Delete","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/feedbackdefinitions":{"get":{"tags":["FeedbackDefinitions"],"operationId":"FeedbackDefinitions_Get","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"filter","in":"query","required":false,"type":"string"}],"responses":{"200":{"description":"OK","schema":{"type":"array","items":{"$ref":"#/definitions/FeedbackDefinition"}}}},"deprecated":false},"post":{"tags":["FeedbackDefinitions"],"operationId":"FeedbackDefinitions_Post","consumes":["application/json","text/json","application/x-www-form-urlencoded"],"produces":["application/json","text/json"],"parameters":[{"name":"entity","in":"body","required":true,"schema":{"$ref":"#/definitions/FeedbackDefinition"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/FeedbackDefinition"}}},"deprecated":false}},"/api/v1/feedbackdefinitions/{id}":{"get":{"tags":["FeedbackDefinitions"],"operationId":"FeedbackDefinitions_GetById","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"},{"name":"filter","in":"query","required":false,"type":"string"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/FeedbackDefinition"}}},"deprecated":false},"put":{"tags":["FeedbackDefinitions"],"operationId":"FeedbackDefinitions_Put","consumes":["application/json","text/json","application/x-www-form-urlencoded"],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"},{"name":"entity","in":"body","required":true,"schema":{"$ref":"#/definitions/FeedbackDefinition"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/FeedbackDefinition"}}},"deprecated":false},"delete":{"tags":["FeedbackDefinitions"],"operationId":"FeedbackDefinitions_Delete","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/feedbacks":{"get":{"tags":["Feedbacks"],"operationId":"Feedbacks_Get","consumes":[],"produces":["application/json","text/json"],"responses":{"200":{"description":"OK","schema":{"type":"array","items":{"$ref":"#/definitions/Feedback"}}}},"deprecated":false},"post":{"tags":["Feedbacks"],"operationId":"Feedbacks_Post","consumes":["application/json","text/json","application/x-www-form-urlencoded"],"produces":["application/json","text/json"],"parameters":[{"name":"entity","in":"body","required":true,"schema":{"$ref":"#/definitions/Feedback"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Feedback"}}},"deprecated":false}},"/api/v1/feedbacks/{id}":{"get":{"tags":["Feedbacks"],"operationId":"Feedbacks_GetById","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Feedback"}}},"deprecated":false},"put":{"tags":["Feedbacks"],"operationId":"Feedbacks_Put","consumes":["application/json","text/json","application/x-www-form-urlencoded"],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"},{"name":"entity","in":"body","required":true,"schema":{"$ref":"#/definitions/Feedback"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Feedback"}}},"deprecated":false},"delete":{"tags":["Feedbacks"],"operationId":"Feedbacks_Delete","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/lookup/apiinfo":{"get":{"tags":["Lookup"],"operationId":"Lookup_ApiInfo","consumes":[],"produces":["application/json","text/json"],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/lookup/roles":{"get":{"tags":["Lookup"],"operationId":"Lookup_Roles","consumes":[],"produces":["application/json","text/json"],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/lookup/levels":{"get":{"tags":["Lookup"],"operationId":"Lookup_Levels","consumes":[],"produces":["application/json","text/json"],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/lookup/levels/{eventId}":{"get":{"tags":["Lookup"],"operationId":"Lookup_LevelsForEvent","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"eventId","in":"path","required":true,"type":"integer","format":"int32"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/lookup/tags/{eventId}":{"get":{"tags":["Lookup"],"operationId":"Lookup_TagsForEvent","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"eventId","in":"path","required":true,"type":"integer","format":"int32"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/lookup/speakers/{eventId}":{"get":{"tags":["Lookup"],"operationId":"Lookup_SpeakersForEvent","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"eventId","in":"path","required":true,"type":"integer","format":"int32"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/lookup/tracks/{eventId}":{"get":{"tags":["Lookup"],"operationId":"Lookup_TracksForEvent","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"eventId","in":"path","required":true,"type":"integer","format":"int32"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/resources":{"get":{"tags":["ResourceTexts"],"operationId":"ResourceTexts_Get","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"filter","in":"query","required":false,"type":"string"},{"name":"language","in":"query","required":false,"type":"string"}],"responses":{"200":{"description":"OK","schema":{"type":"array","items":{"$ref":"#/definitions/ResourceText"}}}},"deprecated":false},"post":{"tags":["ResourceTexts"],"operationId":"ResourceTexts_Post","consumes":["application/json","text/json","application/x-www-form-urlencoded"],"produces":["application/json","text/json"],"parameters":[{"name":"entity","in":"body","required":true,"schema":{"$ref":"#/definitions/ResourceText"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/ResourceText"}}},"deprecated":false}},"/api/v1/resources/{id}":{"put":{"tags":["ResourceTexts"],"operationId":"ResourceTexts_Put","consumes":["application/json","text/json","application/x-www-form-urlencoded"],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"},{"name":"entity","in":"body","required":true,"schema":{"$ref":"#/definitions/ResourceText"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/ResourceText"}}},"deprecated":false},"delete":{"tags":["ResourceTexts"],"operationId":"ResourceTexts_Delete","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/admin/roles":{"get":{"tags":["Roles"],"operationId":"Roles_Get","consumes":[],"produces":["application/json","text/json"],"responses":{"200":{"description":"OK","schema":{"type":"array","items":{"$ref":"#/definitions/RoleAdminBindingModel"}}}},"deprecated":false}},"/api/v1/events/{eventId}/sessions":{"get":{"tags":["Sessions"],"operationId":"Sessions_Get","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"eventId","in":"path","required":true,"type":"integer","format":"int32"},{"name":"filter","in":"query","required":false,"type":"string"}],"responses":{"200":{"description":"OK","schema":{"type":"array","items":{"$ref":"#/definitions/Session"}}}},"deprecated":false},"post":{"tags":["Sessions"],"operationId":"Sessions_Post","consumes":["application/json","text/json","application/x-www-form-urlencoded"],"produces":["application/json","text/json"],"parameters":[{"name":"entity","in":"body","required":true,"schema":{"$ref":"#/definitions/Session"}},{"name":"eventId","in":"path","required":true,"type":"string"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Session"}}},"deprecated":false}},"/api/v1/events/{eventId}/sessions/{id}":{"get":{"tags":["Sessions"],"operationId":"Sessions_GetById","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"eventId","in":"path","required":true,"type":"integer","format":"int32"},{"name":"id","in":"path","required":true,"type":"integer","format":"int32"},{"name":"filter","in":"query","required":false,"type":"string"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Session"}}},"deprecated":false},"put":{"tags":["Sessions"],"operationId":"Sessions_Put","consumes":["application/json","text/json","application/x-www-form-urlencoded"],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"},{"name":"entity","in":"body","required":true,"schema":{"$ref":"#/definitions/Session"}},{"name":"eventId","in":"path","required":true,"type":"string"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Session"}}},"deprecated":false},"delete":{"tags":["Sessions"],"operationId":"Sessions_Delete","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"},{"name":"eventId","in":"path","required":true,"type":"string"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/user/token":{"post":{"tags":["User"],"operationId":"User_Token","consumes":["application/json","text/json","application/x-www-form-urlencoded"],"produces":["application/json","text/json"],"parameters":[{"name":"login","in":"body","required":true,"schema":{"$ref":"#/definitions/LoginBindingModel"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/user/profile":{"get":{"tags":["User"],"operationId":"User_Profile","consumes":[],"produces":["application/json","text/json"],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/v1/admin/users":{"get":{"tags":["Users"],"operationId":"Users_Get","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"filter","in":"query","required":false,"type":"string"}],"responses":{"200":{"description":"OK","schema":{"type":"array","items":{"$ref":"#/definitions/User"}}}},"deprecated":false},"post":{"tags":["Users"],"operationId":"Users_Post","consumes":["application/json","text/json","application/x-www-form-urlencoded"],"produces":["application/json","text/json"],"parameters":[{"name":"entity","in":"body","required":true,"schema":{"$ref":"#/definitions/UserAdminBindingModel"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/User"}}},"deprecated":false}},"/api/v1/admin/users/{id}":{"put":{"tags":["Users"],"operationId":"Users_Put","consumes":["application/json","text/json","application/x-www-form-urlencoded"],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"string"},{"name":"entity","in":"body","required":true,"schema":{"$ref":"#/definitions/UserAdminBindingModel"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/User"}}},"deprecated":false},"delete":{"tags":["Users"],"operationId":"Users_Delete","consumes":[],"produces":["application/json","text/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"string"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}}},"definitions":{"EventReportModel":{"type":"object","properties":{"id":{"format":"int32","type":"integer"},"title":{"type":"string"},"startDate":{"type":"string"},"endDate":{"type":"string"},"location":{"type":"string"},"averageRate":{"type":"string"},"quesstionTitle0":{"type":"string"},"quesstionTitle1":{"type":"string"},"quesstionTitle2":{"type":"string"},"quesstionTitle3":{"type":"string"},"quesstionTitle4":{"type":"string"},"quesstionTitle5":{"type":"string"},"quesstionTitle6":{"type":"string"},"quesstionTitle7":{"type":"string"},"quesstionTitle8":{"type":"string"},"quesstionTitle9":{"type":"string"},"feedbacks":{"type":"array","items":{"$ref":"FeedbackReportModel"}},"sessions":{"type":"array","items":{"$ref":"SessionReportModel"}}}},"FeedbackReportModel":{"type":"object","properties":{"id":{"format":"int32","type":"integer"},"createDate":{"type":"string"},"averageRate":{"type":"string"},"answer0":{"type":"string"},"answer1":{"type":"string"},"answer2":{"type":"string"},"answer3":{"type":"string"},"answer4":{"type":"string"},"answer5":{"type":"string"},"answer6":{"type":"string"},"answer7":{"type":"string"},"answer8":{"type":"string"},"answer9":{"type":"string"},"maxRateQuestion0":{"type":"string"},"maxRateQuestion1":{"type":"string"},"maxRateQuestion2":{"type":"string"},"maxRateQuestion3":{"type":"string"},"maxRateQuestion4":{"type":"string"},"maxRateQuestion5":{"type":"string"},"maxRateQuestion6":{"type":"string"},"maxRateQuestion7":{"type":"string"},"maxRateQuestion8":{"type":"string"},"maxRateQuestion9":{"type":"string"}}},"SessionReportModel":{"type":"object","properties":{"id":{"format":"int32","type":"integer"},"title":{"type":"string"},"speakerList":{"type":"string"},"location":{"type":"string"},"startDate":{"type":"string"},"endDate":{"type":"string"},"feedbackAllowed":{"type":"boolean"},"averageRate":{"type":"string"},"averageRateAnswer0":{"type":"string"},"averageRateAnswer1":{"type":"string"},"averageRateAnswer2":{"type":"string"},"averageRateAnswer3":{"type":"string"},"averageRateAnswer4":{"type":"string"},"averageRateAnswer5":{"type":"string"},"averageRateAnswer6":{"type":"string"},"averageRateAnswer7":{"type":"string"},"averageRateAnswer8":{"type":"string"},"averageRateAnswer9":{"type":"string"},"quesstionTitle0":{"type":"string"},"maxRateQuestion0":{"type":"string"},"quesstionTitle1":{"type":"string"},"maxRateQuestion1":{"type":"string"},"quesstionTitle2":{"type":"string"},"maxRateQuestion2":{"type":"string"},"quesstionTitle3":{"type":"string"},"maxRateQuestion3":{"type":"string"},"quesstionTitle4":{"type":"string"},"maxRateQuestion4":{"type":"string"},"quesstionTitle5":{"type":"string"},"maxRateQuestion5":{"type":"string"},"quesstionTitle6":{"type":"string"},"maxRateQuestion6":{"type":"string"},"quesstionTitle7":{"type":"string"},"maxRateQuestion7":{"type":"string"},"quesstionTitle8":{"type":"string"},"maxRateQuestion8":{"type":"string"},"quesstionTitle9":{"type":"string"},"maxRateQuestion9":{"type":"string"},"feedbacks":{"type":"array","items":{"$ref":"FeedbackReportModel"}}}},"Event":{"required":["title"],"type":"object","properties":{"id":{"format":"int32","type":"integer"},"active":{"type":"string"},"createDate":{"type":"string"},"createdBy":{"type":"string"},"modifyDate":{"type":"string"},"modifiedBy":{"type":"string"},"deleted":{"type":"string"},"deleteDate":{"type":"string"},"deletedBy":{"type":"string"},"title":{"type":"string"},"description":{"type":"string"},"key":{"type":"string"},"link":{"type":"string"},"feedbackAllowed":{"type":"string"},"feedbackDefinitionId":{"type":"string"},"feedbackDefinition":{"$ref":"FeedbackDefinition"},"startDate":{"type":"string"},"endDate":{"type":"string"},"location":{"type":"string"},"organization":{"type":"string"},"activeFromDate":{"type":"string"},"activeTillDate":{"type":"string"},"tags":{"type":"array","items":{"type":"string"}},"tagList":{"type":"string"},"feedbacks":{"type":"array","items":{"$ref":"Feedback"}},"sessions":{"type":"array","items":{"$ref":"Session"}}}},"FeedbackDefinition":{"type":"object","properties":{"id":{"format":"int32","type":"integer"},"active":{"type":"string"},"createDate":{"type":"string"},"createdBy":{"type":"string"},"modifyDate":{"type":"string"},"modifiedBy":{"type":"string"},"deleted":{"type":"string"},"deleteDate":{"type":"string"},"deletedBy":{"type":"string"},"title":{"type":"string"},"description":{"type":"string"},"active0":{"type":"string"},"order0":{"format":"int32","type":"integer"},"weight0":{"format":"double","type":"number"},"questionType0":{"type":"string"},"title0":{"type":"string"},"description0":{"type":"string"},"help0":{"type":"string"},"required0":{"type":"string"},"active1":{"type":"string"},"order1":{"format":"int32","type":"integer"},"weight1":{"format":"double","type":"number"},"questionType1":{"type":"string"},"title1":{"type":"string"},"description1":{"type":"string"},"help1":{"type":"string"},"required1":{"type":"string"},"active2":{"type":"string"},"order2":{"format":"int32","type":"integer"},"weight2":{"format":"double","type":"number"},"questionType2":{"type":"string"},"title2":{"type":"string"},"description2":{"type":"string"},"help2":{"type":"string"},"required2":{"type":"string"},"active3":{"type":"string"},"order3":{"format":"int32","type":"integer"},"weight3":{"format":"double","type":"number"},"questionType3":{"type":"string"},"title3":{"type":"string"},"description3":{"type":"string"},"help3":{"type":"string"},"required3":{"type":"string"},"active4":{"type":"string"},"order4":{"format":"int32","type":"integer"},"weight4":{"format":"double","type":"number"},"questionType4":{"type":"string"},"title4":{"type":"string"},"description4":{"type":"string"},"help4":{"type":"string"},"required4":{"type":"string"},"active5":{"type":"string"},"order5":{"format":"int32","type":"integer"},"weight5":{"format":"double","type":"number"},"questionType5":{"type":"string"},"title5":{"type":"string"},"description5":{"type":"string"},"help5":{"type":"string"},"required5":{"type":"string"},"active6":{"type":"string"},"order6":{"format":"int32","type":"integer"},"weight6":{"format":"double","type":"number"},"questionType6":{"type":"string"},"title6":{"type":"string"},"description6":{"type":"string"},"help6":{"type":"string"},"required6":{"type":"string"},"active7":{"type":"string"},"order7":{"format":"int32","type":"integer"},"weight7":{"format":"double","type":"number"},"questionType7":{"type":"string"},"title7":{"type":"string"},"description7":{"type":"string"},"help7":{"type":"string"},"required7":{"type":"string"},"active8":{"type":"string"},"order8":{"format":"int32","type":"integer"},"weight8":{"format":"double","type":"number"},"questionType8":{"type":"string"},"title8":{"type":"string"},"description8":{"type":"string"},"help8":{"type":"string"},"required8":{"type":"string"},"active9":{"type":"string"},"order9":{"format":"int32","type":"integer"},"weight9":{"format":"double","type":"number"},"questionType9":{"type":"string"},"title9":{"type":"string"},"description9":{"type":"string"},"help9":{"type":"string"},"required9":{"type":"string"}}},"Feedback":{"type":"object","properties":{"id":{"format":"int32","type":"integer"},"active":{"type":"string"},"createDate":{"type":"string"},"createdBy":{"type":"string"},"modifyDate":{"type":"string"},"modifiedBy":{"type":"string"},"deleted":{"type":"string"},"deleteDate":{"type":"string"},"deletedBy":{"type":"string"},"userId":{"type":"string"},"feedbackDefinitionId":{"format":"int32","type":"integer"},"feedbackDefinition":{"$ref":"FeedbackDefinition"},"sessionId":{"type":"string"},"eventId":{"type":"string"},"averageRate":{"type":"string"},"answer0":{"type":"string"},"answer1":{"type":"string"},"answer2":{"type":"string"},"answer3":{"type":"string"},"answer4":{"type":"string"},"answer5":{"type":"string"},"answer6":{"type":"string"},"answer7":{"type":"string"},"answer8":{"type":"string"},"answer9":{"type":"string"}}},"Session":{"required":["title"],"type":"object","properties":{"id":{"format":"int32","type":"integer"},"active":{"type":"string"},"createDate":{"type":"string"},"createdBy":{"type":"string"},"modifyDate":{"type":"string"},"modifiedBy":{"type":"string"},"deleted":{"type":"string"},"deleteDate":{"type":"string"},"deletedBy":{"type":"string"},"title":{"type":"string"},"description":{"type":"string"},"startDate":{"type":"string"},"endDate":{"type":"string"},"location":{"type":"string"},"level":{"type":"string"},"type":{"type":"string"},"track":{"type":"string"},"key":{"type":"string"},"link":{"type":"string"},"activeFromDate":{"type":"string"},"activeTillDate":{"type":"string"},"feedbackAllowed":{"type":"string"},"feedbackDefinitionId":{"type":"string"},"feedbackDefinition":{"$ref":"FeedbackDefinition"},"eventId":{"format":"int32","type":"integer"},"feedbacks":{"type":"array","items":{"$ref":"Feedback"}},"speakers":{"type":"array","items":{"type":"string"}},"speakerList":{"type":"string"},"tags":{"type":"array","items":{"type":"string"}},"tagList":{"type":"string"}}},"Object":{"type":"object","properties":{}},"ResourceText":{"required":["key"],"type":"object","properties":{"id":{"format":"int32","type":"integer"},"active":{"type":"string"},"createDate":{"type":"string"},"createdBy":{"type":"string"},"modifyDate":{"type":"string"},"modifiedBy":{"type":"string"},"deleted":{"type":"string"},"deleteDate":{"type":"string"},"deletedBy":{"type":"string"},"language":{"type":"string"},"key":{"type":"string"},"group":{"type":"string"},"value":{"type":"string"}}},"RoleAdminBindingModel":{"type":"object","properties":{"name":{"type":"string"},"id":{"type":"string"}}},"LoginBindingModel":{"type":"object","properties":{"userName":{"type":"string"},"password":{"type":"string"}}},"User":{"type":"object","properties":{"active":{"type":"string"},"createDate":{"type":"string"},"createdBy":{"type":"string"},"modifyDate":{"type":"string"},"modifiedBy":{"type":"string"},"deleted":{"type":"string"},"deleteDate":{"type":"string"},"deletedBy":{"type":"string"},"organization":{"type":"string"},"activeFromDate":{"type":"string"},"activeTillDate":{"type":"string"},"email":{"type":"string"},"emailConfirmed":{"type":"boolean"},"passwordHash":{"type":"string"},"securityStamp":{"type":"string"},"phoneNumber":{"type":"string"},"phoneNumberConfirmed":{"type":"boolean"},"twoFactorEnabled":{"type":"boolean"},"lockoutEndDateUtc":{"type":"string"},"lockoutEnabled":{"type":"boolean"},"accessFailedCount":{"format":"int32","type":"integer"},"roles":{"type":"array","items":{"$ref":"UserRole"},"readOnly":true},"claims":{"type":"array","items":{"$ref":"UserClaim"},"readOnly":true},"logins":{"type":"array","items":{"$ref":"UserLogin"},"readOnly":true},"id":{"type":"string"},"userName":{"type":"string"}}},"UserRole":{"type":"object","properties":{"userId":{"type":"string"},"roleId":{"type":"string"}}},"UserClaim":{"type":"object","properties":{"id":{"format":"int32","type":"integer"},"userId":{"type":"string"},"claimType":{"type":"string"},"claimValue":{"type":"string"}}},"UserLogin":{"type":"object","properties":{"loginProvider":{"type":"string"},"providerKey":{"type":"string"},"userId":{"type":"string"}}},"UserAdminBindingModel":{"type":"object","properties":{"userName":{"type":"string"},"organization":{"type":"string"},"email":{"type":"string"},"active":{"type":"boolean"},"roles":{"type":"string"},"password":{"type":"string"},"activeFrom":{"type":"string"},"activeTill":{"type":"string"},"id":{"type":"string"}}}}}
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "v1",
+    "title": "EventFeedback.Web.Api"
+  },
+  "host": "localhost:6003",
+  "schemes": [ "http" ],
+  "paths": {
+    "/api/v1/events/{eventId}/report": {
+      "get": {
+        "tags": [ "EventReports" ],
+        "operationId": "EventReports_Get",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/EventReportModel" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/events": {
+      "get": {
+        "tags": [ "Events" ],
+        "operationId": "Events_Get",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Event" }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [ "Events" ],
+        "operationId": "Events_Post",
+        "consumes": [ "application/json", "text/json", "application/x-www-form-urlencoded" ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "entity",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Event" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Event" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/events/{id}": {
+      "get": {
+        "tags": [ "Events" ],
+        "operationId": "Events_GetById",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Event" }
+          }
+        },
+        "deprecated": false
+      },
+      "put": {
+        "tags": [ "Events" ],
+        "operationId": "Events_Put",
+        "consumes": [ "application/json", "text/json", "application/x-www-form-urlencoded" ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "entity",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Event" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Event" }
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [ "Events" ],
+        "operationId": "Events_Delete",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/feedbackdefinitions": {
+      "get": {
+        "tags": [ "FeedbackDefinitions" ],
+        "operationId": "FeedbackDefinitions_Get",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/FeedbackDefinition" }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [ "FeedbackDefinitions" ],
+        "operationId": "FeedbackDefinitions_Post",
+        "consumes": [ "application/json", "text/json", "application/x-www-form-urlencoded" ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "entity",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/FeedbackDefinition" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/FeedbackDefinition" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/feedbackdefinitions/{id}": {
+      "get": {
+        "tags": [ "FeedbackDefinitions" ],
+        "operationId": "FeedbackDefinitions_GetById",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/FeedbackDefinition" }
+          }
+        },
+        "deprecated": false
+      },
+      "put": {
+        "tags": [ "FeedbackDefinitions" ],
+        "operationId": "FeedbackDefinitions_Put",
+        "consumes": [ "application/json", "text/json", "application/x-www-form-urlencoded" ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "entity",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/FeedbackDefinition" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/FeedbackDefinition" }
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [ "FeedbackDefinitions" ],
+        "operationId": "FeedbackDefinitions_Delete",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/feedbacks": {
+      "get": {
+        "tags": [ "Feedbacks" ],
+        "operationId": "Feedbacks_Get",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Feedback" }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [ "Feedbacks" ],
+        "operationId": "Feedbacks_Post",
+        "consumes": [ "application/json", "text/json", "application/x-www-form-urlencoded" ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "entity",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Feedback" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Feedback" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/feedbacks/{id}": {
+      "get": {
+        "tags": [ "Feedbacks" ],
+        "operationId": "Feedbacks_GetById",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Feedback" }
+          }
+        },
+        "deprecated": false
+      },
+      "put": {
+        "tags": [ "Feedbacks" ],
+        "operationId": "Feedbacks_Put",
+        "consumes": [ "application/json", "text/json", "application/x-www-form-urlencoded" ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "entity",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Feedback" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Feedback" }
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [ "Feedbacks" ],
+        "operationId": "Feedbacks_Delete",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/lookup/apiinfo": {
+      "get": {
+        "tags": [ "Lookup" ],
+        "operationId": "Lookup_ApiInfo",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/lookup/roles": {
+      "get": {
+        "tags": [ "Lookup" ],
+        "operationId": "Lookup_Roles",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/lookup/levels": {
+      "get": {
+        "tags": [ "Lookup" ],
+        "operationId": "Lookup_Levels",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/lookup/levels/{eventId}": {
+      "get": {
+        "tags": [ "Lookup" ],
+        "operationId": "Lookup_LevelsForEvent",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/lookup/tags/{eventId}": {
+      "get": {
+        "tags": [ "Lookup" ],
+        "operationId": "Lookup_TagsForEvent",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/lookup/speakers/{eventId}": {
+      "get": {
+        "tags": [ "Lookup" ],
+        "operationId": "Lookup_SpeakersForEvent",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/lookup/tracks/{eventId}": {
+      "get": {
+        "tags": [ "Lookup" ],
+        "operationId": "Lookup_TracksForEvent",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/resources": {
+      "get": {
+        "tags": [ "ResourceTexts" ],
+        "operationId": "ResourceTexts_Get",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/ResourceText" }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [ "ResourceTexts" ],
+        "operationId": "ResourceTexts_Post",
+        "consumes": [ "application/json", "text/json", "application/x-www-form-urlencoded" ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "entity",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/ResourceText" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/ResourceText" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/resources/{id}": {
+      "put": {
+        "tags": [ "ResourceTexts" ],
+        "operationId": "ResourceTexts_Put",
+        "consumes": [ "application/json", "text/json", "application/x-www-form-urlencoded" ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "entity",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/ResourceText" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/ResourceText" }
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [ "ResourceTexts" ],
+        "operationId": "ResourceTexts_Delete",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/admin/roles": {
+      "get": {
+        "tags": [ "Roles" ],
+        "operationId": "Roles_Get",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/RoleAdminBindingModel" }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/events/{eventId}/sessions": {
+      "get": {
+        "tags": [ "Sessions" ],
+        "operationId": "Sessions_Get",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Session" }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [ "Sessions" ],
+        "operationId": "Sessions_Post",
+        "consumes": [ "application/json", "text/json", "application/x-www-form-urlencoded" ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "entity",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Session" }
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Session" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/events/{eventId}/sessions/{id}": {
+      "get": {
+        "tags": [ "Sessions" ],
+        "operationId": "Sessions_GetById",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Session" }
+          }
+        },
+        "deprecated": false
+      },
+      "put": {
+        "tags": [ "Sessions" ],
+        "operationId": "Sessions_Put",
+        "consumes": [ "application/json", "text/json", "application/x-www-form-urlencoded" ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "entity",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Session" }
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Session" }
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [ "Sessions" ],
+        "operationId": "Sessions_Delete",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/user/token": {
+      "post": {
+        "tags": [ "User" ],
+        "operationId": "User_Token",
+        "consumes": [ "application/json", "text/json", "application/x-www-form-urlencoded" ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "login",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/LoginBindingModel" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/user/profile": {
+      "get": {
+        "tags": [ "User" ],
+        "operationId": "User_Profile",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/admin/users": {
+      "get": {
+        "tags": [ "Users" ],
+        "operationId": "Users_Get",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/User" }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [ "Users" ],
+        "operationId": "Users_Post",
+        "consumes": [ "application/json", "text/json", "application/x-www-form-urlencoded" ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "entity",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserAdminBindingModel" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/admin/users/{id}": {
+      "put": {
+        "tags": [ "Users" ],
+        "operationId": "Users_Put",
+        "consumes": [ "application/json", "text/json", "application/x-www-form-urlencoded" ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "entity",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserAdminBindingModel" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [ "Users" ],
+        "operationId": "Users_Delete",
+        "consumes": [ ],
+        "produces": [ "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": { "$ref": "#/definitions/Object" }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "definitions": {
+    "EventReportModel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "title": { "type": "string" },
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "location": { "type": "string" },
+        "averageRate": { "type": "string" },
+        "quesstionTitle0": { "type": "string" },
+        "quesstionTitle1": { "type": "string" },
+        "quesstionTitle2": { "type": "string" },
+        "quesstionTitle3": { "type": "string" },
+        "quesstionTitle4": { "type": "string" },
+        "quesstionTitle5": { "type": "string" },
+        "quesstionTitle6": { "type": "string" },
+        "quesstionTitle7": { "type": "string" },
+        "quesstionTitle8": { "type": "string" },
+        "quesstionTitle9": { "type": "string" },
+        "feedbacks": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/FeedbackReportModel" }
+        },
+        "sessions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SessionReportModel" }
+        }
+      }
+    },
+    "FeedbackReportModel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "averageRate": { "type": "string" },
+        "answer0": { "type": "string" },
+        "answer1": { "type": "string" },
+        "answer2": { "type": "string" },
+        "answer3": { "type": "string" },
+        "answer4": { "type": "string" },
+        "answer5": { "type": "string" },
+        "answer6": { "type": "string" },
+        "answer7": { "type": "string" },
+        "answer8": { "type": "string" },
+        "answer9": { "type": "string" },
+        "maxRateQuestion0": { "type": "string" },
+        "maxRateQuestion1": { "type": "string" },
+        "maxRateQuestion2": { "type": "string" },
+        "maxRateQuestion3": { "type": "string" },
+        "maxRateQuestion4": { "type": "string" },
+        "maxRateQuestion5": { "type": "string" },
+        "maxRateQuestion6": { "type": "string" },
+        "maxRateQuestion7": { "type": "string" },
+        "maxRateQuestion8": { "type": "string" },
+        "maxRateQuestion9": { "type": "string" }
+      }
+    },
+    "SessionReportModel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "title": { "type": "string" },
+        "speakerList": { "type": "string" },
+        "location": { "type": "string" },
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "feedbackAllowed": { "type": "boolean" },
+        "averageRate": { "type": "string" },
+        "averageRateAnswer0": { "type": "string" },
+        "averageRateAnswer1": { "type": "string" },
+        "averageRateAnswer2": { "type": "string" },
+        "averageRateAnswer3": { "type": "string" },
+        "averageRateAnswer4": { "type": "string" },
+        "averageRateAnswer5": { "type": "string" },
+        "averageRateAnswer6": { "type": "string" },
+        "averageRateAnswer7": { "type": "string" },
+        "averageRateAnswer8": { "type": "string" },
+        "averageRateAnswer9": { "type": "string" },
+        "quesstionTitle0": { "type": "string" },
+        "maxRateQuestion0": { "type": "string" },
+        "quesstionTitle1": { "type": "string" },
+        "maxRateQuestion1": { "type": "string" },
+        "quesstionTitle2": { "type": "string" },
+        "maxRateQuestion2": { "type": "string" },
+        "quesstionTitle3": { "type": "string" },
+        "maxRateQuestion3": { "type": "string" },
+        "quesstionTitle4": { "type": "string" },
+        "maxRateQuestion4": { "type": "string" },
+        "quesstionTitle5": { "type": "string" },
+        "maxRateQuestion5": { "type": "string" },
+        "quesstionTitle6": { "type": "string" },
+        "maxRateQuestion6": { "type": "string" },
+        "quesstionTitle7": { "type": "string" },
+        "maxRateQuestion7": { "type": "string" },
+        "quesstionTitle8": { "type": "string" },
+        "maxRateQuestion8": { "type": "string" },
+        "quesstionTitle9": { "type": "string" },
+        "maxRateQuestion9": { "type": "string" },
+        "feedbacks": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/FeedbackReportModel" }
+        }
+      }
+    },
+    "Event": {
+      "required": [ "title" ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "active": { "type": "boolean" },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "createdBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "modifyDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modifiedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "deleted": { "type": "boolean" },
+        "deleteDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "deletedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "link": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "feedbackAllowed": { "type": "boolean" },
+        "feedbackDefinitionId": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "feedbackDefinition": { "$ref": "#/definitions/FeedbackDefinition" },
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "location": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "organization": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "activeFromDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "activeTillDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "tagList": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "feedbacks": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Feedback" }
+        },
+        "sessions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Session" }
+        }
+      }
+    },
+    "FeedbackDefinition": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "active": { "type": "boolean" },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "createdBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "modifyDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modifiedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "deleted": { "type": "boolean" },
+        "deleteDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "deletedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "active0": { "type": "boolean" },
+        "order0": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "weight0": {
+          "format": "double",
+          "type": "number"
+        },
+        "questionType0": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title0": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description0": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help0": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required0": { "type": "boolean" },
+        "active1": { "type": "boolean" },
+        "order1": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "weight1": {
+          "format": "double",
+          "type": "number"
+        },
+        "questionType1": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title1": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description1": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help1": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required1": { "type": "boolean" },
+        "active2": { "type": "boolean" },
+        "order2": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "weight2": {
+          "format": "double",
+          "type": "number"
+        },
+        "questionType2": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title2": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description2": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help2": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required2": { "type": "boolean" },
+        "active3": { "type": "boolean" },
+        "order3": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "weight3": {
+          "format": "double",
+          "type": "number"
+        },
+        "questionType3": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title3": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description3": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help3": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required3": { "type": "boolean" },
+        "active4": { "type": "boolean" },
+        "order4": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "weight4": {
+          "format": "double",
+          "type": "number"
+        },
+        "questionType4": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title4": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description4": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help4": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required4": { "type": "boolean" },
+        "active5": { "type": "boolean" },
+        "order5": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "weight5": {
+          "format": "double",
+          "type": "number"
+        },
+        "questionType5": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title5": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description5": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help5": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required5": { "type": "boolean" },
+        "active6": { "type": "boolean" },
+        "order6": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "weight6": {
+          "format": "double",
+          "type": "number"
+        },
+        "questionType6": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title6": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description6": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help6": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required6": { "type": "boolean" },
+        "active7": { "type": "boolean" },
+        "order7": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "weight7": {
+          "format": "double",
+          "type": "number"
+        },
+        "questionType7": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title7": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description7": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help7": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required7": { "type": "boolean" },
+        "active8": { "type": "boolean" },
+        "order8": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "weight8": {
+          "format": "double",
+          "type": "number"
+        },
+        "questionType8": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title8": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description8": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help8": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required8": { "type": "boolean" },
+        "active9": { "type": "boolean" },
+        "order9": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "weight9": {
+          "format": "double",
+          "type": "number"
+        },
+        "questionType9": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title9": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description9": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help9": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required9": { "type": "boolean" }
+      }
+    },
+    "Feedback": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "active": { "type": "boolean" },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "createdBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "modifyDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modifiedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "deleted": { "type": "boolean" },
+        "deleteDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "deletedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "userId": { "type": "string" },
+        "feedbackDefinitionId": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "feedbackDefinition": { "$ref": "#/definitions/FeedbackDefinition" },
+        "sessionId": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "eventId": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "averageRate": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer0": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer1": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer2": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer3": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer4": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer5": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer6": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer7": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer8": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer9": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        }
+      }
+    },
+    "Session": {
+      "required": [ "title" ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "active": { "type": "boolean" },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "createdBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "modifyDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modifiedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "deleted": { "type": "boolean" },
+        "deleteDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "deletedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "location": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "level": {
+          "maxLength": 10,
+          "minLength": 0,
+          "type": "string"
+        },
+        "type": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "track": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "link": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "activeFromDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "activeTillDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "feedbackAllowed": { "type": "boolean" },
+        "feedbackDefinitionId": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "feedbackDefinition": { "$ref": "#/definitions/FeedbackDefinition" },
+        "eventId": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "feedbacks": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Feedback" }
+        },
+        "speakers": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "speakerList": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "tagList": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        }
+      }
+    },
+    "Object": {
+      "type": "object",
+      "properties": { }
+    },
+    "ResourceText": {
+      "required": [ "key" ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "active": { "type": "boolean" },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "createdBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "modifyDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modifiedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "deleted": { "type": "boolean" },
+        "deleteDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "deletedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "language": {
+          "maxLength": 8,
+          "minLength": 0,
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "group": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        }
+      }
+    },
+    "RoleAdminBindingModel": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "id": { "type": "string" }
+      }
+    },
+    "LoginBindingModel": {
+      "type": "object",
+      "properties": {
+        "userName": { "type": "string" },
+        "password": { "type": "string" }
+      }
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "active": { "type": "boolean" },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "createdBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "modifyDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modifiedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "deleted": { "type": "boolean" },
+        "deleteDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "deletedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "organization": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "activeFromDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "activeTillDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "email": { "type": "string" },
+        "emailConfirmed": { "type": "boolean" },
+        "passwordHash": { "type": "string" },
+        "securityStamp": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "phoneNumberConfirmed": { "type": "boolean" },
+        "twoFactorEnabled": { "type": "boolean" },
+        "lockoutEndDateUtc": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "lockoutEnabled": { "type": "boolean" },
+        "accessFailedCount": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "roles": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/UserRole" },
+          "readOnly": true
+        },
+        "claims": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/UserClaim" },
+          "readOnly": true
+        },
+        "logins": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/UserLogin" },
+          "readOnly": true
+        },
+        "id": { "type": "string" },
+        "userName": { "type": "string" }
+      }
+    },
+    "UserRole": {
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "roleId": { "type": "string" }
+      }
+    },
+    "UserClaim": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "userId": { "type": "string" },
+        "claimType": { "type": "string" },
+        "claimValue": { "type": "string" }
+      }
+    },
+    "UserLogin": {
+      "type": "object",
+      "properties": {
+        "loginProvider": { "type": "string" },
+        "providerKey": { "type": "string" },
+        "userId": { "type": "string" }
+      }
+    },
+    "UserAdminBindingModel": {
+      "type": "object",
+      "properties": {
+        "userName": { "type": "string" },
+        "organization": { "type": "string" },
+        "email": { "type": "string" },
+        "active": { "type": "boolean" },
+        "roles": { "type": "string" },
+        "password": { "type": "string" },
+        "activeFrom": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "activeTill": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "id": { "type": "string" }
+      }
+    }
+  }
+}
