@@ -33,6 +33,7 @@
     <TargetFrameworkProfile />
     <ApplicationInsightsResourceId>/subscriptions/b527698f-a403-465f-8005-932acc5d9f7d/resourcegroups/Default-Web-WestEurope/providers/microsoft.insights/components/eventfeedback</ApplicationInsightsResourceId>
     <NuGetPackageImportStamp>6f782f69</NuGetPackageImportStamp>
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -162,9 +163,11 @@
     <Content Include="www\javascripts\vendor.js" />
     <Content Include="www\service-worker.js" />
     <Content Include="www\stylesheets\app.css" />
+    <Content Include="swagger.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="www2\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config">

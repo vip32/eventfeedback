@@ -7,62 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}"
 EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Web.App", "http://localhost:54911", "{549FB728-3ABD-4562-A57F-5CFB86F45D92}"
-	ProjectSection(WebsiteProperties) = preProject
-		SccProjectName = "SAK"
-		SccAuxPath = "SAK"
-		SccLocalPath = "SAK"
-		SccProvider = "SAK"
-		UseIISExpress = "true"
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5.1"
-		Debug.AspNetCompiler.VirtualPath = "/localhost_54911"
-		Debug.AspNetCompiler.PhysicalPath = "Web.App\"
-		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_54911\"
-		Debug.AspNetCompiler.Updateable = "false"
-		Debug.AspNetCompiler.ForceOverwrite = "true"
-		Debug.AspNetCompiler.FixedNames = "false"
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.VirtualPath = "/localhost_54911"
-		Release.AspNetCompiler.PhysicalPath = "Web.App\"
-		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_54911\"
-		Release.AspNetCompiler.Updateable = "false"
-		Release.AspNetCompiler.ForceOverwrite = "true"
-		Release.AspNetCompiler.FixedNames = "false"
-		Release.AspNetCompiler.Debug = "False"
-		SlnRelativePath = "Web.App\"
-		DefaultWebSiteLanguage = "Visual C#"
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.Api", "Web.Api\Web.Api.csproj", "{10F692CF-164F-48F6-A6A0-147DE9E917B6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Identity", "Domain.Identity\Domain.Identity.csproj", "{86E621A4-FEC1-40BA-BCAD-D9DA5BF8AE2B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B4547435-1D77-4A4A-978D-F1A8E04609CE}"
-EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Chrome.App", "http://localhost:64117", "{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}"
-	ProjectSection(WebsiteProperties) = preProject
-		SccProjectName = "SAK"
-		SccAuxPath = "SAK"
-		SccLocalPath = "SAK"
-		SccProvider = "SAK"
-		UseIISExpress = "true"
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
-		Debug.AspNetCompiler.VirtualPath = "/localhost_64117"
-		Debug.AspNetCompiler.PhysicalPath = "Chrome.App\"
-		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_64117\"
-		Debug.AspNetCompiler.Updateable = "true"
-		Debug.AspNetCompiler.ForceOverwrite = "true"
-		Debug.AspNetCompiler.FixedNames = "false"
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.VirtualPath = "/localhost_64117"
-		Release.AspNetCompiler.PhysicalPath = "Chrome.App\"
-		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_64117\"
-		Release.AspNetCompiler.Updateable = "true"
-		Release.AspNetCompiler.ForceOverwrite = "true"
-		Release.AspNetCompiler.FixedNames = "false"
-		Release.AspNetCompiler.Debug = "False"
-		SlnRelativePath = "Chrome.App\"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apps", "Apps", "{F9C3AE0D-8322-4C55-BF84-DF03480251F3}"
 EndProject
@@ -79,28 +28,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.Api.IntegrationTests", "Web.Api.IntegrationTests\Web.Api.IntegrationTests.csproj", "{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.App.IntegrationTests", "Web.App.IntegrationTests\Web.App.IntegrationTests.csproj", "{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}"
-EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Web2.App", "Web2.App\", "{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}"
-	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.5"
-		Debug.AspNetCompiler.VirtualPath = "/localhost_26348"
-		Debug.AspNetCompiler.PhysicalPath = "Web2.App\"
-		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_26348\"
-		Debug.AspNetCompiler.Updateable = "true"
-		Debug.AspNetCompiler.ForceOverwrite = "true"
-		Debug.AspNetCompiler.FixedNames = "false"
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.VirtualPath = "/localhost_26348"
-		Release.AspNetCompiler.PhysicalPath = "Web2.App\"
-		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_26348\"
-		Release.AspNetCompiler.Updateable = "true"
-		Release.AspNetCompiler.ForceOverwrite = "true"
-		Release.AspNetCompiler.FixedNames = "false"
-		Release.AspNetCompiler.Debug = "False"
-		VWDPort = "26348"
-		SlnRelativePath = "Web2.App\"
-		DefaultWebSiteLanguage = "Visual C#"
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,16 +58,6 @@ Global
 		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.Azure|Any CPU.ActiveCfg = Debug|Any CPU
-		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.Azure|Any CPU.Build.0 = Debug|Any CPU
-		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.AzureDev|Any CPU.ActiveCfg = Debug|Any CPU
-		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.AzureDev|Any CPU.Build.0 = Debug|Any CPU
-		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.AzureProd|Any CPU.ActiveCfg = Debug|Any CPU
-		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.AzureProd|Any CPU.Build.0 = Debug|Any CPU
-		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{549FB728-3ABD-4562-A57F-5CFB86F45D92}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Azure|Any CPU.ActiveCfg = Debug|Any CPU
 		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.Azure|Any CPU.Build.0 = Debug|Any CPU
 		{10F692CF-164F-48F6-A6A0-147DE9E917B6}.AzureDev|Any CPU.ActiveCfg = AzureDev|Any CPU
@@ -161,16 +78,6 @@ Global
 		{86E621A4-FEC1-40BA-BCAD-D9DA5BF8AE2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86E621A4-FEC1-40BA-BCAD-D9DA5BF8AE2B}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{86E621A4-FEC1-40BA-BCAD-D9DA5BF8AE2B}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.Azure|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.Azure|Any CPU.Build.0 = Debug|Any CPU
-		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.AzureDev|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.AzureDev|Any CPU.Build.0 = Debug|Any CPU
-		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.AzureProd|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.AzureProd|Any CPU.Build.0 = Debug|Any CPU
-		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}.Azure|Any CPU.ActiveCfg = Azure|Any CPU
 		{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}.Azure|Any CPU.Build.0 = Azure|Any CPU
 		{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}.AzureDev|Any CPU.ActiveCfg = AzureDev|Any CPU
@@ -191,16 +98,6 @@ Global
 		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}.Release|Any CPU.Build.0 = Release|Any CPU
-		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.Azure|Any CPU.ActiveCfg = Debug|Any CPU
-		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.Azure|Any CPU.Build.0 = Debug|Any CPU
-		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.AzureDev|Any CPU.ActiveCfg = Debug|Any CPU
-		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.AzureDev|Any CPU.Build.0 = Debug|Any CPU
-		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.AzureProd|Any CPU.ActiveCfg = Debug|Any CPU
-		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.AzureProd|Any CPU.Build.0 = Debug|Any CPU
-		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -208,12 +105,9 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{35B7497D-EF2C-4329-8FE8-440CF8833FD3} = {FA77BAC9-B571-4422-9CA6-CD8F4BE5774D}
 		{D0094ED2-7C55-4954-AD09-F51CBBC9A6C6} = {FA77BAC9-B571-4422-9CA6-CD8F4BE5774D}
-		{549FB728-3ABD-4562-A57F-5CFB86F45D92} = {F9C3AE0D-8322-4C55-BF84-DF03480251F3}
 		{10F692CF-164F-48F6-A6A0-147DE9E917B6} = {FA77BAC9-B571-4422-9CA6-CD8F4BE5774D}
 		{86E621A4-FEC1-40BA-BCAD-D9DA5BF8AE2B} = {FA77BAC9-B571-4422-9CA6-CD8F4BE5774D}
-		{6EB44AE2-E12E-4AB1-85E0-A97E0AE5741E} = {F9C3AE0D-8322-4C55-BF84-DF03480251F3}
 		{DD9E342F-D7CC-4704-91B4-59D1B4C92F92} = {B4547435-1D77-4A4A-978D-F1A8E04609CE}
 		{FF760370-B6C3-4C0C-BC89-8B593C5DDB10} = {B4547435-1D77-4A4A-978D-F1A8E04609CE}
-		{04C5E00D-75FF-48E3-A0F6-8D683AC810E9} = {F9C3AE0D-8322-4C55-BF84-DF03480251F3}
 	EndGlobalSection
 EndGlobal

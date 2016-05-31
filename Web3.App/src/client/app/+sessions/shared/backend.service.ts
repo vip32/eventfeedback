@@ -16,7 +16,7 @@ export class BackendService {
   }
 
   getSessions(event: Event): Session[] {
-    console.log('load sessions for event ' + event.id)
+    console.log('load sessions for event ' + event.id);
     return [
       new Session(event.id + 10, event.id, 'Session 1 - ' + event.name),
       new Session(event.id + 20, event.id, 'Session 2 - ' + event.name),
@@ -28,7 +28,7 @@ export class BackendService {
   }
 
   getFeedbacks(): Feedback[] {
-    console.log('load user feedbacks')
+    console.log('load user feedbacks');
     return [
       new Feedback(1001, 100, 110, 'q1111111qqq'),
       new Feedback(2001, 200, 210, 'q1111qqq'),
@@ -37,10 +37,10 @@ export class BackendService {
   }
 
   getFeedback(session: Session) {
-    console.log('load feedback for session ' + session.id)
+    console.log('load feedback for session ' + session.id);
     let result: Feedback;
     let feedbacks = this.getFeedbacks();
-    if(feedbacks){
+    if (feedbacks) {
       result = feedbacks.find(f => f.sessionId === session.id);
     }
     if(!result) {

@@ -44,7 +44,7 @@ namespace EventFeedback.Web.Api.Controllers
                 else
                     result = _context.Events
                         .OrderBy(e => e.StartDate)
-                        .ToList().Where(e => e.IsActive()); 
+                        .ToList().Where(e => e.IsActive());
                         //.Where(d => !(d.Active != null && !(bool) d.Active))
                         //.Where(d => !(d.Deleted != null && (bool) d.Deleted));
 
@@ -72,7 +72,7 @@ namespace EventFeedback.Web.Api.Controllers
                         .ToList().Where(e => e.IsActive())
                         //.Where(d => !(d.Active != null && !(bool) d.Active))
                         //.Where(d => !(d.Deleted != null && (bool) d.Deleted))
-                        .FirstOrDefault(x => x.Id == id); 
+                        .FirstOrDefault(x => x.Id == id);
                 if (result == null) return StatusCode(HttpStatusCode.NotFound);
                 return Ok(result);
             }
