@@ -972,8 +972,14 @@
           "type": "integer"
         },
         "title": { "type": "string" },
-        "startDate": { "type": "string" },
-        "endDate": { "type": "string" },
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
         "location": { "type": "string" },
         "averageRate": { "type": "string" },
         "quesstionTitle0": { "type": "string" },
@@ -988,11 +994,11 @@
         "quesstionTitle9": { "type": "string" },
         "feedbacks": {
           "type": "array",
-          "items": { "$ref": "FeedbackReportModel" }
+          "items": { "$ref": "#/definitions/FeedbackReportModel" }
         },
         "sessions": {
           "type": "array",
-          "items": { "$ref": "SessionReportModel" }
+          "items": { "$ref": "#/definitions/SessionReportModel" }
         }
       }
     },
@@ -1003,7 +1009,10 @@
           "format": "int32",
           "type": "integer"
         },
-        "createDate": { "type": "string" },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
         "averageRate": { "type": "string" },
         "answer0": { "type": "string" },
         "answer1": { "type": "string" },
@@ -1037,8 +1046,14 @@
         "title": { "type": "string" },
         "speakerList": { "type": "string" },
         "location": { "type": "string" },
-        "startDate": { "type": "string" },
-        "endDate": { "type": "string" },
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
         "feedbackAllowed": { "type": "boolean" },
         "averageRate": { "type": "string" },
         "averageRateAnswer0": { "type": "string" },
@@ -1073,7 +1088,7 @@
         "maxRateQuestion9": { "type": "string" },
         "feedbacks": {
           "type": "array",
-          "items": { "$ref": "FeedbackReportModel" }
+          "items": { "$ref": "#/definitions/FeedbackReportModel" }
         }
       }
     },
@@ -1085,39 +1100,103 @@
           "format": "int32",
           "type": "integer"
         },
-        "active": { "type": "string" },
-        "createDate": { "type": "string" },
-        "createdBy": { "type": "string" },
-        "modifyDate": { "type": "string" },
-        "modifiedBy": { "type": "string" },
-        "deleted": { "type": "string" },
-        "deleteDate": { "type": "string" },
-        "deletedBy": { "type": "string" },
-        "title": { "type": "string" },
-        "description": { "type": "string" },
-        "key": { "type": "string" },
-        "link": { "type": "string" },
-        "feedbackAllowed": { "type": "string" },
-        "feedbackDefinitionId": { "type": "string" },
-        "feedbackDefinition": { "$ref": "FeedbackDefinition" },
-        "startDate": { "type": "string" },
-        "endDate": { "type": "string" },
-        "location": { "type": "string" },
-        "organization": { "type": "string" },
-        "activeFromDate": { "type": "string" },
-        "activeTillDate": { "type": "string" },
+        "active": { "type": "boolean" },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "createdBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "modifyDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modifiedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "deleted": { "type": "boolean" },
+        "deleteDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "deletedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "link": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "feedbackAllowed": { "type": "boolean" },
+        "feedbackDefinitionId": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "feedbackDefinition": { "$ref": "#/definitions/FeedbackDefinition" },
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "location": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "organization": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "activeFromDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "activeTillDate": {
+          "format": "date-time",
+          "type": "string"
+        },
         "tags": {
           "type": "array",
           "items": { "type": "string" }
         },
-        "tagList": { "type": "string" },
+        "tagList": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
         "feedbacks": {
           "type": "array",
-          "items": { "$ref": "Feedback" }
+          "items": { "$ref": "#/definitions/Feedback" }
         },
         "sessions": {
           "type": "array",
-          "items": { "$ref": "Session" }
+          "items": { "$ref": "#/definitions/Session" }
         }
       }
     },
@@ -1128,17 +1207,46 @@
           "format": "int32",
           "type": "integer"
         },
-        "active": { "type": "string" },
-        "createDate": { "type": "string" },
-        "createdBy": { "type": "string" },
-        "modifyDate": { "type": "string" },
-        "modifiedBy": { "type": "string" },
-        "deleted": { "type": "string" },
-        "deleteDate": { "type": "string" },
-        "deletedBy": { "type": "string" },
-        "title": { "type": "string" },
-        "description": { "type": "string" },
-        "active0": { "type": "string" },
+        "active": { "type": "boolean" },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "createdBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "modifyDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modifiedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "deleted": { "type": "boolean" },
+        "deleteDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "deletedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "active0": { "type": "boolean" },
         "order0": {
           "format": "int32",
           "type": "integer"
@@ -1147,12 +1255,28 @@
           "format": "double",
           "type": "number"
         },
-        "questionType0": { "type": "string" },
-        "title0": { "type": "string" },
-        "description0": { "type": "string" },
-        "help0": { "type": "string" },
-        "required0": { "type": "string" },
-        "active1": { "type": "string" },
+        "questionType0": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title0": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description0": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help0": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required0": { "type": "boolean" },
+        "active1": { "type": "boolean" },
         "order1": {
           "format": "int32",
           "type": "integer"
@@ -1161,12 +1285,28 @@
           "format": "double",
           "type": "number"
         },
-        "questionType1": { "type": "string" },
-        "title1": { "type": "string" },
-        "description1": { "type": "string" },
-        "help1": { "type": "string" },
-        "required1": { "type": "string" },
-        "active2": { "type": "string" },
+        "questionType1": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title1": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description1": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help1": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required1": { "type": "boolean" },
+        "active2": { "type": "boolean" },
         "order2": {
           "format": "int32",
           "type": "integer"
@@ -1175,12 +1315,28 @@
           "format": "double",
           "type": "number"
         },
-        "questionType2": { "type": "string" },
-        "title2": { "type": "string" },
-        "description2": { "type": "string" },
-        "help2": { "type": "string" },
-        "required2": { "type": "string" },
-        "active3": { "type": "string" },
+        "questionType2": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title2": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description2": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help2": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required2": { "type": "boolean" },
+        "active3": { "type": "boolean" },
         "order3": {
           "format": "int32",
           "type": "integer"
@@ -1189,12 +1345,28 @@
           "format": "double",
           "type": "number"
         },
-        "questionType3": { "type": "string" },
-        "title3": { "type": "string" },
-        "description3": { "type": "string" },
-        "help3": { "type": "string" },
-        "required3": { "type": "string" },
-        "active4": { "type": "string" },
+        "questionType3": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title3": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description3": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help3": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required3": { "type": "boolean" },
+        "active4": { "type": "boolean" },
         "order4": {
           "format": "int32",
           "type": "integer"
@@ -1203,12 +1375,28 @@
           "format": "double",
           "type": "number"
         },
-        "questionType4": { "type": "string" },
-        "title4": { "type": "string" },
-        "description4": { "type": "string" },
-        "help4": { "type": "string" },
-        "required4": { "type": "string" },
-        "active5": { "type": "string" },
+        "questionType4": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title4": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description4": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help4": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required4": { "type": "boolean" },
+        "active5": { "type": "boolean" },
         "order5": {
           "format": "int32",
           "type": "integer"
@@ -1217,12 +1405,28 @@
           "format": "double",
           "type": "number"
         },
-        "questionType5": { "type": "string" },
-        "title5": { "type": "string" },
-        "description5": { "type": "string" },
-        "help5": { "type": "string" },
-        "required5": { "type": "string" },
-        "active6": { "type": "string" },
+        "questionType5": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title5": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description5": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help5": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required5": { "type": "boolean" },
+        "active6": { "type": "boolean" },
         "order6": {
           "format": "int32",
           "type": "integer"
@@ -1231,12 +1435,28 @@
           "format": "double",
           "type": "number"
         },
-        "questionType6": { "type": "string" },
-        "title6": { "type": "string" },
-        "description6": { "type": "string" },
-        "help6": { "type": "string" },
-        "required6": { "type": "string" },
-        "active7": { "type": "string" },
+        "questionType6": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title6": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description6": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help6": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required6": { "type": "boolean" },
+        "active7": { "type": "boolean" },
         "order7": {
           "format": "int32",
           "type": "integer"
@@ -1245,12 +1465,28 @@
           "format": "double",
           "type": "number"
         },
-        "questionType7": { "type": "string" },
-        "title7": { "type": "string" },
-        "description7": { "type": "string" },
-        "help7": { "type": "string" },
-        "required7": { "type": "string" },
-        "active8": { "type": "string" },
+        "questionType7": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title7": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description7": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help7": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required7": { "type": "boolean" },
+        "active8": { "type": "boolean" },
         "order8": {
           "format": "int32",
           "type": "integer"
@@ -1259,12 +1495,28 @@
           "format": "double",
           "type": "number"
         },
-        "questionType8": { "type": "string" },
-        "title8": { "type": "string" },
-        "description8": { "type": "string" },
-        "help8": { "type": "string" },
-        "required8": { "type": "string" },
-        "active9": { "type": "string" },
+        "questionType8": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title8": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description8": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help8": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required8": { "type": "boolean" },
+        "active9": { "type": "boolean" },
         "order9": {
           "format": "int32",
           "type": "integer"
@@ -1273,11 +1525,27 @@
           "format": "double",
           "type": "number"
         },
-        "questionType9": { "type": "string" },
-        "title9": { "type": "string" },
-        "description9": { "type": "string" },
-        "help9": { "type": "string" },
-        "required9": { "type": "string" }
+        "questionType9": {
+          "format": "int32",
+          "enum": [ 0, 1, 10, 11, 12, 20, 21 ],
+          "type": "integer"
+        },
+        "title9": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description9": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        },
+        "help9": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "required9": { "type": "boolean" }
       }
     },
     "Feedback": {
@@ -1287,33 +1555,104 @@
           "format": "int32",
           "type": "integer"
         },
-        "active": { "type": "string" },
-        "createDate": { "type": "string" },
-        "createdBy": { "type": "string" },
-        "modifyDate": { "type": "string" },
-        "modifiedBy": { "type": "string" },
-        "deleted": { "type": "string" },
-        "deleteDate": { "type": "string" },
-        "deletedBy": { "type": "string" },
+        "active": { "type": "boolean" },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "createdBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "modifyDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modifiedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "deleted": { "type": "boolean" },
+        "deleteDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "deletedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
         "userId": { "type": "string" },
         "feedbackDefinitionId": {
           "format": "int32",
           "type": "integer"
         },
-        "feedbackDefinition": { "$ref": "FeedbackDefinition" },
-        "sessionId": { "type": "string" },
-        "eventId": { "type": "string" },
-        "averageRate": { "type": "string" },
-        "answer0": { "type": "string" },
-        "answer1": { "type": "string" },
-        "answer2": { "type": "string" },
-        "answer3": { "type": "string" },
-        "answer4": { "type": "string" },
-        "answer5": { "type": "string" },
-        "answer6": { "type": "string" },
-        "answer7": { "type": "string" },
-        "answer8": { "type": "string" },
-        "answer9": { "type": "string" }
+        "feedbackDefinition": { "$ref": "#/definitions/FeedbackDefinition" },
+        "sessionId": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "eventId": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "averageRate": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer0": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer1": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer2": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer3": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer4": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer5": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer6": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer7": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer8": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "answer9": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        }
       }
     },
     "Session": {
@@ -1324,47 +1663,123 @@
           "format": "int32",
           "type": "integer"
         },
-        "active": { "type": "string" },
-        "createDate": { "type": "string" },
-        "createdBy": { "type": "string" },
-        "modifyDate": { "type": "string" },
-        "modifiedBy": { "type": "string" },
-        "deleted": { "type": "string" },
-        "deleteDate": { "type": "string" },
-        "deletedBy": { "type": "string" },
-        "title": { "type": "string" },
-        "description": { "type": "string" },
-        "startDate": { "type": "string" },
-        "endDate": { "type": "string" },
-        "location": { "type": "string" },
-        "level": { "type": "string" },
-        "type": { "type": "string" },
-        "track": { "type": "string" },
-        "key": { "type": "string" },
-        "link": { "type": "string" },
-        "activeFromDate": { "type": "string" },
-        "activeTillDate": { "type": "string" },
-        "feedbackAllowed": { "type": "string" },
-        "feedbackDefinitionId": { "type": "string" },
-        "feedbackDefinition": { "$ref": "FeedbackDefinition" },
+        "active": { "type": "boolean" },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "createdBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "modifyDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modifiedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "deleted": { "type": "boolean" },
+        "deleteDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "deletedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+        },
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "location": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "level": {
+          "maxLength": 10,
+          "minLength": 0,
+          "type": "string"
+        },
+        "type": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "track": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "link": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
+        "activeFromDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "activeTillDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "feedbackAllowed": { "type": "boolean" },
+        "feedbackDefinitionId": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "feedbackDefinition": { "$ref": "#/definitions/FeedbackDefinition" },
         "eventId": {
           "format": "int32",
           "type": "integer"
         },
         "feedbacks": {
           "type": "array",
-          "items": { "$ref": "Feedback" }
+          "items": { "$ref": "#/definitions/Feedback" }
         },
         "speakers": {
           "type": "array",
           "items": { "type": "string" }
         },
-        "speakerList": { "type": "string" },
+        "speakerList": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        },
         "tags": {
           "type": "array",
           "items": { "type": "string" }
         },
-        "tagList": { "type": "string" }
+        "tagList": {
+          "maxLength": 512,
+          "minLength": 0,
+          "type": "string"
+        }
       }
     },
     "Object": {
@@ -1379,18 +1794,55 @@
           "format": "int32",
           "type": "integer"
         },
-        "active": { "type": "string" },
-        "createDate": { "type": "string" },
-        "createdBy": { "type": "string" },
-        "modifyDate": { "type": "string" },
-        "modifiedBy": { "type": "string" },
-        "deleted": { "type": "string" },
-        "deleteDate": { "type": "string" },
-        "deletedBy": { "type": "string" },
-        "language": { "type": "string" },
-        "key": { "type": "string" },
-        "group": { "type": "string" },
-        "value": { "type": "string" }
+        "active": { "type": "boolean" },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "createdBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "modifyDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modifiedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "deleted": { "type": "boolean" },
+        "deleteDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "deletedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "language": {
+          "maxLength": 8,
+          "minLength": 0,
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "group": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+        }
       }
     },
     "RoleAdminBindingModel": {
@@ -1410,17 +1862,48 @@
     "User": {
       "type": "object",
       "properties": {
-        "active": { "type": "string" },
-        "createDate": { "type": "string" },
-        "createdBy": { "type": "string" },
-        "modifyDate": { "type": "string" },
-        "modifiedBy": { "type": "string" },
-        "deleted": { "type": "string" },
-        "deleteDate": { "type": "string" },
-        "deletedBy": { "type": "string" },
-        "organization": { "type": "string" },
-        "activeFromDate": { "type": "string" },
-        "activeTillDate": { "type": "string" },
+        "active": { "type": "boolean" },
+        "createDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "createdBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "modifyDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modifiedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "deleted": { "type": "boolean" },
+        "deleteDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "deletedBy": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "organization": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+        },
+        "activeFromDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "activeTillDate": {
+          "format": "date-time",
+          "type": "string"
+        },
         "email": { "type": "string" },
         "emailConfirmed": { "type": "boolean" },
         "passwordHash": { "type": "string" },
@@ -1428,7 +1911,10 @@
         "phoneNumber": { "type": "string" },
         "phoneNumberConfirmed": { "type": "boolean" },
         "twoFactorEnabled": { "type": "boolean" },
-        "lockoutEndDateUtc": { "type": "string" },
+        "lockoutEndDateUtc": {
+          "format": "date-time",
+          "type": "string"
+        },
         "lockoutEnabled": { "type": "boolean" },
         "accessFailedCount": {
           "format": "int32",
@@ -1436,17 +1922,17 @@
         },
         "roles": {
           "type": "array",
-          "items": { "$ref": "UserRole" },
+          "items": { "$ref": "#/definitions/UserRole" },
           "readOnly": true
         },
         "claims": {
           "type": "array",
-          "items": { "$ref": "UserClaim" },
+          "items": { "$ref": "#/definitions/UserClaim" },
           "readOnly": true
         },
         "logins": {
           "type": "array",
-          "items": { "$ref": "UserLogin" },
+          "items": { "$ref": "#/definitions/UserLogin" },
           "readOnly": true
         },
         "id": { "type": "string" },
@@ -1489,8 +1975,14 @@
         "active": { "type": "boolean" },
         "roles": { "type": "string" },
         "password": { "type": "string" },
-        "activeFrom": { "type": "string" },
-        "activeTill": { "type": "string" },
+        "activeFrom": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "activeTill": {
+          "format": "date-time",
+          "type": "string"
+        },
         "id": { "type": "string" }
       }
     }
