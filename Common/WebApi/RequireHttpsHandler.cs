@@ -15,14 +15,13 @@ namespace EventFeedback.Common
 
             if (request.RequestUri.Scheme != Uri.UriSchemeHttps && !request.RequestUri.Host.Contains("localhost"))
             {
-                var uriBuilder = new UriBuilder(request.RequestUri)
-                    {
-                        Scheme = Uri.UriSchemeHttps,
-                        Port = 443
-
-                    };
                 response = request.CreateErrorResponse(HttpStatusCode.Forbidden, "https required");
-                response.Headers.Location = uriBuilder.Uri;
+                response.Headers.Location = new UriBuilder(request.RequestUri)
+                {
+                    Scheme = Uri.UriSchemeHttps,
+                    Port = 443
+
+                }.Uri;
             }
             return response;
         }
