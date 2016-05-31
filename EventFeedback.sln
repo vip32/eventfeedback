@@ -17,14 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apps", "Apps", "{F9C3AE0D-8
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{FA77BAC9-B571-4422-9CA6-CD8F4BE5774D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{5F15F571-E0C7-4107-BE61-A2A63E353B67}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-		.nuget\packages.config = .nuget\packages.config
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.Api.IntegrationTests", "Web.Api.IntegrationTests\Web.Api.IntegrationTests.csproj", "{DD9E342F-D7CC-4704-91B4-59D1B4C92F92}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.App.IntegrationTests", "Web.App.IntegrationTests\Web.App.IntegrationTests.csproj", "{FF760370-B6C3-4C0C-BC89-8B593C5DDB10}"

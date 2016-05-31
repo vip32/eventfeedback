@@ -13,7 +13,7 @@ namespace EventFeedback.Common
         {
             var response = await base.SendAsync(request, cancellationToken);
 
-            if (request.RequestUri.Scheme != Uri.UriSchemeHttps)
+            if (request.RequestUri.Scheme != Uri.UriSchemeHttps && !request.RequestUri.Host.Contains("localhost"))
             {
                 var uriBuilder = new UriBuilder(request.RequestUri)
                     {
