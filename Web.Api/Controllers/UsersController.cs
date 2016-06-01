@@ -33,7 +33,7 @@ namespace EventFeedback.Web.Api.Controllers
         }
 
         [HttpPost]
-        [Route("token")]
+        [Route("token")]  // = SIGNIN
         public HttpResponseMessage Token(LoginBindingModel login)
         {
             using (new TraceLogicalScope(_traceSource, "UserController:Token"))

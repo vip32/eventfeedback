@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.Identity;
+﻿using EventFeedback.Common;
+using Microsoft.AspNet.Identity;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
@@ -14,7 +15,7 @@ namespace EventFeedback.Web.Api
         public void ConfigureAuth(IAppBuilder app)
         {
             OAuthBearerOptions = new OAuthBearerAuthenticationOptions();
-
+            
             app.UseOAuthBearerAuthentication(OAuthBearerOptions);
             //app.UseCookieAuthentication(new CookieAuthenticationOptions
             //{

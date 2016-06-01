@@ -6,10 +6,11 @@
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
         <meta name="description" content="">
         <meta name="author" content="">
-        <title>EventFeedback</title>
+        <title>Event|Feedback</title>
         <script type="text/javascript">
-            if (window.location.protocol != "https:")
+            if (window.location.protocol !== "https:" && window.location.href.indexOf("localhost") === -1) {
                 window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
+            }
         </script>
         <meta name="theme-color" content="#B1D43F">
         <meta name="mobile-web-app-capable" content="yes">
@@ -41,7 +42,7 @@
         <script src="javascripts/vendor.js"></script>
         <script src="javascripts/app.js"></script>
         <script>require('initialize');</script>
-        
+
         <script>
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('./www/service-worker.js'/*, { scope: './www' }*/)
@@ -53,7 +54,7 @@
                 });
             });
         </script>
-        
+
         <script type="text/javascript">
             var appInsights = window.appInsights || function (config) {
                 function s(config) { t[config] = function () { var i = arguments; t.queue.push(function () { t[config].apply(t, i) }) } } var t = { config: config }, r = document, f = window, e = "script", o = r.createElement(e), i, u; for (o.src = config.url || "//az416426.vo.msecnd.net/scripts/a/ai.0.js", r.getElementsByTagName(e)[0].parentNode.appendChild(o), t.cookie = r.cookie, t.queue = [], i = ["Event", "Exception", "Metric", "PageView", "Trace"]; i.length;) s("track" + i.pop()); return config.disableExceptionTracking || (i = "onerror", s("_" + i), u = f[i], f[i] = function (config, r, f, e, o) { var s = u && u(config, r, f, e, o); return s !== !0 && t["_" + i](config, r, f, e, o), s }), t
