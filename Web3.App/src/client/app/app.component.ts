@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {ROUTER_DIRECTIVES, Routes} from '@angular/router';
 import {HTTP_PROVIDERS} from '@angular/http';
 import {MdToolbar} from '@angular2-material/toolbar';
 import {MdButton} from '@angular2-material/button';
@@ -10,6 +11,8 @@ import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 
+import {AboutComponent} from './+about/about.component';
+import {ProfileComponent} from './+profile/profile.component';
 import {Event} from './+sessions/shared/event.model';
 import {EventComponent} from './+sessions/event/event.component';
 import {Session} from './+sessions/shared/session.model';
@@ -22,6 +25,7 @@ import {BackendService} from './+sessions/shared/backend.service';
   templateUrl: './app/app.component.html',
   styleUrls: ['./app/app.component.css'],
   directives: [
+    ROUTER_DIRECTIVES,
     MD_SIDENAV_DIRECTIVES,
     MD_LIST_DIRECTIVES,
     MD_CARD_DIRECTIVES,
@@ -37,6 +41,10 @@ import {BackendService} from './+sessions/shared/backend.service';
   ],
   providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher, BackendService]
 })
+@Routes([
+  {path: '/about', component: AboutComponent},
+  {path: '/profile', component: ProfileComponent}
+])
 export class AppComponent {
   title = 'EventFeedback';
   selectedEvent: Event = null;

@@ -1,9 +1,14 @@
 <md-sidenav-layout fullscreen>
   <md-sidenav #sidenav>
     <md-nav-list (click)="sidenav.close()">
-      <a md-list-item>
+      <a md-list-item [routerLink]="['/profile']">
         <md-icon md-list-icon>account_circle</md-icon>
         <span md-line>Profile</span>
+        <span md-line class="secondary"></span>
+      </a>
+      <a md-list-item [routerLink]="['/about']">
+        <md-icon md-list-icon>account_circle</md-icon>
+        <span md-line>About</span>
         <span md-line class="secondary"></span>
       </a>
       <app-event *ngFor="let event of events" 
@@ -56,5 +61,6 @@
       </md-card-actions>
     </md-card>
   </div>
+  <router-outlet></router-outlet>
   <app-session-list [sessions]=sessions></app-session-list>
 </md-sidenav-layout>
