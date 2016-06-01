@@ -9,25 +9,25 @@ import {
 import { ComponentFixture, TestComponentBuilder } from '@angular/compiler/testing';
 import { Component } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { AboutComponent } from './about.component';
+import { HomeComponent } from './home.component';
 
-describe('Component: About', () => {
+describe('Component: Home', () => {
   let builder: TestComponentBuilder;
 
-  beforeEachProviders(() => [AboutComponent]);
+  beforeEachProviders(() => [HomeComponent]);
   beforeEach(inject([TestComponentBuilder], function (tcb: TestComponentBuilder) {
     builder = tcb;
   }));
 
-  it('should inject the component', inject([AboutComponent],
-      (component: AboutComponent) => {
+  it('should inject the component', inject([HomeComponent],
+      (component: HomeComponent) => {
     expect(component).toBeTruthy();
   }));
 
   it('should create the component', inject([], () => {
-    return builder.createAsync(AboutComponentTestController)
+    return builder.createAsync(HomeComponentTestController)
       .then((fixture: ComponentFixture<any>) => {
-        let query = fixture.debugElement.query(By.directive(AboutComponent));
+        let query = fixture.debugElement.query(By.directive(HomeComponent));
         expect(query).toBeTruthy();
         expect(query.componentInstance).toBeTruthy();
       });
@@ -37,10 +37,10 @@ describe('Component: About', () => {
 @Component({
   selector: 'test',
   template: `
-    <app-about></app-about>
+    <app-home></app-home>
   `,
-  directives: [AboutComponent]
+  directives: [HomeComponent]
 })
-class AboutComponentTestController {
+class HomeComponentTestController {
 }
 

@@ -13,9 +13,9 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 
 @Component({
   moduleId: module.id,
-  selector: 'app-profile',
-  templateUrl: 'profile.component.html',
-  styleUrls: ['profile.component.css'],
+  selector: 'app-home',
+  templateUrl: 'home.component.html',
+  styleUrls: ['home.component.css'],
   directives: [
     ROUTER_DIRECTIVES,
     MD_SIDENAV_DIRECTIVES,
@@ -31,7 +31,7 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
     ],
     providers: [MdIconRegistry, MdRadioDispatcher]
 })
-export class ProfileComponent implements OnInit {
+export class HomeComponent implements OnInit {
 
   constructor() {}
 

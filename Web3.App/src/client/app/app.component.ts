@@ -1,16 +1,18 @@
-import {Component} from '@angular/core';
-import {ROUTER_DIRECTIVES, Routes} from '@angular/router';
+import {Component, OnInit} from '@angular/core';
+import {Routes, Router, ROUTER_DIRECTIVES} from '@angular/router';
 import {HTTP_PROVIDERS} from '@angular/http';
-import {MdToolbar} from '@angular2-material/toolbar';
-import {MdButton} from '@angular2-material/button';
+
 import {MD_SIDENAV_DIRECTIVES} from '@angular2-material/sidenav';
 import {MD_LIST_DIRECTIVES} from '@angular2-material/list';
 import {MD_CARD_DIRECTIVES} from '@angular2-material/card';
+import {MdToolbar} from '@angular2-material/toolbar';
+import {MdButton} from '@angular2-material/button';
 import {MdInput} from '@angular2-material/input';
 import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 
+import {HomeComponent} from './+home/home.component';
 import {AboutComponent} from './+about/about.component';
 import {ProfileComponent} from './+profile/profile.component';
 import {Event} from './+sessions/shared/event.model';
@@ -42,16 +44,21 @@ import {BackendService} from './+sessions/shared/backend.service';
   providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher, BackendService]
 })
 @Routes([
-  {path: '/about', component: AboutComponent},
-  {path: '/profile', component: ProfileComponent}
+  { path: '/home', component: HomeComponent },
+  { path: '/about', component: AboutComponent },
+  { path: '/profile', component: ProfileComponent }
 ])
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'EventFeedback';
   selectedEvent: Event = null;
   events: Event[] = this._backendService.getEvents();
   sessions: Session[];
 
-  constructor(private _backendService: BackendService) { }
+  constructor(private router: Router, private _backendService: BackendService) { }
+
+  ngOnInit() {
+    this.router.navigate(['/home']);
+  }
 
   onEventSelected(event: Event) {
     console.log('event selected (list) ', event.id);
