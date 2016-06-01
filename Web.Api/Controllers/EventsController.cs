@@ -14,6 +14,7 @@ using Microsoft.ApplicationInsights;
 namespace EventFeedback.Web.Api.Controllers
 {
     [Authorize]
+    //[AllowAnonymous] //TODO: to be removed
     [RoutePrefix("api/v1/events")]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class EventsController : ApiController
