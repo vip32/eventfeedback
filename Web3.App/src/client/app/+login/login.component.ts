@@ -37,7 +37,7 @@ import {BackendService} from '../shared/backend.service';
 export class LoginComponent implements OnInit {
   model = new LoginModel();
 
-  constructor(private router: Router, private _backendService: BackendService) {}
+  constructor(private _router: Router, private _backendService: BackendService) {}
 
   ngOnInit() {
     //this.model = new LoginModel();
@@ -45,6 +45,6 @@ export class LoginComponent implements OnInit {
 
   onSubmit() {
       console.log('submit', this.model);
-     // this.router.navigate(['/home']);
-    }
+     // this._router.navigate(['/home']);
+  }
 }

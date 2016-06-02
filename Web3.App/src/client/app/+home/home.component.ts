@@ -33,8 +33,10 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 })
 export class HomeComponent implements OnInit {
 
-  constructor(private router: Router) {}
+  constructor(private _router: Router) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    console.log('home init');
+  }
 
 }

@@ -33,11 +33,11 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 })
 export class ProfileComponent implements OnInit {
 
-  constructor(private router: Router) {}
+  constructor(private _router: Router) {}
 
   ngOnInit() {}
 
   onDoneSelect() {
-    this.router.navigate(['/home']);
+    this._router.navigate(['/home']);
   }
 }

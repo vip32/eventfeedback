@@ -16,9 +16,7 @@
         <span md-line>About</span>
         <span md-line class="secondary"></span>
       </a>
-      <app-event *ngFor="let event of events" 
-                 [event]=event
-                 (onSelected)="onEventSelected($event)">
+      <app-event *ngFor="let event of events" [event]=event (onSelected)="onEventSelected($event)">
       </app-event>
     </md-nav-list>
   </md-sidenav>
@@ -26,7 +24,9 @@
     <button md-icon-button (click)="sidenav.open()">
       <md-icon>menu</md-icon>
     </button>
-    <span>{{title}}</span>
+    <span (click)="onHome()">
+      {{title}}
+    </span>
     <md-toolbar-row style="height:40px;">
       <span></span>
       <span class="example-fill-remaining-space"></span>

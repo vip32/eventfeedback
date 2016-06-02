@@ -6,7 +6,7 @@
       <md-card-subtitle>Please enter your credentials</md-card-subtitle>
     </md-card-title-group>
     <md-card-content>
-      <form #f="ngForm">
+      <form #form="ngForm">
         <md-input placeholder="Username" [(ngModel)]="model.username" ngControl="username" required></md-input>
         <md-input placeholder="Password" [(ngModel)]="model.password" ngControl="password" required></md-input>
         <div>
@@ -15,11 +15,11 @@
       </form>
     </md-card-content>
     <md-card-actions align="end">
-      <button (click)="onSubmit()" md-fab color="accent" [disabled]="!f.valid" type="submit">
+      <button (click)="onSubmit()" md-fab color="accent" [disabled]="!form.valid" type="submit">
           <md-icon>done</md-icon>
       </button>
     </md-card-actions>
   </md-card>
 </div>
 model: {{model | json}} <br/> 
-valid: {{f.valid | json}}
+valid/pristine: {{form.valid | json}}/{{form.pristine | json}}

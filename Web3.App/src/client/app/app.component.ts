@@ -52,20 +52,25 @@ import {BackendService} from './+sessions/shared/backend.service';
   { path: '/login', component: LoginComponent }
 ])
 export class AppComponent implements OnInit {
-  title = 'EventFeedback';
+  title = 'Event|Feedback';
   selectedEvent: Event = null;
   events: Event[] = this._backendService.getEvents();
   sessions: Session[];
 
-  constructor(private router: Router, private _backendService: BackendService) { }
+  constructor(private _router: Router, private _backendService: BackendService) { }
 
   ngOnInit() {
-    this.router.navigate(['/home']);
+    console.log('app init');
+    this._router.navigate(['/home']);
   }
 
   onEventSelected(event: Event) {
     console.log('event selected (list) ', event.id);
     this.selectedEvent = event;
     this.sessions = this._backendService.getSessions(event);
+  }
+  
+  onHome() {
+     this._router.navigate(['/home']);
   }
 }
