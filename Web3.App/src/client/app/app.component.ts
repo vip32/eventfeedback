@@ -15,6 +15,8 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 import {HomeComponent} from './+home/home.component';
 import {AboutComponent} from './+about/about.component';
 import {ProfileComponent} from './+profile/profile.component';
+import {LoginComponent} from './+login/login.component';
+
 import {Event} from './+sessions/shared/event.model';
 import {EventComponent} from './+sessions/event/event.component';
 import {Session} from './+sessions/shared/session.model';
@@ -46,7 +48,8 @@ import {BackendService} from './+sessions/shared/backend.service';
 @Routes([
   { path: '/home', component: HomeComponent },
   { path: '/about', component: AboutComponent },
-  { path: '/profile', component: ProfileComponent }
+  { path: '/profile', component: ProfileComponent },
+  { path: '/login', component: LoginComponent }
 ])
 export class AppComponent implements OnInit {
   title = 'EventFeedback';

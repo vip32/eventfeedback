@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {ROUTER_DIRECTIVES} from '@angular/router';
+import {ROUTER_DIRECTIVES, Router} from '@angular/router';
 
 import {MD_SIDENAV_DIRECTIVES} from '@angular2-material/sidenav';
 import {MD_LIST_DIRECTIVES} from '@angular2-material/list';
@@ -33,8 +33,11 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 })
 export class AboutComponent implements OnInit {
 
-  constructor() {}
+  constructor(private router: Router) {}
 
   ngOnInit() {}
 
+  onDoneSelect() {
+      this.router.navigate(['/home']);
+    }
 }

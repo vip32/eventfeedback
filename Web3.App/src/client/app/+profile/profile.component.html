@@ -1,12 +1,14 @@
-<md-card>
-  <md-card-title>Profile</md-card-title>
-  <md-card-content>
-    <form>
-    </form>
-  </md-card-content>
-  <md-card-actions align="end">
-    <a [routerLink]="['/home']" md-raised-button color="accent">
-        <md-icon>done</md-icon>
-    </a>
-  </md-card-actions>
-</md-card>
+<div class="card-container">
+  <md-card>
+    <md-card-title>Profile</md-card-title>
+    <md-card-content>
+      <form>
+      </form>
+    </md-card-content>
+    <md-card-actions align="end">
+      <button (click)="onDoneSelect()" md-raised-button color="accent">
+          <md-icon>done</md-icon>
+      </button>
+    </md-card-actions>
+  </md-card>
+</div>

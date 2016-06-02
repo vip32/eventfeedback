@@ -1,12 +1,25 @@
-<md-card>
-  <md-card-title>Login</md-card-title>
-  <md-card-content>
-    <form>
-    </form>
-  </md-card-content>
-  <md-card-actions align="end">
-    <a [routerLink]="['/home']" md-raised-button color="accent">
-        <md-icon>done</md-icon>
-    </a>
-  </md-card-actions>
-</md-card>
+<div class="card-container">
+  <md-card>
+    <md-card-title-group>
+      <md-icon md-list-icon>account_circle</md-icon>
+      <md-card-title>Login</md-card-title>
+      <md-card-subtitle>Please enter your credentials</md-card-subtitle>
+    </md-card-title-group>
+    <md-card-content>
+      <form #f="ngForm">
+        <md-input placeholder="Username" [(ngModel)]="model.username" ngControl="username" required></md-input>
+        <md-input placeholder="Password" [(ngModel)]="model.password" ngControl="password" required></md-input>
+        <div>
+          <md-checkbox indeterminate="true" [(ngModel)]="model.remember">Remember me</md-checkbox>
+        </div>
+      </form>
+    </md-card-content>
+    <md-card-actions align="end">
+      <button (click)="onSubmit()" md-fab color="accent" [disabled]="!f.valid" type="submit">
+          <md-icon>done</md-icon>
+      </button>
+    </md-card-actions>
+  </md-card>
+</div>
+model: {{model | json}} <br/> 
+valid: {{f.valid | json}}
