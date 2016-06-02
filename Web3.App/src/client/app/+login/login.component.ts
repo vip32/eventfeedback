@@ -11,8 +11,7 @@ import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 
-import {LoginModel} from './shared/login.model';
-import {BackendService} from '../shared/backend.service';
+import {BackendService, LoginBindingModel} from '../shared/backend.service';
 
 @Component({
   moduleId: module.id,
@@ -35,16 +34,25 @@ import {BackendService} from '../shared/backend.service';
     providers: [MdIconRegistry, MdRadioDispatcher, BackendService]
 })
 export class LoginComponent implements OnInit {
-  model = new LoginModel();
+  model = new LoginBindingModel();
+  accessToken: string;
+  authorized: boolean = false;
 
   constructor(private _router: Router, private _backendService: BackendService) {}
 
-  ngOnInit() {
-    //this.model = new LoginModel();
-  }
+  ngOnInit() {}
 
   onSubmit() {
       console.log('submit', this.model);
+      this.accessToken = '';
+      this.authorized = false;
+
+      this._backendService.user_Token(this.model).subscribe(data => {
+            this.accessToken = data['accessToken'];
+            this.authorized = true;
+        }, error => {
+            console.log('error', error);
+        });
      // this._router.navigate(['/home']);
   }
 }
