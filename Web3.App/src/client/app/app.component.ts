@@ -2,15 +2,15 @@ import {Component, OnInit} from '@angular/core';
 import {Routes, Router, ROUTER_DIRECTIVES} from '@angular/router';
 import {HTTP_PROVIDERS} from '@angular/http';
 
-import {MD_SIDENAV_DIRECTIVES} from '@angular2-material/sidenav';
-import {MD_LIST_DIRECTIVES} from '@angular2-material/list';
-import {MD_CARD_DIRECTIVES} from '@angular2-material/card';
-import {MdToolbar} from '@angular2-material/toolbar';
-import {MdButton} from '@angular2-material/button';
-import {MdInput} from '@angular2-material/input';
-import {MdCheckbox} from '@angular2-material/checkbox';
-import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
-import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
+import {MD_SIDENAV_DIRECTIVES} from '@angular2-material/sidenav/sidenav';
+import {MD_LIST_DIRECTIVES} from '@angular2-material/list/list';
+import {MD_CARD_DIRECTIVES} from '@angular2-material/card/card';
+import {MdToolbar} from '@angular2-material/toolbar/toolbar';
+import {MdButton} from '@angular2-material/button/button';
+import {MdInput} from '@angular2-material/input/input';
+import {MdCheckbox} from '@angular2-material/checkbox/checkbox';
+import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio/radio';
+import {MdIcon, MdIconRegistry} from '@angular2-material/icon/icon';
 
 import {HomeComponent} from './+home/home.component';
 import {AboutComponent} from './+about/about.component';
@@ -26,10 +26,10 @@ import {AuthService} from './shared/auth.service';
 import {LoggerService} from './shared/logger.service';
 
 @Component({
-  ///moduleId: module.id,
+  //moduleId: module.id,
   selector: 'sd-app',
-  templateUrl: './app/app.component.html',
-  styleUrls: ['./app/app.component.css'],
+  templateUrl: '<%= ENV %>' === 'dev' ? './app/app.component.html': 'app.component.html', //FIX: remove ./app/ for PROD build
+  styleUrls: [ '<%= ENV %>' === 'dev' ? './app/app.component.css': 'app.component.css'],  //FIX: remove ./app/ for PROD build
   directives: [
     ROUTER_DIRECTIVES,
     MD_SIDENAV_DIRECTIVES, MD_LIST_DIRECTIVES,
@@ -37,7 +37,8 @@ import {LoggerService} from './shared/logger.service';
     MdCheckbox, MdRadioGroup, MdRadioButton, MdIcon,
     EventComponent, SessionListComponent
   ],
-  providers: [HTTP_PROVIDERS,
+  providers: [
+    HTTP_PROVIDERS,
     MdIconRegistry, MdRadioDispatcher,
     BackendMockService, BackendService , AuthService, LoggerService]
 })
@@ -57,6 +58,7 @@ export class AppComponent implements OnInit {
     private _backendService: BackendMockService,
     private _logger: LoggerService) {
       console.log('app ctor');
+      console.log( '<%= ENV %>');
     }
 
   ngOnInit() {

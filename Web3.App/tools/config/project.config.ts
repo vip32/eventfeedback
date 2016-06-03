@@ -15,12 +15,13 @@ export class ProjectConfig extends SeedConfig {
     super();
     this.APP_TITLE = 'Event|Feedback';
     this.SYSTEM_CONFIG_DEV.packageConfigPaths =
-        this.SYSTEM_CONFIG_DEV.packageConfigPaths.concat([
-          `${this.APP_BASE}node_modules/@angular2-material/*/package.json`
-        ]);
+      this.SYSTEM_CONFIG_DEV.packageConfigPaths.concat([
+        `${this.APP_BASE}node_modules/@angular2-material/*/package.json`
+      ]);
     let additional_deps: InjectableDependency[] = [
       // {src: 'jquery/dist/jquery.min.js', inject: 'libs'},
-      { src: 'lodash/lodash.min.js', inject: 'libs'},
+      // {src: 'lodash/lodash.min.js', inject: 'libs'},
+      // {src: 'lodash/lodash.min.js', inject: 'libs'},
       { src: '@angular2-material/button/button.css', inject: true },
       { src: '@angular2-material/card/card.css', inject: true },
       { src: '@angular2-material/checkbox/checkbox.css', inject: true },
