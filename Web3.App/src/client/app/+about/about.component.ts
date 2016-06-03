@@ -35,7 +35,9 @@ export class AboutComponent implements OnInit {
 
   constructor(private _router: Router) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    console.log('about init');
+  }
 
   onDoneSelect() {
       this._router.navigate(['/home']);

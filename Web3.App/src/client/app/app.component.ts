@@ -22,6 +22,7 @@ import {EventComponent} from './+sessions/event/event.component';
 import {Session} from './+sessions/shared/session.model';
 import {SessionListComponent} from './+sessions/session-list/session-list.component';
 import {BackendService} from './+sessions/shared/backend.service';
+// import {AuthService} from './shared/auth.service';
 
 @Component({
   ///moduleId: module.id,
@@ -43,7 +44,7 @@ import {BackendService} from './+sessions/shared/backend.service';
     EventComponent,
     SessionListComponent
   ],
-  providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher, BackendService]
+  providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher, BackendService/*, AuthService*/]
 })
 @Routes([
   { path: '/home', component: HomeComponent },
@@ -57,7 +58,7 @@ export class AppComponent implements OnInit {
   events: Event[] = this._backendService.getEvents();
   sessions: Session[];
 
-  constructor(private _router: Router, private _backendService: BackendService) { }
+  constructor(private _router: Router, private _backendService: BackendService, /*private _authService: AuthService*/) { }
 
   ngOnInit() {
     console.log('app init');
@@ -69,7 +70,7 @@ export class AppComponent implements OnInit {
     this.selectedEvent = event;
     this.sessions = this._backendService.getSessions(event);
   }
-  
+
   onHome() {
      this._router.navigate(['/home']);
   }

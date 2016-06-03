@@ -11,7 +11,8 @@ import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 
-import {BackendService, LoginBindingModel} from '../shared/backend.service';
+import {BackendService} from '../shared/backend.service';
+import {AuthService} from '../shared/auth.service';
 
 @Component({
   moduleId: module.id,
@@ -30,29 +31,27 @@ import {BackendService, LoginBindingModel} from '../shared/backend.service';
     MdRadioGroup,
     MdRadioButton,
     MdIcon
-    ],
-    providers: [MdIconRegistry, MdRadioDispatcher, BackendService]
+  ],
+  providers: [MdIconRegistry, MdRadioDispatcher, BackendService, AuthService]
 })
 export class LoginComponent implements OnInit {
-  model = new LoginBindingModel();
-  accessToken: string;
-  authorized: boolean = false;
+  userName: string;
+  password: string;
+  remember: boolean;
 
-  constructor(private _router: Router, private _backendService: BackendService) {}
+  constructor(private _router: Router, private _backendService: BackendService, private _authService: AuthService) { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.userName = 'vproosdij';
+    this.userName = this._authService.userName;
+    this.password = this._authService.password;
+    this.remember = this._authService.remember;
+  }
 
   onSubmit() {
-      console.log('submit', this.model);
-      this.accessToken = '';
-      this.authorized = false;
-
-      this._backendService.user_Token(this.model).subscribe(data => {
-            this.accessToken = data['accessToken'];
-            this.authorized = true;
-        }, error => {
-            console.log('error', error);
-        });
-     // this._router.navigate(['/home']);
+    this._authService.onAuthenticate(
+      this._backendService,
+      this.userName, this.password, this.remember,
+      '/home');
   }
 }

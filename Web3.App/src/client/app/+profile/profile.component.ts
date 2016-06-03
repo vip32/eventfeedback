@@ -35,7 +35,9 @@ export class ProfileComponent implements OnInit {
 
   constructor(private _router: Router) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    console.log('profile init');
+  }
 
   onDoneSelect() {
     this._router.navigate(['/home']);

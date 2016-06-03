@@ -7,10 +7,10 @@
     </md-card-title-group>
     <md-card-content>
       <form #form="ngForm">
-        <md-input placeholder="Username" [(ngModel)]="model.userName" ngControl="userName" required></md-input>
-        <md-input placeholder="Password" [(ngModel)]="model.password" ngControl="password" required></md-input>
+        <md-input placeholder="Username" [(ngModel)]="userName" ngControl="userName" required></md-input>
+        <md-input placeholder="Password" [(ngModel)]="password" ngControl="password" required></md-input>
         <div>
-          <md-checkbox indeterminate="true" [(ngModel)]="model.remember">Remember me</md-checkbox>
+          <md-checkbox indeterminate="true" [(ngModel)]="remember">Remember me</md-checkbox>
         </div>
       </form>
     </md-card-content>
@@ -21,6 +21,4 @@
     </md-card-actions>
   </md-card>
 </div>
-model: {{model | json}} <br/> 
 valid/pristine: {{form.valid}}/{{form.pristine}} <br/>
-token: {{accessToken}}
