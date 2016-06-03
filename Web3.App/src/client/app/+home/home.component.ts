@@ -12,7 +12,6 @@ import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 
 import {LoggerService} from '../shared/logger.service';
-import {StateService} from '../shared/state.service';
 
 @Component({
   moduleId: module.id,
@@ -29,10 +28,9 @@ import {StateService} from '../shared/state.service';
 })
 export class HomeComponent implements OnInit {
 
-  constructor(private _router: Router, private _state: StateService, private _logger: LoggerService) {}
+  constructor(private _router: Router, private _logger: LoggerService) {}
 
   ngOnInit() {
     console.log('home init');
-    console.log('state', this._state);
   }
 }

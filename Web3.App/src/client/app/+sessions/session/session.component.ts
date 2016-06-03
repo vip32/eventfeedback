@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output, OnInit} from '@angular/core';
 import {HTTP_PROVIDERS} from '@angular/http';
 import {MdToolbar} from '@angular2-material/toolbar';
 import {MdButton} from '@angular2-material/button';
@@ -9,6 +9,7 @@ import {MdInput} from '@angular2-material/input';
 import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
+
 import {Session, Feedback} from '../../shared/backend.service';
 import {BackendMockService} from '../../shared/backendmock.service';
 
@@ -22,20 +23,28 @@ import {BackendMockService} from '../../shared/backendmock.service';
     MD_CARD_DIRECTIVES, MdToolbar, MdButton, MdInput,
     MdCheckbox, MdRadioGroup, MdRadioButton, MdIcon,
   ],
-  providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher]
+  providers: [HTTP_PROVIDERS,
+    MdIconRegistry, MdRadioDispatcher
+  ]
 })
-export class SessionComponent  {
+export class SessionComponent implements OnInit {
   @Input() session: Session;
   @Output() onSelected = new EventEmitter<Session>();
 
-  isSelected = false;
+  isSelected: boolean = false;
   feedback: Feedback;
 
-  constructor(private _backendService: BackendMockService) { }
+  constructor(private _backendService: BackendMockService) {
+    console.log('session ctor');
+  }
+
+  ngOnInit() {
+    console.log('session init', this.session);
+  }
 
   select(session: Session) {
     console.log('session selected ', session.id);
-    if(!this.feedback) {
+    if (!this.feedback) {
       this.feedback = this._backendService.getFeedback(session);
     }
     this.isSelected = !this.isSelected;
@@ -44,5 +53,6 @@ export class SessionComponent  {
 
   save() {
     console.log('save', this.feedback);
+    // TODO
   }
 }

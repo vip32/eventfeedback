@@ -23,7 +23,6 @@ import {SessionListComponent} from './+sessions/session-list/session-list.compon
 import {BackendMockService} from './shared/backendmock.service';
 import {BackendService} from './shared/backend.service';
 import {AuthService} from './shared/auth.service';
-import {StateService} from './shared/state.service';
 import {LoggerService} from './shared/logger.service';
 
 @Component({
@@ -40,7 +39,7 @@ import {LoggerService} from './shared/logger.service';
   ],
   providers: [HTTP_PROVIDERS,
     MdIconRegistry, MdRadioDispatcher,
-    BackendMockService, BackendService , AuthService, StateService, LoggerService]
+    BackendMockService, BackendService , AuthService, LoggerService]
 })
 @Routes([
   { path: '/home', component: HomeComponent },
@@ -56,7 +55,6 @@ export class AppComponent implements OnInit {
 
   constructor(private _router: Router,
     private _backendService: BackendMockService,
-    private _state: StateService,
     private _logger: LoggerService) {
       console.log('app ctor');
     }
@@ -70,6 +68,7 @@ export class AppComponent implements OnInit {
     console.log('event selected (list) ', event.id);
     this.selectedEvent = event;
     this.sessions = this._backendService.getSessions(event);
+    console.log('sessions', this.sessions);
   }
 
   onHome() {

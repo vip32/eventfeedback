@@ -16,12 +16,30 @@ export class BackendMockService {
   getSessions(event: Event): Session[] {
     console.log('load sessions for event ' + event.id);
     return [
-      new Session({ id: event.id + 10, eventId: event.id, title: 'Session 1 - ' + event.title }),
-      new Session({ id: event.id + 20, eventId: event.id, title: 'Session 2 - ' + event.title }),
-      new Session({ id: event.id + 30, eventId: event.id, title: 'Session 3 - ' + event.title }),
-      new Session({ id: event.id + 40, eventId: event.id, title: 'Session 4 - ' + event.title }),
-      new Session({ id: event.id + 50, eventId: event.id, title: 'Session 5 - ' + event.title }),
-      new Session({ id: event.id + 60, eventId: event.id, title: 'Session 6 - ' + event.title }),
+      new Session({
+        id: event.id + 10, eventId: event.id, title: 'Session 1 - ' + event.title,
+        description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
+      }),
+      new Session({
+        id: event.id + 20, eventId: event.id, title: 'Session 2 - ' + event.title,
+        description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
+      }),
+      new Session({
+        id: event.id + 30, eventId: event.id, title: 'Session 3 - ' + event.title,
+        description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
+      }),
+      new Session({
+        id: event.id + 40, eventId: event.id, title: 'Session 4 - ' + event.title,
+        description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
+      }),
+      new Session({
+        id: event.id + 50, eventId: event.id, title: 'Session 5 - ' + event.title,
+        description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
+      }),
+      new Session({
+        id: event.id + 60, eventId: event.id, title: 'Session 6 - ' + event.title,
+        description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
+      }),
     ];
   }
 

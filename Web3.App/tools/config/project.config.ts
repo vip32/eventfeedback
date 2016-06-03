@@ -13,7 +13,7 @@ export class ProjectConfig extends SeedConfig {
 
   constructor() {
     super();
-    this.APP_TITLE = 'Angular2-Seed Materialized';
+    this.APP_TITLE = 'Event|Feedback';
     this.SYSTEM_CONFIG_DEV.packageConfigPaths =
         this.SYSTEM_CONFIG_DEV.packageConfigPaths.concat([
           `${this.APP_BASE}node_modules/@angular2-material/*/package.json`

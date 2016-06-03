@@ -11,6 +11,9 @@ import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 
+import {LoggerService} from '../shared/logger.service';
+import {AuthService} from '../shared/auth.service';
+
 @Component({
   moduleId: module.id,
   selector: 'app-profile',
@@ -21,15 +24,20 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
     MD_SIDENAV_DIRECTIVES, MD_LIST_DIRECTIVES,
     MD_CARD_DIRECTIVES, MdToolbar, MdButton, MdInput,
     MdCheckbox, MdRadioGroup, MdRadioButton, MdIcon,
-    ],
-    providers: [MdIconRegistry, MdRadioDispatcher]
+  ],
+  providers: [MdIconRegistry, MdRadioDispatcher]
 })
 export class ProfileComponent implements OnInit {
 
-  constructor(private _router: Router) {}
+  constructor(private _router: Router,
+    private _authService: AuthService,
+    private _logger: LoggerService) { }
 
   ngOnInit() {
     console.log('profile init');
+    if (!this._authService.isAuthenticated) {
+      this._router.navigate(['/login']);
+    }
   }
 
   onDoneSelect() {

@@ -11,9 +11,7 @@ import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 
-import {BackendService} from '../shared/backend.service';
 import {AuthService} from '../shared/auth.service';
-import {StateService} from '../shared/state.service';
 import {LoggerService} from '../shared/logger.service';
 
 @Component({
@@ -34,28 +32,24 @@ import {LoggerService} from '../shared/logger.service';
 export class LoginComponent implements OnInit {
   userName: string;
   password: string;
-  remember: boolean;
+  remember: boolean = true;
 
   constructor(private _router: Router,
     private _authService: AuthService,
-    private _state: StateService,
     private _logger: LoggerService) {
     console.log('login ctor');
   }
 
   ngOnInit() {
     console.log('login init');
-    console.log('state', this._state);
-    this.userName = this._state.userName;
-    this.password = this._state.password;
-    this.remember = this._state.remember;
+    if (this._authService.remember) {
+      this.userName = this._authService.userName;
+      this.password = this._authService.password;
+      this.remember = this._authService.remember;
+    };
   }
 
   onSubmit() {
-    this._state.userName = this.userName;
-    this._state.password = this.password;
-    this._state.remember = this.remember;
-    console.log('state', this._state);
     this._authService.onAuthenticate(
       this.userName, this.password, this.remember,
       '/home');

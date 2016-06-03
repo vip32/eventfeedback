@@ -7,6 +7,9 @@ import {LoggerService} from './logger.service';
 @Injectable()
 export class AuthService {
     isAuthenticated: boolean = false;
+    userName: string = undefined;
+    password: string = undefined;
+    remember: boolean = undefined;
     token: string = undefined;
     authenticatedSince: Date;
 
@@ -21,6 +24,9 @@ export class AuthService {
         redirectRoute?: string) {
         console.log('onAuthenticate', this);
         this.isAuthenticated = false;
+        this.userName = userName;
+        this.password = password;
+        this.remember = remember;
         this.token = undefined;
         this.authenticatedSince = undefined;
 
