@@ -17,12 +17,14 @@ import {AboutComponent} from './+about/about.component';
 import {ProfileComponent} from './+profile/profile.component';
 import {LoginComponent} from './+login/login.component';
 
-import {Event} from './+sessions/shared/event.model';
+import {Event, Session} from  './shared/backend.service';;
 import {EventComponent} from './+sessions/event/event.component';
-import {Session} from './+sessions/shared/session.model';
 import {SessionListComponent} from './+sessions/session-list/session-list.component';
-import {BackendService} from './+sessions/shared/backend.service';
-// import {AuthService} from './shared/auth.service';
+import {BackendMockService} from './shared/backendmock.service';
+import {BackendService} from './shared/backend.service';
+import {AuthService} from './shared/auth.service';
+import {StateService} from './shared/state.service';
+import {LoggerService} from './shared/logger.service';
 
 @Component({
   ///moduleId: module.id,
@@ -31,20 +33,14 @@ import {BackendService} from './+sessions/shared/backend.service';
   styleUrls: ['./app/app.component.css'],
   directives: [
     ROUTER_DIRECTIVES,
-    MD_SIDENAV_DIRECTIVES,
-    MD_LIST_DIRECTIVES,
-    MD_CARD_DIRECTIVES,
-    MdToolbar,
-    MdButton,
-    MdInput,
-    MdCheckbox,
-    MdRadioGroup,
-    MdRadioButton,
-    MdIcon,
-    EventComponent,
-    SessionListComponent
+    MD_SIDENAV_DIRECTIVES, MD_LIST_DIRECTIVES,
+    MD_CARD_DIRECTIVES, MdToolbar, MdButton, MdInput,
+    MdCheckbox, MdRadioGroup, MdRadioButton, MdIcon,
+    EventComponent, SessionListComponent
   ],
-  providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher, BackendService/*, AuthService*/]
+  providers: [HTTP_PROVIDERS,
+    MdIconRegistry, MdRadioDispatcher,
+    BackendMockService, BackendService , AuthService, StateService, LoggerService]
 })
 @Routes([
   { path: '/home', component: HomeComponent },
@@ -58,7 +54,12 @@ export class AppComponent implements OnInit {
   events: Event[] = this._backendService.getEvents();
   sessions: Session[];
 
-  constructor(private _router: Router, private _backendService: BackendService, /*private _authService: AuthService*/) { }
+  constructor(private _router: Router,
+    private _backendService: BackendMockService,
+    private _state: StateService,
+    private _logger: LoggerService) {
+      console.log('app ctor');
+    }
 
   ngOnInit() {
     console.log('app init');
@@ -72,6 +73,6 @@ export class AppComponent implements OnInit {
   }
 
   onHome() {
-     this._router.navigate(['/home']);
+    this._router.navigate(['/home']);
   }
 }

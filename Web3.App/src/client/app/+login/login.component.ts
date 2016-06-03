@@ -13,6 +13,8 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 
 import {BackendService} from '../shared/backend.service';
 import {AuthService} from '../shared/auth.service';
+import {StateService} from '../shared/state.service';
+import {LoggerService} from '../shared/logger.service';
 
 @Component({
   moduleId: module.id,
@@ -21,36 +23,40 @@ import {AuthService} from '../shared/auth.service';
   styleUrls: ['login.component.css'],
   directives: [
     ROUTER_DIRECTIVES,
-    MD_SIDENAV_DIRECTIVES,
-    MD_LIST_DIRECTIVES,
-    MD_CARD_DIRECTIVES,
-    MdToolbar,
-    MdButton,
-    MdInput,
-    MdCheckbox,
-    MdRadioGroup,
-    MdRadioButton,
-    MdIcon
+    MD_SIDENAV_DIRECTIVES, MD_LIST_DIRECTIVES,
+    MD_CARD_DIRECTIVES, MdToolbar, MdButton, MdInput,
+    MdCheckbox, MdRadioGroup, MdRadioButton, MdIcon
   ],
-  providers: [MdIconRegistry, MdRadioDispatcher, BackendService, AuthService]
+  providers: [
+    MdIconRegistry, MdRadioDispatcher
+  ]
 })
 export class LoginComponent implements OnInit {
   userName: string;
   password: string;
   remember: boolean;
 
-  constructor(private _router: Router, private _backendService: BackendService, private _authService: AuthService) { }
+  constructor(private _router: Router,
+    private _authService: AuthService,
+    private _state: StateService,
+    private _logger: LoggerService) {
+    console.log('login ctor');
+  }
 
   ngOnInit() {
-    this.userName = 'vproosdij';
-    this.userName = this._authService.userName;
-    this.password = this._authService.password;
-    this.remember = this._authService.remember;
+    console.log('login init');
+    console.log('state', this._state);
+    this.userName = this._state.userName;
+    this.password = this._state.password;
+    this.remember = this._state.remember;
   }
 
   onSubmit() {
+    this._state.userName = this.userName;
+    this._state.password = this.password;
+    this._state.remember = this.remember;
+    console.log('state', this._state);
     this._authService.onAuthenticate(
-      this._backendService,
       this.userName, this.password, this.remember,
       '/home');
   }

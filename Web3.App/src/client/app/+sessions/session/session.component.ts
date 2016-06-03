@@ -9,9 +9,8 @@ import {MdInput} from '@angular2-material/input';
 import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
-import {Session} from '../shared/session.model';
-import {Feedback} from '../shared/feedback.model';
-import {BackendService} from '../shared/backend.service';
+import {Session, Feedback} from '../../shared/backend.service';
+import {BackendMockService} from '../../shared/backendmock.service';
 
 @Component({
   moduleId: module.id,
@@ -19,18 +18,11 @@ import {BackendService} from '../shared/backend.service';
   templateUrl: 'session.component.html',
   styleUrls: ['session.component.css'],
   directives: [
-    MD_SIDENAV_DIRECTIVES,
-    MD_LIST_DIRECTIVES,
-    MD_CARD_DIRECTIVES,
-    MdToolbar,
-    MdButton,
-    MdInput,
-    MdCheckbox,
-    MdRadioGroup,
-    MdRadioButton,
-    MdIcon
+    MD_SIDENAV_DIRECTIVES, MD_LIST_DIRECTIVES,
+    MD_CARD_DIRECTIVES, MdToolbar, MdButton, MdInput,
+    MdCheckbox, MdRadioGroup, MdRadioButton, MdIcon,
   ],
-  providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher, BackendService]
+  providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher]
 })
 export class SessionComponent  {
   @Input() session: Session;
@@ -39,7 +31,7 @@ export class SessionComponent  {
   isSelected = false;
   feedback: Feedback;
 
-  constructor(private _backendService: BackendService) { }
+  constructor(private _backendService: BackendMockService) { }
 
   select(session: Session) {
     console.log('session selected ', session.id);

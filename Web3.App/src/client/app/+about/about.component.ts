@@ -18,16 +18,9 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
   styleUrls: ['about.component.css'],
   directives: [
     ROUTER_DIRECTIVES,
-    MD_SIDENAV_DIRECTIVES,
-    MD_LIST_DIRECTIVES,
-    MD_CARD_DIRECTIVES,
-    MdToolbar,
-    MdButton,
-    MdInput,
-    MdCheckbox,
-    MdRadioGroup,
-    MdRadioButton,
-    MdIcon
+    MD_SIDENAV_DIRECTIVES, MD_LIST_DIRECTIVES,
+    MD_CARD_DIRECTIVES, MdToolbar, MdButton, MdInput,
+    MdCheckbox, MdRadioGroup, MdRadioButton, MdIcon,
     ],
     providers: [MdIconRegistry, MdRadioDispatcher]
 })

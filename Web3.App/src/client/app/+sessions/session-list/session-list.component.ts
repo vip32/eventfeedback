@@ -9,8 +9,7 @@ import {MdInput} from '@angular2-material/input';
 import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
-import {SessionComponent} from '../session/session.component';
-import {Session} from '../shared/session.model';
+import {Session} from '../../shared/backend.service';
 
 @Component({
   moduleId: module.id,
@@ -18,17 +17,9 @@ import {Session} from '../shared/session.model';
   templateUrl: 'session-list.component.html',
   styleUrls: ['session-list.component.css'],
   directives: [
-    MD_SIDENAV_DIRECTIVES,
-    MD_LIST_DIRECTIVES,
-    MD_CARD_DIRECTIVES,
-    MdToolbar,
-    MdButton,
-    MdInput,
-    MdCheckbox,
-    MdRadioGroup,
-    MdRadioButton,
-    MdIcon,
-    SessionComponent
+    MD_SIDENAV_DIRECTIVES, MD_LIST_DIRECTIVES,
+    MD_CARD_DIRECTIVES, MdToolbar, MdButton, MdInput,
+    MdCheckbox, MdRadioGroup, MdRadioButton, MdIcon,
   ],
   providers: [HTTP_PROVIDERS, MdIconRegistry, MdRadioDispatcher]
 })

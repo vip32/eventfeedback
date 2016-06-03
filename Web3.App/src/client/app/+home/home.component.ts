@@ -11,6 +11,9 @@ import {MdCheckbox} from '@angular2-material/checkbox';
 import {MdRadioButton, MdRadioGroup, MdRadioDispatcher} from '@angular2-material/radio';
 import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
 
+import {LoggerService} from '../shared/logger.service';
+import {StateService} from '../shared/state.service';
+
 @Component({
   moduleId: module.id,
   selector: 'app-home',
@@ -18,24 +21,18 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon';
   styleUrls: ['home.component.css'],
   directives: [
     ROUTER_DIRECTIVES,
-    MD_SIDENAV_DIRECTIVES,
-    MD_LIST_DIRECTIVES,
-    MD_CARD_DIRECTIVES,
-    MdToolbar,
-    MdButton,
-    MdInput,
-    MdCheckbox,
-    MdRadioGroup,
-    MdRadioButton,
-    MdIcon
+    MD_SIDENAV_DIRECTIVES, MD_LIST_DIRECTIVES,
+    MD_CARD_DIRECTIVES, MdToolbar, MdButton, MdInput,
+    MdCheckbox, MdRadioGroup, MdRadioButton, MdIcon,
     ],
     providers: [MdIconRegistry, MdRadioDispatcher]
 })
 export class HomeComponent implements OnInit {
 
-  constructor(private _router: Router) {}
+  constructor(private _router: Router, private _state: StateService, private _logger: LoggerService) {}
 
   ngOnInit() {
     console.log('home init');
+    console.log('state', this._state);
   }
 }
