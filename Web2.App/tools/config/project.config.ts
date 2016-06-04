@@ -21,7 +21,6 @@ export class ProjectConfig extends SeedConfig {
     let additional_deps: InjectableDependency[] = [
       // {src: 'jquery/dist/jquery.min.js', inject: 'libs'},
       // {src: 'lodash/lodash.min.js', inject: 'libs'},
-      // {src: 'lodash/lodash.min.js', inject: 'libs'},
       { src: '@angular2-material/button/button.css', inject: true },
       { src: '@angular2-material/card/card.css', inject: true },
       { src: '@angular2-material/checkbox/checkbox.css', inject: true },
