@@ -1,0 +1,61 @@
+<span (click)="select(session)">
+  <!--<img md-card-image [alt]="session.name" src="https://material.angularjs.org/material2_assets/ngconf/{{session.name}}.png">-->
+  <img md-card-image [alt]="session.name" src="http://www.dummymag.com/media/img/dummy-logo.png">
+  <md-card-title>{{session.title}} #{{session.id}}</md-card-title>
+  <md-card-content class="secondary">
+    {{session.description}}
+  </md-card-content>
+  <!--<md-card-actions align="end">
+    <button md-raised-button color="primary">Rate</button>
+  </md-card-actions>-->
+  <button (click)="formShowing=!formShowing" md-fab color="accent">
+    <md-icon class="md-24">comment</md-icon>
+  </button>
+  <div class="form" *ngIf="formShowing && feedback">
+    <form>
+      <md-input placeholder="Q_1" [(ngModel)]="feedback.answer0"></md-input>
+      <md-input placeholder="Q_2" [(ngModel)]="feedback.answer1"></md-input>
+      <md-input placeholder="Q_3" [(ngModel)]="feedback.answer2"></md-input>
+      <h3>Q4</h3>
+      <md-radio-group [(ngModel)]="feedback.answer3" #q1>
+        <md-radio-button value="1">
+          <md-icon>mood_bad</md-icon>
+        </md-radio-button>
+        <md-radio-button value="2"></md-radio-button>
+        <md-radio-button value="3"></md-radio-button>
+        <md-radio-button value="4"></md-radio-button>
+        <md-radio-button value="5">
+          <md-icon>mood</md-icon>
+        </md-radio-button>
+      </md-radio-group>
+      <h3>Q5</h3>
+      <md-radio-group [(ngModel)]="feedback.answer4">
+        <md-radio-button value="1">
+          <md-icon>mood_bad</md-icon>
+        </md-radio-button>
+        <md-radio-button value="2"></md-radio-button>
+        <md-radio-button value="3"></md-radio-button>
+        <md-radio-button value="4"></md-radio-button>
+        <md-radio-button value="5">
+          <md-icon>mood</md-icon>
+        </md-radio-button>
+      </md-radio-group>
+      <h3>Q6</h3>
+      <md-radio-group [(ngModel)]="feedback.answer5">
+        <md-radio-button value="1">
+          <md-icon>mood_bad</md-icon>
+        </md-radio-button>
+        <md-radio-button value="2"></md-radio-button>
+        <md-radio-button value="3"></md-radio-button>
+        <md-radio-button value="4"></md-radio-button>
+        <md-radio-button value="5">
+          <md-icon>mood</md-icon>
+        </md-radio-button>
+      </md-radio-group>
+    </form>
+    <button md-raised-button color="accent" class="card-done-button" (click)="save()">
+      <md-icon>done</md-icon>
+    </button>
+
+  </div>
+</span>

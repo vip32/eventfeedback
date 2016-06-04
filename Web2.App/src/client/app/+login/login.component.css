@@ -1,0 +1,23 @@
+.card-container {
+  /*align-content: center;*/
+  display: flex;
+  flex-flow: row wrap;
+}
+
+md-card {
+  /*width: 400px;*/
+  width: 90%;
+  box-sizing: border-box;
+  margin: 16px;
+}
+
+[md-fab] { /* rate */
+  /*position: relative;
+  left:85%;*/
+  /*bottom: 16px;*/
+  /*z-index: 1;*/
+}
+
+.ng-invalid{
+  /*border-left: 5px solid #a94442;*/
+}

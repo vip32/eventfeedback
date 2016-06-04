@@ -1,0 +1,15 @@
+<div class="card-container">
+  <md-card>
+    <md-card-title>Profile</md-card-title>
+    <md-card-content>
+      <p>
+        Welcome {{_authService.userName}}
+      </p>
+    </md-card-content>
+    <md-card-actions align="end">
+      <button (click)="onDoneSelect()" md-fab color="accent">
+          <md-icon>done</md-icon>
+      </button>
+    </md-card-actions>
+  </md-card>
+</div>
