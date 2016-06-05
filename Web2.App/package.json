@@ -1,6 +1,6 @@
 {
   "name": "angular2-seed",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "description": "Modular seed project for Angular 2 apps with fast, statically typed build",
   "repository": {
     "url": "https://github.com/mgechev/angular2-seed"

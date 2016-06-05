@@ -25,7 +25,9 @@ import {MdIcon, MdIconRegistry} from '@angular2-material/icon/icon';
     providers: [MdIconRegistry, MdRadioDispatcher]
 })
 export class AboutComponent implements OnInit {
-
+  environment: string = '<%= ENV %>';
+  version: string = '<%= VERSION %>';
+  appbase: string = '<%= APP_BASE %>';
   constructor(private _router: Router) {}
 
   ngOnInit() {

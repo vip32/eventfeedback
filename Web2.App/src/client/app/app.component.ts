@@ -58,7 +58,7 @@ export class AppComponent implements OnInit {
     private _backendService: BackendMockService,
     private _logger: LoggerService) {
       console.log('app ctor');
-      console.log( '<%= ENV %>');
+      console.log( 'env:<%= ENV %>, version:<%= VERSION %>');
     }
 
   ngOnInit() {
@@ -72,7 +72,7 @@ export class AppComponent implements OnInit {
     this.sessions = this._backendService.getSessions(event);
     console.log('sessions', this.sessions);
   }
-
+ 
   onHome() {
     this._router.navigate(['/home']);
   }
