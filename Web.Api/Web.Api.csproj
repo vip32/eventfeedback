@@ -126,6 +126,11 @@
       <DependentUpon>Web.config</DependentUpon>
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="www2\assets\svg\more.svg" />
+    <Content Include="www2\css\main.css" />
+    <Content Include="www2\index.html" />
+    <Content Include="www2\js\app.js" />
+    <Content Include="www2\js\shims.js" />
     <Content Include="www\config.xml" />
     <Content Include="www\favicon.ico" />
     <Content Include="www\fonts\glyphicons-halflings-regular.svg" />
@@ -164,10 +169,11 @@
     <Content Include="www\service-worker.js" />
     <Content Include="www\stylesheets\app.css" />
     <Content Include="swagger.json" />
+    <Content Include="www2\assets\data.json" />
+    <Content Include="www2\tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="www2\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config">
