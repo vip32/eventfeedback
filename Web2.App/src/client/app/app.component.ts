@@ -20,8 +20,9 @@ import {LoginComponent} from './+login/login.component';
 import {Event, Session} from  './shared/backend.service';;
 import {EventComponent} from './+sessions/event/event.component';
 import {SessionListComponent} from './+sessions/session-list/session-list.component';
-import {BackendMockService} from './shared/backendmock.service';
 import {BackendService} from './shared/backend.service';
+import {API_BASE_URL} from './shared/backend.service';
+import {BackendMockService} from './shared/backendmock.service';
 import {AuthService} from './shared/auth.service';
 import {LoggerService} from './shared/logger.service';
 
@@ -40,7 +41,8 @@ import {LoggerService} from './shared/logger.service';
   providers: [
     HTTP_PROVIDERS,
     MdIconRegistry, MdRadioDispatcher,
-    BackendMockService, BackendService , AuthService, LoggerService]
+    BackendMockService, BackendService, AuthService, LoggerService,
+    {provide: API_BASE_URL, useValue: '<%= ENV %>' === 'dev' ? 'http://localhost:6003': window.location.href}]
 })
 @Routes([
   { path: '/home', component: HomeComponent },
