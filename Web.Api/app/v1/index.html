@@ -19,33 +19,33 @@
         <!-- <link rel="apple-touch-startup-image" href="/startup.png"> -->
         <link rel="canonical" href="https://eventfeeback.azurewebsites.net">
         <!-- standard shortcut icon -->
-        <link rel="icon" href="/www/images/icon-192x192.png" sizes="192x192">
-        <link rel="shortcut icon" href="/www/images/icon-196x196.png" sizes="196x196">
+        <link rel="icon" href="/app/v1/images/icon-192x192.png" sizes="192x192">
+        <link rel="shortcut icon" href="/app/v1/images/icon-196x196.png" sizes="196x196">
         <!-- non-retina iPhone pre iOS 7 -->
-        <link rel="apple-touch-icon" href="/www/images/icon-57x57.png" sizes="57x57">
+        <link rel="apple-touch-icon" href="/app/v1/images/icon-57x57.png" sizes="57x57">
         <!-- non-retina iPad pre iOS 7 -->
-        <link rel="apple-touch-icon" href="/www/images/icon-72x72.png" sizes="72x72">
+        <link rel="apple-touch-icon" href="/app/v1/images/icon-72x72.png" sizes="72x72">
         <!-- non-retina iPad iOS 7 -->
-        <link rel="apple-touch-icon" href="/www/images/icon-76x76.png" sizes="76x76">
+        <link rel="apple-touch-icon" href="/app/v1/images/icon-76x76.png" sizes="76x76">
         <!-- retina iPhone pre iOS 7 -->
-        <link rel="apple-touch-icon" href="/www/images/icon-114x114.png" sizes="114x114">
+        <link rel="apple-touch-icon" href="/app/v1/images/icon-114x114.png" sizes="114x114">
         <!-- retina iPhone iOS 7 -->
-        <link rel="apple-touch-icon" href="/www/images/icon-120x120.png" sizes="120x120">
+        <link rel="apple-touch-icon" href="/app/v1/images/icon-120x120.png" sizes="120x120">
         <!-- retina iPad pre iOS 7 -->
-        <link rel="apple-touch-icon" href="/www/images/icon-144x144.png" sizes="144x144">
+        <link rel="apple-touch-icon" href="/app/v1/images/icon-144x144.png" sizes="144x144">
         <!-- retina iPad iOS 7 -->
-        <link rel="apple-touch-icon" href="/www/images/icon-152x152.png" sizes="152x152">
+        <link rel="apple-touch-icon" href="/app/v1/images/icon-152x152.png" sizes="152x152">
 
         <link rel="manifest" href="manifest.json">
-        <link rel="stylesheet" href="/www/stylesheets/app.css">
+        <link rel="stylesheet" href="/app/v1/stylesheets/app.css">
 
-        <script src="/www/javascripts/vendor.js"></script>
-        <script src="/www/javascripts/app.js"></script>
+        <script src="/app/v1/javascripts/vendor.js"></script>
+        <script src="/app/v1/javascripts/app.js"></script>
         <script>require('initialize');</script>
 
         <script>
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./www/service-worker.js'/*, { scope: './www' }*/)
+                navigator.serviceWorker.register('./app/v1/service-worker.js'/*, { scope: './app/v1' }*/)
                     .then(function(r) {
                         console.log('registered service worker');
                     })
