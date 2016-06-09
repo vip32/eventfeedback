@@ -174,7 +174,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="www\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config">
