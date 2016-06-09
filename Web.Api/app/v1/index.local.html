@@ -45,7 +45,7 @@
 
         <script>
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./app/v1/service-worker.js'/*, { scope: './app/v1' }*/)
+                navigator.serviceWorker.register('./service-worker.js'/*, { scope: './app/v1' }*/)
                 .then(function(r) {
                   console.log('registered service worker');
                 })
