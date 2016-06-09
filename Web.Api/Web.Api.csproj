@@ -126,11 +126,11 @@
       <DependentUpon>Web.config</DependentUpon>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="app\assets\svg\more.svg" />
-    <Content Include="app\css\main.css" />
-    <Content Include="app\index.html" />
-    <Content Include="app\js\app.js" />
-    <Content Include="app\js\shims.js" />
+    <Content Include="app\v2\assets\svg\more.svg" />
+    <Content Include="app\v2\css\main.css" />
+    <Content Include="app\v2\index.html" />
+    <Content Include="app\v2\js\app.js" />
+    <Content Include="app\v2\js\shims.js" />
     <Content Include="www\config.xml" />
     <Content Include="www\favicon.ico" />
     <Content Include="www\fonts\glyphicons-halflings-regular.svg" />
@@ -169,8 +169,8 @@
     <Content Include="www\service-worker.js" />
     <Content Include="www\stylesheets\app.css" />
     <Content Include="swagger.json" />
-    <Content Include="app\assets\data.json" />
-    <Content Include="app\tsconfig.json" />
+    <Content Include="app\v2\assets\data.json" />
+    <Content Include="app\v2\tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
