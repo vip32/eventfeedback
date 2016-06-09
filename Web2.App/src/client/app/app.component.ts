@@ -74,7 +74,7 @@ export class AppComponent implements OnInit {
     this.sessions = this._backendService.getSessions(event);
     console.log('sessions', this.sessions);
   }
- 
+
   onHome() {
     this._router.navigate(['/home']);
   }
