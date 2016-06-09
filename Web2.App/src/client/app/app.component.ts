@@ -45,6 +45,7 @@ import {LoggerService} from './shared/logger.service';
     {provide: API_BASE_URL, useValue: '<%= ENV %>' === 'dev' ? 'http://localhost:6003': window.location.href}]
 })
 @Routes([
+  { path: '/www2', component: HomeComponent },
   { path: '/home', component: HomeComponent },
   { path: '/about', component: AboutComponent },
   { path: '/profile', component: ProfileComponent },
