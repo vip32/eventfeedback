@@ -42,10 +42,10 @@ import {LoggerService} from './shared/logger.service';
     HTTP_PROVIDERS,
     MdIconRegistry, MdRadioDispatcher,
     BackendMockService, BackendService, AuthService, LoggerService,
-    {provide: API_BASE_URL, useValue: '<%= ENV %>' === 'dev' ? 'http://localhost:6003': window.location.href}]
+    {provide: API_BASE_URL, useValue: '<%= ENV %>' === 'dev' ? 'http://localhost:6003': 'https://eventfeedback-staging.azurewebsites.net'/*window.location.href*/}]
 })
 @Routes([
-  { path: '/www2', component: HomeComponent },
+  { path: '/app', component: HomeComponent },
   { path: '/home', component: HomeComponent },
   { path: '/about', component: AboutComponent },
   { path: '/profile', component: ProfileComponent },
