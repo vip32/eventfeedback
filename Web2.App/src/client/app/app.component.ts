@@ -42,7 +42,8 @@ import {LoggerService} from './shared/logger.service';
     HTTP_PROVIDERS,
     MdIconRegistry, MdRadioDispatcher,
     BackendMockService, BackendService, AuthService, LoggerService,
-    {provide: API_BASE_URL, useValue: '<%= ENV %>' === 'dev' ? 'http://localhost:6003': 'https://eventfeedback-staging.azurewebsites.net'/*window.location.href*/}]
+    {provide: API_BASE_URL, useValue:
+      '<%= ENV %>' === 'dev' ? 'http://localhost:6003': 'https://eventfeedback-staging.azurewebsites.net'/*window.location.href*/}]
 })
 @Routes([
   { path: '/app/v2', component: HomeComponent },
