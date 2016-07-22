@@ -16,8 +16,8 @@ export class AuthService {
     constructor(private _router: Router,
         private _logger: LoggerService,
         private _backendService: BackendService) {
-            console.log('authservice ctor');
-        }
+        console.log('authservice ctor');
+    }
 
     // backendservice should actually be injected into ctor, but that does not work with the DI now
     onAuthenticate(userName: string, password: string, remember?: boolean,
@@ -38,9 +38,9 @@ export class AuthService {
                     this.isAuthenticated = true;
                     this.authenticatedSince = new Date();
                     console.log('isAuthenticated', this.isAuthenticated, this.token);
-                    //if (redirectRoute.length > 0) {
-                        this._router.navigate([redirectRoute]);
-                    //}
+                    this._router.navigate([redirectRoute]).then(_ => {
+                        //navigation done
+                    });
                 }
             }, error => {
                 console.log('error', error);

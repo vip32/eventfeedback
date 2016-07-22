@@ -39,6 +39,8 @@ export class EventListComponent implements OnInit {
     select(event: Event) {
         console.log('event selected ', event.id);
         this.selectedEvent = event;
-        this._router.navigate(['/events/' + event.id]);
+        this._router.navigate(['/events', event.id]).then(_ => {
+            //navigation done
+        });
     };
 }
