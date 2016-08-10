@@ -32,7 +32,6 @@ namespace EventFeedback.Web.Api.Controllers
         {
             using (new TraceLogicalScope(_traceSource, "LookupController:ApiInfo"))
             {
-
                 _telemetry.TrackEvent("API:Lookup/ApiInfo");
                 var version = Assembly.GetExecutingAssembly().GetName().Version;
                 return Ok(new
