@@ -39,3 +39,4 @@ obj/
 *.suo
 packages/*/
 *.svclog
+/Web.Seed/
