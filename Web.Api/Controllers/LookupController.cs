@@ -32,6 +32,7 @@ namespace EventFeedback.Web.Api.Controllers
         {
             using (new TraceLogicalScope(_traceSource, "LookupController:ApiInfo"))
             {
+
                 _telemetry.TrackEvent("API:Lookup/ApiInfo");
                 var version = Assembly.GetExecutingAssembly().GetName().Version;
                 return Ok(new
@@ -42,6 +43,7 @@ namespace EventFeedback.Web.Api.Controllers
                         TimeSpan.TicksPerSecond*2*version.Revision)),
                     // seconds since midnight, (multiply by 2 to get original)
                     Environment = Environment.GetEnvironmentVariable("APPSETTING_Environment"),
+                    DbName = _context.Database.Connection.Database,
                     DbMigrations = new DbMigrator(new Domain.Migrations.Configuration()).GetDatabaseMigrations()
                 });
             }
