@@ -15,6 +15,7 @@ namespace EventFeedback.Web.Api.Controllers
 {
     [RoutePrefix("api/v1/resources")]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
+    [ExceptionHandling]
     public class ResourceTextsController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

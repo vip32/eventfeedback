@@ -17,6 +17,7 @@ namespace EventFeedback.Web.Api.Controllers
     [Authorize]
     [RoutePrefix("api/v1/feedbacks")] // TODO : routes are defined in Startup.WebApi
     [EnableCors(origins: "*", headers: "*", methods: "*")]
+    [ExceptionHandling]
     public class FeedbacksController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

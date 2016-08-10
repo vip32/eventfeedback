@@ -20,6 +20,7 @@ namespace EventFeedback.Web.Api.Controllers
 {
     [RoutePrefix("api/v1/user")]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
+    [ExceptionHandling]
     public class UserController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

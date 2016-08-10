@@ -14,6 +14,7 @@ namespace EventFeedback.Web.Api.Controllers
 {
     [RoutePrefix("api/v1/lookup")]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
+    [ExceptionHandling]
     public class LookupController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

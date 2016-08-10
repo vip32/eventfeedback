@@ -18,6 +18,7 @@ namespace EventFeedback.Web.Api.Controllers
     //[AllowAnonymous] //TODO: to be removed
     [RoutePrefix("api/v1/events/{eventId}/sessions")]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
+    [ExceptionHandling]
     public class SessionsController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);

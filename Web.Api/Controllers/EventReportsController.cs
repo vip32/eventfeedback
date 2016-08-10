@@ -16,6 +16,7 @@ namespace EventFeedback.Web.Api.Controllers
     [Authorize(Roles = "Administrator")]
     [RoutePrefix("api/v1/events/{eventId}/report")]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
+    [ExceptionHandling]
     public class EventReportsController : ApiController
     {
         private readonly TraceSource _traceSource = new TraceSource(Assembly.GetExecutingAssembly().GetName().Name);
