@@ -1,0 +1,26 @@
+<div class="card-container">
+  <md-card>
+    <md-card-title-group>
+      <md-icon md-list-icon>account_circle</md-icon>
+      <md-card-title>Login</md-card-title>
+      <md-card-subtitle>Please enter your credentials</md-card-subtitle>
+    </md-card-title-group>
+    <md-card-content>
+      <!--#form="ngForm"-->
+      <form>
+        <md-input [(ngModel)]="userName" placeholder="Username" name="userName" required></md-input>
+        <md-input [(ngModel)]="password" placeholder="Password" name="password" required type="password"></md-input>
+        <div>
+          <md-checkbox [(ngModel)]="remember" indeterminate="true" name="remember">Remember me</md-checkbox>
+        </div>
+      </form>
+    </md-card-content>
+    <md-card-actions align="end">
+      <!--[disabled]="!form.valid"-->
+      <button (click)="onSubmit()" md-fab color="accent" type="submit">
+          <md-icon>done</md-icon>
+      </button>
+    </md-card-actions>
+  </md-card>
+</div>
+<!--valid/pristine: {{form?.valid}}/{{form?.pristine}} <br/>-->
