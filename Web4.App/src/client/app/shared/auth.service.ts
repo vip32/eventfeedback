@@ -17,9 +17,16 @@ export class AuthService {
         private _logger: LoggerService,
         private _backendService: BackendService) {
         console.log('authservice ctor');
+
+        this.userName = localStorage.getItem('userName');
+        this.password = localStorage.getItem('password');
+        this.remember = (localStorage.getItem('remember') === 'true');
+        this.token = localStorage.getItem('token');
+        if (localStorage.getItem('authenticatedSince') !== null) {
+            this.authenticatedSince = new Date(localStorage.getItem('authenticatedSince'));
+        }
     }
 
-    // backendservice should actually be injected into ctor, but that does not work with the DI now
     onAuthenticate(userName: string, password: string, remember?: boolean,
         redirectRoute?: string) {
         console.log('onAuthenticate', this);
@@ -30,6 +37,17 @@ export class AuthService {
         this.token = undefined;
         this.authenticatedSince = undefined;
 
+        localStorage.setItem('remember', this.remember.toString());
+        localStorage.setItem('token', undefined);
+        localStorage.setItem('authenticatedSince', undefined);
+        if (remember) {
+            localStorage.setItem('userName', userName);
+            localStorage.setItem('password', password);
+        } else {
+            localStorage.setItem('userName', undefined);
+            localStorage.setItem('password', undefined);
+        }
+
         this._backendService.user_Token(
             new LoginBindingModel({ userName: userName, password: password }))
             .subscribe(data => {
@@ -37,6 +55,8 @@ export class AuthService {
                 if (this.token.length > 0) {
                     this.isAuthenticated = true;
                     this.authenticatedSince = new Date();
+                    localStorage.setItem('token', this.token);
+                    localStorage.setItem('authenticatedSince', this.authenticatedSince.toString());
                     console.log('isAuthenticated', this.isAuthenticated, this.token);
                     this._router.navigate([redirectRoute]).then(_ => {
                         //navigation done
