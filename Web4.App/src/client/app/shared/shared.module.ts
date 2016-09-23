@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
-import { LayoutModule } from './layout/layout.module';
 import { MaterialModule } from './material.module';
+import { LayoutModule } from './layout/layout.module';
 import { AuthService } from './auth.service';
 import { BackendService } from './backend.service';
 import { LoggerService } from './logger.service';

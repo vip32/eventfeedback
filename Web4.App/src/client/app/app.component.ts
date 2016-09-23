@@ -10,26 +10,24 @@ import {AuthService} from './shared/auth.service';
  * applications routes, configuring the paths for the lazy loaded components (HomeComponent, AboutComponent).
  */
 @Component({
-  moduleId: module.id,
-  selector: 'sd-app',
-  templateUrl: 'app.component.html',
-  providers: [
-    AuthService,
-    // {
-    //   provide: API_BASE_URL, useValue:
-    //     '<%= ENV %>' === 'dev' ? 'http://localhost:6003' : 'https://eventfeedback-staging.azurewebsites.net'/*window.location.href*/
-    // }
-    ]
+    moduleId: module.id,
+    selector: 'sd-app',
+    templateUrl: 'app.component.html'
+    // providers: [
+    //     AuthService,
+    //     {
+    //         provide: API_BASE_URL, useValue: Config.API
+    //     }
+    // ]
 })
 
 export class AppComponent implements OnInit {
-  constructor(private _router: Router,
+    constructor(private _router: Router,
         private _authService: AuthService) {
-          console.log('Environment config', Config);
-          console.log('Environment: ', '<%= ENV %>'.toUpperCase());
-  }
+        console.log('Config', Config);
+    }
 
-  ngOnInit() {
+    ngOnInit() {
         console.log('app init', this._authService.isAuthenticated);
         if (!this._authService.isAuthenticated) {
             this._router.navigate(['/login']);

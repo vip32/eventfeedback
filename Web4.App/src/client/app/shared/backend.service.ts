@@ -8,6 +8,7 @@ import 'rxjs/Rx';
 import {Observable} from 'rxjs/Observable';
 import {Injectable, Inject, Optional, OpaqueToken} from '@angular/core';
 import {Http, Headers, Response, RequestOptionsArgs} from '@angular/http';
+import { Config } from './index';
 
 export const API_BASE_URL = new OpaqueToken('API_BASE_URL');
 export const JSON_PARSE_REVIVER = new OpaqueToken('JSON_PARSE_REVIVER');
@@ -18,9 +19,9 @@ export class BackendService {
     private baseUrl: string = undefined;
     private jsonParseReviver: (key: string, value: any) => any = undefined;
 
-    constructor(@Inject(Http) http: Http, @Optional() @Inject(API_BASE_URL) baseUrl?: string, @Optional() @Inject(JSON_PARSE_REVIVER) jsonParseReviver?: (key: string, value: any) => any) {
+    constructor( @Inject(Http) http: Http, @Optional() @Inject(API_BASE_URL) baseUrl?: string, @Optional() @Inject(JSON_PARSE_REVIVER) jsonParseReviver?: (key: string, value: any) => any) {
         this.http = http;
-        this.baseUrl = baseUrl ? baseUrl : "http://localhost:6003";
+        this.baseUrl = baseUrl ? baseUrl : Config.API;
         this.jsonParseReviver = jsonParseReviver;
     }
 
@@ -60,8 +61,7 @@ export class BackendService {
             result200 = resultData200 ? new EventReportModel(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -102,8 +102,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -137,8 +136,7 @@ export class BackendService {
             result200 = resultData200 ? new Event(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -179,8 +177,7 @@ export class BackendService {
             result200 = resultData200 ? new Event(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -218,8 +215,7 @@ export class BackendService {
             result200 = resultData200 ? new Event(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -227,7 +223,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    events_Delete(id: number): Observable<{ [key: string] : any; }> {
+    events_Delete(id: number): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/events/{id}?";
 
         if (id === undefined || id === null)
@@ -252,7 +248,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -263,8 +259,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -305,8 +300,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -340,8 +334,7 @@ export class BackendService {
             result200 = resultData200 ? new FeedbackDefinition(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -382,8 +375,7 @@ export class BackendService {
             result200 = resultData200 ? new FeedbackDefinition(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -421,8 +413,7 @@ export class BackendService {
             result200 = resultData200 ? new FeedbackDefinition(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -430,7 +421,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    feedbackDefinitions_Delete(id: number): Observable<{ [key: string] : any; }> {
+    feedbackDefinitions_Delete(id: number): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/feedbackdefinitions/{id}?";
 
         if (id === undefined || id === null)
@@ -455,7 +446,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -466,8 +457,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -505,8 +495,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -540,8 +529,7 @@ export class BackendService {
             result200 = resultData200 ? new Feedback(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -579,8 +567,7 @@ export class BackendService {
             result200 = resultData200 ? new Feedback(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -618,8 +605,7 @@ export class BackendService {
             result200 = resultData200 ? new Feedback(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -627,7 +613,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    feedbacks_Delete(id: number): Observable<{ [key: string] : any; }> {
+    feedbacks_Delete(id: number): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/feedbacks/{id}?";
 
         if (id === undefined || id === null)
@@ -652,7 +638,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -663,8 +649,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -672,7 +657,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    lookup_ApiInfo(): Observable<{ [key: string] : any; }> {
+    lookup_ApiInfo(): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/lookup/apiinfo?";
 
         var content = "";
@@ -693,7 +678,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -704,8 +689,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -713,7 +697,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    lookup_Roles(): Observable<{ [key: string] : any; }> {
+    lookup_Roles(): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/lookup/roles?";
 
         var content = "";
@@ -734,7 +718,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -745,8 +729,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -754,7 +737,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    lookup_Levels(): Observable<{ [key: string] : any; }> {
+    lookup_Levels(): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/lookup/levels?";
 
         var content = "";
@@ -775,7 +758,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -786,8 +769,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -795,7 +777,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    lookup_LevelsForEvent(eventId: number): Observable<{ [key: string] : any; }> {
+    lookup_LevelsForEvent(eventId: number): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/lookup/levels/{eventId}?";
 
         if (eventId === undefined || eventId === null)
@@ -820,7 +802,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -831,8 +813,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -840,7 +821,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    lookup_TagsForEvent(eventId: number): Observable<{ [key: string] : any; }> {
+    lookup_TagsForEvent(eventId: number): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/lookup/tags/{eventId}?";
 
         if (eventId === undefined || eventId === null)
@@ -865,7 +846,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -876,8 +857,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -885,7 +865,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    lookup_SpeakersForEvent(eventId: number): Observable<{ [key: string] : any; }> {
+    lookup_SpeakersForEvent(eventId: number): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/lookup/speakers/{eventId}?";
 
         if (eventId === undefined || eventId === null)
@@ -910,7 +890,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -921,8 +901,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -930,7 +909,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    lookup_TracksForEvent(eventId: number): Observable<{ [key: string] : any; }> {
+    lookup_TracksForEvent(eventId: number): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/lookup/tracks/{eventId}?";
 
         if (eventId === undefined || eventId === null)
@@ -955,7 +934,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -966,8 +945,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1010,8 +988,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1045,8 +1022,7 @@ export class BackendService {
             result200 = resultData200 ? new ResourceText(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1084,8 +1060,7 @@ export class BackendService {
             result200 = resultData200 ? new ResourceText(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1093,7 +1068,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    resourceTexts_Delete(id: number): Observable<{ [key: string] : any; }> {
+    resourceTexts_Delete(id: number): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/resources/{id}?";
 
         if (id === undefined || id === null)
@@ -1118,7 +1093,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -1129,8 +1104,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1168,8 +1142,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1214,8 +1187,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1253,8 +1225,7 @@ export class BackendService {
             result200 = resultData200 ? new Session(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1298,8 +1269,7 @@ export class BackendService {
             result200 = resultData200 ? new Session(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1340,8 +1310,7 @@ export class BackendService {
             result200 = resultData200 ? new Session(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1349,7 +1318,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    sessions_Delete(id: number, eventId: string): Observable<{ [key: string] : any; }> {
+    sessions_Delete(id: number, eventId: string): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/events/{eventId}/sessions/{id}?";
 
         if (id === undefined || id === null)
@@ -1377,7 +1346,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -1388,8 +1357,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1397,7 +1365,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    user_Token(login: LoginBindingModel): Observable<{ [key: string] : any; }> {
+    user_Token(login: LoginBindingModel): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/user/token?";
         var content = JSON.stringify(login ? login.toJS() : null);
         console.log(url, content);
@@ -1419,7 +1387,7 @@ export class BackendService {
         var status = response.status.toString();
         console.log(status);
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -1430,8 +1398,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1439,7 +1406,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    user_Profile(): Observable<{ [key: string] : any; }> {
+    user_Profile(): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/user/profile?";
 
         var content = "";
@@ -1460,7 +1427,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -1471,8 +1438,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1513,8 +1479,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1548,8 +1513,7 @@ export class BackendService {
             result200 = resultData200 ? new User(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1587,8 +1551,7 @@ export class BackendService {
             result200 = resultData200 ? new User(resultData200) : null;
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -1596,7 +1559,7 @@ export class BackendService {
     /**
      * @return OK
      */
-    users_Delete(id: string): Observable<{ [key: string] : any; }> {
+    users_Delete(id: string): Observable<{ [key: string]: any; }> {
         var url = this.baseUrl + "/api/v1/admin/users/{id}?";
 
         if (id === undefined || id === null)
@@ -1621,7 +1584,7 @@ export class BackendService {
         var status = response.status.toString();
 
         if (status === "200") {
-            var result200: { [key: string] : any; } = null;
+            var result200: { [key: string]: any; } = null;
             var resultData200 = data === "" ? null : JSON.parse(data, this.jsonParseReviver);
             if (resultData200) {
                 result200 = {};
@@ -1632,8 +1595,7 @@ export class BackendService {
             }
             return result200;
         }
-        else
-        {
+        else {
             throw "error_no_callback_for_the_received_http_status";
         }
     }
@@ -2009,7 +1971,7 @@ export class Event {
             if (data["tags"] && data["tags"].constructor === Array) {
                 this.tags = [];
                 for (let item of data["tags"])
-                this.tags.push(item);
+                    this.tags.push(item);
             }
             this.tagList = data["tagList"] !== undefined ? data["tagList"] : null;
             if (data["feedbacks"] && data["feedbacks"].constructor === Array) {
@@ -2052,7 +2014,7 @@ export class Event {
         if (this.tags && this.tags.constructor === Array) {
             data["tags"] = [];
             for (let item of this.tags)
-            data["tags"].push(item);
+                data["tags"].push(item);
         }
         data["tagList"] = this.tagList !== undefined ? this.tagList : null;
         if (this.feedbacks && this.feedbacks.constructor === Array) {
@@ -2522,13 +2484,13 @@ export class Session {
             if (data["speakers"] && data["speakers"].constructor === Array) {
                 this.speakers = [];
                 for (let item of data["speakers"])
-                this.speakers.push(item);
+                    this.speakers.push(item);
             }
             this.speakerList = data["speakerList"] !== undefined ? data["speakerList"] : null;
             if (data["tags"] && data["tags"].constructor === Array) {
                 this.tags = [];
                 for (let item of data["tags"])
-                this.tags.push(item);
+                    this.tags.push(item);
             }
             this.tagList = data["tagList"] !== undefined ? data["tagList"] : null;
         }
@@ -2569,13 +2531,13 @@ export class Session {
         if (this.speakers && this.speakers.constructor === Array) {
             data["speakers"] = [];
             for (let item of this.speakers)
-            data["speakers"].push(item);
+                data["speakers"].push(item);
         }
         data["speakerList"] = this.speakerList !== undefined ? this.speakerList : null;
         if (this.tags && this.tags.constructor === Array) {
             data["tags"] = [];
             for (let item of this.tags)
-            data["tags"].push(item);
+                data["tags"].push(item);
         }
         data["tagList"] = this.tagList !== undefined ? this.tagList : null;
         return data;
