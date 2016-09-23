@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router} from '@angular/router';
 import { Config } from './shared/index';
-import {AuthService} from './shared/auth.service';
 
 /**
  * This class represents the main application component. Within the @Routes annotation is the configuration of the
@@ -14,16 +13,11 @@ import {AuthService} from './shared/auth.service';
 })
 
 export class AppComponent implements OnInit {
-    constructor(private _router: Router,
-        private _authService: AuthService) {
+    constructor(private _router: Router) {
         console.log('Config', Config);
     }
 
     ngOnInit() {
-        console.log('app init', this._authService.isAuthenticated);
-        if (!this._authService.isAuthenticated) {
-            console.log('redirecting to login');
-            this._router.navigate(['/login']);
-        }
+        console.log('app init');
     }
 }
