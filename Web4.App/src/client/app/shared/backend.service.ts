@@ -8,7 +8,6 @@ import 'rxjs/Rx';
 import {Observable} from 'rxjs/Observable';
 import {Injectable, Inject, Optional, OpaqueToken} from '@angular/core';
 import {Http, Headers, Response, RequestOptionsArgs} from '@angular/http';
-import { Config } from './index';
 
 export const API_BASE_URL = new OpaqueToken('API_BASE_URL');
 export const JSON_PARSE_REVIVER = new OpaqueToken('JSON_PARSE_REVIVER');
@@ -21,7 +20,7 @@ export class BackendService {
 
     constructor( @Inject(Http) http: Http, @Optional() @Inject(API_BASE_URL) baseUrl?: string, @Optional() @Inject(JSON_PARSE_REVIVER) jsonParseReviver?: (key: string, value: any) => any) {
         this.http = http;
-        this.baseUrl = baseUrl ? baseUrl : Config.API;
+        this.baseUrl = baseUrl
         this.jsonParseReviver = jsonParseReviver;
     }
 
