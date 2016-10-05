@@ -9,6 +9,7 @@ import { routes } from './app.routes';
 import { LayoutModule } from './shared/layout/layout.module';
 import { DebugModule } from './+debug/debug.module';
 import { AboutModule } from './+about/about.module';
+import { ProfileModule } from './+profile/profile.module';
 import { HomeModule } from './+home/home.module';
 import { LoginModule } from './+login/login.module';
 import { EventListModule } from './+events/event-list/event-list.module';
@@ -20,7 +21,7 @@ import { Config } from './shared/index';
 
 @NgModule({
   imports: [BrowserModule, HttpModule, RouterModule.forRoot(routes),
-    LayoutModule, DebugModule, AboutModule, HomeModule, LoginModule,
+    LayoutModule, DebugModule, AboutModule, ProfileModule, HomeModule, LoginModule,
     EventListModule, SessionListModule, SharedModule.forRoot()],
   declarations: [AppComponent],
   providers: [
