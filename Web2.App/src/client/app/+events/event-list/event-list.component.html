@@ -1,9 +1,7 @@
 <div class="card-container">
   <md-card *ngFor="let event of events" (click)="select(event)">
-    <md-card-subtitle>Event</md-card-subtitle>
-    <md-card-title>
-      <md-icon md-list-icon>event</md-icon>&nbsp;{{event.title}}</md-card-title>
-    <hr/>
+    <md-card-title><md-icon md-list-icon>bookmark_border</md-icon>&nbsp;{{event.title}}</md-card-title>
+    <md-card-subtitle>{{event.location}}</md-card-subtitle>
     <md-card-content class="secondary">
       <p>
         {{event.description}}

@@ -3,10 +3,10 @@ md-sidenav-layout {
 }
 
 md-nav-list{
-  width: 125px;
-  padding-top: 60px;
+  /*width: 125px;*/
+  padding: 40px 0 0 0;
   display: block;
-  margin-left: 20px;
+  /*margin-left: 20px;*/
 }
 
 md-nav-list p{

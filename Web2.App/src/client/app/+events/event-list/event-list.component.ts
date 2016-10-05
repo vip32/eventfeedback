@@ -16,7 +16,7 @@ import { AuthService } from '../../shared/auth.service';
 })
 export class EventListComponent implements OnInit {
     selectedEvent: Event = null;
-    events: Event[] = this._backendService.getEvents();
+    events: Event[] = null;
 
     constructor(
         private _router: Router,
@@ -28,6 +28,7 @@ export class EventListComponent implements OnInit {
 
     ngOnInit() {
         console.log('event-list init');
+        this.events = this._backendService.getEvents();
     }
 
     select(event: Event) {

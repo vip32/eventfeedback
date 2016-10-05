@@ -1,10 +1,13 @@
 <span (click)="select(session)">
   <!--<img md-card-image [alt]="session.name" src="https://material.angularjs.org/material2_assets/ngconf/{{session.name}}.png">-->
-  <img md-card-image [alt]="session.name" src="http://www.dummymag.com/media/img/dummy-logo.png">
-  <md-card-title>{{session.title}} #{{session.id}}</md-card-title>
+  <md-card-title><md-icon md-list-icon >event</md-icon>&nbsp;{{session.title}} #{{session.id}}</md-card-title>
+  <md-card-subtitle>{{session.location}} - {{session.speakers}}</md-card-subtitle>
   <md-card-content class="secondary">
-    {{session.description}}
+    <p>
+      {{session.description}}
+    </p>
   </md-card-content>
+  <img md-card-image [alt]="session.name" src="http://www.dummymag.com/media/img/dummy-logo.png">
   <!--<md-card-actions align="end">
     <button md-raised-button color="primary">Rate</button>
   </md-card-actions>-->

@@ -12,7 +12,7 @@ import { AuthService } from '../shared/auth.service';
 @NgModule({
     imports: [CommonModule, SharedModule],
     declarations: [SessionListComponent, SessionComponent],
-    exports: [SessionListComponent],
+    exports: [SessionListComponent, SessionComponent],
     providers: [LoggerService, BackendService, BackendMockService, AuthService]
 })
 export class SessionModule { }

@@ -7,9 +7,9 @@ export class BackendMockService {
   getEvents(): Event[] {
     console.log('load events');
     return [
-      new Event({ id: 100, title: 'Event 1', description: 'Event 1a' }),
-      new Event({ id: 200, title: 'Event 2', description: 'Event 2b' }),
-      new Event({ id: 300, title: 'Event 3', description: 'Event 3c' }),
+      new Event({ id: 100, title: 'Event 1', location: 'Amsterdam', description: 'Event 1a Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.' }),
+      new Event({ id: 200, title: 'Event 2', location: 'Stuttgart', description: 'Event 2b Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.' }),
+      new Event({ id: 300, title: 'Event 3', location: 'Amsterdam', description: 'Event 3c Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.' }),
     ];
   }
 
@@ -17,28 +17,28 @@ export class BackendMockService {
     console.log('load sessions for event ' + eventId);
     return [
       new Session({
-        id: eventId + 10, eventId: eventId, title: 'Session 1',
-        description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
+        id: eventId + 10, eventId: eventId, title: 'Session 1', speakers: ["Speaker X"], 
+        location: 'Room X', description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
       }),
       new Session({
-        id: eventId + 20, eventId: eventId, title: 'Session 2',
-        description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
+        id: eventId + 20, eventId: eventId, title: 'Session 2', speakers: ["Speaker X"], 
+        location: 'Room X', description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
       }),
       new Session({
-        id: eventId + 30, eventId: eventId, title: 'Session 3',
-        description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
+        id: eventId + 30, eventId: eventId, title: 'Session 3', speakers: ["Speaker X"], 
+        location: 'Room X', description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
       }),
       new Session({
-        id: eventId + 40, eventId: eventId, title: 'Session 4',
-        description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
+        id: eventId + 40, eventId: eventId, title: 'Session 4', speakers: ["Speaker X"], 
+        location: 'Room X', description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
       }),
       new Session({
-        id: eventId + 50, eventId: eventId, title: 'Session 5',
-        description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
+        id: eventId + 50, eventId: eventId, title: 'Session 5', speakers: ["Speaker X"], 
+        location: 'Room X', description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
       }),
       new Session({
-        id: eventId + 60, eventId: eventId, title: 'Session 6',
-        description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
+        id: eventId + 60, eventId: eventId, title: 'Session 6', speakers: ["Speaker X"], 
+        location: 'Room X', description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
       }),
     ];
   }
