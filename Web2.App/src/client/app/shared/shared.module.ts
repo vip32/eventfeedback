@@ -2,8 +2,8 @@ import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { MaterialModule } from './material.module'; // TODO: will be '@angular/material'
 
-import { MaterialModule } from './material.module';
 import { LayoutModule } from './layout/layout.module';
 import { AuthService } from './auth.service';
 import { BackendService } from './backend.service';
