@@ -1,46 +1,39 @@
+import { TestComponentBuilder } from '@angular/compiler/testing';
+import { disableDeprecatedForms, provideForms } from '@angular/forms';
+import { Component } from '@angular/core';
 import {
-  beforeEach,
-  beforeEachProviders,
   describe,
   expect,
-  it,
   inject,
+  it
 } from '@angular/core/testing';
-import { ComponentFixture, TestComponentBuilder } from '@angular/compiler/testing';
-import { Component } from '@angular/core';
-import { By } from '@angular/platform-browser';
+import { getDOM } from '@angular/platform-browser/src/dom/dom_adapter';
+
 import { AboutComponent } from './about.component';
 
-describe('Component: About', () => {
-  let builder: TestComponentBuilder;
+export function main() {
+  describe('About component', () => {
+    // Disable old forms
+    let providerArr: any[];
 
-  beforeEachProviders(() => [AboutComponent]);
-  beforeEach(inject([TestComponentBuilder], function (tcb: TestComponentBuilder) {
-    builder = tcb;
-  }));
+    beforeEach(() => { providerArr = [disableDeprecatedForms(), provideForms()]; });
 
-  it('should inject the component', inject([AboutComponent],
-      (component: AboutComponent) => {
-    expect(component).toBeTruthy();
-  }));
+    it('should work',
+      inject([TestComponentBuilder], (tcb: TestComponentBuilder) => {
+        tcb.overrideProviders(TestComponent, providerArr)
+          .createAsync(TestComponent)
+          .then((rootTC: any) => {
+            let domEl = rootTC.debugElement.children[0].nativeElement;
 
-  it('should create the component', inject([], () => {
-    return builder.createAsync(AboutComponentTestController)
-      .then((fixture: ComponentFixture<any>) => {
-        let query = fixture.debugElement.query(By.directive(AboutComponent));
-        expect(query).toBeTruthy();
-        expect(query.componentInstance).toBeTruthy();
-      });
-  }));
-});
-
-@Component({
-  selector: 'test',
-  template: `
-    <app-about></app-about>
-  `,
-  directives: [AboutComponent]
-})
-class AboutComponentTestController {
+	    expect(getDOM().querySelectorAll(domEl, 'h2')[0].textContent).toEqual('Features');
+          });
+        }));
+    });
 }
 
+@Component({
+  selector: 'test-cmp',
+  directives: [AboutComponent],
+  template: '<app-about></app-about>'
+})
+class TestComponent {}

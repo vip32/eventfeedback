@@ -6,19 +6,21 @@
       <md-card-subtitle>Please enter your credentials</md-card-subtitle>
     </md-card-title-group>
     <md-card-content>
-      <form #form="ngForm">
-        <md-input placeholder="Username" [(ngModel)]="userName" ngControl="userName" required></md-input>
-        <md-input placeholder="Password" [(ngModel)]="password" ngControl="password" required type="password"></md-input>
+      <!--#form="ngForm"-->
+      <form>
+        <md-input [(ngModel)]="userName" placeholder="Username" name="userName" required></md-input>
+        <md-input [(ngModel)]="password" placeholder="Password" name="password" required type="password"></md-input>
         <div>
-          <md-checkbox indeterminate="true" [(ngModel)]="remember">Remember me</md-checkbox>
+          <md-checkbox [(ngModel)]="remember" indeterminate="true" name="remember">Remember me</md-checkbox>
         </div>
       </form>
     </md-card-content>
     <md-card-actions align="end">
-      <button (click)="onSubmit()" md-fab color="accent" [disabled]="!form.valid" type="submit">
+      <!--[disabled]="!form.valid"-->
+      <button (click)="onSubmit()" md-fab color="accent" type="submit">
           <md-icon>done</md-icon>
       </button>
     </md-card-actions>
   </md-card>
 </div>
-valid/pristine: {{form.valid}}/{{form.pristine}} <br/>
+<!--valid/pristine: {{form?.valid}}/{{form?.pristine}} <br/>-->

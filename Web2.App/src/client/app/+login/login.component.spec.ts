@@ -35,7 +35,7 @@ describe('Component: Login', () => {
 });
 
 @Component({
-  selector: 'test',
+  selector: 'test-cmp',
   template: `
     <app-login></app-login>
   `,
