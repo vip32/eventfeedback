@@ -13,31 +13,31 @@ export class BackendMockService {
     ];
   }
 
-  getSessions(event: Event): Session[] {
-    console.log('load sessions for event ' + event.id);
+  getSessions(eventId: number): Session[] {
+    console.log('load sessions for event ' + eventId);
     return [
       new Session({
-        id: event.id + 10, eventId: event.id, title: 'Session 1 - ' + event.title,
+        id: eventId + 10, eventId: eventId, title: 'Session 1',
         description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
       }),
       new Session({
-        id: event.id + 20, eventId: event.id, title: 'Session 2 - ' + event.title,
+        id: eventId + 20, eventId: eventId, title: 'Session 2',
         description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
       }),
       new Session({
-        id: event.id + 30, eventId: event.id, title: 'Session 3 - ' + event.title,
+        id: eventId + 30, eventId: eventId, title: 'Session 3',
         description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
       }),
       new Session({
-        id: event.id + 40, eventId: event.id, title: 'Session 4 - ' + event.title,
+        id: eventId + 40, eventId: eventId, title: 'Session 4',
         description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
       }),
       new Session({
-        id: event.id + 50, eventId: event.id, title: 'Session 5 - ' + event.title,
+        id: eventId + 50, eventId: eventId, title: 'Session 5',
         description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
       }),
       new Session({
-        id: event.id + 60, eventId: event.id, title: 'Session 6 - ' + event.title,
+        id: eventId + 60, eventId: eventId, title: 'Session 6',
         description: 'Magna commodo eiusmod minim deserunt irure reprehenderit deserunt laborum tempor tempor culpa cillum.'
       }),
     ];

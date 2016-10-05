@@ -1,1 +1,8 @@
-sessions for event {{eventId | async}} 
+<div class="card-container">
+  <md-card *ngFor="let session of sessions" [style.background]="color">
+            <!--(mouseenter)="color = '#EEE'"
+               (mouseleave)="color = '#FFFFFF'"-->
+    <app-session [session]=session (onSelected)="onSessionSelected($session)">
+    </app-session>
+  </md-card>
+</div>

@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
 
-import {Event} from  '../../shared/backend.service';;
-import {BackendService} from '../../shared/backend.service';
-import {BackendMockService} from '../../shared/backendmock.service';
-import {LoggerService} from '../../shared/logger.service';
-import {AuthService} from '../../shared/auth.service';
+import { Event } from '../../shared/backend.service';;
+import { BackendService } from '../../shared/backend.service';
+import { BackendMockService } from '../../shared/backendmock.service';
+import { LoggerService } from '../../shared/logger.service';
+import { AuthService } from '../../shared/auth.service';
 
 @Component({
     moduleId: module.id,

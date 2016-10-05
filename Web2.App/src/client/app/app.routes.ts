@@ -6,7 +6,7 @@ import { AboutRoutes } from './+about/index';
 import { ProfileRoutes } from './+profile/index';
 import { LoginRoutes } from './+login/index';
 import { EventListRoutes } from './+events/event-list/index';
-import { SessionListRoutes } from './+sessions/session-list/index';
+import { SessionRoutes } from './+sessions/session.routes';
 
 export const routes: Routes = [
   ...DebugRoutes,
@@ -15,5 +15,5 @@ export const routes: Routes = [
   ...ProfileRoutes,
   ...LoginRoutes,
   ...EventListRoutes,
-  ...SessionListRoutes
+  ...SessionRoutes
 ];

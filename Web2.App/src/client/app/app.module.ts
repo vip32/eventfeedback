@@ -13,16 +13,16 @@ import { ProfileModule } from './+profile/profile.module';
 import { HomeModule } from './+home/home.module';
 import { LoginModule } from './+login/login.module';
 import { EventListModule } from './+events/event-list/event-list.module';
-import { SessionListModule } from './+sessions/session-list/session-list.module';
+import { SessionModule } from './+sessions/session.module';
 import { SharedModule } from './shared/shared.module';
 
-import {API_BASE_URL} from './shared/backend.service';
+import { API_BASE_URL } from './shared/backend.service';
 import { Config } from './shared/index';
 
 @NgModule({
   imports: [BrowserModule, HttpModule, RouterModule.forRoot(routes),
     LayoutModule, DebugModule, AboutModule, ProfileModule, HomeModule, LoginModule,
-    EventListModule, SessionListModule, SharedModule.forRoot()],
+    EventListModule, SessionModule, SharedModule.forRoot()],
   declarations: [AppComponent],
   providers: [
     {
