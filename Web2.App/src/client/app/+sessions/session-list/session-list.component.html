@@ -2,7 +2,7 @@
   <md-card *ngFor="let session of sessions" [style.background]="color">
             <!--(mouseenter)="color = '#EEE'"
                (mouseleave)="color = '#FFFFFF'"-->
-    <app-session [session]=session (onSelected)="onSessionSelected($session)">
+    <app-session [session]=session (onSelected)="select(session)">
     </app-session>
   </md-card>
 </div>

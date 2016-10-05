@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Session } from '../../shared/backend.service';;
@@ -12,7 +12,6 @@ import { AuthService } from '../../shared/auth.service';
     selector: 'app-session-list',
     templateUrl: 'session-list.component.html',
     styleUrls: ['session-list.component.css'], 
-    providers: [LoggerService, BackendService, BackendMockService]
 })
 export class SessionListComponent implements OnInit {
     selectedSession: Session = null;
@@ -22,7 +21,8 @@ export class SessionListComponent implements OnInit {
     constructor(
         private route: ActivatedRoute,
         private _authService: AuthService,
-        private _backendService: BackendMockService, ) {
+        private _backendService: BackendMockService,
+        private _logger: LoggerService) {
         console.log('sessionlist ctor');
         //this.eventId = route.params.map(r => r['eventId']);
     }
@@ -37,8 +37,8 @@ export class SessionListComponent implements OnInit {
         });
     }
 
-    onSessionSelected(session: Session) {
-        console.log('session selected (list) ', session); // TODO: seems to be null, needed?
+    select(session: Session) {
+        console.log('session selected (list) ', session.id); // TODO: seems to be null, needed?
         this.selectedSession = session;
     }
 }

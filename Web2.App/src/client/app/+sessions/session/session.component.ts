@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, Output, OnInit, } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 
 import { Session, Feedback } from '../../shared/backend.service';;
 import { BackendService } from '../../shared/backend.service';
@@ -12,7 +11,6 @@ import { AuthService } from '../../shared/auth.service';
     selector: 'app-session',
     templateUrl: 'session.component.html',
     styleUrls: ['session.component.css'],
-    providers: [LoggerService, BackendService, BackendMockService]
 })
 export class SessionComponent implements OnInit {
     @Input() session: Session;
@@ -21,7 +19,9 @@ export class SessionComponent implements OnInit {
     isSelected: boolean = false;
     feedback: Feedback;
 
-    constructor(private _backendService: BackendMockService) {
+    constructor(private _authService: AuthService,
+        private _backendService: BackendMockService,
+        private _logger: LoggerService) {
         console.log('session ctor');
     }
 
@@ -40,6 +40,6 @@ export class SessionComponent implements OnInit {
 
     save() {
         console.log('save', this.feedback);
-        // TODO
+        // TODO: call backendservice
     }
 }
