@@ -172,7 +172,6 @@
     <Content Include="app\v1\stylesheets\app.css" />
     <Content Include="swagger.json" />
     <Content Include="app\v2\assets\data.json" />
-    <Content Include="app\v2\tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
