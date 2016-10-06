@@ -1,38 +1,20 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <base href="./">
+  <base href="/">
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Event|Feedback2</title>
+  <title>Welcome to angular2-seed!</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <!-- inject:css -->
-  <link rel="stylesheet" href="./css/main.css?1465511603045">
+  <link rel="stylesheet" href="/app/v2/css/main.css?1475767655943">
   <!-- endinject -->
 </head>
 <body>
 
   <sd-app>Loading...</sd-app>
-
-  <script>
-  // function.name (all IE)
-  // Remove once https://github.com/angular/angular/issues/6501 is fixed.
-  /*! @source http://stackoverflow.com/questions/6903762/function-name-not-supported-in-ie*/
-  if (!Object.hasOwnProperty('name')) {
-    Object.defineProperty(Function.prototype, 'name', {
-      get: function() {
-        var matches = this.toString().match(/^\s*function\s*((?![0-9])[a-zA-Z0-9_$]*)\s*\(/);
-        var name = matches && matches.length > 1 ? matches[1] : "";
-        // For better performance only parse once, and then cache the
-        // result through a new accessor for repeated access.
-        Object.defineProperty(this, 'name', {value: name});
-        return name;
-      }
-    });
-  }
-  </script>
 
   <script>
   // Fixes undefined module function in SystemJS bundle
@@ -48,8 +30,8 @@
   <!-- endinject -->
 
   <!-- inject:js -->
-  <script src="./js/shims.js?1465511603040"></script>
-  <script src="./js/app.js?1465511603042"></script>
+  <script src="/app/v2/js/shims.js?1475767655936"></script>
+  <script src="/app/v2/js/app.js?1475767655938"></script>
   <!-- endinject -->
 
 
