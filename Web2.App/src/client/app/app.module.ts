@@ -38,7 +38,7 @@ import { Config } from './shared/index';
 
 export class AppModule { }
 
-// Azure AD auth + ADAL: https://github.com/AzureAD/azure-activedirectory-library-for-js/issues/194
+// Azure AD auth + ADAL: https://github.com/AzureAD/azure-activedirectory-library-for-js/issues/194#issuecomment-237618289
 // https://github.com/ITUnity/dev/tree/master/OpenIDConnect/src/OpenIDConnect/wwwroot/app
 // https://www.itunity.com/article/angular-2-openid-connect-azure-active-directory-3093
 // https://github.com/microsoftgraph/angular2-connect-rest-sample
