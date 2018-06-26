@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <title>EventFeedback</title>
+        <script type="text/javascript">
+            if (window.location.protocol != "https:")
+                window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
+        </script>
+        <meta name="theme-color" content="#B1D43F">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <!-- <link rel="apple-touch-startup-image" href="/startup.png"> -->
+        <link rel="canonical" href="https://eventfeeback.azurewebsites.net">
+        <!-- standard shortcut icon -->
+        <link rel="icon" href="/www/images/icon-192x192.png" sizes="192x192">
+        <link rel="shortcut icon" href="images/icon-196x196.png" sizes="196x196">
+        <!-- non-retina iPhone pre iOS 7 -->
+        <link rel="apple-touch-icon" href="images/icon-57x57.png" sizes="57x57">
+        <!-- non-retina iPad pre iOS 7 -->
+        <link rel="apple-touch-icon" href="images/icon-72x72.png" sizes="72x72">
+        <!-- non-retina iPad iOS 7 -->
+        <link rel="apple-touch-icon" href="images/icon-76x76.png" sizes="76x76">
+        <!-- retina iPhone pre iOS 7 -->
+        <link rel="apple-touch-icon" href="images/icon-114x114.png" sizes="114x114">
+        <!-- retina iPhone iOS 7 -->
+        <link rel="apple-touch-icon" href="images/icon-120x120.png" sizes="120x120">
+        <!-- retina iPad pre iOS 7 -->
+        <link rel="apple-touch-icon" href="images/icon-144x144.png" sizes="144x144">
+        <!-- retina iPad iOS 7 -->
+        <link rel="apple-touch-icon" href="images/icon-152x152.png" sizes="152x152">
+
+        <link rel="manifest" href="manifest.json">
+        <link rel="stylesheet" href="stylesheets/app.css">
+
+        <script src="javascripts/vendor.js"></script>
+        <script src="javascripts/app.js"></script>
+        <script>require('initialize');</script>
+        
+        <script>
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./www/service-worker.js'/*, { scope: './www' }*/)
+                .then(function(r) {
+                  console.log('registered service worker');
+                })
+                .catch(function(err) {
+                  console.error(err);
+                });
+            });
+        </script>
+        
+        <script type="text/javascript">
+            var appInsights = window.appInsights || function (config) {
+                function s(config) { t[config] = function () { var i = arguments; t.queue.push(function () { t[config].apply(t, i) }) } } var t = { config: config }, r = document, f = window, e = "script", o = r.createElement(e), i, u; for (o.src = config.url || "//az416426.vo.msecnd.net/scripts/a/ai.0.js", r.getElementsByTagName(e)[0].parentNode.appendChild(o), t.cookie = r.cookie, t.queue = [], i = ["Event", "Exception", "Metric", "PageView", "Trace"]; i.length;) s("track" + i.pop()); return config.disableExceptionTracking || (i = "onerror", s("_" + i), u = f[i], f[i] = function (config, r, f, e, o) { var s = u && u(config, r, f, e, o); return s !== !0 && t["_" + i](config, r, f, e, o), s }), t
+            }({
+                instrumentationKey: "efe0a00b-2c77-412e-91aa-81509e261a94"
+            });
+
+            window.appInsights = appInsights;
+            appInsights.trackPageView();
+        </script>
+
+        <!--<script type="text/javascript">
+    var appInsights = window.appInsights || function (config) {
+        function s(config) { t[config] = function () { var i = arguments; t.queue.push(function () { t[config].apply(t, i) }) } } var t = { config: config }, r = document, f = window, e = "script", o = r.createElement(e), i, u; for (o.src = config.url || "//az416426.vo.msecnd.net/scripts/a/ai.0.js", r.getElementsByTagName(e)[0].parentNode.appendChild(o), t.cookie = r.cookie, t.queue = [], i = ["Event", "Exception", "Metric", "PageView", "Trace"]; i.length;) s("track" + i.pop()); return config.disableExceptionTracking || (i = "onerror", s("_" + i), u = f[i], f[i] = function (config, r, f, e, o) { var s = u && u(config, r, f, e, o); return s !== !0 && t["_" + i](config, r, f, e, o), s }), t
+    }({
+        instrumentationKey: "efe0a00b-2c77-412e-91aa-81509e261a94"
+    });
+
+    window.appInsights = appInsights;
+    appInsights.trackPageView();
+        </script>-->
+    </head>
+    <body>
+        <div style="position: absolute;top: 0;left: 0;width: 100%;height: 100%;z-index: 9999;background: #5F5F5F">
+            <h1>&nbsp;LOADING...</h1>
+        </div>
+    </body>
+</html>
+

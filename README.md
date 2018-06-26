@@ -8,6 +8,7 @@ a .NET Webapi with a coffeescript based SPA.
 - backbone
 - marionette.js
 - bower
+- node 4.9.1
 - npm (npm install -g npm@2.15.11)
 - brunch.io (npm install brunch@1.8.5 -g)
 - .net webapi
@@ -18,3 +19,5 @@ a .NET Webapi with a coffeescript based SPA.
 Web2 - ng2 cli + material
 Web3 - seed2
 Web4 - seed2 + material
+https://localhost:44303/index.html
+https://localhost:44303/www/index.html
