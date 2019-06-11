@@ -1994,7 +1994,7 @@ module.exports = UsersGeneratorView = (function(_super) {
   UsersGeneratorView.prototype.onPrintClick = function(e) {
     var css;
     e.preventDefault();
-    $('#js-users .list-group-item:nth-child(5n)').css('page-break-after', 'always');
+    $('#js-users .list-group-item:nth-child(4n)').css('page-break-after', 'always');
     css = '<link href="www/stylesheets/app.css" rel="stylesheet" type="text/css">';
     window.frames["print_frame"].document.body.innerHTML = css + document.getElementById("js-users").innerHTML;
     window.frames["print_frame"].window.focus();
