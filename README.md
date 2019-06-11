@@ -18,3 +18,6 @@ a .NET Webapi with a coffeescript based SPA.
 Web2 - ng2 cli + material
 Web3 - seed2
 Web4 - seed2 + material
+
+github commit --> Appveyor > Build
+              --> Azure Deployment Center > Build + Deploy (eventfeedback-staging)
