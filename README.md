@@ -16,5 +16,5 @@ a .NET Webapi with a coffeescript based SPA.
 - entity framework
 
 #### CI/CD
-- github commit --> Appveyor > Build
+- github commit --> [Appveyor](https://ci.appveyor.com/project/vip32/eventfeedback) > Build
 - github commit --> Azure Deployment Center > Build + Deploy (eventfeedback-staging)
