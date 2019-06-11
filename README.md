@@ -5,6 +5,7 @@ eventfeedback
 =============
 a .NET Webapi with a coffeescript based SPA.
 
+#### Dev stack
 - backbone
 - marionette.js
 - bower
@@ -14,10 +15,6 @@ a .NET Webapi with a coffeescript based SPA.
 - c#
 - entity framework
 
-
-Web2 - ng2 cli + material
-Web3 - seed2
-Web4 - seed2 + material
-
-github commit --> Appveyor > Build
-              --> Azure Deployment Center > Build + Deploy (eventfeedback-staging)
+#### CI/CD
+- github commit --> Appveyor > Build
+- github commit --> Azure Deployment Center > Build + Deploy (eventfeedback-staging)
