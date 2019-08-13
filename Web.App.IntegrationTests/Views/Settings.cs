@@ -5,7 +5,7 @@
         public string AppHost
         {
             get { return "localhost"; }
-        }         // "eventfeedback.azurewebsites.net"
+        }         // "bit-eventfeedback.azurewebsites.net"
 
         public string Root
         {

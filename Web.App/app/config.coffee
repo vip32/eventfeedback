@@ -2,7 +2,7 @@ class Config
   apptitle: 'Event|Feedback'
   appcontainer: 'content'
   approot: '/'
-  apiroot: '/api/v1' # https://eventfeedback.azurewebsites.net
+  apiroot: '/api/v1' # https://bit-eventfeedback.azurewebsites.net
   apitimeout: 60000
   hometrigger: 'home:index'
   startuptrigger: 'events:index'
@@ -11,7 +11,7 @@ class Config
   layout: 'layouts/app-layout'
   sidebarglyphicon: 'glyphicon-minus'
   spinneractive: false
-  url: 'https://eventfeedback.azurewebsites.net'
+  url: 'https://bit-eventfeedback.azurewebsites.net'
   modules:
     'header': 'modules/header/router'
     'common': 'modules/common/router'
